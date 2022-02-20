@@ -1,0 +1,12 @@
+C:\Users\ghass\source\repos\ActionRepeater\src\ActionRepeater.Win32\bin\Debug\net6.0\ActionRepeater.Win32.deps.json
+C:\Users\ghass\source\repos\ActionRepeater\src\ActionRepeater.Win32\bin\Debug\net6.0\ActionRepeater.Win32.dll
+C:\Users\ghass\source\repos\ActionRepeater\src\ActionRepeater.Win32\bin\Debug\net6.0\ref\ActionRepeater.Win32.dll
+C:\Users\ghass\source\repos\ActionRepeater\src\ActionRepeater.Win32\bin\Debug\net6.0\ActionRepeater.Win32.pdb
+C:\Users\ghass\source\repos\ActionRepeater\src\ActionRepeater.Win32\obj\Debug\net6.0\ActionRepeater.Win32.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\ghass\source\repos\ActionRepeater\src\ActionRepeater.Win32\obj\Debug\net6.0\ActionRepeater.Win32.AssemblyInfoInputs.cache
+C:\Users\ghass\source\repos\ActionRepeater\src\ActionRepeater.Win32\obj\Debug\net6.0\ActionRepeater.Win32.AssemblyInfo.cs
+C:\Users\ghass\source\repos\ActionRepeater\src\ActionRepeater.Win32\obj\Debug\net6.0\ActionRepeater.Win32.csproj.CoreCompileInputs.cache
+C:\Users\ghass\source\repos\ActionRepeater\src\ActionRepeater.Win32\obj\Debug\net6.0\ActionRepeater.Win32.dll
+C:\Users\ghass\source\repos\ActionRepeater\src\ActionRepeater.Win32\obj\Debug\net6.0\ref\ActionRepeater.Win32.dll
+C:\Users\ghass\source\repos\ActionRepeater\src\ActionRepeater.Win32\obj\Debug\net6.0\ActionRepeater.Win32.pdb
+C:\Users\ghass\source\repos\ActionRepeater\src\ActionRepeater.Win32\obj\Debug\net6.0\ActionRepeater.Win32.csproj.AssemblyReference.cache

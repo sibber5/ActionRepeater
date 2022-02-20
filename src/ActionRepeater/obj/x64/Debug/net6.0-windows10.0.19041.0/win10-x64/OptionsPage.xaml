@@ -1,0 +1,51 @@
+﻿<Page x:ConnectionId='1'
+    x:Class="ActionRepeater.OptionsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:ActionRepeater"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource AppBarBackgroundThemeBrush}">
+
+    <Page.Resources>
+        <x:Double x:Key="CommandBarFontSize">14</x:Double>
+    </Page.Resources>
+
+    <StackPanel Orientation="Horizontal" Margin="0,0,0,0">
+
+        <StackPanel Orientation="Vertical" Margin="5,0,5,0">
+
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Cursor tracking:" FontSize="{StaticResource CommandBarFontSize}" Margin="0,0,10,0" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                <ComboBox x:ConnectionId='5' x:Name="CursorTrackingModeCB" FontSize="{StaticResource CommandBarFontSize}" Width="157" Height="32"                                             >
+                    <x:String>No Tracking</x:String>
+                    <x:String>Absolute Position</x:String>
+                    <x:String>Relative Position</x:String>
+                </ComboBox>
+            </StackPanel>
+
+            <CheckBox x:ConnectionId='4' x:Name="SetCursorPosOnClickCheckBox" Content="Set cursor position on clicks" HorizontalAlignment="Left"
+                                                                                                  />
+
+        </StackPanel>
+
+        <AppBarSeparator Margin="5,0,5,0"/>
+
+        <StackPanel Orientation="Vertical" Margin="5,0,5,0">
+
+            <StackPanel Orientation="Horizontal" ToolTipService.ToolTip="The maximum time, in milliseconds, between pressing down a key/mouse button and releasing it for the action to be counted as a press/click (instead of button down and up actinos)">
+                <TextBlock Text="Max click interval (ms):" FontSize="{StaticResource CommandBarFontSize}"
+                           Margin="0,0,10,0" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                <NumberBox x:ConnectionId='3' x:Name="ClickIntervalNumBox" SmallChange="10" LargeChange="100" Minimum="0" Maximum="9999" SpinButtonPlacementMode="Inline"
+                                                                  ValidationMode="InvalidInputOverwritten" />
+            </StackPanel>
+
+            <CheckBox x:ConnectionId='2' Content="Simulate keystroke auto-repeat"                                                                          HorizontalAlignment="Left" />
+
+        </StackPanel>
+
+    </StackPanel>
+    
+</Page>
+

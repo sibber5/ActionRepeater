@@ -1,0 +1,32 @@
+﻿namespace ActionRepeater.Win32;
+
+/// <summary>The <typeparamref name="POINT"/> structure defines the <i>x</i>- and <i>y</i>-coordinates of a point.</summary>
+/// <remarks>
+/// <para>The <typeparamref name="POINT"/> structure is identical to the <a href="https://docs.microsoft.com/windows/desktop/api/windef/ns-windef-pointl">POINTL</a> structure.</para>
+/// <para><see href="https://docs.microsoft.com/windows/desktop/api/windef/ns-windef-point">Read more on docs.microsoft.com</see>.</para>
+/// </remarks>
+public struct POINT : IEquatable<POINT>
+{
+	/// <summary>Specifies the <i>x</i>-coordinate of the point.</summary>
+	public int x;
+	/// <summary>Specifies the <i>y</i>-coordinate of the point.</summary>
+	public int y;
+
+	public static bool operator ==(POINT a, POINT b) => a.x == b.x && a.y == b.y;
+	public static bool operator !=(POINT a, POINT b) => a.x != b.x || a.y != b.y;
+
+    public bool Equals(POINT other) => x == other.x && y == other.y;
+
+#pragma warning disable CS8765 // Nullability of type of parameter doesn't match overridden member (possibly because of nullability attributes).
+    public override bool Equals(object obj)
+#pragma warning restore CS8765 // Nullability of type of parameter doesn't match overridden member (possibly because of nullability attributes).
+    {
+		if (obj is POINT p)
+        {
+			return p.x == x && p.y == y;
+        }
+		return false;
+    }
+
+    public override int GetHashCode() => HashCode.Combine(x, y);
+}
