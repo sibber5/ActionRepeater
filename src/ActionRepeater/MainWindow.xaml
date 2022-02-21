@@ -31,7 +31,7 @@
                    Grid.Row="1" Margin="13,0,10,0" VerticalAlignment="Bottom" HorizontalAlignment="Left"
                    FontSize="18"/>
 
-        <TextBlock Grid.Row="1" FontSize="14" Margin="77,0,55,1" VerticalAlignment="Bottom" HorizontalAlignment="Right"
+        <TextBlock x:Name="ShowAutoRepeatText" Grid.Row="1" FontSize="14" Margin="77,0,55,1" VerticalAlignment="Bottom" HorizontalAlignment="Right"
                    Text="show keystroke auto-repeat"/>
 
         <ToggleSwitch x:Name="ShowAutoRepeatActionsToggle" OnContent="" OffContent="" IsOn="False" Toggled="ShowAutoRepeatActions_Toggled"

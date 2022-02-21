@@ -273,6 +273,9 @@ internal static class Recorder
                 && lastKeyAction.Key == curKeyAction.Key)
             {
                 ReplaceLastAction(new KeyAction(KeyAction.Type.KeyPress, curKeyAction.Key));
+
+                _lastNewActionTickCount = curTickCount;
+                return;
             }
             else if (action is MouseButtonAction curMBAction
                 && curMBAction.ActionType == MouseButtonAction.Type.MouseButtonUp
@@ -282,10 +285,10 @@ internal static class Recorder
                 && lastMBAction.Position == curMBAction.Position)
             {
                 ReplaceLastAction(new MouseButtonAction(MouseButtonAction.Type.MouseButtonClick, curMBAction.Button, curMBAction.Position, curMBAction.UsePosition));
-            }
 
-            _lastNewActionTickCount = curTickCount;
-            return;
+                _lastNewActionTickCount = curTickCount;
+                return;
+            }
         }
 
         if (ticksSinceLastAction > 10)

@@ -23,7 +23,8 @@
             </StackPanel>
         </ToggleButton>
 
-        <ToggleButton x:Name="PlayButton" Background="Transparent" BorderBrush="Transparent" IsChecked="{x:Bind local:App.MainWindow.IsPlayingActions, Mode=OneWay}" Click="PlayButton_Click">
+        <ToggleButton x:Name="PlayButton" Background="Transparent" BorderBrush="Transparent" IsChecked="{x:Bind local:App.MainWindow.IsPlayingActions, Mode=OneWay}"
+                      Click="PlayButton_Click">
             <StackPanel Width="{StaticResource ButtonSize}" Height="{StaticResource ButtonSize}">
                 <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xE768;" FontSize="{StaticResource ButtonIconSize}" />
                 <TextBlock Text="Play" FontSize="{StaticResource CommandBarFontSize}" Margin="0,2,0,0" HorizontalAlignment="Center" />

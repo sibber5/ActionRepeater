@@ -43,9 +43,7 @@ public sealed partial class HomePage : Page
 
         if (Player.IsPlaying)
         {
-            PlayButton.IsEnabled = false;
             Player.Cancel();
-            PlayButton.IsEnabled = true;
             return;
         }
 

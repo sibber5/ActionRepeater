@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
 using Microsoft.UI.Xaml;
@@ -7,6 +8,8 @@ using Microsoft.UI.Xaml.Input;
 using ActionRepeater.Action;
 using ActionRepeater.Input;
 using ActionRepeater.Messaging;
+using System.Diagnostics;
+using System.Collections.Generic;
 
 #pragma warning disable RCS1163, IDE0060
 
@@ -58,6 +61,8 @@ public sealed partial class MainWindow : Window, INotifyPropertyChanged
             UpdatePropertyInView();
         }
     }
+
+    private readonly List<int> _modifiedFilteredActionIdx = new();
 
     private IInputAction _copiedAction = null;
 
@@ -152,27 +157,43 @@ public sealed partial class MainWindow : Window, INotifyPropertyChanged
 
     public void AddAction(IInputAction action)
     {
-        WaitAction newWaitAction = action as WaitAction;
-
-        if (newWaitAction is not null && Actions.Count > 0 && Actions[^1] is WaitAction lastWaitAction)
+        if (action is WaitAction waitAction)
         {
-            lastWaitAction.Duration += newWaitAction.Duration;
-        }
-        else
-        {
-            Actions.Add(action);
-        }
-
-        if (!(action is KeyAction keyAction && keyAction.IsAutoRepeat))
-        {
-            if (newWaitAction is not null && _actionsEclKeyRepeat.Count > 0 && _actionsEclKeyRepeat[^1] is WaitAction lastFilteredWaitAction)
+            if (Actions.Count > 0 && Actions[^1] is WaitAction lastWaitAction)
             {
-                lastFilteredWaitAction.Duration += newWaitAction.Duration;
+                lastWaitAction.Duration += waitAction.Duration;
+            }
+            else
+            {
+                Actions.Add(action);
+            }
+
+            int lastFilteredActionIdx = _actionsEclKeyRepeat.Count - 1;
+            if (_actionsEclKeyRepeat.Count > 0 && _actionsEclKeyRepeat[lastFilteredActionIdx] is WaitAction lastFilteredWaitAction)
+            {
+                if (_modifiedFilteredActionIdx.Contains(lastFilteredActionIdx))
+                {
+                    lastFilteredWaitAction.Duration += waitAction.Duration;
+                }
+                else if (!ReferenceEquals(Actions[^1], lastFilteredWaitAction))
+                {
+                    _actionsEclKeyRepeat[lastFilteredActionIdx] = new WaitAction(lastFilteredWaitAction.Duration + waitAction.Duration);
+                    _modifiedFilteredActionIdx.Add(lastFilteredActionIdx);
+                }
             }
             else
             {
                 _actionsEclKeyRepeat.Add(action);
             }
+
+            return;
+        }
+
+        Actions.Add(action);
+
+        if (!(action is KeyAction keyAction && keyAction.IsAutoRepeat))
+        {
+            _actionsEclKeyRepeat.Add(action);
         }
     }
 
@@ -198,9 +219,26 @@ public sealed partial class MainWindow : Window, INotifyPropertyChanged
 
     private void OnCopyClick(object sender, RoutedEventArgs e) => _copiedAction = (IInputAction)ActionList.SelectedItem;
 
-    private void OnRemoveClick(object sender, RoutedEventArgs e)
+    private async void OnRemoveClick(object sender, RoutedEventArgs e)
     {
         var selectedItem = (IInputAction)ActionList.SelectedItem;
+
+        foreach (int idx in _modifiedFilteredActionIdx)
+        {
+            if (_actionsEclKeyRepeat[idx] == selectedItem)
+            {
+                ContentDialog dialog = new()
+                {
+                    XamlRoot = ActionList.XamlRoot,
+                    Title = "⚠ Failed to remove action",
+                    Content = $"This action represents multiple hidden actions (because \"{ShowAutoRepeatText.Text}\" is off).\nRemoving it will result in unexpected behavior.",
+                    CloseButtonText = "Ok"
+                };
+                await dialog.ShowAsync();
+                return;
+            }
+        }
+
         Actions.Remove(selectedItem);
         _actionsEclKeyRepeat.Remove(selectedItem);
     }
@@ -240,6 +278,7 @@ public sealed partial class MainWindow : Window, INotifyPropertyChanged
     {
         Actions.Clear();
         _actionsEclKeyRepeat.Clear();
+        _modifiedFilteredActionIdx.Clear();
         Recorder.Reset();
     }
 
