@@ -4,18 +4,17 @@ using ActionRepeater.Input;
 
 namespace ActionRepeater.Action;
 
-internal sealed class MouseWheelAction : IInputAction
+internal sealed class MouseWheelAction : IInputAction, System.IEquatable<MouseWheelAction>
 {
     public event PropertyChangedEventHandler PropertyChanged;
     private void NotifyPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
-    private readonly string _name;
-    public string Name => _name;
+    public string Name { get => IsHorizontal ? "Horizontal Mouse Wheel" : "Mouse Wheel"; }
 
     private string _description;
     public string Description => _description;
 
-    private readonly bool _isHorizontal;
+    public bool IsHorizontal { get; }
 
     private int _stepCount;
     public int StepCount
@@ -28,13 +27,13 @@ internal sealed class MouseWheelAction : IInputAction
             _stepCount = value;
             if (_duration == 0)
             {
-                _description = _isHorizontal
+                _description = IsHorizontal
                     ? ActionDescriptionTemplates.HorizontalWheelSteps(value)
                     : ActionDescriptionTemplates.WheelSteps(value);
             }
             else
             {
-                _description = _isHorizontal
+                _description = IsHorizontal
                     ? ActionDescriptionTemplates.HorizontalWheelSteps(value, _duration)
                     : ActionDescriptionTemplates.WheelSteps(value, _duration);
             }
@@ -53,13 +52,13 @@ internal sealed class MouseWheelAction : IInputAction
             _duration = value;
             if (value == 0)
             {
-                _description = _isHorizontal
+                _description = IsHorizontal
                     ? ActionDescriptionTemplates.HorizontalWheelSteps(_stepCount)
                     : ActionDescriptionTemplates.WheelSteps(_stepCount);
             }
             else
             {
-                _description = _isHorizontal
+                _description = IsHorizontal
                     ? ActionDescriptionTemplates.HorizontalWheelSteps(_stepCount, value)
                     : ActionDescriptionTemplates.WheelSteps(_stepCount, value);
             }
@@ -89,7 +88,7 @@ internal sealed class MouseWheelAction : IInputAction
 
         void SendWheelEvent(int clicks)
         {
-            if (!InputSimulator.MoveMouseWheel(clicks, _isHorizontal))
+            if (!InputSimulator.MoveMouseWheel(clicks, IsHorizontal))
             {
                 System.Diagnostics.Debug.WriteLine("Failed to send mouse wheel event.");
                 throw new Win32Exception(System.Runtime.InteropServices.Marshal.GetLastPInvokeError());
@@ -97,32 +96,22 @@ internal sealed class MouseWheelAction : IInputAction
         }
     }
 
-    public IInputAction Clone() => new MouseWheelAction(_name, _description, _isHorizontal, _stepCount, _duration);
+    public IInputAction Clone() => new MouseWheelAction(_description, IsHorizontal, _stepCount, _duration);
 
-    private MouseWheelAction(string name, string description, bool isHorizontal, int stepCount, int duration = 0)
+    private MouseWheelAction(string description, bool isHorizontal, int stepCount, int duration = 0)
     {
-        _name = name;
         _description = description;
-        _isHorizontal = isHorizontal;
+        IsHorizontal = isHorizontal;
         _stepCount = stepCount;
         _duration = duration;
     }
 
-#pragma warning disable RCS1139 // Add summary element to documentation comment.
     /// <param name="duration">The time it took/takes to scroll the wheel, in milliseconds/ticks.</param>
     public MouseWheelAction(bool isHorizontal, int stepCount, int duration = 0)
     {
-        _isHorizontal = isHorizontal;
+        IsHorizontal = isHorizontal;
         _stepCount = stepCount;
         _duration = duration;
-        if (isHorizontal)
-        {
-            _name = "Horizontal Mouse Wheel";
-        }
-        else
-        {
-            _name = "Mouse Wheel";
-        }
         if (_duration == 0)
         {
             _description = isHorizontal
@@ -136,4 +125,18 @@ internal sealed class MouseWheelAction : IInputAction
                 : ActionDescriptionTemplates.WheelSteps(stepCount, duration);
         }
     }
+
+    /// <summary>
+    /// Checks if the object's values are equal.<br/>
+    /// Use equality operators (== and !=) to check if the references are equal or not.
+    /// </summary>
+    public bool Equals(MouseWheelAction other) => other is not null
+        && other.IsHorizontal == IsHorizontal
+        && other.StepCount == _stepCount
+        && other.Duration == _duration;
+
+    /// <inheritdoc cref="Equals(MouseWheelAction)"/>
+    public override bool Equals(object obj) => Equals(obj as MouseWheelAction);
+
+    public override int GetHashCode() => System.HashCode.Combine(IsHorizontal, _stepCount, _duration);
 }

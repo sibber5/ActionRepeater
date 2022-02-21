@@ -4,7 +4,7 @@ using VirtualKey = ActionRepeater.Win32.Input.VirtualKey;
 
 namespace ActionRepeater.Action;
 
-internal sealed class KeyAction : IInputAction
+internal sealed class KeyAction : IInputAction, System.IEquatable<KeyAction>
 {
     public enum @Type
     {
@@ -104,4 +104,18 @@ internal sealed class KeyAction : IInputAction
             _description = ActionDescriptionTemplates.KeyFriendlyName(key);
         }
     }
+
+    /// <summary>
+    /// Checks if the object's values are equal.<br/>
+    /// Use equality operators (== and !=) to check if the references are equal or not.
+    /// </summary>
+    public bool Equals(KeyAction other) => other is not null
+        && other.ActionType == ActionType
+        && other.Key == _key
+        && other.IsAutoRepeat == IsAutoRepeat;
+
+    /// <inheritdoc cref="Equals(KeyAction)"/>
+    public override bool Equals(object obj) => Equals(obj as KeyAction);
+
+    public override int GetHashCode() => System.HashCode.Combine(ActionType, _key, IsAutoRepeat);
 }

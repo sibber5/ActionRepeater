@@ -4,7 +4,7 @@ using POINT = ActionRepeater.Win32.POINT;
 
 namespace ActionRepeater.Action;
 
-internal sealed class MouseButtonAction : IInputAction
+internal sealed class MouseButtonAction : IInputAction, System.IEquatable<MouseButtonAction>
 {
     public enum @Type
     {
@@ -115,4 +115,19 @@ internal sealed class MouseButtonAction : IInputAction
         _usePosition = usePosition;
         UpdateDescription();
     }
+
+    /// <summary>
+    /// Checks if the object's values are equal.<br/>
+    /// Use equality operators (== and !=) to check if the references are equal or not.
+    /// </summary>
+    public bool Equals(MouseButtonAction other) => other is not null
+        && other.ActionType == ActionType
+        && other.Button == _button
+        && other.Position == _position
+        && other.UsePosition == _usePosition;
+
+    /// <inheritdoc cref="Equals(MouseButtonAction)"/>
+    public override bool Equals(object obj) => Equals(obj as MouseButtonAction);
+
+    public override int GetHashCode() => System.HashCode.Combine(ActionType, _button, _position, _usePosition);
 }
