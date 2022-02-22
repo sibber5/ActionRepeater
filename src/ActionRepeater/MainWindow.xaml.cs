@@ -19,13 +19,13 @@ public sealed partial class MainWindow : Window, INotifyPropertyChanged
 {
     private readonly WindowMessageMonitor _msgMonitor;
 
-    public bool IsHoveringOverExcl => NavViewCmdBar.SelectedItem is HomePage home && home.IsHoveringOverExcl;
+    public bool IsHoveringOverExcl => NavViewFrame.Content is HomePage home && home.IsHoveringOverExcl;
 
     public bool IsPlayingActions { get; private set; }
 
     public ObservableCollection<IInputAction> Actions { get; }
     private readonly ObservableCollection<IInputAction> _actionsEclKeyRepeat;
-    private ObservableCollection<IInputAction> FilteredActions { get => ShowAutoRepeatActionsToggle.IsOn ? Actions : _actionsEclKeyRepeat; }
+    private ObservableCollection<IInputAction> FilteredActions { get => ShowAutoRepeatToggle.IsOn ? Actions : _actionsEclKeyRepeat; }
 
     public CursorTrackingMode CursorTrackingMode { get; internal set; } = CursorTrackingMode.None;
 
@@ -77,7 +77,7 @@ public sealed partial class MainWindow : Window, INotifyPropertyChanged
             IsPlayingActions = isPlayingNewVal;
             UpdatePropertyInView(nameof(IsPlayingActions));
 
-            if (NavViewCmdBar.SelectedItem is HomePage home) home.IsRecordButtonEnabled = !isPlayingNewVal;
+            if (NavViewFrame.Content is HomePage home) home.IsRecordButtonEnabled = !isPlayingNewVal;
         };
 
         Recorder.AddActionToList = AddAction;
@@ -96,8 +96,6 @@ public sealed partial class MainWindow : Window, INotifyPropertyChanged
         };
 
         InitializeComponent();
-        Closed += OnClosed;
-        SizeChanged += OnSizeChanged;
 
         _msgMonitor = new WindowMessageMonitor(this);
         _msgMonitor.WindowMessageReceived += Recorder.OnMessageReceived;
@@ -119,11 +117,15 @@ public sealed partial class MainWindow : Window, INotifyPropertyChanged
             case < 160:
                 NavViewCmdBar.Visibility = Visibility.Collapsed;
                 ActionListHeader.Visibility = Visibility.Collapsed;
+                ShowAutoRepeatLabel.Visibility = Visibility.Collapsed;
+                ShowAutoRepeatToggle.Visibility = Visibility.Collapsed;
                 break;
 
             case > 160:
                 NavViewCmdBar.Visibility = Visibility.Visible;
                 ActionListHeader.Visibility = Visibility.Visible;
+                ShowAutoRepeatLabel.Visibility = Visibility.Visible;
+                ShowAutoRepeatToggle.Visibility = Visibility.Visible;
                 break;
         }
     }
@@ -141,15 +143,15 @@ public sealed partial class MainWindow : Window, INotifyPropertyChanged
 
     private void NavigateCommandBar(string tag, Microsoft.UI.Xaml.Media.Animation.NavigationTransitionInfo navInfo)
     {
-        System.Type pageType = tag switch
+        Type pageType = tag switch
         {
             "home" => typeof(HomePage),
             "opts" => typeof(OptionsPage),
             _ => null
         };
-        if (pageType is not null && !Equals(NavViewContent.CurrentSourcePageType, pageType))
+        if (pageType is not null && !Equals(NavViewFrame.CurrentSourcePageType, pageType))
         {
-            NavViewContent.Navigate(pageType, null, navInfo);
+            NavViewFrame.Navigate(pageType, null, navInfo);
         }
     }
 
@@ -231,7 +233,7 @@ public sealed partial class MainWindow : Window, INotifyPropertyChanged
                 {
                     XamlRoot = ActionList.XamlRoot,
                     Title = "⚠ Failed to remove action",
-                    Content = $"This action represents multiple hidden actions (because \"{ShowAutoRepeatText.Text}\" is off).\nRemoving it will result in unexpected behavior.",
+                    Content = $"This action represents multiple hidden actions (because \"{ShowAutoRepeatLabel.Text}\" is off).\nRemoving it will result in unexpected behavior.",
                     CloseButtonText = "Ok"
                 };
                 await dialog.ShowAsync();
@@ -249,7 +251,7 @@ public sealed partial class MainWindow : Window, INotifyPropertyChanged
         IInputAction selectedItem;
         int selectedItemIdx;
 
-        if (ShowAutoRepeatActionsToggle.IsOn)
+        if (ShowAutoRepeatToggle.IsOn)
         {
             selectedItem = Actions[ActionList.SelectedIndex];
 
