@@ -36,7 +36,7 @@ public partial class App : Application
 
         // The Window object doesn't have Width and Height properties in WInUI 3.
         // You can use the Win32 API SetWindowPos to set the Width and Height.
-        SetWindowSize(WinRT.Interop.WindowNative.GetWindowHandle(MainWindow), MainWindowWidth, MainWindowHeight);
+        SetWindowSize(MainWindow.Handle, MainWindowWidth, MainWindowHeight);
 
         MainWindow.Activate();
     }

@@ -14,7 +14,7 @@ internal static class Player
     public static bool IsPlaying { get; private set; } = false;
     public static event EventHandler<bool> IsPlayingChanged;
 
-    public static void PlayActions(IEnumerable<IInputAction> actions, bool sendKeyAutoRepeat = true)
+    public static void PlayActions(IEnumerable<InputAction> actions)
     {
         _tokenSource?.Dispose();
         _tokenSource = new CancellationTokenSource();
@@ -33,13 +33,6 @@ internal static class Player
                 }
                 else
                 {
-                    if (!sendKeyAutoRepeat
-                        && action is KeyAction keyAction
-                        && keyAction.IsAutoRepeat)
-                    {
-                        continue;
-                    }
-
                     action.Play();
                 }
 

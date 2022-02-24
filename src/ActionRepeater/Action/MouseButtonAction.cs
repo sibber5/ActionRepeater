@@ -4,7 +4,7 @@ using POINT = ActionRepeater.Win32.POINT;
 
 namespace ActionRepeater.Action;
 
-internal sealed class MouseButtonAction : IInputAction, System.IEquatable<MouseButtonAction>
+public sealed class MouseButtonAction : InputAction, System.IEquatable<MouseButtonAction>
 {
     public enum @Type
     {
@@ -13,12 +13,9 @@ internal sealed class MouseButtonAction : IInputAction, System.IEquatable<MouseB
         MouseButtonClick
     }
 
-    public event PropertyChangedEventHandler PropertyChanged;
-    private void NotifyPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-
     public @Type ActionType { get; }
 
-    public string Name
+    public override string Name
     {
         get
         {
@@ -38,7 +35,7 @@ internal sealed class MouseButtonAction : IInputAction, System.IEquatable<MouseB
     }
 
     private string _description;
-    public string Description => _description;
+    public override string Description => _description;
     private void UpdateDescription()
     {
         _description = _usePosition
@@ -88,7 +85,7 @@ internal sealed class MouseButtonAction : IInputAction, System.IEquatable<MouseB
         }
     }
 
-    public void Play()
+    public override void Play()
     {
         bool success = ActionType switch
         {
@@ -105,7 +102,7 @@ internal sealed class MouseButtonAction : IInputAction, System.IEquatable<MouseB
         }
     }
 
-    public IInputAction Clone() => new MouseButtonAction(ActionType, _button, _position);
+    public override InputAction Clone() => new MouseButtonAction(ActionType, _button, _position);
 
     public MouseButtonAction(@Type type, MouseButton button, POINT position, bool usePosition = true)
     {
@@ -130,4 +127,53 @@ internal sealed class MouseButtonAction : IInputAction, System.IEquatable<MouseB
     public override bool Equals(object obj) => Equals(obj as MouseButtonAction);
 
     public override int GetHashCode() => System.HashCode.Combine(ActionType, _button, _position, _usePosition);
+
+    public static async System.Threading.Tasks.Task<MouseButtonAction> CreateActionFromXmlAsync(System.Xml.XmlReader reader)
+    {
+        await reader.ReadAsync(); // move to Start Element ActionType
+
+        ThrowIfInvalidName(nameof(ActionType));
+        @Type type = (@Type)reader.ReadElementContentAsInt(); // this moves to start of next element
+
+        ThrowIfInvalidName(nameof(Button));
+        MouseButton button = (MouseButton)reader.ReadElementContentAsInt(); // this moves to start of next element, which in this case is Position
+
+        ThrowIfInvalidName(nameof(Position));
+        await reader.ReadAsync(); // move to Start Element x
+        ThrowIfInvalidName("x");
+        int pointX = reader.ReadElementContentAsInt();
+        ThrowIfInvalidName("y");
+        int pointY = reader.ReadElementContentAsInt();
+
+        // not its at End Element Position
+        await reader.ReadAsync(); // move to Start Element UsePosition
+        ThrowIfInvalidName(nameof(UsePosition));
+        bool usePosition = reader.ReadElementContentAsBoolean();
+
+        return new MouseButtonAction(type, button, new POINT() { x = pointX, y = pointY }, usePosition);
+
+        void ThrowIfInvalidName(string name)
+        {
+            if (!reader.Name.Equals(name, System.StringComparison.Ordinal))
+            {
+                throw new System.FormatException($"Unexpected element \"{reader.Name}\". Expected \"{name}\".");
+            }
+        }
+    }
+
+    public override void WriteXml(System.Xml.XmlWriter writer)
+    {
+        writer.WriteAttributeString("Type", nameof(MouseButtonAction));
+
+        writer.WriteComment("ActionType is the type of the mouse button action. it can be on of the following: 0 - MouseButtonDown; 1 - MouseButtonUp; 2 - MouseButtonClick");
+        writer.WriteElementString(nameof(ActionType), ((int)ActionType).ToString(System.Globalization.CultureInfo.InvariantCulture));
+        writer.WriteElementString(nameof(Button), ((int)_button).ToString(System.Globalization.CultureInfo.InvariantCulture));
+
+        writer.WriteStartElement(nameof(Position));
+        writer.WriteElementString(nameof(_position.x), _position.x.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        writer.WriteElementString(nameof(_position.y), _position.y.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        writer.WriteEndElement();
+
+        writer.WriteElementString(nameof(UsePosition), _usePosition.ToString(System.Globalization.CultureInfo.InvariantCulture).ToLowerInvariant());
+    }
 }

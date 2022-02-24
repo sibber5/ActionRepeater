@@ -5,7 +5,7 @@ using static ActionRepeater.Win32.PInvoke.Helpers;
 
 namespace ActionRepeater.Input;
 
-internal static class InputSimulator
+public static class InputSimulator
 {
     public enum MouseButton
     {

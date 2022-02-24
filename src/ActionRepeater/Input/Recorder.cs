@@ -11,9 +11,9 @@ internal static class Recorder
 {
     public static bool IsRecording { get; private set; } = false;
 
-    public static Action<IInputAction> AddActionToList;
-    public static Action<IInputAction> ReplaceLastAction;
-    public static Func<IInputAction> GetLastAction;
+    public static Action<InputAction> AddActionToList;
+    public static Action<InputAction> ReplaceLastAction;
+    public static Func<InputAction> GetLastAction;
 
     private static bool _isSubscribed = false;
 
@@ -31,7 +31,7 @@ internal static class Recorder
         if (!_isSubscribed)
         {
             //return;
-            SubscribeToEvents();
+            RegisterRawInput();
         }
 
         Reset();
@@ -46,13 +46,12 @@ internal static class Recorder
             return;
         }
 
-        UnsubscribeToEvents();
+        UnregisterRawInput();
         IsRecording = false;
     }
 
-    public static void SubscribeToEvents()
+    public static void RegisterRawInput()
     {
-        IntPtr handle = WinRT.Interop.WindowNative.GetWindowHandle(App.MainWindow);
         RAWINPUTDEVICE[] rid = new[]
         {
             new RAWINPUTDEVICE()
@@ -60,14 +59,14 @@ internal static class Recorder
                 usUsagePage = UsagePage.GenericDesktopControl,
                 usUsage = UsageId.Mouse,
                 dwFlags = RawInputFlags.INPUTSINK,
-                hwndTarget = handle
+                hwndTarget = App.MainWindow.Handle
             },
             new RAWINPUTDEVICE()
             {
                 usUsagePage = UsagePage.GenericDesktopControl,
                 usUsage = UsageId.Keyboard,
                 dwFlags = RawInputFlags.INPUTSINK,
-                hwndTarget = handle
+                hwndTarget = App.MainWindow.Handle
             }
         };
 
@@ -79,7 +78,7 @@ internal static class Recorder
         _isSubscribed = true;
     }
 
-    public static void UnsubscribeToEvents()
+    public static void UnregisterRawInput()
     {
         RAWINPUTDEVICE[] rid = new[]
         {
@@ -247,7 +246,7 @@ internal static class Recorder
         }
     }
 
-    private static void AddAction(IInputAction action)
+    private static void AddAction(InputAction action)
     {
         if (action is null)
         {

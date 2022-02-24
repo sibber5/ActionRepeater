@@ -59,7 +59,7 @@
             </ListView.Style>
 
             <ListView.ItemTemplate>
-                <DataTemplate x:DataType="action:IInputAction">
+                <DataTemplate x:DataType="action:InputAction">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="1*"/>

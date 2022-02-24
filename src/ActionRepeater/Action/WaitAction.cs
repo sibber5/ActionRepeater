@@ -1,17 +1,13 @@
 ﻿using System;
-using System.ComponentModel;
 
 namespace ActionRepeater.Action;
 
-internal sealed class WaitAction : IInputAction, IEquatable<WaitAction>
+public sealed class WaitAction : InputAction, IEquatable<WaitAction>
 {
-    public event PropertyChangedEventHandler PropertyChanged;
-    private void NotifyPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-
-    public string Name => "Wait";
+    public override string Name => "Wait";
 
     private string _description;
-    public string Description => _description;
+    public override string Description => _description;
 
     private int _duration;
     public int Duration
@@ -27,9 +23,9 @@ internal sealed class WaitAction : IInputAction, IEquatable<WaitAction>
         }
     }
 
-    public void Play() => throw new NotImplementedException("Player should use it's own method to wait the specified amount.");
+    public override void Play() => throw new NotImplementedException("Player should use it's own method to wait the specified amount.");
 
-    public IInputAction Clone() => new WaitAction(_duration);
+    public override InputAction Clone() => new WaitAction(_duration);
 
     public WaitAction(int duration)
     {
@@ -47,4 +43,22 @@ internal sealed class WaitAction : IInputAction, IEquatable<WaitAction>
     public override bool Equals(object obj) => Equals(obj as WaitAction);
 
     public override int GetHashCode() => _duration.GetHashCode();
+
+    public static async System.Threading.Tasks.Task<WaitAction> CreateActionFromXmlAsync(System.Xml.XmlReader reader)
+    {
+        await reader.ReadAsync();
+        if (!reader.Name.Equals(nameof(Duration), StringComparison.Ordinal))
+        {
+            throw new FormatException($"Unexpected element \"{reader.Name}\". Expected \"{nameof(Duration)}\".");
+        }
+        return new WaitAction(reader.ReadElementContentAsInt());
+    }
+
+    public override void WriteXml(System.Xml.XmlWriter writer)
+    {
+        writer.WriteAttributeString("Type", nameof(WaitAction));
+
+        writer.WriteComment("Time in milliseconds");
+        writer.WriteElementString(nameof(Duration), _duration.ToString(System.Globalization.CultureInfo.InvariantCulture));
+    }
 }

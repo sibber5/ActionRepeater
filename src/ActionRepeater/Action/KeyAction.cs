@@ -4,7 +4,7 @@ using VirtualKey = ActionRepeater.Win32.Input.VirtualKey;
 
 namespace ActionRepeater.Action;
 
-internal sealed class KeyAction : IInputAction, System.IEquatable<KeyAction>
+public sealed class KeyAction : InputAction, System.IEquatable<KeyAction>
 {
     public enum @Type
     {
@@ -13,12 +13,9 @@ internal sealed class KeyAction : IInputAction, System.IEquatable<KeyAction>
         KeyPress
     }
 
-    public event PropertyChangedEventHandler PropertyChanged;
-    private void NotifyPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-
     public @Type ActionType { get; }
 
-    public string Name
+    public override string Name
     {
         get
         {
@@ -38,7 +35,7 @@ internal sealed class KeyAction : IInputAction, System.IEquatable<KeyAction>
     }
 
     private string _description;
-    public string Description => _description;
+    public override string Description => _description;
 
     private VirtualKey _key = VirtualKey.NO_KEY;
     public VirtualKey Key
@@ -63,7 +60,7 @@ internal sealed class KeyAction : IInputAction, System.IEquatable<KeyAction>
 
     public bool IsAutoRepeat { get; }
 
-    public void Play()
+    public override void Play()
     {
         bool success = ActionType switch
         {
@@ -80,7 +77,7 @@ internal sealed class KeyAction : IInputAction, System.IEquatable<KeyAction>
         }
     }
 
-    public IInputAction Clone() => new KeyAction(ActionType, _description, _key, IsAutoRepeat);
+    public override InputAction Clone() => new KeyAction(ActionType, _description, _key, IsAutoRepeat);
 
     private KeyAction(@Type type, string description, VirtualKey key, bool isAutoRepeat)
     {
@@ -118,4 +115,38 @@ internal sealed class KeyAction : IInputAction, System.IEquatable<KeyAction>
     public override bool Equals(object obj) => Equals(obj as KeyAction);
 
     public override int GetHashCode() => System.HashCode.Combine(ActionType, _key, IsAutoRepeat);
+
+    public static async System.Threading.Tasks.Task<KeyAction> CreateActionFromXmlAsync(System.Xml.XmlReader reader)
+    {
+        await reader.ReadAsync(); // move to Start Element ActionType
+
+        ThrowIfInvalidName(nameof(ActionType));
+        @Type type = (@Type)reader.ReadElementContentAsInt(); // this moves to start of next element
+
+        ThrowIfInvalidName(nameof(Key));
+        VirtualKey key = (VirtualKey)reader.ReadElementContentAsInt();
+
+        ThrowIfInvalidName(nameof(IsAutoRepeat));
+        bool isAutoRepeat = reader.ReadElementContentAsBoolean();
+
+        return new KeyAction(type, key, isAutoRepeat);
+
+        void ThrowIfInvalidName(string name)
+        {
+            if (!reader.Name.Equals(name, System.StringComparison.Ordinal))
+            {
+                throw new System.FormatException($"Unexpected element \"{reader.Name}\". Expected \"{name}\".");
+            }
+        }
+    }
+
+    public override void WriteXml(System.Xml.XmlWriter writer)
+    {
+        writer.WriteAttributeString("Type", nameof(KeyAction));
+
+        writer.WriteComment("ActionType is the type of the key action. it can be on of the following: 0 - KeyDown; 1 - KeyUp; 2 - KeyPress");
+        writer.WriteElementString(nameof(ActionType), ((int)ActionType).ToString(System.Globalization.CultureInfo.InvariantCulture));
+        writer.WriteElementString(nameof(Key), ((ushort)_key).ToString(System.Globalization.CultureInfo.InvariantCulture));
+        writer.WriteElementString(nameof(IsAutoRepeat), IsAutoRepeat.ToString(System.Globalization.CultureInfo.InvariantCulture).ToLowerInvariant());
+    }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
 using Microsoft.UI.Xaml;
@@ -9,7 +10,6 @@ using ActionRepeater.Action;
 using ActionRepeater.Input;
 using ActionRepeater.Messaging;
 using System.Diagnostics;
-using System.Collections.Generic;
 
 #pragma warning disable RCS1163, IDE0060
 
@@ -17,15 +17,17 @@ namespace ActionRepeater;
 
 public sealed partial class MainWindow : Window, INotifyPropertyChanged
 {
+    public IntPtr Handle { get; }
+
     private readonly WindowMessageMonitor _msgMonitor;
 
     public bool IsHoveringOverExcl => NavViewFrame.Content is HomePage home && home.IsHoveringOverExcl;
 
     public bool IsPlayingActions { get; private set; }
 
-    public ObservableCollection<IInputAction> Actions { get; }
-    private readonly ObservableCollection<IInputAction> _actionsEclKeyRepeat;
-    private ObservableCollection<IInputAction> FilteredActions { get => ShowAutoRepeatToggle.IsOn ? Actions : _actionsEclKeyRepeat; }
+    public ObservableCollection<InputAction> Actions { get; }
+    public ObservableCollection<InputAction> ActionsEclKeyRepeat { get; }
+    private ObservableCollection<InputAction> FilteredActions { get => ShowAutoRepeatToggle.IsOn ? Actions : ActionsEclKeyRepeat; }
 
     public CursorTrackingMode CursorTrackingMode { get; internal set; } = CursorTrackingMode.None;
 
@@ -37,7 +39,7 @@ public sealed partial class MainWindow : Window, INotifyPropertyChanged
         {
             if (_useCursorPosOnClicks == value) return;
 
-            foreach (IInputAction action in Actions)
+            foreach (InputAction action in Actions)
             {
                 if (action is MouseButtonAction mbAction)
                 {
@@ -64,12 +66,14 @@ public sealed partial class MainWindow : Window, INotifyPropertyChanged
 
     private readonly List<int> _modifiedFilteredActionIdx = new();
 
-    private IInputAction _copiedAction = null;
+    private InputAction _copiedAction = null;
 
     public MainWindow()
     {
+        Handle = WinRT.Interop.WindowNative.GetWindowHandle(this);
+
         Actions = new();
-        _actionsEclKeyRepeat = new();
+        ActionsEclKeyRepeat = new();
 
         IsPlayingActions = Player.IsPlaying;
         Player.IsPlayingChanged += (s, isPlayingNewVal) =>
@@ -83,9 +87,9 @@ public sealed partial class MainWindow : Window, INotifyPropertyChanged
         Recorder.AddActionToList = AddAction;
         Recorder.ReplaceLastAction = (newAction) =>
         {
-            if (Actions[^1] == _actionsEclKeyRepeat[^1])
+            if (Actions[^1] == ActionsEclKeyRepeat[^1])
             {
-                _actionsEclKeyRepeat[^1] = newAction;
+                ActionsEclKeyRepeat[^1] = newAction;
             }
             Actions[^1] = newAction;
         };
@@ -99,6 +103,91 @@ public sealed partial class MainWindow : Window, INotifyPropertyChanged
 
         _msgMonitor = new WindowMessageMonitor(this);
         _msgMonitor.WindowMessageReceived += Recorder.OnMessageReceived;
+    }
+
+    // when changing/updating this method also update FillFilteredActionList if required
+    public void AddAction(InputAction action)
+    {
+        if (action is WaitAction waitAction)
+        {
+            if (Actions.Count > 0 && Actions[^1] is WaitAction lastWaitAction)
+            {
+                lastWaitAction.Duration += waitAction.Duration;
+            }
+            else
+            {
+                Actions.Add(action);
+            }
+
+            int lastFilteredActionIdx = ActionsEclKeyRepeat.Count - 1;
+            if (ActionsEclKeyRepeat.Count > 0 && ActionsEclKeyRepeat[lastFilteredActionIdx] is WaitAction lastFilteredWaitAction)
+            {
+                if (_modifiedFilteredActionIdx.Contains(lastFilteredActionIdx))
+                {
+                    lastFilteredWaitAction.Duration += waitAction.Duration;
+                }
+                else if (!ReferenceEquals(Actions[^1], lastFilteredWaitAction))
+                {
+                    ActionsEclKeyRepeat[lastFilteredActionIdx] = new WaitAction(lastFilteredWaitAction.Duration + waitAction.Duration);
+                    _modifiedFilteredActionIdx.Add(lastFilteredActionIdx);
+                }
+            }
+            else
+            {
+                ActionsEclKeyRepeat.Add(action);
+            }
+
+            return;
+        }
+
+        Actions.Add(action);
+
+        if (!(action is KeyAction keyAction && keyAction.IsAutoRepeat))
+        {
+            ActionsEclKeyRepeat.Add(action);
+        }
+    }
+
+    /// <summary>
+    /// Fills ActionsEclKeyRepeat from the actinos in Actions.
+    /// </summary>
+    public void FillFilteredActionList()
+    {
+        ActionsEclKeyRepeat.Clear();
+        _modifiedFilteredActionIdx.Clear();
+
+        for (int i = 0; i < Actions.Count; ++i)
+        {
+            InputAction action = Actions[i];
+
+            if (action is WaitAction waitAction)
+            {
+                int lastFilteredActionIdx = ActionsEclKeyRepeat.Count - 1;
+                if (ActionsEclKeyRepeat.Count > 0 && ActionsEclKeyRepeat[lastFilteredActionIdx] is WaitAction lastFilteredWaitAction)
+                {
+                    if (_modifiedFilteredActionIdx.Contains(lastFilteredActionIdx))
+                    {
+                        lastFilteredWaitAction.Duration += waitAction.Duration;
+                    }
+                    else if (!ReferenceEquals(Actions[i - 1], lastFilteredWaitAction))
+                    {
+                        ActionsEclKeyRepeat[lastFilteredActionIdx] = new WaitAction(lastFilteredWaitAction.Duration + waitAction.Duration);
+                        _modifiedFilteredActionIdx.Add(lastFilteredActionIdx);
+                    }
+                }
+                else
+                {
+                    ActionsEclKeyRepeat.Add(action);
+                }
+
+                continue;
+            }
+
+            if (!(action is KeyAction keyAction && keyAction.IsAutoRepeat))
+            {
+                ActionsEclKeyRepeat.Add(action);
+            }
+        }
     }
 
     private void OnClosed(object sender, WindowEventArgs args)
@@ -157,54 +246,12 @@ public sealed partial class MainWindow : Window, INotifyPropertyChanged
 
     public void ScrollActionList() => ActionList.ScrollIntoView(ActionList.Items[^1]);
 
-    public void AddAction(IInputAction action)
-    {
-        if (action is WaitAction waitAction)
-        {
-            if (Actions.Count > 0 && Actions[^1] is WaitAction lastWaitAction)
-            {
-                lastWaitAction.Duration += waitAction.Duration;
-            }
-            else
-            {
-                Actions.Add(action);
-            }
-
-            int lastFilteredActionIdx = _actionsEclKeyRepeat.Count - 1;
-            if (_actionsEclKeyRepeat.Count > 0 && _actionsEclKeyRepeat[lastFilteredActionIdx] is WaitAction lastFilteredWaitAction)
-            {
-                if (_modifiedFilteredActionIdx.Contains(lastFilteredActionIdx))
-                {
-                    lastFilteredWaitAction.Duration += waitAction.Duration;
-                }
-                else if (!ReferenceEquals(Actions[^1], lastFilteredWaitAction))
-                {
-                    _actionsEclKeyRepeat[lastFilteredActionIdx] = new WaitAction(lastFilteredWaitAction.Duration + waitAction.Duration);
-                    _modifiedFilteredActionIdx.Add(lastFilteredActionIdx);
-                }
-            }
-            else
-            {
-                _actionsEclKeyRepeat.Add(action);
-            }
-
-            return;
-        }
-
-        Actions.Add(action);
-
-        if (!(action is KeyAction keyAction && keyAction.IsAutoRepeat))
-        {
-            _actionsEclKeyRepeat.Add(action);
-        }
-    }
-
     private void ShowAutoRepeatActions_Toggled(object sender, RoutedEventArgs e) => UpdatePropertyInView(nameof(FilteredActions));
 
     private void ActionList_RightTapped(object sender, RightTappedRoutedEventArgs e)
     {
         var listView = (ListView)sender;
-        var actionItem = (IInputAction)((FrameworkElement)e.OriginalSource).DataContext;
+        var actionItem = (InputAction)((FrameworkElement)e.OriginalSource).DataContext;
 
         if (actionItem is null)
         {
@@ -219,36 +266,36 @@ public sealed partial class MainWindow : Window, INotifyPropertyChanged
         ActionItemMenuFlyout.ShowAt(listView, e.GetPosition(listView));
     }
 
-    private void OnCopyClick(object sender, RoutedEventArgs e) => _copiedAction = (IInputAction)ActionList.SelectedItem;
+    private void OnCopyClick(object sender, RoutedEventArgs e) => _copiedAction = (InputAction)ActionList.SelectedItem;
 
     private async void OnRemoveClick(object sender, RoutedEventArgs e)
     {
-        var selectedItem = (IInputAction)ActionList.SelectedItem;
+        var selectedItem = (InputAction)ActionList.SelectedItem;
 
         foreach (int idx in _modifiedFilteredActionIdx)
         {
-            if (_actionsEclKeyRepeat[idx] == selectedItem)
+            if (ActionsEclKeyRepeat[idx] == selectedItem)
             {
-                ContentDialog dialog = new()
+                await new ContentDialog()
                 {
                     XamlRoot = ActionList.XamlRoot,
                     Title = "⚠ Failed to remove action",
                     Content = $"This action represents multiple hidden actions (because \"{ShowAutoRepeatLabel.Text}\" is off).\nRemoving it will result in unexpected behavior.",
                     CloseButtonText = "Ok"
-                };
-                await dialog.ShowAsync();
+                }.ShowAsync();
+
                 return;
             }
         }
 
         Actions.Remove(selectedItem);
-        _actionsEclKeyRepeat.Remove(selectedItem);
+        ActionsEclKeyRepeat.Remove(selectedItem);
     }
 
     private void OnReplaceClick(object sender, RoutedEventArgs e)
     {
         var newItem = _copiedAction.Clone();
-        IInputAction selectedItem;
+        InputAction selectedItem;
         int selectedItemIdx;
 
         if (ShowAutoRepeatToggle.IsOn)
@@ -257,15 +304,15 @@ public sealed partial class MainWindow : Window, INotifyPropertyChanged
 
             Actions[ActionList.SelectedIndex] = newItem;
 
-            selectedItemIdx = _actionsEclKeyRepeat.IndexOf(selectedItem);
-            _actionsEclKeyRepeat[selectedItemIdx] = newItem;
+            selectedItemIdx = ActionsEclKeyRepeat.IndexOf(selectedItem);
+            ActionsEclKeyRepeat[selectedItemIdx] = newItem;
 
             return;
         }
 
-        selectedItem = _actionsEclKeyRepeat[ActionList.SelectedIndex];
+        selectedItem = ActionsEclKeyRepeat[ActionList.SelectedIndex];
 
-        _actionsEclKeyRepeat[ActionList.SelectedIndex] = newItem;
+        ActionsEclKeyRepeat[ActionList.SelectedIndex] = newItem;
 
         selectedItemIdx = Actions.IndexOf(selectedItem);
         Actions[selectedItemIdx] = newItem;
@@ -279,7 +326,7 @@ public sealed partial class MainWindow : Window, INotifyPropertyChanged
     private void OnClearClick(object sender, RoutedEventArgs e)
     {
         Actions.Clear();
-        _actionsEclKeyRepeat.Clear();
+        ActionsEclKeyRepeat.Clear();
         _modifiedFilteredActionIdx.Clear();
         Recorder.Reset();
     }
