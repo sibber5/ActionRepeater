@@ -17,7 +17,7 @@ public static class SerializationHelper
         var xmlWriter = XmlWriter.Create(writer, new XmlWriterSettings
         {
             Indent = true,
-            IndentChars = "    ",
+            IndentChars = "    ", // 4 spaces
             CloseOutput = true,
             NewLineHandling = NewLineHandling.Replace,
             Encoding = System.Text.Encoding.UTF8
@@ -36,15 +36,15 @@ public static class SerializationHelper
     }
 
     /// <param name="path">The full path of the file, including its name and extention.</param>
-    public static T Deserialize<T>(string path)
+    public static T? Deserialize<T>(string path)
     {
         FileStream stream = new(path, FileMode.Open);
         XmlSerializer serializer = new(typeof(T));
 
-        T loadedObj;
+        T? loadedObj;
         try
         {
-            loadedObj = (T)serializer.Deserialize(stream);
+            loadedObj = (T?)serializer.Deserialize(stream);
         }
         finally
         {
@@ -80,7 +80,7 @@ public static class SerializationHelper
 
             if (!reader.Name.Equals(nameof(InputAction), StringComparison.Ordinal)) continue;
 
-            string actiontype = reader.GetAttribute("Type");
+            string? actiontype = reader.GetAttribute("Type");
 
             if (reader.AttributeCount != 1 || actiontype is null)
             {

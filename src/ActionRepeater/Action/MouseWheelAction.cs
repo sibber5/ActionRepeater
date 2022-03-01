@@ -127,13 +127,13 @@ public sealed class MouseWheelAction : InputAction, System.IEquatable<MouseWheel
     /// Checks if the object's values are equal.<br/>
     /// Use equality operators (== and !=) to check if the references are equal or not.
     /// </summary>
-    public bool Equals(MouseWheelAction other) => other is not null
+    public bool Equals(MouseWheelAction? other) => other is not null
         && other.IsHorizontal == IsHorizontal
         && other.StepCount == _stepCount
         && other.Duration == _duration;
 
     /// <inheritdoc cref="Equals(MouseWheelAction)"/>
-    public override bool Equals(object obj) => Equals(obj as MouseWheelAction);
+    public override bool Equals(object? obj) => Equals(obj as MouseWheelAction);
 
     public override int GetHashCode() => System.HashCode.Combine(IsHorizontal, _stepCount, _duration);
 

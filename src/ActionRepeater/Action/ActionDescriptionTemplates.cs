@@ -238,7 +238,7 @@ internal static class ActionDescriptionTemplates
     }
     public static string KeyFriendlyName(VirtualKey key)
     {
-        if (_virtualKeyFriendlyNames.TryGetValue(key, out string name)) return name;
+        if (_virtualKeyFriendlyNames.TryGetValue(key, out string? name)) return name;
         return key.ToString();
     }
 

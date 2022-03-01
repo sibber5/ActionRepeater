@@ -11,9 +11,10 @@ internal static class Recorder
 {
     public static bool IsRecording { get; private set; } = false;
 
-    public static Action<InputAction> AddActionToList;
-    public static Action<InputAction> ReplaceLastAction;
-    public static Func<InputAction> GetLastAction;
+    // these should be set on app startup (probably in the main window constructor)
+    public static Action<InputAction> AddActionToList = null!;
+    public static Action<InputAction> ReplaceLastAction = null!;
+    public static Func<InputAction?> GetLastAction = null!;
 
     private static bool _isSubscribed = false;
 
@@ -109,7 +110,7 @@ internal static class Recorder
     /// <summary>
     /// Callback for window message proc. should not be manually called.
     /// </summary>
-    public static void OnMessageReceived(object sender, Messaging.WindowMessageEventArgs e)
+    public static void OnMessageReceived(object? sender, Messaging.WindowMessageEventArgs e)
     {
         if (e.MessageType != WindowMessage.INPUT) return;
 

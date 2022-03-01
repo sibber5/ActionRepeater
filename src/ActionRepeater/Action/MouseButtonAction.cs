@@ -34,7 +34,7 @@ public sealed class MouseButtonAction : InputAction, System.IEquatable<MouseButt
         }
     }
 
-    private string _description;
+    private string _description = "";
     public override string Description => _description;
     private void UpdateDescription()
     {
@@ -117,14 +117,14 @@ public sealed class MouseButtonAction : InputAction, System.IEquatable<MouseButt
     /// Checks if the object's values are equal.<br/>
     /// Use equality operators (== and !=) to check if the references are equal or not.
     /// </summary>
-    public bool Equals(MouseButtonAction other) => other is not null
+    public bool Equals(MouseButtonAction? other) => other is not null
         && other.ActionType == ActionType
         && other.Button == _button
         && other.Position == _position
         && other.UsePosition == _usePosition;
 
     /// <inheritdoc cref="Equals(MouseButtonAction)"/>
-    public override bool Equals(object obj) => Equals(obj as MouseButtonAction);
+    public override bool Equals(object? obj) => Equals(obj as MouseButtonAction);
 
     public override int GetHashCode() => System.HashCode.Combine(ActionType, _button, _position, _usePosition);
 

@@ -7,7 +7,7 @@ namespace ActionRepeater.Action;
 
 public abstract class InputAction : INotifyPropertyChanged, System.Xml.Serialization.IXmlSerializable
 {
-    public event PropertyChangedEventHandler PropertyChanged;
+    public event PropertyChangedEventHandler? PropertyChanged;
     protected void NotifyPropertyChanged([CallerMemberName] string propertyName = "") => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
     public abstract string Name { get; }
@@ -17,7 +17,7 @@ public abstract class InputAction : INotifyPropertyChanged, System.Xml.Serializa
 
     public abstract void Play();
 
-    public XmlSchema GetSchema() => null;
+    public XmlSchema? GetSchema() => null;
 
     public void ReadXml(XmlReader reader) => throw new System.NotImplementedException("This shouldn't be used. Use the custom parser.");
 

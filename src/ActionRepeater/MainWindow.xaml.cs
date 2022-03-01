@@ -17,6 +17,9 @@ namespace ActionRepeater;
 
 public sealed partial class MainWindow : Window, INotifyPropertyChanged
 {
+    public event PropertyChangedEventHandler? PropertyChanged;
+    private void UpdatePropertyInView([CallerMemberName] string propertyName = "") => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
     public IntPtr Handle { get; }
 
     private readonly WindowMessageMonitor _msgMonitor;
@@ -66,7 +69,7 @@ public sealed partial class MainWindow : Window, INotifyPropertyChanged
 
     private readonly List<int> _modifiedFilteredActionIdx = new();
 
-    private InputAction _copiedAction = null;
+    private InputAction? _copiedAction = null;
 
     public MainWindow()
     {
@@ -87,6 +90,7 @@ public sealed partial class MainWindow : Window, INotifyPropertyChanged
         Recorder.AddActionToList = AddAction;
         Recorder.ReplaceLastAction = (newAction) =>
         {
+            // the caller of this func always checks if the action list is not empty
             if (Actions[^1] == ActionsEclKeyRepeat[^1])
             {
                 ActionsEclKeyRepeat[^1] = newAction;
@@ -230,9 +234,9 @@ public sealed partial class MainWindow : Window, INotifyPropertyChanged
         NavigateCommandBar(args.SelectedItemContainer.Tag.ToString(), args.RecommendedNavigationTransitionInfo);
     }
 
-    private void NavigateCommandBar(string tag, Microsoft.UI.Xaml.Media.Animation.NavigationTransitionInfo navInfo)
+    private void NavigateCommandBar(string? tag, Microsoft.UI.Xaml.Media.Animation.NavigationTransitionInfo navInfo)
     {
-        Type pageType = tag switch
+        Type? pageType = tag switch
         {
             "home" => typeof(HomePage),
             "opts" => typeof(OptionsPage),
@@ -294,7 +298,7 @@ public sealed partial class MainWindow : Window, INotifyPropertyChanged
 
     private void OnReplaceClick(object sender, RoutedEventArgs e)
     {
-        var newItem = _copiedAction.Clone();
+        var newItem = _copiedAction!.Clone();
         InputAction selectedItem;
         int selectedItemIdx;
 
@@ -320,7 +324,7 @@ public sealed partial class MainWindow : Window, INotifyPropertyChanged
 
     private void OnPasteClick(object sender, RoutedEventArgs e)
     {
-        AddAction(_copiedAction.Clone());
+        AddAction(_copiedAction!.Clone());
     }
 
     private void OnClearClick(object sender, RoutedEventArgs e)
@@ -330,9 +334,6 @@ public sealed partial class MainWindow : Window, INotifyPropertyChanged
         _modifiedFilteredActionIdx.Clear();
         Recorder.Reset();
     }
-
-    public event PropertyChangedEventHandler PropertyChanged;
-    private void UpdatePropertyInView([CallerMemberName] string propertyName = "") => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 }
 
 public enum CursorTrackingMode

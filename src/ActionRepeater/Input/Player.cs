@@ -9,10 +9,10 @@ namespace ActionRepeater.Input;
 
 internal static class Player
 {
-    private static CancellationTokenSource _tokenSource = null;
+    private static CancellationTokenSource? _tokenSource = null;
 
     public static bool IsPlaying { get; private set; } = false;
-    public static event EventHandler<bool> IsPlayingChanged;
+    public static event EventHandler<bool>? IsPlayingChanged;
 
     public static void PlayActions(IEnumerable<InputAction> actions)
     {
@@ -58,13 +58,17 @@ internal static class Player
 
     public static void Cancel()
     {
+        Debug.Assert(_tokenSource is not null, $"{nameof(_tokenSource)} is null. A play task may not have been run.");
+
         Debug.WriteLine("Cancelling play task...");
-        _tokenSource.Cancel();
+        _tokenSource!.Cancel();
     }
 
     private static void CleanUp()
     {
-        _tokenSource.Dispose();
+        Debug.Assert(_tokenSource is not null, $"{nameof(_tokenSource)} is null");
+
+        _tokenSource!.Dispose();
         _tokenSource = null;
     }
 }

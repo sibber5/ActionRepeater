@@ -14,7 +14,7 @@ public partial class App : Application
     //private const int MainWindowMinWidth = 315;
     //private const int MainWindowMinHeight = 100;
 
-    public static MainWindow MainWindow { get; private set; }
+    public static MainWindow MainWindow { get; private set; } = null!;
 
     /// <summary>
     /// Initializes the singleton application object.  This is the first line of authored code

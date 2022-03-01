@@ -12,15 +12,14 @@ namespace ActionRepeater.Messaging;
 public sealed class WindowMessageMonitor : IDisposable
 {
     private readonly IntPtr _hwnd = IntPtr.Zero;
-    private SUBCLASSPROC callback;
+    private SUBCLASSPROC? callback;
     private readonly object _lockObject = new();
 
     /// <summary>
     /// Initialize a new instance of the <see cref="WindowMessageMonitor"/> class.
     /// </summary>
     /// <param name="window">The window to listen to messages for</param>
-    public WindowMessageMonitor(Microsoft.UI.Xaml.Window window) : this(WinRT.Interop.WindowNative.GetWindowHandle(window))
-    { }
+    public WindowMessageMonitor(Microsoft.UI.Xaml.Window window) : this(WinRT.Interop.WindowNative.GetWindowHandle(window)) { }
 
     /// <summary>
     /// Initialize a new instance of the <see cref="WindowMessageMonitor"/> class.
@@ -31,25 +30,24 @@ public sealed class WindowMessageMonitor : IDisposable
         _hwnd = hwnd;
     }
 
-    private event EventHandler<WindowMessageEventArgs> _NativeMessage;
-
+    private event EventHandler<WindowMessageEventArgs>? _windowMessageReceived;
     /// <summary>
     /// Event raised when a windows message is received.
     /// </summary>
-    public event EventHandler<WindowMessageEventArgs> WindowMessageReceived
+    public event EventHandler<WindowMessageEventArgs>? WindowMessageReceived
     {
         add
         {
-            if (_NativeMessage is null)
+            if (_windowMessageReceived is null)
             {
                 Subscribe();
             }
-            _NativeMessage += value;
+            _windowMessageReceived += value;
         }
         remove
         {
-            _NativeMessage -= value;
-            if (_NativeMessage is null)
+            _windowMessageReceived -= value;
+            if (_windowMessageReceived is null)
             {
                 Unsubscribe();
             }
@@ -58,10 +56,10 @@ public sealed class WindowMessageMonitor : IDisposable
 
     private nint NewWindowProc(IntPtr hWnd, uint uMsg, nuint wParam, nint lParam, nuint uIdSubclass, nuint dwRefData)
     {
-        if (_NativeMessage is not null)
+        if (_windowMessageReceived is not null)
         {
             var args = new WindowMessageEventArgs(hWnd, uMsg, wParam, lParam);
-            _NativeMessage.Invoke(this, args);
+            _windowMessageReceived.Invoke(this, args);
             if (args.Handled) return (int)args.Result;
         }
         return PInvoke.DefSubclassProc(hWnd, uMsg, wParam, lParam);
@@ -91,19 +89,8 @@ public sealed class WindowMessageMonitor : IDisposable
         }
     }
 
-
-    private void Dispose(bool disposing)
-    {
-        if (_NativeMessage != null) Unsubscribe();
-    }
-
     public void Dispose()
     {
-        Dispose(true);
-    }
-
-    ~WindowMessageMonitor()
-    {
-        Dispose(false);
+        if (_windowMessageReceived is not null) Unsubscribe();
     }
 }
