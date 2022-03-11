@@ -3,57 +3,59 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using ActionRepeater.Action;
-using Debug = System.Diagnostics.Debug;
+using System.Diagnostics;
 
 namespace ActionRepeater.Input;
 
 internal static class Player
 {
-    private static CancellationTokenSource? _tokenSource = null;
+    private static CancellationTokenSource? _tokenSource;
 
-    public static bool IsPlaying { get; private set; } = false;
+    private static bool _isPlaying;
+    public static bool IsPlaying
+    {
+        get => _isPlaying;
+        private set
+        {
+            _isPlaying = value;
+            IsPlayingChanged?.Invoke(null, value);
+        }
+    }
     public static event EventHandler<bool>? IsPlayingChanged;
 
-    public static void PlayActions(IEnumerable<InputAction> actions)
+    public static void PlayActions(IReadOnlyList<InputAction> actions)
     {
         _tokenSource?.Dispose();
         _tokenSource = new CancellationTokenSource();
-        _ = Task.Run(async () =>
+        Task.Run(async () =>
         {
-            if (_tokenSource.IsCancellationRequested)
+            for (int i = 0; i < actions.Count; ++i)
             {
-                return;
-            }
-
-            foreach (var action in actions)
-            {
-                if (action is WaitAction a)
-                {
-                    await Task.Delay(a.Duration, _tokenSource.Token).ContinueWith(_ => { });
-                }
-                else
-                {
-                    action.Play();
-                }
-
                 if (_tokenSource.IsCancellationRequested)
                 {
-                    return;
+                    break;
                 }
+
+                if (actions[i] is WaitAction w)
+                {
+                    // await contiuation task to avoid TaskCancellationException
+                    await Task.Delay(w.Duration, _tokenSource.Token).ContinueWith(task => { });
+                    continue;
+                }
+
+                actions[i].Play();
             }
-        }, _tokenSource.Token).ContinueWith(_ =>
+        }, _tokenSource.Token).ContinueWith(task =>
         {
             Debug.WriteLine("Finished play task.");
-            IsPlaying = false;
-            App.MainWindow.DispatcherQueue.TryEnqueue(() =>
-            {
-                IsPlayingChanged?.Invoke(null, false);
-                CleanUp();
-            });
+            App.MainWindow.DispatcherQueue.TryEnqueue(() => IsPlaying = false);
+
+            Debug.WriteLine("Disposing token source...");
+            _tokenSource!.Dispose();
+            _tokenSource = null;
         });
         IsPlaying = true;
-        IsPlayingChanged?.Invoke(null, true);
-        Debug.WriteLine("Started Playing");
+        Debug.WriteLine("Started play task.");
     }
 
     public static void Cancel()
@@ -62,13 +64,5 @@ internal static class Player
 
         Debug.WriteLine("Cancelling play task...");
         _tokenSource!.Cancel();
-    }
-
-    private static void CleanUp()
-    {
-        Debug.Assert(_tokenSource is not null, $"{nameof(_tokenSource)} is null");
-
-        _tokenSource!.Dispose();
-        _tokenSource = null;
     }
 }

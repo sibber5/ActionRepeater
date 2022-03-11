@@ -4,10 +4,10 @@ namespace ActionRepeater.Action;
 
 public sealed class WaitAction : InputAction, IEquatable<WaitAction>
 {
-    public override string Name => "Wait";
+    public override string Name { get => "Wait"; }
 
     private string _description;
-    public override string Description => _description;
+    public override string Description { get => _description; }
 
     private int _duration;
     public int Duration

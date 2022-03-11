@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using ActionRepeater.Input;
+using ActionRepeater.Extentions;
 using VirtualKey = ActionRepeater.Win32.Input.VirtualKey;
 
 namespace ActionRepeater.Action;
@@ -15,27 +16,20 @@ public sealed class KeyAction : InputAction, System.IEquatable<KeyAction>
 
     public @Type ActionType { get; }
 
-    public override string Name
-    {
-        get
-        {
-            System.Text.StringBuilder sb = new();
-            string name = ActionType.ToString();
-            for (int i = 1; i < name.Length; ++i)
-            {
-                sb.Append(name[i - 1]);
-                if (char.IsUpper(name[i]))
-                {
-                    sb.Append(' ');
-                }
-            }
-            sb.Append(name[^1]);
-            return sb.ToString();
-        }
-    }
+    public override string Name { get; }
 
-    private string _description;
-    public override string Description => _description;
+    private string _description = default!;
+    public override string Description { get => _description; }
+    private void UpdateDescription()
+    {
+        if (IsAutoRepeat)
+        {
+            _description = ActionDescriptionTemplates.KeyAutoRepeat(_key);
+            return;
+        }
+
+        _description = ActionDescriptionTemplates.KeyFriendlyName(_key);
+    }
 
     private VirtualKey _key = VirtualKey.NO_KEY;
     public VirtualKey Key
@@ -46,14 +40,7 @@ public sealed class KeyAction : InputAction, System.IEquatable<KeyAction>
             if (_key == value) return;
 
             _key = value;
-            if (IsAutoRepeat)
-            {
-                _description = ActionDescriptionTemplates.KeyAutoRepeat(value);
-            }
-            else
-            {
-                _description = ActionDescriptionTemplates.KeyFriendlyName(value);
-            }
+            UpdateDescription();
             NotifyPropertyChanged(nameof(Description));
         }
     }
@@ -77,29 +64,15 @@ public sealed class KeyAction : InputAction, System.IEquatable<KeyAction>
         }
     }
 
-    public override InputAction Clone() => new KeyAction(ActionType, _description, _key, IsAutoRepeat);
-
-    private KeyAction(@Type type, string description, VirtualKey key, bool isAutoRepeat)
-    {
-        ActionType = type;
-        _description = description;
-        _key = key;
-        IsAutoRepeat = isAutoRepeat;
-    }
+    public override InputAction Clone() => new KeyAction(ActionType, _key, IsAutoRepeat);
 
     public KeyAction(@Type type, VirtualKey key, bool isAutoRepeat = false)
     {
         ActionType = type;
         _key = key;
         IsAutoRepeat = isAutoRepeat;
-        if (isAutoRepeat)
-        {
-            _description = ActionDescriptionTemplates.KeyAutoRepeat(key);
-        }
-        else
-        {
-            _description = ActionDescriptionTemplates.KeyFriendlyName(key);
-        }
+        Name = type.ToString().WithSpacesBetweenWords();
+        UpdateDescription();
     }
 
     /// <summary>

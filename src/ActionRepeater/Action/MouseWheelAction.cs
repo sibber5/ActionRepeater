@@ -8,8 +8,23 @@ public sealed class MouseWheelAction : InputAction, System.IEquatable<MouseWheel
 {
     public override string Name { get => IsHorizontal ? "Horizontal Mouse Wheel" : "Mouse Wheel"; }
 
-    private string _description;
-    public override string Description => _description;
+    private string _description = default!;
+    public override string Description { get => _description; }
+    private void UpdateDescription()
+    {
+        if (_duration == 0)
+        {
+            _description = IsHorizontal
+                ? ActionDescriptionTemplates.HorizontalWheelSteps(_stepCount)
+                : ActionDescriptionTemplates.WheelSteps(_stepCount);
+
+            return;
+        }
+
+        _description = IsHorizontal
+            ? ActionDescriptionTemplates.HorizontalWheelSteps(_stepCount, _duration)
+            : ActionDescriptionTemplates.WheelSteps(_stepCount, _duration);
+    }
 
     public bool IsHorizontal { get; }
 
@@ -22,18 +37,7 @@ public sealed class MouseWheelAction : InputAction, System.IEquatable<MouseWheel
             if (_stepCount == value) return;
 
             _stepCount = value;
-            if (_duration == 0)
-            {
-                _description = IsHorizontal
-                    ? ActionDescriptionTemplates.HorizontalWheelSteps(value)
-                    : ActionDescriptionTemplates.WheelSteps(value);
-            }
-            else
-            {
-                _description = IsHorizontal
-                    ? ActionDescriptionTemplates.HorizontalWheelSteps(value, _duration)
-                    : ActionDescriptionTemplates.WheelSteps(value, _duration);
-            }
+            UpdateDescription();
             NotifyPropertyChanged(nameof(Description));
         }
     }
@@ -47,18 +51,7 @@ public sealed class MouseWheelAction : InputAction, System.IEquatable<MouseWheel
             if (_duration == value) return;
 
             _duration = value;
-            if (value == 0)
-            {
-                _description = IsHorizontal
-                    ? ActionDescriptionTemplates.HorizontalWheelSteps(_stepCount)
-                    : ActionDescriptionTemplates.WheelSteps(_stepCount);
-            }
-            else
-            {
-                _description = IsHorizontal
-                    ? ActionDescriptionTemplates.HorizontalWheelSteps(_stepCount, value)
-                    : ActionDescriptionTemplates.WheelSteps(_stepCount, value);
-            }
+            UpdateDescription();
             NotifyPropertyChanged(nameof(Description));
         }
     }
@@ -93,15 +86,7 @@ public sealed class MouseWheelAction : InputAction, System.IEquatable<MouseWheel
         }
     }
 
-    public override InputAction Clone() => new MouseWheelAction(_description, IsHorizontal, _stepCount, _duration);
-
-    private MouseWheelAction(string description, bool isHorizontal, int stepCount, int duration = 0)
-    {
-        _description = description;
-        IsHorizontal = isHorizontal;
-        _stepCount = stepCount;
-        _duration = duration;
-    }
+    public override InputAction Clone() => new MouseWheelAction(IsHorizontal, _stepCount, _duration);
 
     /// <param name="duration">The time it took/takes to scroll the wheel, in milliseconds/ticks.</param>
     public MouseWheelAction(bool isHorizontal, int stepCount, int duration = 0)
@@ -109,18 +94,7 @@ public sealed class MouseWheelAction : InputAction, System.IEquatable<MouseWheel
         IsHorizontal = isHorizontal;
         _stepCount = stepCount;
         _duration = duration;
-        if (_duration == 0)
-        {
-            _description = isHorizontal
-                ? ActionDescriptionTemplates.HorizontalWheelSteps(stepCount)
-                : ActionDescriptionTemplates.WheelSteps(stepCount);
-        }
-        else
-        {
-            _description = isHorizontal
-                ? ActionDescriptionTemplates.HorizontalWheelSteps(stepCount, duration)
-                : ActionDescriptionTemplates.WheelSteps(stepCount, duration);
-        }
+        UpdateDescription();
     }
 
     /// <summary>

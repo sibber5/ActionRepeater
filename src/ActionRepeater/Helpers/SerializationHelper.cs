@@ -74,6 +74,7 @@ public static class SerializationHelper
             throw new FormatException($"Invalid XML element \"{reader.Name}\". Expected \"ArrayOf{nameof(InputAction)}\".");
         }
 
+        // do...while instead of regular while because MoveToContentAsync() was called earlier
         do
         {
             if (reader.NodeType != XmlNodeType.Element) continue;

@@ -5,6 +5,8 @@ using VirtualKey = ActionRepeater.Win32.Input.VirtualKey;
 
 namespace ActionRepeater.Action;
 
+#pragma warning disable HAA0601, HAA0102
+
 internal static class ActionDescriptionTemplates
 {
     private static readonly Dictionary<VirtualKey, string> _virtualKeyFriendlyNames = new()

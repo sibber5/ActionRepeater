@@ -9,11 +9,11 @@ public class TimeConsistencyChecker
 
     private readonly bool _useLastTimeAsBaseline;
 
-    private int? _lastTickCount = null;
-    private int? _baseline = null;
+    private int? _lastTickCount;
+    private int? _baseline;
 
-    private int _tickDeltasCount = 0;
-    private int _tickDeltasTotal = 0;
+    private int _tickDeltasCount;
+    private int _tickDeltasTotal;
 
     public int TickDeltasCount => _tickDeltasCount;
     //public int TickDeltasTotal => _tickDeltasTotal;

@@ -30,6 +30,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="ClrHeapAllocationAnalyzer" Version="3.0.0" />
         <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.0.0" />
         <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22000.194" />
         <Manifest Include="$(ApplicationManifest)" />
@@ -40,6 +41,9 @@
        package has not yet been restored -->
     <ItemGroup Condition="'$(DisableMsixProjectCapabilityAddedByProject)'!='true' and '$(EnablePreviewMsixTooling)'=='true'">
         <ProjectCapability Include="Msix" />
+    </ItemGroup>
+    <ItemGroup>
+      <None Include="..\..\.editorconfig" Link=".editorconfig" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\ActionRepeater.Win32\ActionRepeater.Win32.csproj" />

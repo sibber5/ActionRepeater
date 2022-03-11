@@ -1,0 +1,22 @@
+﻿[*.cs]
+
+# Default severity for analyzer diagnostics with category 'Performance'
+dotnet_analyzer_diagnostic.category-Performance.severity = suggestion
+
+# RCS1139: Add summary element to documentation comment.
+dotnet_diagnostic.RCS1139.severity = none
+
+# HAA0502: Explicit new reference type allocation
+dotnet_diagnostic.HAA0502.severity = silent
+
+# HAA0501: Explicit new array type allocation
+dotnet_diagnostic.HAA0501.severity = silent
+
+# RCS1234: Duplicate enum value.
+dotnet_diagnostic.RCS1234.severity = none
+
+# RCS1163: Unused parameter.
+dotnet_diagnostic.RCS1163.severity = none
+
+# HAA0504: Implicit new array creation allocation
+dotnet_diagnostic.HAA0504.severity = silent

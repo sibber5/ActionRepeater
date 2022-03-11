@@ -54,6 +54,8 @@ public sealed partial class HomePage : Page
         Player.PlayActions(App.MainWindow.SendKeyAutoRepeat ? actions : App.MainWindow.ActionsEclKeyRepeat);
     }
 
+#pragma warning disable HAA0301, HAA0302
+
     private async void ExportButton_Click(object sender, RoutedEventArgs e)
     {
         var actions = App.MainWindow.Actions;
@@ -119,4 +121,7 @@ public sealed partial class HomePage : Page
 
         App.MainWindow.FillFilteredActionList();
     }
+
+#pragma warning restore HAA0301, HAA0302
+
 }

@@ -9,14 +9,14 @@ namespace ActionRepeater.Input;
 
 internal static class Recorder
 {
-    public static bool IsRecording { get; private set; } = false;
+    public static bool IsRecording { get; private set; }
 
     // these should be set on app startup (probably in the main window constructor)
     public static Action<InputAction> AddActionToList = null!;
     public static Action<InputAction> ReplaceLastAction = null!;
     public static Func<InputAction?> GetLastAction = null!;
 
-    private static bool _isSubscribed = false;
+    private static bool _isSubscribed;
 
     private static int _lastNewActionTickCount;
     private static readonly TimeConsistencyChecker _wheelMsgTCC = new();

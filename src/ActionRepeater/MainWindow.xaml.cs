@@ -11,8 +11,6 @@ using ActionRepeater.Input;
 using ActionRepeater.Messaging;
 using System.Diagnostics;
 
-#pragma warning disable RCS1163, IDE0060
-
 namespace ActionRepeater;
 
 public sealed partial class MainWindow : Window, INotifyPropertyChanged
@@ -69,7 +67,7 @@ public sealed partial class MainWindow : Window, INotifyPropertyChanged
 
     private readonly List<int> _modifiedFilteredActionIdx = new();
 
-    private InputAction? _copiedAction = null;
+    private InputAction? _copiedAction;
 
     public MainWindow()
     {

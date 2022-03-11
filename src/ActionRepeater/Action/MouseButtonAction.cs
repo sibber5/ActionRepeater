@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using ActionRepeater.Extentions;
 using static ActionRepeater.Input.InputSimulator;
 using POINT = ActionRepeater.Win32.POINT;
 
@@ -15,27 +16,10 @@ public sealed class MouseButtonAction : InputAction, System.IEquatable<MouseButt
 
     public @Type ActionType { get; }
 
-    public override string Name
-    {
-        get
-        {
-            System.Text.StringBuilder sb = new();
-            string name = ActionType.ToString();
-            for (int i = 1; i < name.Length; ++i)
-            {
-                sb.Append(name[i - 1]);
-                if (char.IsUpper(name[i]))
-                {
-                    sb.Append(' ');
-                }
-            }
-            sb.Append(name[^1]);
-            return sb.ToString();
-        }
-    }
+    public override string Name { get; }
 
-    private string _description = "";
-    public override string Description => _description;
+    private string _description = default!;
+    public override string Description { get => _description; }
     private void UpdateDescription()
     {
         _description = _usePosition
@@ -110,6 +94,7 @@ public sealed class MouseButtonAction : InputAction, System.IEquatable<MouseButt
         _button = button;
         _position = position;
         _usePosition = usePosition;
+        Name = type.ToString().WithSpacesBetweenWords();
         UpdateDescription();
     }
 
