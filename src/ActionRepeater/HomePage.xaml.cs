@@ -39,26 +39,12 @@ public sealed partial class HomePage : Page
 
     private void PlayButton_Click(object sender, RoutedEventArgs e)
     {
-        var actions = App.MainWindow.Actions;
-        if (actions.Count == 0)
-        {
-            return;
-        }
-
-        if (Player.IsPlaying)
-        {
-            Player.Cancel();
-            return;
-        }
-
-        Player.PlayActions(App.MainWindow.SendKeyAutoRepeat ? actions : App.MainWindow.ActionsEclKeyRepeat);
+        ActionManager.PlayActions();
     }
-
-#pragma warning disable HAA0301, HAA0302
 
     private async void ExportButton_Click(object sender, RoutedEventArgs e)
     {
-        var actions = App.MainWindow.Actions;
+        var actions = ActionManager.Actions;
         if (actions.Count < 1)
         {
             await new ContentDialog()
@@ -84,12 +70,12 @@ public sealed partial class HomePage : Page
         StorageFile file = await savePicker.PickSaveFileAsync();
         if (file is null) return;
 
-        await System.Threading.Tasks.Task.Run(() => Helpers.SerializationHelper.Serialize(App.MainWindow.Actions, file.Path));
+        await System.Threading.Tasks.Task.Run(() => Helpers.SerializationHelper.Serialize(ActionManager.Actions, file.Path));
     }
 
     private async void ImportButton_Click(object sender, RoutedEventArgs e)
     {
-        App.MainWindow.Actions.Clear();
+        ActionManager.Actions.Clear();
 
         FileOpenPicker openPicker = new();
 
@@ -103,11 +89,11 @@ public sealed partial class HomePage : Page
 
         try
         {
-            await Helpers.SerializationHelper.DeserializeActionsAsync(App.MainWindow.Actions, file.Path);
+            await Helpers.SerializationHelper.DeserializeActionsAsync(ActionManager.Actions, file.Path);
         }
         catch (SystemException ex) when (ex is FormatException || (ex is System.Xml.XmlException && ex.InnerException is FormatException))
         {
-            App.MainWindow.Actions.Clear();
+            ActionManager.Actions.Clear();
             await new ContentDialog()
             {
                 XamlRoot = App.MainWindow.Content.XamlRoot,
@@ -119,9 +105,6 @@ public sealed partial class HomePage : Page
             return;
         }
 
-        App.MainWindow.FillFilteredActionList();
+        ActionManager.FillFilteredActionList();
     }
-
-#pragma warning restore HAA0301, HAA0302
-
 }

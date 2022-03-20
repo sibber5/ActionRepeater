@@ -12,7 +12,17 @@ public struct POINT : IEquatable<POINT>
 	/// <summary>Specifies the <i>y</i>-coordinate of the point.</summary>
 	public int y;
 
-	public static bool operator ==(POINT a, POINT b) => a.x == b.x && a.y == b.y;
+    public static explicit operator System.Drawing.Point(POINT p)
+    {
+        return new System.Drawing.Point(p.x, p.y);
+    }
+
+    public static explicit operator POINT(System.Drawing.Point p)
+    {
+        return new POINT { x = p.X, y = p.Y };
+    }
+
+    public static bool operator ==(POINT a, POINT b) => a.x == b.x && a.y == b.y;
 	public static bool operator !=(POINT a, POINT b) => a.x != b.x || a.y != b.y;
 
     public bool Equals(POINT other) => x == other.x && y == other.y;

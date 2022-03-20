@@ -11,15 +11,26 @@ internal static class Recorder
 {
     public static bool IsRecording { get; private set; }
 
-    // these should be set on app startup (probably in the main window constructor)
-    public static Action<InputAction> AddActionToList = null!;
-    public static Action<InputAction> ReplaceLastAction = null!;
-    public static Func<InputAction?> GetLastAction = null!;
-
     private static bool _isSubscribed;
 
     private static int _lastNewActionTickCount;
     private static readonly TimeConsistencyChecker _wheelMsgTCC = new();
+
+    private static void ReplaceLastAction(InputAction newAction)
+    {
+        // the caller of this func always checks if the action list is not empty
+        if (ActionManager.Actions[^1] == ActionManager.ActionsExlKeyRepeat[^1])
+        {
+            ActionManager.ActionsExlKeyRepeat[^1] = newAction;
+        }
+        ActionManager.Actions[^1] = newAction;
+    }
+
+    private static InputAction? GetLastAction()
+    {
+        if (ActionManager.Actions.Count > 0) return ActionManager.Actions[^1];
+        return null;
+    }
 
     public static void Reset()
     {
@@ -88,7 +99,7 @@ internal static class Recorder
                 usUsagePage = UsagePage.GenericDesktopControl,
                 usUsage = UsageId.Mouse,
                 dwFlags = RawInputFlags.REMOVE,
-                hwndTarget = IntPtr.Zero
+                hwndTarget = IntPtr.Zero // hwndTarget must be IntPtr.Zero when RawInputFlags.REMOVE is set
             },
             new RAWINPUTDEVICE()
             {
@@ -107,13 +118,8 @@ internal static class Recorder
         _isSubscribed = false;
     }
 
-    /// <summary>
-    /// Callback for window message proc. should not be manually called.
-    /// </summary>
-    public static void OnMessageReceived(object? sender, Messaging.WindowMessageEventArgs e)
+    public static void OnInputMessage(Messaging.WindowMessageEventArgs e)
     {
-        if (e.MessageType != WindowMessage.INPUT) return;
-
         var inputCode = unchecked(e.Message.wParam & 0xff);
         if (!Win32.PInvoke.GetRawInputData(e.Message.lParam, out RAWINPUT inputData))
         {
@@ -127,7 +133,10 @@ internal static class Recorder
 
                 if (data.rawButtonData.buttonInfo.usButtonFlags == 0) // move event
                 {
-                    //Debug.WriteLine($"{data.usFlags} - {data.lLastX}, {data.lLastY}\n");
+                    //Debug.WriteLine($"{data.usFlags} - {data.lLastX}, {data.lLastY}");
+
+                    //var pos = Win32.PInvoke.Helpers.GetCursorPos();
+                    //Debug.WriteLine($"{data.usFlags} - {pos.x}, {pos.y}");
                 }
                 else // button/wheel event
                 {
@@ -158,48 +167,48 @@ internal static class Recorder
                         case RawMouseButtonState.LEFT_BUTTON_DOWN:
                             if (App.MainWindow.IsHoveringOverExcl) break;
                             AddAction(new MouseButtonAction(MouseButtonAction.Type.MouseButtonDown, InputSimulator.MouseButton.Left,
-                                Win32.PInvoke.Helpers.GetCursorPos(), App.MainWindow.UseCursorPosOnClicks));
+                                Win32.PInvoke.Helpers.GetCursorPos(), Options.Instance.UseCursorPosOnClicks));
                             break;
                         case RawMouseButtonState.LEFT_BUTTON_UP:
                             if (App.MainWindow.IsHoveringOverExcl) break;
                             AddAction(new MouseButtonAction(MouseButtonAction.Type.MouseButtonUp, InputSimulator.MouseButton.Left,
-                                Win32.PInvoke.Helpers.GetCursorPos(), App.MainWindow.UseCursorPosOnClicks));
+                                Win32.PInvoke.Helpers.GetCursorPos(), Options.Instance.UseCursorPosOnClicks));
                             break;
 
                         case RawMouseButtonState.RIGHT_BUTTON_DOWN:
                             AddAction(new MouseButtonAction(MouseButtonAction.Type.MouseButtonDown, InputSimulator.MouseButton.Right,
-                                Win32.PInvoke.Helpers.GetCursorPos(), App.MainWindow.UseCursorPosOnClicks));
+                                Win32.PInvoke.Helpers.GetCursorPos(), Options.Instance.UseCursorPosOnClicks));
                             break;
                         case RawMouseButtonState.RIGHT_BUTTON_UP:
                             AddAction(new MouseButtonAction(MouseButtonAction.Type.MouseButtonUp, InputSimulator.MouseButton.Right,
-                                Win32.PInvoke.Helpers.GetCursorPos(), App.MainWindow.UseCursorPosOnClicks));
+                                Win32.PInvoke.Helpers.GetCursorPos(), Options.Instance.UseCursorPosOnClicks));
                             break;
 
                         case RawMouseButtonState.MIDDLE_BUTTON_DOWN:
                             AddAction(new MouseButtonAction(MouseButtonAction.Type.MouseButtonDown, InputSimulator.MouseButton.Middle,
-                                Win32.PInvoke.Helpers.GetCursorPos(), App.MainWindow.UseCursorPosOnClicks));
+                                Win32.PInvoke.Helpers.GetCursorPos(), Options.Instance.UseCursorPosOnClicks));
                             break;
                         case RawMouseButtonState.MIDDLE_BUTTON_UP:
                             AddAction(new MouseButtonAction(MouseButtonAction.Type.MouseButtonUp, InputSimulator.MouseButton.Middle,
-                                Win32.PInvoke.Helpers.GetCursorPos(), App.MainWindow.UseCursorPosOnClicks));
+                                Win32.PInvoke.Helpers.GetCursorPos(), Options.Instance.UseCursorPosOnClicks));
                             break;
 
                         case RawMouseButtonState.XBUTTON1_DOWN:
                             AddAction(new MouseButtonAction(MouseButtonAction.Type.MouseButtonDown, InputSimulator.MouseButton.X1,
-                                Win32.PInvoke.Helpers.GetCursorPos(), App.MainWindow.UseCursorPosOnClicks));
+                                Win32.PInvoke.Helpers.GetCursorPos(), Options.Instance.UseCursorPosOnClicks));
                             break;
                         case RawMouseButtonState.XBUTTON1_UP:
                             AddAction(new MouseButtonAction(MouseButtonAction.Type.MouseButtonUp, InputSimulator.MouseButton.X1,
-                                Win32.PInvoke.Helpers.GetCursorPos(), App.MainWindow.UseCursorPosOnClicks));
+                                Win32.PInvoke.Helpers.GetCursorPos(), Options.Instance.UseCursorPosOnClicks));
                             break;
 
                         case RawMouseButtonState.XBUTTON2_DOWN:
                             AddAction(new MouseButtonAction(MouseButtonAction.Type.MouseButtonDown, InputSimulator.MouseButton.X2,
-                                Win32.PInvoke.Helpers.GetCursorPos(), App.MainWindow.UseCursorPosOnClicks));
+                                Win32.PInvoke.Helpers.GetCursorPos(), Options.Instance.UseCursorPosOnClicks));
                             break;
                         case RawMouseButtonState.XBUTTON2_UP:
                             AddAction(new MouseButtonAction(MouseButtonAction.Type.MouseButtonUp, InputSimulator.MouseButton.X2,
-                                Win32.PInvoke.Helpers.GetCursorPos(), App.MainWindow.UseCursorPosOnClicks));
+                                Win32.PInvoke.Helpers.GetCursorPos(), Options.Instance.UseCursorPosOnClicks));
                             break;
                     }
                 }
@@ -220,7 +229,7 @@ internal static class Recorder
                 }
                 else //if (keyFlags.HasFlag(RawInputKeyFlags.MAKE))
                 {
-                    var actions = App.MainWindow.Actions;
+                    var actions = ActionManager.Actions;
                     bool isAutoRepeat = false;
                     for (int i = actions.Count - 1; i > -1; --i)
                     {
@@ -263,7 +272,7 @@ internal static class Recorder
         int curTickCount = Environment.TickCount;
         int ticksSinceLastAction = curTickCount - _lastNewActionTickCount;
 
-        if (ticksSinceLastAction <= App.MainWindow.MaxClickInterval)
+        if (ticksSinceLastAction <= Options.Instance.MaxClickInterval)
         {
             if (action is KeyAction curKeyAction
                 && curKeyAction.ActionType == KeyAction.Type.KeyUp
@@ -293,10 +302,10 @@ internal static class Recorder
 
         if (ticksSinceLastAction > 10)
         {
-            AddActionToList(new WaitAction(ticksSinceLastAction));
+            ActionManager.AddAction(new WaitAction(ticksSinceLastAction));
         }
 
-        AddActionToList(action);
+        ActionManager.AddAction(action);
         App.MainWindow.ScrollActionList();
 
         _lastNewActionTickCount = curTickCount;

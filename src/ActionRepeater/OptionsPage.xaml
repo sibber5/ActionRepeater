@@ -26,7 +26,7 @@
             </StackPanel>
 
             <CheckBox x:Name="SetCursorPosOnClickCheckBox" Content="Set cursor position on clicks" HorizontalAlignment="Left"
-                      IsChecked="{x:Bind local:App.MainWindow.UseCursorPosOnClicks, Mode=TwoWay}" />
+                      IsChecked="{x:Bind local:Options.Instance.UseCursorPosOnClicks, Mode=TwoWay}" />
 
         </StackPanel>
 
@@ -41,7 +41,7 @@
                            ValueChanged="MaxClickIntervalChanged" ValidationMode="InvalidInputOverwritten" />
             </StackPanel>
 
-            <CheckBox Content="Simulate keystroke auto-repeat" IsChecked="{x:Bind local:App.MainWindow.SendKeyAutoRepeat, Mode=TwoWay}" HorizontalAlignment="Left" />
+            <CheckBox Content="Simulate keystroke auto-repeat" IsChecked="{x:Bind local:Options.Instance.SendKeyAutoRepeat, Mode=TwoWay}" HorizontalAlignment="Left" />
 
         </StackPanel>
 
