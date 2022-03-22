@@ -12,7 +12,7 @@ public class Options : INotifyPropertyChanged
     public event PropertyChangedEventHandler? PropertyChanged;
     protected void NotifyPropertyChanged([CallerMemberName] string propertyName = "") => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
-    public CursorTrackingMode CursorTrackingMode { get; internal set; } = CursorTrackingMode.None;
+    public CursorMovementMode CursorMovementMode { get; internal set; } = CursorMovementMode.None;
 
     private bool _useCursorPosOnClicks = true;
     public bool UseCursorPosOnClicks
@@ -48,7 +48,7 @@ public class Options : INotifyPropertyChanged
     }
 }
 
-public enum CursorTrackingMode
+public enum CursorMovementMode
 {
     None = 0,
     Absolute,

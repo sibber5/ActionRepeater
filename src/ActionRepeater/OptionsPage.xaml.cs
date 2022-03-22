@@ -4,9 +4,9 @@ namespace ActionRepeater;
 
 public sealed partial class OptionsPage : Page
 {
-    private void CursorTrackingModeChanged(object s, SelectionChangedEventArgs e)
+    private void CursorMovementModeChanged(object s, SelectionChangedEventArgs e)
     {
-        Options.Instance.CursorTrackingMode = (CursorTrackingMode)CursorTrackingModeCB.SelectedIndex;
+        Options.Instance.CursorMovementMode = (CursorMovementMode)CursorMovementModeCB.SelectedIndex;
     }
 
     private void MaxClickIntervalChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
@@ -20,7 +20,7 @@ public sealed partial class OptionsPage : Page
         this.InitializeComponent();
         this.NavigationCacheMode = Microsoft.UI.Xaml.Navigation.NavigationCacheMode.Required;
 
-        CursorTrackingModeCB.SelectedIndex = (int)Options.Instance.CursorTrackingMode;
+        CursorMovementModeCB.SelectedIndex = (int)Options.Instance.CursorMovementMode;
         ClickIntervalNumBox.Value = Options.Instance.MaxClickInterval;
     }
 }

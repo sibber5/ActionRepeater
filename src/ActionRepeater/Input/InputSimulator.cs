@@ -60,7 +60,7 @@ public static class InputSimulator
     /// </summary>
     private static readonly ushort[] _exKeysE1 = new[]
     {
-        (ushort)VirtualKey.PAUSE, // (BREAK/Ctrl+Pause) should map to scan code 70.
+        (ushort)VirtualKey.PAUSE, // (BREAK/Ctrl+Esc) should map to scan code 70.
         (ushort)VirtualKey.SNAPSHOT,
     };
 

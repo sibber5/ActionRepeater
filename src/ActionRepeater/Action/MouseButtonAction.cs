@@ -135,7 +135,7 @@ public sealed class MouseButtonAction : InputAction, System.IEquatable<MouseButt
         ThrowIfInvalidName(nameof(UsePosition));
         bool usePosition = reader.ReadElementContentAsBoolean();
 
-        return new MouseButtonAction(type, button, new POINT() { x = pointX, y = pointY }, usePosition);
+        return new MouseButtonAction(type, button, new POINT(pointX, pointY), usePosition);
 
         void ThrowIfInvalidName(string name)
         {

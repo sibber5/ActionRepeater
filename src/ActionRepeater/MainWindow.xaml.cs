@@ -21,6 +21,13 @@ public sealed partial class MainWindow : Window, INotifyPropertyChanged
     public bool IsHoveringOverExcl => NavViewFrame.Content is HomePage home && home.IsHoveringOverExcl;
 
     public bool IsPlayingActions { get; private set; }
+    public void UpdatePlayingStatus(object? sender, bool isPlayingNewVal)
+    {
+        IsPlayingActions = isPlayingNewVal;
+        UpdatePropertyInView(nameof(IsPlayingActions));
+
+        if (NavViewFrame.Content is HomePage home) home.IsRecordButtonEnabled = !isPlayingNewVal;
+    }
 
     private ObservableCollection<InputAction> FilteredActions { get => ShowAutoRepeatToggle.IsOn ? ActionManager.Actions : ActionManager.ActionsExlKeyRepeat; }
 
@@ -33,13 +40,7 @@ public sealed partial class MainWindow : Window, INotifyPropertyChanged
         Handle = WinRT.Interop.WindowNative.GetWindowHandle(this);
 
         IsPlayingActions = Player.IsPlaying;
-        Player.IsPlayingChanged += (s, isPlayingNewVal) =>
-        {
-            IsPlayingActions = isPlayingNewVal;
-            UpdatePropertyInView(nameof(IsPlayingActions));
-
-            if (NavViewFrame.Content is HomePage home) home.IsRecordButtonEnabled = !isPlayingNewVal;
-        };
+        Player.IsPlayingChanged += UpdatePlayingStatus;
 
         InitializeComponent();
 
@@ -170,7 +171,7 @@ public sealed partial class MainWindow : Window, INotifyPropertyChanged
 
     private void OnClearClick(object sender, RoutedEventArgs e)
     {
-        ActionManager.ClearActions();
+        ActionManager.Clear();
         Recorder.Reset();
     }
 }

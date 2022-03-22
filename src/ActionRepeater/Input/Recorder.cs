@@ -1,6 +1,5 @@
 ﻿using System;
 using ActionRepeater.Win32.Input;
-using ActionRepeater.Win32.WindowsAndMessages;
 using ActionRepeater.Action;
 using ActionRepeater.Utilities;
 using System.Diagnostics;
@@ -13,6 +12,9 @@ internal static class Recorder
 
     private static bool _isSubscribed;
 
+    private static bool _shouldRecordMouseMovement;
+
+    private static int _lastMouseMoveTickCount;
     private static int _lastNewActionTickCount;
     private static readonly TimeConsistencyChecker _wheelMsgTCC = new();
 
@@ -47,6 +49,18 @@ internal static class Recorder
         }
 
         Reset();
+
+        _shouldRecordMouseMovement = Options.Instance.CursorMovementMode != CursorMovementMode.None;
+
+        if (_shouldRecordMouseMovement)
+        {
+            if (ActionManager.CursorPathStart is null)
+            {
+                ActionManager.CursorPathStart = new(Win32.PInvoke.Helpers.GetCursorPos(), 0);
+                Debug.WriteLine($"set cursor start path pos to: {ActionManager.CursorPathStart.MovPoint}");
+            }
+            _lastMouseMoveTickCount = Environment.TickCount;
+        }
 
         IsRecording = true;
     }
@@ -137,6 +151,16 @@ internal static class Recorder
 
                     //var pos = Win32.PInvoke.Helpers.GetCursorPos();
                     //Debug.WriteLine($"{data.usFlags} - {pos.x}, {pos.y}");
+
+                    if (_shouldRecordMouseMovement)
+                    {
+                        int curTickCount = Environment.TickCount;
+                        int ticksSinceLastMov = curTickCount - _lastMouseMoveTickCount;
+
+                        ActionManager.CursorPath.Add(new(new Win32.POINT(data.lLastX, data.lLastY), ticksSinceLastMov));
+
+                        _lastMouseMoveTickCount = curTickCount;
+                    }
                 }
                 else // button/wheel event
                 {

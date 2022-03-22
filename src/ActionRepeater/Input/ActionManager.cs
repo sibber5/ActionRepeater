@@ -6,6 +6,32 @@ namespace ActionRepeater.Input;
 
 public static class ActionManager
 {
+    public static MouseMovement? CursorPathStart { get; set; }
+    public static List<MouseMovement> CursorPath { get; } = new();
+    public static IReadOnlyList<MouseMovement> AbsoluteCursorPath
+    {
+        get
+        {
+            if (CursorPathStart is null) return System.Array.Empty<MouseMovement>();
+
+            MouseMovement[] list = new MouseMovement[CursorPath.Count + 1];
+
+            list[0] = CursorPathStart;
+
+            for (int i = 1; i < list.Length; ++i)
+            {
+                MouseMovement m = CursorPath[i - 1];
+                list[i] = new MouseMovement(
+                    new Win32.POINT(
+                        m.MovPoint.x + list[i - 1].MovPoint.x,
+                        m.MovPoint.y + list[i - 1].MovPoint.y),
+                    m.DelayDuration);
+            }
+
+            return list;
+        }
+    }
+
     public static ObservableCollection<InputAction> Actions { get; } = new();
     public static ObservableCollection<InputAction> ActionsExlKeyRepeat { get; } = new();
 
@@ -145,8 +171,10 @@ public static class ActionManager
         ActionsExlKeyRepeat[replacedActionIdx] = newAction;
     }
 
-    public static void ClearActions()
+    public static void Clear()
     {
+        CursorPathStart = null;
+        CursorPath.Clear();
         Actions.Clear();
         ActionsExlKeyRepeat.Clear();
         _modifiedFilteredActionsIdxs.Clear();
@@ -154,8 +182,9 @@ public static class ActionManager
 
     public static void PlayActions()
     {
-        if (Actions.Count == 0)
+        if (Actions.Count == 0 && CursorPathStart is null)
         {
+            App.MainWindow.UpdatePlayingStatus(null, false);
             return;
         }
 
@@ -165,6 +194,21 @@ public static class ActionManager
             return;
         }
 
-        Player.PlayActions(Options.Instance.SendKeyAutoRepeat ? Actions : ActionsExlKeyRepeat);
+        var actionsToPlay = Options.Instance.SendKeyAutoRepeat ? Actions : ActionsExlKeyRepeat;
+
+        switch (Options.Instance.CursorMovementMode)
+        {
+            case CursorMovementMode.Absolute:
+                Player.PlayActions(actionsToPlay, AbsoluteCursorPath, false);
+                break;
+
+            case CursorMovementMode.Relative:
+                Player.PlayActions(actionsToPlay, CursorPath, true);
+                break;
+
+            default:
+                Player.PlayActions(actionsToPlay, null, false);
+                break;
+        }
     }
 }

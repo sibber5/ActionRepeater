@@ -23,18 +23,49 @@ internal static class Player
     }
     public static event EventHandler<bool>? IsPlayingChanged;
 
-    public static void PlayActions(IReadOnlyList<InputAction> actions)
+    private static Task PlayCursorMovement(IReadOnlyList<MouseMovement> path, bool isPathRelative)
+    {
+        if (isPathRelative)
+        {
+            return Task.Run(async () =>
+            {
+                if (_tokenSource!.IsCancellationRequested) return;
+
+                await Task.Delay(ActionManager.CursorPathStart!.DelayDuration, _tokenSource!.Token).ContinueWith(task => { });
+                InputSimulator.MoveMouse(ActionManager.CursorPathStart!.MovPoint, false, false);
+
+                for (int i = 0; i < path.Count; ++i)
+                {
+                    if (_tokenSource!.IsCancellationRequested) return;
+
+                    await Task.Delay(path[i].DelayDuration, _tokenSource!.Token).ContinueWith(task => { });
+                    InputSimulator.MoveMouse(path[i].MovPoint, true);
+                }
+            }, _tokenSource!.Token);
+        }
+
+        return Task.Run(async () =>
+        {
+            for (int i = 0; i < path.Count; ++i)
+            {
+                if (_tokenSource!.IsCancellationRequested) return;
+
+                await Task.Delay(path[i].DelayDuration, _tokenSource!.Token).ContinueWith(task => { });
+                InputSimulator.MoveMouse(path[i].MovPoint, false, false);
+            }
+        }, _tokenSource!.Token);
+    }
+
+    public static void PlayActions(IReadOnlyList<InputAction> actions, IReadOnlyList<MouseMovement>? path, bool isPathRelative)
     {
         _tokenSource?.Dispose();
         _tokenSource = new CancellationTokenSource();
-        Task.Run(async () =>
+
+        var playInputActionsAsync = async () =>
         {
             for (int i = 0; i < actions.Count; ++i)
             {
-                if (_tokenSource.IsCancellationRequested)
-                {
-                    break;
-                }
+                if (_tokenSource.IsCancellationRequested) return;
 
                 if (actions[i] is WaitAction w)
                 {
@@ -45,15 +76,34 @@ internal static class Player
 
                 actions[i].Play();
             }
-        }, _tokenSource.Token).ContinueWith(task =>
-        {
-            Debug.WriteLine("Finished play task.");
-            App.MainWindow.DispatcherQueue.TryEnqueue(() => IsPlaying = false);
+        };
 
-            Debug.WriteLine("Disposing token source...");
-            _tokenSource!.Dispose();
-            _tokenSource = null;
-        });
+        if (ActionManager.CursorPathStart is not null && path?.Count > 0)
+        {
+            Task.WhenAll(Task.Run(playInputActionsAsync, _tokenSource.Token), PlayCursorMovement(path, isPathRelative))
+                .ContinueWith(task =>
+                {
+                    Debug.WriteLine("Finished play task.");
+                    App.MainWindow.DispatcherQueue.TryEnqueue(() => IsPlaying = false);
+
+                    Debug.WriteLine("Disposing token source...");
+                    _tokenSource!.Dispose();
+                    _tokenSource = null;
+                });
+        }
+        else
+        {
+            Task.Run(playInputActionsAsync, _tokenSource.Token).ContinueWith(task =>
+            {
+                Debug.WriteLine("Finished play task.");
+                App.MainWindow.DispatcherQueue.TryEnqueue(() => IsPlaying = false);
+
+                Debug.WriteLine("Disposing token source...");
+                _tokenSource!.Dispose();
+                _tokenSource = null;
+            });
+        }
+
         IsPlaying = true;
         Debug.WriteLine("Started play task.");
     }
