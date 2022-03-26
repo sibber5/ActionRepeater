@@ -63,6 +63,10 @@ public sealed partial class MainWindow : Window, INotifyPropertyChanged
             Recorder.StopRecording();
         }
         _msgMonitor.Dispose();
+        if (App.IsPathWindowOpen)
+        {
+            App.ClosePathWindow();
+        }
     }
 
     private void OnSizeChanged(object sender, WindowSizeChangedEventArgs args)

@@ -4,11 +4,19 @@ public sealed class MouseMovement
 {
     public Win32.POINT MovPoint { get; set; }
 
-    public int DelayDuration { get; set; }
+    /// <summary>
+    /// The actual measured delay duration.
+    /// </summary>
+    public int ActualDelay { get; set; }
 
-    public MouseMovement(Win32.POINT deltaMovPoint, int delayDuration)
+    /// <summary>
+    /// The delay duration with compensated for the system timer.
+    /// </summary>
+    public int DelayDuration { get => (int)(ActualDelay / 1.2); }
+
+    public MouseMovement(Win32.POINT deltaMovPoint, int actualDelayDuration)
     {
         MovPoint = deltaMovPoint;
-        DelayDuration = delayDuration;
+        ActualDelay = actualDelayDuration;
     }
 }

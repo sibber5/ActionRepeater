@@ -1,4 +1,6 @@
-﻿namespace ActionRepeater.Win32.Input;
+﻿using System;
+
+namespace ActionRepeater.Win32.Input;
 
 /// <summary>
 /// Specifies various aspects of a keystroke. This member can be certain combinations of the following values.

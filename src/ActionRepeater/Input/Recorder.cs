@@ -73,6 +73,9 @@ internal static class Recorder
         }
 
         UnregisterRawInput();
+
+        if (ActionManager.CursorPath.Count == 0) ActionManager.CursorPathStart = null;
+
         IsRecording = false;
     }
 

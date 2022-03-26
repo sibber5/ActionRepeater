@@ -78,30 +78,24 @@ internal static class Player
             }
         };
 
+        Action<Task> cleanUp = task =>
+        {
+            Debug.WriteLine("Finished play task.");
+            App.MainWindow.DispatcherQueue.TryEnqueue(() => IsPlaying = false);
+
+            Debug.WriteLine("Disposing token source...");
+            _tokenSource!.Dispose();
+            _tokenSource = null;
+        };
+
         if (ActionManager.CursorPathStart is not null && path?.Count > 0)
         {
             Task.WhenAll(Task.Run(playInputActionsAsync, _tokenSource.Token), PlayCursorMovement(path, isPathRelative))
-                .ContinueWith(task =>
-                {
-                    Debug.WriteLine("Finished play task.");
-                    App.MainWindow.DispatcherQueue.TryEnqueue(() => IsPlaying = false);
-
-                    Debug.WriteLine("Disposing token source...");
-                    _tokenSource!.Dispose();
-                    _tokenSource = null;
-                });
+                .ContinueWith(cleanUp);
         }
         else
         {
-            Task.Run(playInputActionsAsync, _tokenSource.Token).ContinueWith(task =>
-            {
-                Debug.WriteLine("Finished play task.");
-                App.MainWindow.DispatcherQueue.TryEnqueue(() => IsPlaying = false);
-
-                Debug.WriteLine("Disposing token source...");
-                _tokenSource!.Dispose();
-                _tokenSource = null;
-            });
+            Task.Run(playInputActionsAsync, _tokenSource.Token).ContinueWith(cleanUp);
         }
 
         IsPlaying = true;

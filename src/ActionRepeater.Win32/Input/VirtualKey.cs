@@ -1,4 +1,6 @@
-﻿namespace ActionRepeater.Win32.Input;
+﻿using System;
+
+namespace ActionRepeater.Win32.Input;
 
 [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1069:Enums values should not be duplicated", Justification = "This is on purpose")]
 public enum VirtualKey : ushort

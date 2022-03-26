@@ -18,4 +18,9 @@ public static class ExtentionMethods
         sb.Append(str[^1]);
         return sb.ToString();
     }
+
+    public static bool ContainsInclusive(this System.Drawing.Rectangle rect, int x, int y)
+    {
+        return x >= rect.Left && x <= rect.Right && y >= rect.Top && y <= rect.Bottom;
+    }
 }

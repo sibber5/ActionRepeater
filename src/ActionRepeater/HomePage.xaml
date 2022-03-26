@@ -47,6 +47,16 @@
             </StackPanel>
         </Button>
 
+        <AppBarSeparator Margin="5,0,5,0"/>
+
+        <ToggleButton x:Name="CursorPathButton" Background="Transparent" BorderBrush="Transparent" IsChecked="{x:Bind IsShowingCursorPath, Mode=OneWay}"
+                      Click="CursorPathButton_Click">
+            <StackPanel Width="70" Height="{StaticResource ButtonSize}">
+                <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}" Glyph="&#xF128;" FontSize="{StaticResource ButtonIconSize}" />
+                <TextBlock Text="Cursor Path" FontSize="{StaticResource CommandBarFontSize}" Margin="0,2,0,0" HorizontalAlignment="Center" />
+            </StackPanel>
+        </ToggleButton>
+
     </StackPanel>
     
 </Page>

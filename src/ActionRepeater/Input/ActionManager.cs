@@ -1,6 +1,8 @@
 ﻿using ActionRepeater.Action;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
+using ActionRepeater.Extentions;
 
 namespace ActionRepeater.Input;
 
@@ -14,21 +16,57 @@ public static class ActionManager
         {
             if (CursorPathStart is null) return System.Array.Empty<MouseMovement>();
 
-            MouseMovement[] list = new MouseMovement[CursorPath.Count + 1];
+            List<MouseMovement> absPath = new();
 
-            list[0] = CursorPathStart;
+            absPath.Add(CursorPathStart);
 
-            for (int i = 1; i < list.Length; ++i)
+            var monitors = Win32.SystemInformation.MonitorRects;
+
+            for (int i = 0; i < CursorPath.Count; ++i)
             {
-                MouseMovement m = CursorPath[i - 1];
-                list[i] = new MouseMovement(
-                    new Win32.POINT(
-                        m.MovPoint.x + list[i - 1].MovPoint.x,
-                        m.MovPoint.y + list[i - 1].MovPoint.y),
-                    m.DelayDuration);
+                MouseMovement delta = CursorPath[i];
+                MouseMovement lastAbs = absPath[^1];
+
+                Win32.POINT pt = new(lastAbs.MovPoint.x, lastAbs.MovPoint.y);
+
+                var ogMonitor = monitors.First(m => m.ContainsInclusive(pt.x, pt.y));
+
+                pt.x += delta.MovPoint.x;
+                if (!monitors.Any(m => m.ContainsInclusive(pt.x, pt.y)))
+                {
+                    if (delta.MovPoint.x < 0)
+                    {
+                        pt.x = ogMonitor.Left;
+                    }
+                    else
+                    {
+                        pt.x = ogMonitor.Right;
+                    }
+                }
+
+                pt.y += delta.MovPoint.y;
+                if (!monitors.Any(m => m.ContainsInclusive(pt.x, pt.y)))
+                {
+                    if (delta.MovPoint.y < 0)
+                    {
+                        pt.y = ogMonitor.Top;
+                    }
+                    else
+                    {
+                        pt.y = ogMonitor.Bottom;
+                    }
+                }
+
+                if (pt == lastAbs.MovPoint)
+                {
+                    lastAbs.ActualDelay += delta.ActualDelay;
+                    continue;
+                }
+
+                absPath.Add(new MouseMovement(pt, delta.ActualDelay));
             }
 
-            return list;
+            return absPath;
         }
     }
 

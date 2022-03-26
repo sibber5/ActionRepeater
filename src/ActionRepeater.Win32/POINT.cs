@@ -1,4 +1,6 @@
-﻿namespace ActionRepeater.Win32;
+﻿using System;
+
+namespace ActionRepeater.Win32;
 
 /// <summary>The <typeparamref name="POINT"/> structure defines the <i>x</i>- and <i>y</i>-coordinates of a point.</summary>
 /// <remarks>
@@ -7,10 +9,10 @@
 /// </remarks>
 public struct POINT : IEquatable<POINT>
 {
-	/// <summary>Specifies the <i>x</i>-coordinate of the point.</summary>
-	public int x;
-	/// <summary>Specifies the <i>y</i>-coordinate of the point.</summary>
-	public int y;
+    /// <summary>Specifies the <i>x</i>-coordinate of the point.</summary>
+    public int x;
+    /// <summary>Specifies the <i>y</i>-coordinate of the point.</summary>
+    public int y;
 
     public POINT(int x, int y)
     {
@@ -18,28 +20,28 @@ public struct POINT : IEquatable<POINT>
         this.y = y;
     }
 
-    public static explicit operator System.Drawing.Point(POINT p)
+    public static implicit operator System.Drawing.Point(POINT p)
     {
         return new System.Drawing.Point(p.x, p.y);
     }
 
-    public static explicit operator POINT(System.Drawing.Point p)
+    public static implicit operator POINT(System.Drawing.Point p)
     {
         return new POINT(p.X, p.Y);
     }
 
     public static bool operator ==(POINT a, POINT b) => a.x == b.x && a.y == b.y;
-	public static bool operator !=(POINT a, POINT b) => a.x != b.x || a.y != b.y;
+    public static bool operator !=(POINT a, POINT b) => a.x != b.x || a.y != b.y;
 
     public bool Equals(POINT other) => x == other.x && y == other.y;
 
     public override bool Equals(object? obj)
     {
-		if (obj is POINT p)
+        if (obj is POINT p)
         {
-			return p.x == x && p.y == y;
+            return p.x == x && p.y == y;
         }
-		return false;
+        return false;
     }
 
     public override int GetHashCode() => HashCode.Combine(x, y);

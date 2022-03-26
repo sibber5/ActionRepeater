@@ -1,6 +1,11 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Linq;
+using System.Runtime.Versioning;
 using Microsoft.UI.Xaml;
+using PathWindows;
 
+[assembly: SupportedOSPlatform("Windows10.0.17763.0")]
 namespace ActionRepeater;
 
 /// <summary>
@@ -9,12 +14,16 @@ namespace ActionRepeater;
 public partial class App : Application
 {
     private const string MainWindowTitle = "ActionRepeater";
-    private const int MainWindowWidth = 400;
+    private const int MainWindowWidth = 425;
     private const int MainWindowHeight = 600;
     //private const int MainWindowMinWidth = 315;
     //private const int MainWindowMinHeight = 100;
 
     public static MainWindow MainWindow { get; private set; } = null!;
+
+    public static bool IsPathWindowOpen => _pathWindow is not null;
+
+    private static PathWindow? _pathWindow;
 
     /// <summary>
     /// Initializes the singleton application object.  This is the first line of authored code
@@ -23,6 +32,32 @@ public partial class App : Application
     public App()
     {
         this.InitializeComponent();
+    }
+
+    /// <summary>
+    /// Opens the path window, unless the cursor path is empty.
+    /// </summary>
+    /// <returns>true if the function succeeds (the window has been opened), otherwise false (fails if the cursor path is empty).</returns>
+    public static bool TryOpenPathWindow()
+    {
+        Debug.Assert(_pathWindow is null, "Path window is not null.");
+
+        if (Input.ActionManager.CursorPathStart is null)
+        {
+            return false;
+        }
+
+        _pathWindow = new(Input.ActionManager.AbsoluteCursorPath.Select(p => (System.Drawing.Point)p.MovPoint).ToArray());
+        return true;
+    }
+
+    public static void ClosePathWindow()
+    {
+        Debug.Assert(_pathWindow is not null, "Path window is null.");
+
+        _pathWindow.Dispose();
+        _pathWindow = null;
+        //GC.Collect();
     }
 
     /// <summary>

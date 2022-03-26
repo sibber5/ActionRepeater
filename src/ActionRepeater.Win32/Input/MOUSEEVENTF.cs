@@ -1,4 +1,6 @@
-﻿namespace ActionRepeater.Win32.Input;
+﻿using System;
+
+namespace ActionRepeater.Win32.Input;
 
 /// <summary>
 /// <para>A set of bit flags that specify various aspects of mouse motion and button clicks. This can be any reasonable combination of it's values.</para>

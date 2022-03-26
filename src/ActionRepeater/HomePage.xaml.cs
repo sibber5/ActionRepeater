@@ -5,17 +5,33 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Windows.Storage;
 using Windows.Storage.Pickers;
+using System.ComponentModel;
 
 namespace ActionRepeater;
 
-public sealed partial class HomePage : Page
+public sealed partial class HomePage : Page, INotifyPropertyChanged
 {
+    public event PropertyChangedEventHandler? PropertyChanged;
+    private void NotifyPropertyChanged(string propertyName) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
     public bool IsHoveringOverExcl => RecordButton.IsPointerOver;
 
     public bool IsRecordButtonEnabled
     {
         get => RecordButton.IsEnabled;
         set => RecordButton.IsEnabled = value;
+    }
+
+    private bool _isShowingCursorPath;
+    public bool IsShowingCursorPath
+    {
+        get => _isShowingCursorPath;
+
+        set
+        {
+            _isShowingCursorPath = value;
+            NotifyPropertyChanged(nameof(IsShowingCursorPath));
+        }
     }
 
     public HomePage()
@@ -40,6 +56,19 @@ public sealed partial class HomePage : Page
     private void PlayButton_Click(object sender, RoutedEventArgs e)
     {
         ActionManager.PlayActions();
+    }
+
+    private void CursorPathButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (IsShowingCursorPath)
+        {
+            App.ClosePathWindow();
+
+            IsShowingCursorPath = false;
+            return;
+        }
+
+        IsShowingCursorPath = App.TryOpenPathWindow();
     }
 
     private async void ExportButton_Click(object sender, RoutedEventArgs e)

@@ -16,4 +16,26 @@ public struct RECT
 	public int right;
 	/// <summary>Specifies the <i>y</i>-coordinate of the lower-right corner of the rectangle.</summary>
 	public int bottom;
+
+	/// <param name="left"><inheritdoc cref="left"/></param>
+	/// <param name="top"><inheritdoc cref="top"/></param>
+	/// <param name="right"><inheritdoc cref="right"/></param>
+	/// <param name="bottom"><inheritdoc cref="bottom"/></param>
+	public RECT(int left, int top, int right, int bottom)
+    {
+		this.left = left;
+		this.top = top;
+		this.right = right;
+		this.bottom = bottom;
+    }
+
+	public static implicit operator System.Drawing.Rectangle(RECT r)
+    {
+		return new System.Drawing.Rectangle(r.left, r.top, r.right - r.left, r.bottom - r.top);
+    }
+
+	public static implicit operator RECT(System.Drawing.Rectangle r)
+    {
+		return new RECT(r.Left, r.Top, r.Right, r.Bottom);
+    }
 }

@@ -1,4 +1,6 @@
-﻿namespace ActionRepeater.Win32.Input;
+﻿using System;
+
+namespace ActionRepeater.Win32.Input;
 
 #pragma warning disable CA1069, RCS1234, RCS1191
 

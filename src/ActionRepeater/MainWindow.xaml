@@ -81,11 +81,11 @@
                     <MenuFlyoutItem Text="Copy" Click="OnCopyClick"/>
                     <MenuFlyoutItem Text="Replace With Copied Action" Click="OnReplaceClick" IsEnabled="False"/>
                     <MenuFlyoutItem Text="Remove" Click="OnRemoveClick"/>
-                    <MenuFlyoutItem Text="Remove All" Click="OnClearClick"/>
+                    <MenuFlyoutItem Text="Clear (All)" Click="OnClearClick"/>
                 </MenuFlyout>
                 <MenuFlyout x:Name="ActionListMenuFlyout">
                     <MenuFlyoutItem Text="Paste" Click="OnPasteClick" IsEnabled="False"/>
-                    <MenuFlyoutItem Text="Remove All" Click="OnClearClick"/>
+                    <MenuFlyoutItem Text="Clear" Click="OnClearClick"/>
                 </MenuFlyout>
             </ListView.Resources>
 

@@ -1,4 +1,6 @@
-﻿namespace ActionRepeater.Win32.WindowsAndMessages;
+﻿using System;
+
+namespace ActionRepeater.Win32.WindowsAndMessages;
 
 #pragma warning disable CA1069
 /// <summary>

@@ -1,7 +1,9 @@
-﻿using System.Runtime.InteropServices;
+﻿using System;
+using System.Runtime.InteropServices;
 using SupportedOSPlatformAttribute = System.Runtime.Versioning.SupportedOSPlatformAttribute;
 using ActionRepeater.Win32.Input;
 using ActionRepeater.Win32.WindowsAndMessages;
+using ActionRepeater.Win32.Graphics;
 
 #pragma warning disable CA1401 // P/Invokes should not be visible
 [assembly: SupportedOSPlatform("windows5.1.2600")]
@@ -127,137 +129,6 @@ public static partial class PInvoke
 	[DllImport("User32", ExactSpelling = true, SetLastError = true)]
 	[DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
 	public static extern BOOL SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, SetWindowPosFlags uFlags);
-
-	/// <summary>Installs an application-defined hook procedure into a hook chain.</summary>
-	/// <param name="idHook">
-	/// Type: <b>int</b> The type of hook procedure to be installed.
-	/// </param>
-	/// <param name="lpfn">
-	/// <para>Type: <b>HOOKPROC</b> A pointer to the hook procedure. If the <paramref name="dwThreadId"/> parameter is zero or specifies the identifier of a thread created by a different process, the <paramref name="lpfn"/> parameter must point to a hook procedure in a DLL. Otherwise, <paramref name="lpfn"/> can point to a hook procedure in the code associated with the current process.</para>
-	/// <para>You can pass any delegate that is identical to <see cref="HOOKPROC"/>, <c>e.g. `new HOOKPROC(yourDelegate)`</c>.</para>
-	/// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-setwindowshookexw#parameters">Read more on docs.microsoft.com</see>.</para>
-	/// </param>
-	/// <param name="hmod">
-	/// <para>Type: <b>HINSTANCE</b> A handle to the DLL containing the hook procedure pointed to by the <paramref name="lpfn"/> parameter. The <paramref name="hmod"/> parameter must be set to <typeparamref name="null"/> if the <paramref name="dwThreadId"/> parameter specifies a thread created by the current process and if the hook procedure is within the code associated with the current process.</para>
-	/// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-setwindowshookexw#parameters">Read more on docs.microsoft.com</see>.</para>
-	/// </param>
-	/// <param name="dwThreadId">
-	/// <para>Type: <b>DWORD</b> The identifier of the thread with which the hook procedure is to be associated. For desktop apps, if this parameter is zero, the hook procedure is associated with all existing threads running in the same desktop as the calling thread. For Windows Store apps, see the Remarks section.</para>
-	/// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-setwindowshookexw#parameters">Read more on docs.microsoft.com</see>.</para>
-	/// </param>
-	/// <returns>
-	/// <para>If the function succeeds, the return value is the handle to the hook procedure.<br/>
-	/// If the function fails, the return value is an invalid handle. To get extended error information, call <see cref="Marshal.GetLastPInvokeError"/>.</para>
-	/// </returns>
-	/// <remarks>
-	/// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-setwindowshookexw">Learn more about this API from docs.microsoft.com</see>.</para>
-	/// </remarks>
-	public static unsafe SafeHookHandle SetWindowsHookEx(WindowsHookType idHook, HOOKPROC lpfn, SafeHandle? hmod, uint dwThreadId)
-	{
-		bool hmodAddRef = false;
-		try
-		{
-			IntPtr hmodLocal = IntPtr.Zero;
-			if (hmod is not null)
-			{
-				hmod.DangerousAddRef(ref hmodAddRef);
-				hmodLocal = hmod.DangerousGetHandle();
-			}
-			IntPtr __result = SetWindowsHookEx(idHook, lpfn, hmodLocal, dwThreadId);
-			return new SafeHookHandle(__result, ownsHandle: true);
-		}
-		finally
-		{
-			if (hmodAddRef)
-			{
-                hmod?.DangerousRelease();
-			}
-		}
-	}
-
-	/// <summary>Installs an application-defined hook procedure into a hook chain.</summary>
-	/// <param name="idHook">
-	/// Type: <b>int</b> The type of hook procedure to be installed.
-	/// </param>
-	/// <param name="lpfn">
-	/// <para>Type: <b>HOOKPROC</b> A pointer to the hook procedure. If the <paramref name="dwThreadId"/> parameter is zero or specifies the identifier of a thread created by a different process, the <paramref name="lpfn"/> parameter must point to a hook procedure in a DLL. Otherwise, <paramref name="lpfn"/> can point to a hook procedure in the code associated with the current process.</para>
-	/// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-setwindowshookexw#parameters">Read more on docs.microsoft.com</see>.</para>
-	/// </param>
-	/// <param name="hmod">
-	/// <para>Type: <b>HINSTANCE</b> A handle to the DLL containing the hook procedure pointed to by the <paramref name="lpfn"/> parameter. The <paramref name="hmod"/> parameter must be set to <b>NULL</b> (<see cref="IntPtr.Zero"/>) if the <paramref name="dwThreadId"/> parameter specifies a thread created by the current process and if the hook procedure is within the code associated with the current process.</para>
-	/// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-setwindowshookexw#parameters">Read more on docs.microsoft.com</see>.</para>
-	/// </param>
-	/// <param name="dwThreadId">
-	/// <para>Type: <b>DWORD</b> The identifier of the thread with which the hook procedure is to be associated. For desktop apps, if this parameter is zero, the hook procedure is associated with all existing threads running in the same desktop as the calling thread. For Windows Store apps, see the Remarks section.</para>
-	/// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-setwindowshookexw#parameters">Read more on docs.microsoft.com</see>.</para>
-	/// </param>
-	/// <returns>
-	/// <para>Type: <b>HHOOK</b> If the function succeeds, the return value is the handle to the hook procedure. If the function fails, the return value is <b>NULL</b> (<see cref="IntPtr.Zero"/>). To get extended error information, call <see cref="Marshal.GetLastPInvokeError"/>.</para>
-	/// </returns>
-	/// <remarks>
-	/// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-setwindowshookexw">Learn more about this API from docs.microsoft.com</see>.</para>
-	/// </remarks>
-	[DllImport("User32", ExactSpelling = true, EntryPoint = "SetWindowsHookExW", SetLastError = true)]
-	[DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-	public static extern IntPtr SetWindowsHookEx(WindowsHookType idHook, HOOKPROC lpfn, IntPtr hmod, uint dwThreadId);
-
-	/// <summary>Removes a hook procedure installed in a hook chain by the <seealso cref="SetWindowsHookEx">SetWindowsHookEx</seealso> function.</summary>
-	/// <param name="hhk">
-	/// <para>Type: <b>HHOOK</b> A handle to the hook to be removed. This parameter is a hook handle obtained by a previous call to <seealso cref="SetWindowsHookEx(WindowsHookType, HOOKPROC, IntPtr, uint)">SetWindowsHookEx</seealso>.</para>
-	/// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-unhookwindowshookex#parameters">Read more on docs.microsoft.com</see>.</para>
-	/// </param>
-	/// <returns>
-	/// <para>Type: <b>BOOL</b> If the function succeeds, the return value is nonzero. If the function fails, the return value is zero. To get extended error information, call <see cref="Marshal.GetLastPInvokeError"/>.</para>
-	/// </returns>
-	/// <remarks>
-	/// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-unhookwindowshookex">Learn more about this API from docs.microsoft.com</see>.</para>
-	/// </remarks>
-	[DllImport("User32", ExactSpelling = true, SetLastError = true)]
-	[DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-	public static extern BOOL UnhookWindowsHookEx(IntPtr hhk);
-
-	/// <inheritdoc cref="CallNextHookEx(IntPtr, int, nuint, nint)"/>
-	public static nint CallNextHookEx(int nCode, nuint wParam, nint lParam) => CallNextHookEx(IntPtr.Zero, nCode, wParam, lParam);
-
-	/// <summary>Passes the hook information to the next hook procedure in the current hook chain. A hook procedure can call this function either before or after processing the hook information.</summary>
-	/// <param name="hhk">
-	/// <para>Type: <b>HHOOK</b> This parameter is ignored.</para>
-	/// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-callnexthookex#parameters">Read more on docs.microsoft.com</see>.</para>
-	/// </param>
-	/// <param name="nCode">
-	/// <para>Type: <b>int</b> The hook code passed to the current hook procedure. The next hook procedure uses this code to determine how to process the hook information.</para>
-	/// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-callnexthookex#parameters">Read more on docs.microsoft.com</see>.</para>
-	/// </param>
-	/// <param name="wParam">
-	/// <para>Type: <b>WPARAM</b> The <paramref name="wParam"/> value passed to the current hook procedure. The meaning of this parameter depends on the type of hook associated with the current hook chain.</para>
-	/// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-callnexthookex#parameters">Read more on docs.microsoft.com</see>.</para>
-	/// </param>
-	/// <param name="lParam">
-	/// <para>Type: <b>LPARAM</b> The <paramref name="lParam"/> value passed to the current hook procedure. The meaning of this parameter depends on the type of hook associated with the current hook chain.</para>
-	/// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-callnexthookex#parameters">Read more on docs.microsoft.com</see>.</para>
-	/// </param>
-	/// <returns>
-	/// <para>Type: <b>LRESULT</b> This value is returned by the next hook procedure in the chain. The current hook procedure must also return this value. The meaning of the return value depends on the hook type. For more information, see the descriptions of the individual hook procedures.</para>
-	/// </returns>
-	/// <remarks>
-	/// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-callnexthookex">Learn more about this API from docs.microsoft.com</see>.</para>
-	/// </remarks>
-	[DllImport("User32", ExactSpelling = true)]
-	[DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-	public static extern nint CallNextHookEx(IntPtr hhk, int nCode, nuint wParam, nint lParam);
-
-	/// <summary>Retrieves the thread identifier of the calling thread.</summary>
-	/// <returns>The return value is the thread identifier of the calling thread.</returns>
-	/// <remarks>
-	/// <para><see href="https://docs.microsoft.com/windows/win32/api//processthreadsapi/nf-processthreadsapi-getcurrentthreadid">Learn more about this API from docs.microsoft.com</see>.</para>
-	/// </remarks>
-	[DllImport("Kernel32", ExactSpelling = true)]
-	[DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-	public static extern uint GetCurrentThreadId();
-
-	[DllImport("Kernel32", ExactSpelling = true, EntryPoint = "GetModuleHandleW", CharSet = CharSet.Unicode, SetLastError = true)]
-	[DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-	public static extern IntPtr GetModuleHandle(string lpModuleName);
 
 	/// <inheritdoc cref="RegisterRawInputDevices"/>
 	public static unsafe bool RegisterRawInputDevices(Span<RAWINPUTDEVICE> pRawInputDevices)
@@ -440,4 +311,25 @@ public static partial class PInvoke
 	[DllImport("User32", ExactSpelling = true)]
 	[DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
 	public static extern uint GetRawInputData(nint hRawInput, uint uiCommand, out RAWINPUT pData, ref uint pcbSize, uint cbSizeHeader);
+
+	/// <summary>The EnumDisplayMonitors function enumerates display monitors (including invisible pseudo-monitors associated with the mirroring drivers) that intersect a region formed by the intersection of a specified clipping rectangle and the visible region of a device context. EnumDisplayMonitors calls an application-defined MonitorEnumProc callback function once for each monitor that is enumerated. Note that GetSystemMetrics (SM_CMONITORS) counts only the display monitors.</summary>
+	/// <param name="hdc">
+	/// <para>A handle to a display device context that defines the visible region of interest. If this parameter is <b>NULL</b>, the <i>hdcMonitor</i> parameter passed to the callback function will be <b>NULL</b>, and the visible region of interest is the virtual screen that encompasses all the displays on the desktop.</para>
+	/// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-enumdisplaymonitors#parameters">Read more on docs.microsoft.com</see>.</para>
+	/// </param>
+	/// <param name="lprcClip">
+	/// <para>A pointer to a <a href="https://docs.microsoft.com/windows/desktop/api/windef/ns-windef-rect">RECT</a> structure that specifies a clipping rectangle. The region of interest is the intersection of the clipping rectangle with the visible region specified by <i>hdc</i>. If <i>hdc</i> is non-<b>NULL</b>, the coordinates of the clipping rectangle are relative to the origin of the <i>hdc</i>. If <i>hdc</i> is <b>NULL</b>, the coordinates are virtual-screen coordinates. This parameter can be <b>NULL</b> if you don't want to clip the region specified by <i>hdc</i>.</para>
+	/// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-enumdisplaymonitors#parameters">Read more on docs.microsoft.com</see>.</para>
+	/// </param>
+	/// <param name="lpfnEnum">A pointer to a <a href="https://docs.microsoft.com/windows/desktop/api/winuser/nc-winuser-monitorenumproc">MonitorEnumProc</a> application-defined callback function.</param>
+	/// <param name="dwData">Application-defined data that <b>EnumDisplayMonitors</b> passes directly to the <a href="https://docs.microsoft.com/windows/desktop/api/winuser/nc-winuser-monitorenumproc">MonitorEnumProc</a> function.</param>
+	/// <returns>
+	/// <para>If the function succeeds, the return value is nonzero. If the function fails, the return value is zero.</para>
+	/// </returns>
+	/// <remarks>
+	/// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-enumdisplaymonitors">Learn more about this API from docs.microsoft.com</see>.</para>
+	/// </remarks>
+	[DllImport("User32", ExactSpelling = true)]
+	[DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+	public static extern unsafe bool EnumDisplayMonitors(IntPtr hdc, IntPtr lprcClip, MONITORENUMPROC lpfnEnum, nint dwData);
 }

@@ -70,21 +70,4 @@ public struct RAWMOUSE
             public ushort usButtonData;
         }
     }
-
-    //[StructLayout(LayoutKind.Explicit)]
-    //public struct Data
-    //{
-    //	[FieldOffset(0)]
-    //	public uint ulButtons;
-    //	/// <summary>
-    //	/// If the mouse wheel is moved, this will contain the delta amount.
-    //	/// </summary>
-    //	[FieldOffset(2)]
-    //	public ushort usButtonData;
-    //	/// <summary>
-    //	/// Flags for the event.
-    //	/// </summary>
-    //	[FieldOffset(0)]
-    //	public ushort usButtonFlags;
-    //}
 }
