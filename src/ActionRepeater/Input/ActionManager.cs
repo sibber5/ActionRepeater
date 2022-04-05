@@ -209,13 +209,25 @@ public static class ActionManager
         ActionsExlKeyRepeat[replacedActionIdx] = newAction;
     }
 
-    public static void Clear()
+    public static void ClearCursorPath()
     {
         CursorPathStart = null;
         CursorPath.Clear();
+    }
+
+    public static void ClearActions()
+    {
         Actions.Clear();
         ActionsExlKeyRepeat.Clear();
         _modifiedFilteredActionsIdxs.Clear();
+
+        Recorder.Reset();
+    }
+
+    public static void ClearAll()
+    {
+        ClearCursorPath();
+        ClearActions();
     }
 
     public static void PlayActions()

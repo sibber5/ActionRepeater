@@ -15,19 +15,41 @@ public sealed class PathWindow : IDisposable
 
     private bool _disposed;
 
-    public PathWindow(Point[] points)
+    public PathWindow(Point[]? points)
     {
-        byte[] types = new byte[points.Length];
+        if (points is null)
+        {
+            _thread = new Thread(() =>
+            {
+                _pathForm = new(new Pen(Color.Red, 3), null);
+                Application.Run(_pathForm);
+            });
+        }
+        else
+        {
+            byte[] types = new byte[points.Length];
+            types[0] = (byte)PathPointType.Start;
+            Array.Fill(types, (byte)PathPointType.Line, 1, types.Length - 1);
+
+            _thread = new Thread(() =>
+            {
+                _pathForm = new(new Pen(Color.Red, 3), new GraphicsPath(points, types));
+                Application.Run(_pathForm);
+            });
+        }
+
+        _thread.SetApartmentState(ApartmentState.STA);
+        _thread.Start();
+    }
+
+    public void OnPathChanged(Point[] newPoints)
+    {
+        byte[] types = new byte[newPoints.Length];
         types[0] = (byte)PathPointType.Start;
         Array.Fill(types, (byte)PathPointType.Line, 1, types.Length - 1);
 
-        _thread = new Thread(() =>
-        {
-            _pathForm = new(new Pen(Color.Red, 4f), new GraphicsPath(points, types));
-            Application.Run(_pathForm);
-        });
-        _thread.SetApartmentState(ApartmentState.STA);
-        _thread.Start();
+        //_pathForm!.Invoke(() => _pathForm!.UpdatePath(new GraphicsPath(newPoints, types)));
+        _pathForm?.UpdatePath(new GraphicsPath(newPoints, types));
     }
 
     private void Dispose(bool disposing)
@@ -64,13 +86,14 @@ public sealed class PathWindow : IDisposable
         private Pen? _pen;
         private GraphicsPath? _path;
 
-        public PathForm(Pen pen, GraphicsPath path)
+        public PathForm(Pen pen, GraphicsPath? path)
         {
             AutoScaleMode = AutoScaleMode.None;
             ClientSize = new Size(SystemInformation.VirtualScreen.Width, SystemInformation.VirtualScreen.Height);
             TopMost = true;
             FormBorderStyle = FormBorderStyle.None;
             ShowInTaskbar = false;
+            DoubleBuffered = true;
 
             TransparencyKey = Color.FromArgb(254, 254, 254);
             BackColor = TransparencyKey;
@@ -80,6 +103,25 @@ public sealed class PathWindow : IDisposable
 
             Paint += OnPaint;
             FormClosed += OnClosed;
+        }
+
+        protected override CreateParams CreateParams
+        {
+            get
+            {
+                CreateParams cp = base.CreateParams;
+
+                //                       WS_EX_COMPOSITED | WS_EX_LAYERED | WS_EX_NOACTIVATE | WS_EX_TOPMOST | WS_EX_TRANSPARENT
+                cp.ExStyle = cp.ExStyle | 0x02000000 | 0x00080000 | 0x08000000 | 0x00000008 | 0x00000020;
+
+                return cp;
+            }
+        }
+
+        public void UpdatePath(GraphicsPath newPath)
+        {
+            _path = newPath;
+            Invalidate();
         }
 
         private void OnClosed(object? sender, FormClosedEventArgs e)
@@ -92,7 +134,7 @@ public sealed class PathWindow : IDisposable
             _pen!.Dispose();
             _pen = null;
 
-            _path!.Dispose();
+            _path?.Dispose();
             _path = null;
 
             Debug.WriteLine("Disposed path form.");
@@ -100,19 +142,12 @@ public sealed class PathWindow : IDisposable
 
         private void OnPaint(object? sender, PaintEventArgs e)
         {
-            e.Graphics.DrawPath(_pen!, _path!);
-        }
+            if (_path is null) return;
 
-        protected override void WndProc(ref Message m)
-        {
-            // WM_NCHITTEST
-            if (m.Msg == 0x0084)
-            {
-                m.Result = new IntPtr(-1);
-                return;
-            }
-
-            base.WndProc(ref m);
+            //e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            e.Graphics.DrawPath(_pen!, _path);
+            _path.Dispose();
+            _path = null;
         }
     }
 }

@@ -173,9 +173,19 @@ public sealed partial class MainWindow : Window, INotifyPropertyChanged
         ActionManager.AddAction(_copiedAction!.Clone());
     }
 
+    private void OnClearActionsClick(object sender, RoutedEventArgs e)
+    {
+        ActionManager.ClearActions();
+    }
+
+    private void OnClearCursorPathClick(object sender, RoutedEventArgs e)
+    {
+        ActionManager.ClearCursorPath();
+    }
+
     private void OnClearClick(object sender, RoutedEventArgs e)
     {
-        ActionManager.Clear();
-        Recorder.Reset();
+        ActionManager.ClearAll();
+        //GC.Collect();
     }
 }

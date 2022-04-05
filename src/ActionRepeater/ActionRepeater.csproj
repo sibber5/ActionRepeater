@@ -12,7 +12,8 @@
         <EnablePreviewMsixTooling>true</EnablePreviewMsixTooling>
         <WindowsPackageType>None</WindowsPackageType>
 		<Nullable>enable</Nullable>
-    </PropertyGroup>
+		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+	</PropertyGroup>
     <ItemGroup>
         <None Remove="HomePage.xaml" />
         <None Remove="OptionsPage.xaml" />

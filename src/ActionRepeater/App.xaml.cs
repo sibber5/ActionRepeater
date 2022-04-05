@@ -42,12 +42,17 @@ public partial class App : Application
     {
         Debug.Assert(_pathWindow is null, "Path window is not null.");
 
-        if (Input.ActionManager.CursorPathStart is null)
-        {
-            return false;
-        }
+        //if (Input.ActionManager.CursorPathStart is null)
+        //{
+        //    return false;
+        //}
 
-        _pathWindow = new(Input.ActionManager.AbsoluteCursorPath.Select(p => (System.Drawing.Point)p.MovPoint).ToArray());
+        _pathWindow = new(Input.ActionManager.CursorPathStart is null ? null
+            : Input.ActionManager.AbsoluteCursorPath.Select(p => (System.Drawing.Point)p.MovPoint).ToArray());
+
+        //Input.ActionManager.CursorPath.CollectionChanged += UpdatePathWindow;
+        UpdatePathWindow();
+
         return true;
     }
 
@@ -55,9 +60,27 @@ public partial class App : Application
     {
         Debug.Assert(_pathWindow is not null, "Path window is null.");
 
+        //Input.ActionManager.CursorPath.CollectionChanged -= UpdatePathWindow;
+
         _pathWindow.Dispose();
         _pathWindow = null;
         //GC.Collect();
+    }
+
+    private static void UpdatePathWindow()
+    {
+        System.Threading.Tasks.Task.Run(async () =>
+        {
+            while (true)
+            {
+                await System.Threading.Tasks.Task.Delay(40);
+
+                if (Input.ActionManager.CursorPathStart is null || !Input.Recorder.IsRecording) continue;
+
+                if (_pathWindow is null) break;
+                _pathWindow.OnPathChanged(Input.ActionManager.AbsoluteCursorPath.Select(p => (System.Drawing.Point)p.MovPoint).ToArray());
+            }
+        });
     }
 
     /// <summary>
