@@ -24,6 +24,8 @@ public partial class App : Application
     public static bool IsPathWindowOpen => _pathWindow is not null;
 
     private static PathWindow? _pathWindow;
+    private static int _lastCursorPtsCount;
+    private static Win32.POINT? _lastAbsPt;
 
     /// <summary>
     /// Initializes the singleton application object.  This is the first line of authored code
@@ -38,19 +40,23 @@ public partial class App : Application
     /// Opens the path window, unless the cursor path is empty.
     /// </summary>
     /// <returns>true if the function succeeds (the window has been opened), otherwise false (fails if the cursor path is empty).</returns>
-    public static bool TryOpenPathWindow()
+    public static bool OpenPathWindow()
     {
         Debug.Assert(_pathWindow is null, "Path window is not null.");
 
-        //if (Input.ActionManager.CursorPathStart is null)
-        //{
-        //    return false;
-        //}
+        if (Input.ActionManager.CursorPathStart is null)
+        {
+            _pathWindow = new();
+            _lastAbsPt = null;
+        }
+        else
+        {
+            var absCursorPts = Input.ActionManager.AbsoluteCursorPath.Select(p => (System.Drawing.Point)p.MovPoint).ToArray();
+            _lastAbsPt = absCursorPts[^1];
 
-        _pathWindow = new(Input.ActionManager.CursorPathStart is null ? null
-            : Input.ActionManager.AbsoluteCursorPath.Select(p => (System.Drawing.Point)p.MovPoint).ToArray());
+            _pathWindow = new(absCursorPts);
+        }
 
-        //Input.ActionManager.CursorPath.CollectionChanged += UpdatePathWindow;
         UpdatePathWindow();
 
         return true;
@@ -59,8 +65,6 @@ public partial class App : Application
     public static void ClosePathWindow()
     {
         Debug.Assert(_pathWindow is not null, "Path window is null.");
-
-        //Input.ActionManager.CursorPath.CollectionChanged -= UpdatePathWindow;
 
         _pathWindow.Dispose();
         _pathWindow = null;
@@ -71,15 +75,41 @@ public partial class App : Application
     {
         System.Threading.Tasks.Task.Run(async () =>
         {
-            while (true)
+            Debug.WriteLine("Update Window Task Started.");
+
+            var cursorPath = Input.ActionManager.CursorPath;
+
+            _lastCursorPtsCount = cursorPath.Count;
+
+            while (_pathWindow is not null)
             {
                 await System.Threading.Tasks.Task.Delay(40);
 
-                if (Input.ActionManager.CursorPathStart is null || !Input.Recorder.IsRecording) continue;
+                if (_lastCursorPtsCount == cursorPath.Count) continue;
 
                 if (_pathWindow is null) break;
-                _pathWindow.OnPathChanged(Input.ActionManager.AbsoluteCursorPath.Select(p => (System.Drawing.Point)p.MovPoint).ToArray());
+
+                if (cursorPath.Count == 0)
+                {
+                    _lastAbsPt = Input.ActionManager.CursorPathStart?.MovPoint;
+                    _lastCursorPtsCount = cursorPath.Count;
+                    _pathWindow.ClearPath();
+                    continue;
+                }
+
+                _lastAbsPt ??= Input.ActionManager.CursorPathStart!.MovPoint;
+
+                for (int i = _lastCursorPtsCount; i < cursorPath.Count; ++i)
+                {
+                    var newPoint = Action.MouseMovement.OffsetPointWithinScreens(_lastAbsPt.Value, cursorPath[i].MovPoint);
+                    _pathWindow.AddLineToPath(_lastAbsPt.Value, newPoint);
+                    _lastAbsPt = newPoint;
+                }
+
+                _lastCursorPtsCount = cursorPath.Count;
             }
+
+            Debug.WriteLine("Update Window Task Finished.");
         });
     }
 

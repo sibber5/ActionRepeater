@@ -15,13 +15,13 @@ public sealed class PathWindow : IDisposable
 
     private bool _disposed;
 
-    public PathWindow(Point[]? points)
+    public PathWindow(Point[]? points = null)
     {
         if (points is null)
         {
             _thread = new Thread(() =>
             {
-                _pathForm = new(new Pen(Color.Red, 3), null);
+                _pathForm = new(new Pen(Color.Red, 3), new GraphicsPath());
                 Application.Run(_pathForm);
             });
         }
@@ -42,14 +42,14 @@ public sealed class PathWindow : IDisposable
         _thread.Start();
     }
 
-    public void OnPathChanged(Point[] newPoints)
+    public void AddLineToPath(Point prevPoint, Point newPoint)
     {
-        byte[] types = new byte[newPoints.Length];
-        types[0] = (byte)PathPointType.Start;
-        Array.Fill(types, (byte)PathPointType.Line, 1, types.Length - 1);
+        _pathForm?.AddLine(prevPoint, newPoint);
+    }
 
-        //_pathForm!.Invoke(() => _pathForm!.UpdatePath(new GraphicsPath(newPoints, types)));
-        _pathForm?.UpdatePath(new GraphicsPath(newPoints, types));
+    public void ClearPath()
+    {
+        _pathForm?.ResetPath();
     }
 
     private void Dispose(bool disposing)
@@ -86,7 +86,9 @@ public sealed class PathWindow : IDisposable
         private Pen? _pen;
         private GraphicsPath? _path;
 
-        public PathForm(Pen pen, GraphicsPath? path)
+        private readonly ManualResetEventSlim _addLineMre = new(true);
+
+        public PathForm(Pen pen, GraphicsPath path)
         {
             AutoScaleMode = AutoScaleMode.None;
             ClientSize = new Size(SystemInformation.VirtualScreen.Width, SystemInformation.VirtualScreen.Height);
@@ -118,9 +120,19 @@ public sealed class PathWindow : IDisposable
             }
         }
 
-        public void UpdatePath(GraphicsPath newPath)
+        public void AddLine(Point prevPoint, Point newPoint)
         {
-            _path = newPath;
+            if (_path is null) return;
+
+            if (!_addLineMre.IsSet) _addLineMre.Wait();
+
+            _path.AddLine(prevPoint, newPoint);
+            Invalidate();
+        }
+
+        public void ResetPath()
+        {
+            _path!.Reset();
             Invalidate();
         }
 
@@ -134,20 +146,22 @@ public sealed class PathWindow : IDisposable
             _pen!.Dispose();
             _pen = null;
 
-            _path?.Dispose();
+            _path!.Dispose();
             _path = null;
+
+            _addLineMre.Dispose();
 
             Debug.WriteLine("Disposed path form.");
         }
 
         private void OnPaint(object? sender, PaintEventArgs e)
         {
-            if (_path is null) return;
+            _addLineMre.Reset();
 
             //e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-            e.Graphics.DrawPath(_pen!, _path);
-            _path.Dispose();
-            _path = null;
+            e.Graphics.DrawPath(_pen!, _path!);
+
+            _addLineMre.Set();
         }
     }
 }

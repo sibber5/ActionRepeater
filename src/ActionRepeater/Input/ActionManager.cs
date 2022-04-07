@@ -1,13 +1,15 @@
 ﻿using ActionRepeater.Action;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using ActionRepeater.Extentions;
 
 namespace ActionRepeater.Input;
 
 public static class ActionManager
 {
+    /// <remarks>
+    /// If this is null then <see cref="CursorPath"/> is empty;
+    /// and if <see cref="CursorPath"/> is not empty then this is not null.
+    /// </remarks>
     public static MouseMovement? CursorPathStart { get; set; }
     public static List<MouseMovement> CursorPath { get; } = new();
     public static IReadOnlyList<MouseMovement> AbsoluteCursorPath
@@ -20,42 +22,12 @@ public static class ActionManager
 
             absPath.Add(CursorPathStart);
 
-            var monitors = Win32.SystemInformation.MonitorRects;
-
             for (int i = 0; i < CursorPath.Count; ++i)
             {
                 MouseMovement delta = CursorPath[i];
                 MouseMovement lastAbs = absPath[^1];
 
-                Win32.POINT pt = new(lastAbs.MovPoint.x, lastAbs.MovPoint.y);
-
-                var ogMonitor = monitors.First(m => m.ContainsInclusive(pt.x, pt.y));
-
-                pt.x += delta.MovPoint.x;
-                if (!monitors.Any(m => m.ContainsInclusive(pt.x, pt.y)))
-                {
-                    if (delta.MovPoint.x < 0)
-                    {
-                        pt.x = ogMonitor.Left;
-                    }
-                    else
-                    {
-                        pt.x = ogMonitor.Right;
-                    }
-                }
-
-                pt.y += delta.MovPoint.y;
-                if (!monitors.Any(m => m.ContainsInclusive(pt.x, pt.y)))
-                {
-                    if (delta.MovPoint.y < 0)
-                    {
-                        pt.y = ogMonitor.Top;
-                    }
-                    else
-                    {
-                        pt.y = ogMonitor.Bottom;
-                    }
-                }
+                Win32.POINT pt = MouseMovement.OffsetPointWithinScreens(lastAbs.MovPoint, delta.MovPoint);
 
                 if (pt == lastAbs.MovPoint)
                 {

@@ -68,7 +68,8 @@ public sealed partial class HomePage : Page, INotifyPropertyChanged
             return;
         }
 
-        IsShowingCursorPath = App.TryOpenPathWindow();
+        App.OpenPathWindow();
+        IsShowingCursorPath = true;
     }
 
     private async void ExportButton_Click(object sender, RoutedEventArgs e)
