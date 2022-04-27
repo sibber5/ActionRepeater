@@ -4,7 +4,7 @@ namespace ActionRepeater.Extentions;
 
 public static class ExtentionMethods
 {
-    public static string WithSpacesBetweenWords(this string str)
+    public static string AddSpacesBetweenWords(this string str)
     {
         StringBuilder sb = new();
         for (int i = 1; i < str.Length; ++i)

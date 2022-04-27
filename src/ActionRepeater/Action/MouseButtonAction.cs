@@ -94,7 +94,7 @@ public sealed class MouseButtonAction : InputAction, System.IEquatable<MouseButt
         _button = button;
         _position = position;
         _usePosition = usePosition;
-        Name = type.ToString().WithSpacesBetweenWords();
+        Name = type.ToString().AddSpacesBetweenWords();
         UpdateDescription();
     }
 
@@ -113,52 +113,5 @@ public sealed class MouseButtonAction : InputAction, System.IEquatable<MouseButt
 
     public override int GetHashCode() => System.HashCode.Combine(ActionType, _button, _position, _usePosition);
 
-    public static async System.Threading.Tasks.Task<MouseButtonAction> CreateActionFromXmlAsync(System.Xml.XmlReader reader)
-    {
-        await reader.ReadAsync(); // move to Start Element ActionType
-
-        ThrowIfInvalidName(nameof(ActionType));
-        @Type type = (@Type)reader.ReadElementContentAsInt(); // this moves to start of next element
-
-        ThrowIfInvalidName(nameof(Button));
-        MouseButton button = (MouseButton)reader.ReadElementContentAsInt(); // this moves to start of next element, which in this case is Position
-
-        ThrowIfInvalidName(nameof(Position));
-        await reader.ReadAsync(); // move to Start Element x
-        ThrowIfInvalidName("x");
-        int pointX = reader.ReadElementContentAsInt();
-        ThrowIfInvalidName("y");
-        int pointY = reader.ReadElementContentAsInt();
-
-        // not its at End Element Position
-        await reader.ReadAsync(); // move to Start Element UsePosition
-        ThrowIfInvalidName(nameof(UsePosition));
-        bool usePosition = reader.ReadElementContentAsBoolean();
-
-        return new MouseButtonAction(type, button, new POINT(pointX, pointY), usePosition);
-
-        void ThrowIfInvalidName(string name)
-        {
-            if (!reader.Name.Equals(name, System.StringComparison.Ordinal))
-            {
-                throw new System.FormatException($"Unexpected element \"{reader.Name}\". Expected \"{name}\".");
-            }
-        }
-    }
-
-    public override void WriteXml(System.Xml.XmlWriter writer)
-    {
-        writer.WriteAttributeString("Type", nameof(MouseButtonAction));
-
-        writer.WriteComment("ActionType is the type of the mouse button action. it can be on of the following: 0 - MouseButtonDown; 1 - MouseButtonUp; 2 - MouseButtonClick");
-        writer.WriteElementString(nameof(ActionType), ((int)ActionType).ToString(System.Globalization.CultureInfo.InvariantCulture));
-        writer.WriteElementString(nameof(Button), ((int)_button).ToString(System.Globalization.CultureInfo.InvariantCulture));
-
-        writer.WriteStartElement(nameof(Position));
-        writer.WriteElementString(nameof(_position.x), _position.x.ToString(System.Globalization.CultureInfo.InvariantCulture));
-        writer.WriteElementString(nameof(_position.y), _position.y.ToString(System.Globalization.CultureInfo.InvariantCulture));
-        writer.WriteEndElement();
-
-        writer.WriteElementString(nameof(UsePosition), _usePosition.ToString(System.Globalization.CultureInfo.InvariantCulture).ToLowerInvariant());
-    }
+    private MouseButtonAction() { Name = ActionType.ToString().AddSpacesBetweenWords(); }
 }

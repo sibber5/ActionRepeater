@@ -40,7 +40,7 @@ public partial class App : Application
     /// Opens the path window, unless the cursor path is empty.
     /// </summary>
     /// <returns>true if the function succeeds (the window has been opened), otherwise false (fails if the cursor path is empty).</returns>
-    public static bool OpenPathWindow()
+    public static void OpenPathWindow()
     {
         Debug.Assert(_pathWindow is null, "Path window is not null.");
 
@@ -58,8 +58,6 @@ public partial class App : Application
         }
 
         UpdatePathWindow();
-
-        return true;
     }
 
     public static void ClosePathWindow()

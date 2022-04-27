@@ -1,18 +1,30 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Xml;
 using System.Xml.Serialization;
-using System.Threading.Tasks;
 using ActionRepeater.Action;
+using System.Collections.Generic;
+using System;
+using System.Threading.Tasks;
 
 namespace ActionRepeater.Helpers;
+
+public sealed class ActionData
+{
+    public System.Collections.ObjectModel.Collection<InputAction>? Actions { get; init; }
+
+    public MouseMovement? CursorPathStartAbs { get; init; }
+
+    public List<MouseMovement>? CursorPathRel { get; init; }
+}
 
 public static class SerializationHelper
 {
     /// <param name="path">The full path of the file, including its name and extention.</param>
-    public static void Serialize<T>(in T obj, string path)
+    public static void Serialize(ActionData obj, string path)
     {
-        XmlSerializer serializer = new(typeof(T));
+        // TODO: not all [public] properties are serialized in KeyAction
+
+        XmlSerializer serializer = new(typeof(ActionData));
         var writer = new StreamWriter(path);
         var xmlWriter = XmlWriter.Create(writer, new XmlWriterSettings
         {
@@ -20,12 +32,13 @@ public static class SerializationHelper
             IndentChars = "    ", // 4 spaces
             CloseOutput = true,
             NewLineHandling = NewLineHandling.Replace,
-            Encoding = System.Text.Encoding.UTF8
+            Encoding = System.Text.Encoding.UTF8,
+            OmitXmlDeclaration = true
         });
 
         try
         {
-            serializer.Serialize(xmlWriter, obj, new XmlSerializerNamespaces(new XmlQualifiedName[] { new(string.Empty) }));
+            serializer.Serialize(xmlWriter, obj/*, new XmlSerializerNamespaces(new XmlQualifiedName[] { new(null) })*/);
         }
         finally
         {
@@ -36,15 +49,15 @@ public static class SerializationHelper
     }
 
     /// <param name="path">The full path of the file, including its name and extention.</param>
-    public static T? Deserialize<T>(string path)
+    public static ActionData? Deserialize(string path)
     {
         FileStream stream = new(path, FileMode.Open);
-        XmlSerializer serializer = new(typeof(T));
+        XmlSerializer serializer = new(typeof(ActionData));
 
-        T? loadedObj;
+        ActionData? loadedObj;
         try
         {
-            loadedObj = (T?)serializer.Deserialize(stream);
+            loadedObj = (ActionData?)serializer.Deserialize(stream);
         }
         finally
         {
@@ -54,48 +67,44 @@ public static class SerializationHelper
         return loadedObj;
     }
 
-    public static async Task DeserializeActionsAsync(System.Collections.ObjectModel.ObservableCollection<InputAction> actions, string path)
+    /// <returns>null if deserialization was successful, otherwise returns the error message.</returns>
+    public static async Task<string?> DeserializeActionsAsync(string path)
     {
-        FileStream stream = new(path, FileMode.Open);
+        ActionData? dat = null;
 
-        using XmlReader reader = XmlReader.Create(stream, new XmlReaderSettings()
+        try
         {
-            Async = true,
-            CloseInput = true,
-            IgnoreComments = true,
-            IgnoreWhitespace = true,
-            IgnoreProcessingInstructions = true
-        });
-
-        await reader.MoveToContentAsync();
-
-        if (!reader.Name.Equals($"ArrayOf{nameof(InputAction)}", StringComparison.Ordinal))
+            await Task.Run(() => dat = Deserialize(path));
+        }
+        catch (InvalidOperationException ex)
         {
-            throw new FormatException($"Invalid XML element \"{reader.Name}\". Expected \"ArrayOf{nameof(InputAction)}\".");
+            return ex.Message;
         }
 
-        // do...while instead of regular while because MoveToContentAsync() was called earlier
-        do
+        if (dat is null) return null;
+
+        Input.ActionManager.ClearAll();
+
+        if (dat.Actions is not null)
         {
-            if (reader.NodeType != XmlNodeType.Element) continue;
-
-            if (!reader.Name.Equals(nameof(InputAction), StringComparison.Ordinal)) continue;
-
-            string? actiontype = reader.GetAttribute("Type");
-
-            if (reader.AttributeCount != 1 || actiontype is null)
+            for (int i = 0; i < dat.Actions.Count; ++i)
             {
-                throw new FormatException($"Invalid XML attributes for element \"{nameof(InputAction)}\". Expected 1 attribute \"Type\".");
+                Input.ActionManager.Actions.Add(dat.Actions[i]);
             }
+        }
 
-            actions.Add(actiontype switch
-            {
-                nameof(KeyAction) => await KeyAction.CreateActionFromXmlAsync(reader),
-                nameof(MouseButtonAction) => await MouseButtonAction.CreateActionFromXmlAsync(reader),
-                nameof(MouseWheelAction) => await MouseWheelAction.CreateActionFromXmlAsync(reader),
-                nameof(WaitAction) => await WaitAction.CreateActionFromXmlAsync(reader),
-                _ => throw new FormatException($"Unexpected XML attribute value \"{actiontype}\".")
-            });
-        } while (await reader.ReadAsync());
+        if (dat.CursorPathRel is not null)
+        {
+            if (dat.CursorPathStartAbs is null) throw new InvalidOperationException($"There is not start position ({nameof(dat.CursorPathStartAbs)} is null), but the cursor path is not empty.");
+
+            Input.ActionManager.CursorPathStart = dat.CursorPathStartAbs;
+            Input.ActionManager.CursorPath.AddRange(dat.CursorPathRel);
+        }
+        else if (dat.CursorPathStartAbs is not null)
+        {
+            throw new InvalidOperationException($"The cursor path is not empty, but there is a start position ({nameof(dat.CursorPathStartAbs)} is not null)");
+        }
+
+        return null;
     }
 }

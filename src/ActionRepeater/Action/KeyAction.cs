@@ -71,7 +71,7 @@ public sealed class KeyAction : InputAction, System.IEquatable<KeyAction>
         ActionType = type;
         _key = key;
         IsAutoRepeat = isAutoRepeat;
-        Name = type.ToString().WithSpacesBetweenWords();
+        Name = type.ToString().AddSpacesBetweenWords();
         UpdateDescription();
     }
 
@@ -89,37 +89,5 @@ public sealed class KeyAction : InputAction, System.IEquatable<KeyAction>
 
     public override int GetHashCode() => System.HashCode.Combine(ActionType, _key, IsAutoRepeat);
 
-    public static async System.Threading.Tasks.Task<KeyAction> CreateActionFromXmlAsync(System.Xml.XmlReader reader)
-    {
-        await reader.ReadAsync(); // move to Start Element ActionType
-
-        ThrowIfInvalidName(nameof(ActionType));
-        @Type type = (@Type)reader.ReadElementContentAsInt(); // this moves to start of next element
-
-        ThrowIfInvalidName(nameof(Key));
-        VirtualKey key = (VirtualKey)reader.ReadElementContentAsInt();
-
-        ThrowIfInvalidName(nameof(IsAutoRepeat));
-        bool isAutoRepeat = reader.ReadElementContentAsBoolean();
-
-        return new KeyAction(type, key, isAutoRepeat);
-
-        void ThrowIfInvalidName(string name)
-        {
-            if (!reader.Name.Equals(name, System.StringComparison.Ordinal))
-            {
-                throw new System.FormatException($"Unexpected element \"{reader.Name}\". Expected \"{name}\".");
-            }
-        }
-    }
-
-    public override void WriteXml(System.Xml.XmlWriter writer)
-    {
-        writer.WriteAttributeString("Type", nameof(KeyAction));
-
-        writer.WriteComment("ActionType is the type of the key action. it can be on of the following: 0 - KeyDown; 1 - KeyUp; 2 - KeyPress");
-        writer.WriteElementString(nameof(ActionType), ((int)ActionType).ToString(System.Globalization.CultureInfo.InvariantCulture));
-        writer.WriteElementString(nameof(Key), ((ushort)_key).ToString(System.Globalization.CultureInfo.InvariantCulture));
-        writer.WriteElementString(nameof(IsAutoRepeat), IsAutoRepeat.ToString(System.Globalization.CultureInfo.InvariantCulture).ToLowerInvariant());
-    }
+    private KeyAction() { Name = ActionType.ToString().AddSpacesBetweenWords(); }
 }

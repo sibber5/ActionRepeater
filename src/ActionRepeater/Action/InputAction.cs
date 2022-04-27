@@ -1,11 +1,14 @@
 ﻿using System.ComponentModel;
-using System.Xml;
-using System.Xml.Schema;
 using System.Runtime.CompilerServices;
+using System.Xml.Serialization;
 
 namespace ActionRepeater.Action;
 
-public abstract class InputAction : INotifyPropertyChanged, System.Xml.Serialization.IXmlSerializable
+[XmlInclude(typeof(KeyAction))]
+[XmlInclude(typeof(MouseButtonAction))]
+[XmlInclude(typeof(MouseWheelAction))]
+[XmlInclude(typeof(WaitAction))]
+public abstract class InputAction : INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler? PropertyChanged;
     protected void NotifyPropertyChanged([CallerMemberName] string propertyName = "") => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
@@ -13,18 +16,7 @@ public abstract class InputAction : INotifyPropertyChanged, System.Xml.Serializa
     public abstract string Name { get; }
     public abstract string Description { get; }
 
-    public abstract InputAction Clone();
+    public virtual InputAction Clone() => (InputAction)this.MemberwiseClone();
 
     public abstract void Play();
-
-    public XmlSchema? GetSchema() => null;
-
-    public void ReadXml(XmlReader reader) => throw new System.NotImplementedException("This shouldn't be used. Use the custom parser.");
-
-    public abstract void WriteXml(XmlWriter writer);
-
-    //public abstract System.Threading.Tasks.Task<InputAction> CreateActionFromXmlAsync(XmlReader reader);
-
-    /// <summary>This is intended for serialization only.</summary>
-    protected InputAction() { }
 }

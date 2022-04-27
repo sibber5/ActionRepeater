@@ -18,6 +18,9 @@ public sealed class MouseMovement
     /// </summary>
     public int DelayDuration { get => (int)(ActualDelay / 1.2); }
 
+    // for serialization
+    private MouseMovement() { }
+
     public MouseMovement(POINT deltaMovPoint, int actualDelayDuration)
     {
         MovPoint = deltaMovPoint;

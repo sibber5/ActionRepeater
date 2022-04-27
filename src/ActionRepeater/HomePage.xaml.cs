@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using ActionRepeater.Input;
+using System.ComponentModel;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Windows.Storage;
 using Windows.Storage.Pickers;
-using System.ComponentModel;
+using ActionRepeater.Helpers;
+using ActionRepeater.Input;
 
 namespace ActionRepeater;
 
@@ -75,7 +76,7 @@ public sealed partial class HomePage : Page, INotifyPropertyChanged
     private async void ExportButton_Click(object sender, RoutedEventArgs e)
     {
         var actions = ActionManager.Actions;
-        if (actions.Count < 1)
+        if (actions.Count == 0)
         {
             await new ContentDialog()
             {
@@ -100,13 +101,20 @@ public sealed partial class HomePage : Page, INotifyPropertyChanged
         StorageFile file = await savePicker.PickSaveFileAsync();
         if (file is null) return;
 
-        await System.Threading.Tasks.Task.Run(() => Helpers.SerializationHelper.Serialize(ActionManager.Actions, file.Path));
+        await System.Threading.Tasks.Task.Run(() =>
+        {
+            ActionData dat = new()
+            {
+                Actions = ActionManager.Actions,
+                CursorPathStartAbs = ActionManager.CursorPathStart,
+                CursorPathRel = ActionManager.CursorPath
+            };
+            SerializationHelper.Serialize(dat, file.Path);
+        });
     }
 
     private async void ImportButton_Click(object sender, RoutedEventArgs e)
     {
-        ActionManager.Actions.Clear();
-
         FileOpenPicker openPicker = new();
 
         // Associate the HWND with the file picker
@@ -117,18 +125,14 @@ public sealed partial class HomePage : Page, INotifyPropertyChanged
         StorageFile file = await openPicker.PickSingleFileAsync();
         if (file is null) return;
 
-        try
+        string? errMsg = await SerializationHelper.DeserializeActionsAsync(file.Path);
+        if (errMsg is not null)
         {
-            await Helpers.SerializationHelper.DeserializeActionsAsync(ActionManager.Actions, file.Path);
-        }
-        catch (SystemException ex) when (ex is FormatException || (ex is System.Xml.XmlException && ex.InnerException is FormatException))
-        {
-            ActionManager.Actions.Clear();
             await new ContentDialog()
             {
                 XamlRoot = App.MainWindow.Content.XamlRoot,
-                Title = $"File {file.Name} couldn't be loaded",
-                Content = ex.Message,
+                Title = $"{file.Name} couldn't be loaded",
+                Content = errMsg!,
                 CloseButtonText = "Ok"
             }.ShowAsync();
 
