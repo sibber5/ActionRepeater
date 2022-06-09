@@ -64,7 +64,7 @@ public sealed class KeyAction : InputAction, System.IEquatable<KeyAction>
         }
     }
 
-    public override InputAction Clone() => new KeyAction(ActionType, _key, IsAutoRepeat);
+    //public override InputAction Clone() => new KeyAction(ActionType, _key, IsAutoRepeat);
 
     public KeyAction(@Type type, VirtualKey key, bool isAutoRepeat = false)
     {
@@ -87,7 +87,7 @@ public sealed class KeyAction : InputAction, System.IEquatable<KeyAction>
     /// <inheritdoc cref="Equals(KeyAction)"/>
     public override bool Equals(object? obj) => Equals(obj as KeyAction);
 
-    public override int GetHashCode() => System.HashCode.Combine(ActionType, _key, IsAutoRepeat);
+    //public override int GetHashCode() => System.HashCode.Combine(ActionType, _key, IsAutoRepeat);
 
     private KeyAction() { Name = ActionType.ToString().AddSpacesBetweenWords(); }
 }

@@ -86,7 +86,7 @@ public sealed class MouseButtonAction : InputAction, System.IEquatable<MouseButt
         }
     }
 
-    public override InputAction Clone() => new MouseButtonAction(ActionType, _button, _position);
+    //public override InputAction Clone() => new MouseButtonAction(ActionType, _button, _position);
 
     public MouseButtonAction(@Type type, MouseButton button, POINT position, bool usePosition = true)
     {
@@ -111,7 +111,7 @@ public sealed class MouseButtonAction : InputAction, System.IEquatable<MouseButt
     /// <inheritdoc cref="Equals(MouseButtonAction)"/>
     public override bool Equals(object? obj) => Equals(obj as MouseButtonAction);
 
-    public override int GetHashCode() => System.HashCode.Combine(ActionType, _button, _position, _usePosition);
+    //public override int GetHashCode() => System.HashCode.Combine(ActionType, _button, _position, _usePosition);
 
     private MouseButtonAction() { Name = ActionType.ToString().AddSpacesBetweenWords(); }
 }

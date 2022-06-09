@@ -86,7 +86,7 @@ public sealed class MouseWheelAction : InputAction, System.IEquatable<MouseWheel
         }
     }
 
-    public override InputAction Clone() => new MouseWheelAction(IsHorizontal, _stepCount, _duration);
+    //public override InputAction Clone() => new MouseWheelAction(IsHorizontal, _stepCount, _duration);
 
     /// <param name="duration">The time it took/takes to scroll the wheel, in milliseconds/ticks.</param>
     public MouseWheelAction(bool isHorizontal, int stepCount, int duration = 0)
@@ -109,7 +109,7 @@ public sealed class MouseWheelAction : InputAction, System.IEquatable<MouseWheel
     /// <inheritdoc cref="Equals(MouseWheelAction)"/>
     public override bool Equals(object? obj) => Equals(obj as MouseWheelAction);
 
-    public override int GetHashCode() => System.HashCode.Combine(IsHorizontal, _stepCount, _duration);
+    //public override int GetHashCode() => System.HashCode.Combine(IsHorizontal, _stepCount, _duration);
 
     private MouseWheelAction() { }
 }

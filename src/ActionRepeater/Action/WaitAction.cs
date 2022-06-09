@@ -25,7 +25,7 @@ public sealed class WaitAction : InputAction, IEquatable<WaitAction>
 
     public override void Play() => throw new NotImplementedException("Player should use it's own method to wait the specified amount.");
 
-    public override InputAction Clone() => new WaitAction(_duration);
+    //public override InputAction Clone() => new WaitAction(_duration);
 
     public WaitAction(int duration)
     {
@@ -42,7 +42,7 @@ public sealed class WaitAction : InputAction, IEquatable<WaitAction>
     /// <inheritdoc cref="Equals(WaitAction)"/>
     public override bool Equals(object? obj) => Equals(obj as WaitAction);
 
-    public override int GetHashCode() => _duration.GetHashCode();
+    //public override int GetHashCode() => _duration.GetHashCode();
 
     private WaitAction() { _description = ActionDescriptionTemplates.Duration(_duration); }
 }

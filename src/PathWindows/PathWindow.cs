@@ -7,6 +7,7 @@ using System.Diagnostics;
 
 namespace PathWindows;
 
+// TODO: switch to win2d https://www.nuget.org/packages/Microsoft.Graphics.Win2D
 public sealed class PathWindow : IDisposable
 {
     private Thread? _thread;
