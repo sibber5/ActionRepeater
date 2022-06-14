@@ -2,7 +2,7 @@
     x:Class="ActionRepeater.OptionsPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:ActionRepeater"
+    xmlns:core="using:ActionRepeater.Core"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
@@ -26,7 +26,7 @@
             </StackPanel>
 
             <CheckBox x:Name="SetCursorPosOnClickCheckBox" Content="Set cursor position on clicks" HorizontalAlignment="Left"
-                      IsChecked="{x:Bind local:Options.Instance.UseCursorPosOnClicks, Mode=TwoWay}" />
+                      IsChecked="{x:Bind core:Options.Instance.UseCursorPosOnClicks, Mode=TwoWay}" />
 
         </StackPanel>
 
@@ -41,7 +41,7 @@
                            ValueChanged="MaxClickIntervalChanged" ValidationMode="InvalidInputOverwritten" />
             </StackPanel>
 
-            <CheckBox Content="Simulate keystroke auto-repeat" IsChecked="{x:Bind local:Options.Instance.SendKeyAutoRepeat, Mode=TwoWay}" HorizontalAlignment="Left" />
+            <CheckBox Content="Simulate keystroke auto-repeat" IsChecked="{x:Bind core:Options.Instance.SendKeyAutoRepeat, Mode=TwoWay}" HorizontalAlignment="Left" />
 
         </StackPanel>
 

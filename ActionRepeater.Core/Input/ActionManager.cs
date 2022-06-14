@@ -1,8 +1,8 @@
-﻿using ActionRepeater.Action;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using ActionRepeater.Core.Action;
 
-namespace ActionRepeater.Input;
+namespace ActionRepeater.Core.Input;
 
 public static class ActionManager
 {
@@ -202,18 +202,20 @@ public static class ActionManager
         ClearActions();
     }
 
-    public static void PlayActions()
+    /// <returns>
+    /// false if there are no actions to play or its already playing, otherwise true.
+    /// </returns>
+    public static bool TryPlayActions()
     {
         if (Actions.Count == 0 && CursorPathStart is null)
         {
-            App.MainWindow.UpdatePlayingStatus(null, false);
-            return;
+            return false;
         }
 
         if (Player.IsPlaying)
         {
             Player.Cancel();
-            return;
+            return false;
         }
 
         var actionsToPlay = Options.Instance.SendKeyAutoRepeat ? Actions : ActionsExlKeyRepeat;
@@ -232,5 +234,7 @@ public static class ActionManager
                 Player.PlayActions(actionsToPlay, null, false);
                 break;
         }
+
+        return true;
     }
 }

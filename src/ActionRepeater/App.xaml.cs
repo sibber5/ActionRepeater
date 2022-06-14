@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Runtime.Versioning;
 using Microsoft.UI.Xaml;
+using ActionRepeater.Core.Input;
 using PathWindows;
 
 [assembly: SupportedOSPlatform("Windows10.0.17763.0")]
@@ -44,14 +45,14 @@ public partial class App : Application
     {
         Debug.Assert(_pathWindow is null, "Path window is not null.");
 
-        if (Input.ActionManager.CursorPathStart is null)
+        if (ActionManager.CursorPathStart is null)
         {
             _pathWindow = new();
             _lastAbsPt = null;
         }
         else
         {
-            var absCursorPts = Input.ActionManager.AbsoluteCursorPath.Select(p => (System.Drawing.Point)p.MovPoint).ToArray();
+            var absCursorPts = ActionManager.AbsoluteCursorPath.Select(p => (System.Drawing.Point)p.MovPoint).ToArray();
             _lastAbsPt = absCursorPts[^1];
 
             _pathWindow = new(absCursorPts);
@@ -75,7 +76,7 @@ public partial class App : Application
         {
             Debug.WriteLine("Update Window Task Started.");
 
-            var cursorPath = Input.ActionManager.CursorPath;
+            var cursorPath = ActionManager.CursorPath;
 
             _lastCursorPtsCount = cursorPath.Count;
 
@@ -89,17 +90,17 @@ public partial class App : Application
 
                 if (cursorPath.Count == 0)
                 {
-                    _lastAbsPt = Input.ActionManager.CursorPathStart?.MovPoint;
+                    _lastAbsPt = ActionManager.CursorPathStart?.MovPoint;
                     _lastCursorPtsCount = cursorPath.Count;
                     _pathWindow.ClearPath();
                     continue;
                 }
 
-                _lastAbsPt ??= Input.ActionManager.CursorPathStart!.MovPoint;
+                _lastAbsPt ??= ActionManager.CursorPathStart!.MovPoint;
 
                 for (int i = _lastCursorPtsCount; i < cursorPath.Count; ++i)
                 {
-                    var newPoint = Action.MouseMovement.OffsetPointWithinScreens(_lastAbsPt.Value, cursorPath[i].MovPoint);
+                    var newPoint = Core.Action.MouseMovement.OffsetPointWithinScreens(_lastAbsPt.Value, cursorPath[i].MovPoint);
                     _pathWindow.AddLineToPath(_lastAbsPt.Value, newPoint);
                     _lastAbsPt = newPoint;
                 }

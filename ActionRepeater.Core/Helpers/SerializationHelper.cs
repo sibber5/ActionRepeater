@@ -1,12 +1,12 @@
 ﻿using System.IO;
 using System.Xml;
 using System.Xml.Serialization;
-using ActionRepeater.Action;
 using System.Collections.Generic;
 using System;
 using System.Threading.Tasks;
+using ActionRepeater.Core.Action;
 
-namespace ActionRepeater.Helpers;
+namespace ActionRepeater.Core.Helpers;
 
 public sealed class ActionData
 {

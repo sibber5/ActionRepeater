@@ -1,6 +1,9 @@
 ﻿using System;
 
-namespace ActionRepeater.Action;
+namespace ActionRepeater.Core.Action;
+
+// This is intentional because when selecting an action from the ui, two identical ones would not be considered the same one
+#pragma warning disable CS0659 // Type overrides Object.Equals(object o) but does not override Object.GetHashCode()
 
 public sealed class WaitAction : InputAction, IEquatable<WaitAction>
 {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace ActionRepeater.Utilities;
+namespace ActionRepeater.Core.Utilities;
 
 public class TimeConsistencyChecker
 {

@@ -4,9 +4,9 @@ using System.Collections.ObjectModel;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
-using ActionRepeater.Action;
-using ActionRepeater.Input;
-using ActionRepeater.Messaging;
+using ActionRepeater.Core.Action;
+using ActionRepeater.Core.Input;
+using ActionRepeater.Win32.WindowsAndMessages.Utilities;
 using System.Diagnostics;
 
 namespace ActionRepeater;
@@ -21,12 +21,17 @@ public sealed partial class MainWindow : Window, INotifyPropertyChanged
     public bool IsHoveringOverExcl => NavViewFrame.Content is HomePage home && home.IsHoveringOverExcl;
 
     public bool IsPlayingActions { get; private set; }
+    public void UpdatePlayingStatus() => UpdatePlayingStatus(null, Player.IsPlaying);
     public void UpdatePlayingStatus(object? sender, bool isPlayingNewVal)
     {
         IsPlayingActions = isPlayingNewVal;
-        UpdatePropertyInView(nameof(IsPlayingActions));
 
-        if (NavViewFrame.Content is HomePage home) home.IsRecordButtonEnabled = !isPlayingNewVal;
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            UpdatePropertyInView(nameof(IsPlayingActions));
+
+            if (NavViewFrame.Content is HomePage home) home.IsRecordButtonEnabled = !IsPlayingActions;
+        });
     }
 
     private ObservableCollection<InputAction> FilteredActions { get => ShowAutoRepeatToggle.IsOn ? ActionManager.Actions : ActionManager.ActionsExlKeyRepeat; }
@@ -44,8 +49,16 @@ public sealed partial class MainWindow : Window, INotifyPropertyChanged
 
         InitializeComponent();
 
-        _msgMonitor = new WindowMessageMonitor(this);
+        _msgMonitor = new WindowMessageMonitor(Handle);
         _msgMonitor.WindowMessageReceived += OnWindowMessage;
+
+        Recorder.ActionAdded += OnActionAdded;
+    }
+
+    private void OnActionAdded(object? sender, InputAction action)
+    {
+        //ScrollActionList();
+        ActionList.ScrollIntoView(action);
     }
 
     private void OnWindowMessage(object? sender, WindowMessageEventArgs e)

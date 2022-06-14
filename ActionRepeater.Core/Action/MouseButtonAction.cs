@@ -1,9 +1,12 @@
 ﻿using System.ComponentModel;
-using ActionRepeater.Extentions;
-using static ActionRepeater.Input.InputSimulator;
+using ActionRepeater.Core.Extentions;
+using static ActionRepeater.Core.Input.InputSimulator;
 using POINT = ActionRepeater.Win32.POINT;
 
-namespace ActionRepeater.Action;
+namespace ActionRepeater.Core.Action;
+
+// This is intentional because when selecting an action from the ui, two identical ones would not be considered the same one
+#pragma warning disable CS0659 // Type overrides Object.Equals(object o) but does not override Object.GetHashCode()
 
 public sealed class MouseButtonAction : InputAction, System.IEquatable<MouseButtonAction>
 {

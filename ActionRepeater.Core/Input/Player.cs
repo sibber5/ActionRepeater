@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using ActionRepeater.Action;
 using System.Diagnostics;
+using ActionRepeater.Core.Action;
 
-namespace ActionRepeater.Input;
+namespace ActionRepeater.Core.Input;
 
-internal static class Player
+public static class Player
 {
     private static CancellationTokenSource? _tokenSource;
 
@@ -81,7 +81,9 @@ internal static class Player
         Action<Task> cleanUp = task =>
         {
             Debug.WriteLine("Finished play task.");
-            App.MainWindow.DispatcherQueue.TryEnqueue(() => IsPlaying = false);
+
+            IsPlaying = false;
+            //App.MainWindow.DispatcherQueue.TryEnqueue(() => IsPlaying = false);
 
             Debug.WriteLine("Disposing token source...");
             _tokenSource!.Dispose();

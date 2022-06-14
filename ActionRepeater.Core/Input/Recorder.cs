@@ -1,38 +1,25 @@
 ﻿using System;
-using ActionRepeater.Win32.Input;
-using ActionRepeater.Action;
-using ActionRepeater.Utilities;
 using System.Diagnostics;
+using ActionRepeater.Win32.Input;
+using ActionRepeater.Win32.WindowsAndMessages.Utilities;
+using ActionRepeater.Core.Action;
+using ActionRepeater.Core.Utilities;
 
-namespace ActionRepeater.Input;
+namespace ActionRepeater.Core.Input;
 
-internal static class Recorder
+public static class Recorder
 {
     public static bool IsRecording { get; private set; }
 
-    private static bool _isSubscribed;
+    public static event EventHandler<InputAction>? ActionAdded;
+
+    public static bool IsSubscribed { get; private set; }
 
     private static bool _shouldRecordMouseMovement;
 
     private static int _lastMouseMoveTickCount;
     private static int _lastNewActionTickCount;
     private static readonly TimeConsistencyChecker _wheelMsgTCC = new();
-
-    private static void ReplaceLastAction(InputAction newAction)
-    {
-        // the caller of this func always checks if the action list is not empty
-        if (ActionManager.Actions[^1] == ActionManager.ActionsExlKeyRepeat[^1])
-        {
-            ActionManager.ActionsExlKeyRepeat[^1] = newAction;
-        }
-        ActionManager.Actions[^1] = newAction;
-    }
-
-    private static InputAction? GetLastAction()
-    {
-        if (ActionManager.Actions.Count > 0) return ActionManager.Actions[^1];
-        return null;
-    }
 
     public static void Reset()
     {
@@ -42,10 +29,11 @@ internal static class Recorder
 
     public static void StartRecording()
     {
-        if (!_isSubscribed)
+        if (!IsSubscribed)
         {
             //return;
-            RegisterRawInput();
+            //RegisterRawInput();
+            throw new InvalidOperationException("Not currently registered for raw input. Call Recorder.RegisterRawInput(IntPtr) to register.");
         }
 
         Reset();
@@ -67,7 +55,7 @@ internal static class Recorder
 
     public static void StopRecording()
     {
-        if (!_isSubscribed)
+        if (!IsSubscribed)
         {
             return;
         }
@@ -79,7 +67,7 @@ internal static class Recorder
         IsRecording = false;
     }
 
-    public static void RegisterRawInput()
+    public static void RegisterRawInput(IntPtr targetWindowHandle)
     {
         RAWINPUTDEVICE[] rid = new[]
         {
@@ -88,14 +76,14 @@ internal static class Recorder
                 usUsagePage = UsagePage.GenericDesktopControl,
                 usUsage = UsageId.Mouse,
                 dwFlags = RawInputFlags.INPUTSINK,
-                hwndTarget = App.MainWindow.Handle
+                hwndTarget = targetWindowHandle
             },
             new RAWINPUTDEVICE()
             {
                 usUsagePage = UsagePage.GenericDesktopControl,
                 usUsage = UsageId.Keyboard,
                 dwFlags = RawInputFlags.INPUTSINK,
-                hwndTarget = App.MainWindow.Handle
+                hwndTarget = targetWindowHandle
             }
         };
 
@@ -104,7 +92,7 @@ internal static class Recorder
             throw new System.ComponentModel.Win32Exception(System.Runtime.InteropServices.Marshal.GetLastPInvokeError());
         }
 
-        _isSubscribed = true;
+        IsSubscribed = true;
     }
 
     public static void UnregisterRawInput()
@@ -132,10 +120,10 @@ internal static class Recorder
             throw new System.ComponentModel.Win32Exception(System.Runtime.InteropServices.Marshal.GetLastPInvokeError());
         }
 
-        _isSubscribed = false;
+        IsSubscribed = false;
     }
 
-    public static void OnInputMessage(Messaging.WindowMessageEventArgs e)
+    public static void OnInputMessage(WindowMessageEventArgs e)
     {
         var inputCode = unchecked(e.Message.wParam & 0xff);
         if (!Win32.PInvoke.GetRawInputData(e.Message.lParam, out RAWINPUT inputData))
@@ -192,12 +180,13 @@ internal static class Recorder
                             break;
 
                         case RawMouseButtonState.LEFT_BUTTON_DOWN:
-                            if (App.MainWindow.IsHoveringOverExcl) break;
+                            // TODO: this: (and the one in the next case)
+                            //if (App.MainWindow.IsHoveringOverExcl) break;
                             AddAction(new MouseButtonAction(MouseButtonAction.Type.MouseButtonDown, InputSimulator.MouseButton.Left,
                                 Win32.PInvoke.Helpers.GetCursorPos(), Options.Instance.UseCursorPosOnClicks));
                             break;
                         case RawMouseButtonState.LEFT_BUTTON_UP:
-                            if (App.MainWindow.IsHoveringOverExcl) break;
+                            //if (App.MainWindow.IsHoveringOverExcl) break;
                             AddAction(new MouseButtonAction(MouseButtonAction.Type.MouseButtonUp, InputSimulator.MouseButton.Left,
                                 Win32.PInvoke.Helpers.GetCursorPos(), Options.Instance.UseCursorPosOnClicks));
                             break;
@@ -333,8 +322,25 @@ internal static class Recorder
         }
 
         ActionManager.AddAction(action);
-        App.MainWindow.ScrollActionList();
+
+        ActionAdded?.Invoke(null, action);
 
         _lastNewActionTickCount = curTickCount;
+    }
+
+    private static void ReplaceLastAction(InputAction newAction)
+    {
+        // the caller of this func always checks if the action list is not empty
+        if (ActionManager.Actions[^1] == ActionManager.ActionsExlKeyRepeat[^1])
+        {
+            ActionManager.ActionsExlKeyRepeat[^1] = newAction;
+        }
+        ActionManager.Actions[^1] = newAction;
+    }
+
+    private static InputAction? GetLastAction()
+    {
+        if (ActionManager.Actions.Count > 0) return ActionManager.Actions[^1];
+        return null;
     }
 }

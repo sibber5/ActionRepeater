@@ -1,11 +1,9 @@
 ﻿using System.Collections.Generic;
-using MouseButton = ActionRepeater.Input.InputSimulator.MouseButton;
+using MouseButton = ActionRepeater.Core.Input.InputSimulator.MouseButton;
 using POINT = ActionRepeater.Win32.POINT;
 using VirtualKey = ActionRepeater.Win32.Input.VirtualKey;
 
-namespace ActionRepeater.Action;
-
-#pragma warning disable HAA0601, HAA0102
+namespace ActionRepeater.Core.Action;
 
 internal static class ActionDescriptionTemplates
 {

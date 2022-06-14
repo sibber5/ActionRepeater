@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace ActionRepeater.Extentions;
+namespace ActionRepeater.Core.Extentions;
 
 public static class ExtentionMethods
 {

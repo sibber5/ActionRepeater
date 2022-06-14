@@ -1,8 +1,8 @@
 ﻿using System.Linq;
-using ActionRepeater.Extentions;
+using ActionRepeater.Core.Extentions;
 using ActionRepeater.Win32;
 
-namespace ActionRepeater.Action;
+namespace ActionRepeater.Core.Action;
 
 public sealed class MouseMovement
 {

@@ -2,7 +2,7 @@
 using System.Runtime.CompilerServices;
 using System.Xml.Serialization;
 
-namespace ActionRepeater.Action;
+namespace ActionRepeater.Core.Action;
 
 [XmlInclude(typeof(KeyAction))]
 [XmlInclude(typeof(MouseButtonAction))]

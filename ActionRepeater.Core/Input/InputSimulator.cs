@@ -3,7 +3,7 @@ using ActionRepeater.Win32;
 using ActionRepeater.Win32.Input;
 using static ActionRepeater.Win32.PInvoke.Helpers;
 
-namespace ActionRepeater.Input;
+namespace ActionRepeater.Core.Input;
 
 public static class InputSimulator
 {

@@ -1,9 +1,12 @@
 ﻿using System.ComponentModel;
-using ActionRepeater.Input;
-using ActionRepeater.Extentions;
+using ActionRepeater.Core.Input;
+using ActionRepeater.Core.Extentions;
 using VirtualKey = ActionRepeater.Win32.Input.VirtualKey;
 
-namespace ActionRepeater.Action;
+namespace ActionRepeater.Core.Action;
+
+// This is intentional because when selecting an action from the ui, two identical ones would not be considered the same one
+#pragma warning disable CS0659 // Type overrides Object.Equals(object o) but does not override Object.GetHashCode()
 
 public sealed class KeyAction : InputAction, System.IEquatable<KeyAction>
 {

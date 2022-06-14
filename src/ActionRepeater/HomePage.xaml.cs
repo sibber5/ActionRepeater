@@ -5,8 +5,8 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Windows.Storage;
 using Windows.Storage.Pickers;
-using ActionRepeater.Helpers;
-using ActionRepeater.Input;
+using ActionRepeater.Core.Helpers;
+using ActionRepeater.Core.Input;
 
 namespace ActionRepeater;
 
@@ -37,8 +37,8 @@ public sealed partial class HomePage : Page, INotifyPropertyChanged
 
     public HomePage()
     {
-        this.InitializeComponent();
-        this.NavigationCacheMode = Microsoft.UI.Xaml.Navigation.NavigationCacheMode.Required;
+        InitializeComponent();
+        NavigationCacheMode = Microsoft.UI.Xaml.Navigation.NavigationCacheMode.Required;
     }
 
     private void RecordButton_Click(object sender, RoutedEventArgs e)
@@ -50,13 +50,18 @@ public sealed partial class HomePage : Page, INotifyPropertyChanged
             return;
         }
 
+        if (!Recorder.IsSubscribed) Recorder.RegisterRawInput(App.MainWindow.Handle);
+
         //PlayButton.IsEnabled = false;
         Recorder.StartRecording();
     }
 
     private void PlayButton_Click(object sender, RoutedEventArgs e)
     {
-        ActionManager.PlayActions();
+        if (!ActionManager.TryPlayActions())
+        {
+            App.MainWindow.UpdatePlayingStatus();
+        }
     }
 
     private void CursorPathButton_Click(object sender, RoutedEventArgs e)

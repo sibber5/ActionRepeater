@@ -1,10 +1,29 @@
 ﻿using System;
-using ActionRepeater.Win32;
-using ActionRepeater.Win32.WindowsAndMessages;
 
-namespace ActionRepeater.Messaging;
+namespace ActionRepeater.Win32.WindowsAndMessages.Utilities;
 
-// From https://github.com/dotMorten/WinUIEx by dotMorten (MIT Licence)
+// From https://github.com/dotMorten/WinUIEx by dotMorten
+// MIT License
+// 
+// Copyright(c) 2021 Morten Nielsen
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
 
 /// <summary>
 /// The message monitor allows you to monitor all WM_MESSAGE events for a given window.
@@ -18,23 +37,23 @@ public sealed class WindowMessageMonitor : IDisposable
     /// <summary>
     /// Initialize a new instance of the <see cref="WindowMessageMonitor"/> class.
     /// </summary>
-    /// <param name="window">The window to listen to messages for</param>
-    public WindowMessageMonitor(Microsoft.UI.Xaml.Window window) : this(WinRT.Interop.WindowNative.GetWindowHandle(window)) { }
-
-    /// <summary>
-    /// Initialize a new instance of the <see cref="WindowMessageMonitor"/> class.
-    /// </summary>
     /// <param name="hwnd">The window handle to listen to messages for</param>
     public WindowMessageMonitor(IntPtr hwnd)
     {
         _hwnd = hwnd;
     }
 
+    public void Dispose()
+    {
+        if (_windowMessageReceived is not null) Unsubscribe();
+    }
+
     private event EventHandler<WindowMessageEventArgs>? _windowMessageReceived;
+
     /// <summary>
     /// Event raised when a windows message is received.
     /// </summary>
-    public event EventHandler<WindowMessageEventArgs>? WindowMessageReceived
+    public event EventHandler<WindowMessageEventArgs> WindowMessageReceived
     {
         add
         {
@@ -87,10 +106,5 @@ public sealed class WindowMessageMonitor : IDisposable
                 callback = null;
             }
         }
-    }
-
-    public void Dispose()
-    {
-        if (_windowMessageReceived is not null) Unsubscribe();
     }
 }

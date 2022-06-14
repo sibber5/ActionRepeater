@@ -1,4 +1,5 @@
-﻿using Microsoft.UI.Xaml.Controls;
+﻿using ActionRepeater.Core;
+using Microsoft.UI.Xaml.Controls;
 
 namespace ActionRepeater;
 

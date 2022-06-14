@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using ActionRepeater.Action;
+using ActionRepeater.Core.Action;
 
-namespace ActionRepeater;
+namespace ActionRepeater.Core;
 
 public class Options : INotifyPropertyChanged
 {
@@ -12,17 +12,17 @@ public class Options : INotifyPropertyChanged
     public event PropertyChangedEventHandler? PropertyChanged;
     protected void NotifyPropertyChanged([CallerMemberName] string propertyName = "") => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
-    public CursorMovementMode CursorMovementMode { get; internal set; } = CursorMovementMode.None;
+    public CursorMovementMode CursorMovementMode { get; set; } = CursorMovementMode.None;
 
     private bool _useCursorPosOnClicks = true;
     public bool UseCursorPosOnClicks
     {
         get => _useCursorPosOnClicks;
-        internal set
+        set
         {
             if (_useCursorPosOnClicks == value) return;
 
-            foreach (InputAction action in ActionRepeater.Input.ActionManager.Actions)
+            foreach (InputAction action in Input.ActionManager.Actions)
             {
                 if (action is MouseButtonAction mbAction)
                 {
@@ -34,13 +34,13 @@ public class Options : INotifyPropertyChanged
         }
     }
 
-    public int MaxClickInterval { get; internal set; } = 120;
+    public int MaxClickInterval { get; set; } = 120;
 
     private bool _sendKeyAutoRepeat = true;
     public bool SendKeyAutoRepeat
     {
         get => _sendKeyAutoRepeat;
-        internal set
+        set
         {
             _sendKeyAutoRepeat = value;
             NotifyPropertyChanged();
