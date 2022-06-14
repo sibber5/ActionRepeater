@@ -47,7 +47,7 @@
       <None Include="..\..\.editorconfig" Link=".editorconfig" />
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="..\..\ActionRepeater.Core\ActionRepeater.Core.csproj" />
+        <ProjectReference Include="..\ActionRepeater.Core\ActionRepeater.Core.csproj" />
         <ProjectReference Include="..\ActionRepeater.Win32\ActionRepeater.Win32.csproj" />
         <ProjectReference Include="..\PathWindows\PathWindows.csproj" />
     </ItemGroup>
