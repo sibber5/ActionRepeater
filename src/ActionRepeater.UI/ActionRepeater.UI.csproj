@@ -58,6 +58,8 @@
     <ItemGroup>
       <None Remove="Controls\CmdBarButton.xaml" />
       <None Remove="Controls\CmdBarToggleButton.xaml" />
+      <None Remove="Pages\CmdBarHomePage.xaml" />
+      <None Remove="Pages\CmdBarOptionsPage.xaml" />
       <None Remove="Styles.xaml" />
       <None Remove="Views\ActionListView.xaml" />
       <None Remove="Views\CmdBarHomeView.xaml" />
@@ -65,6 +67,11 @@
     </ItemGroup>
     <ItemGroup>
       <Resource Remove="Views\ActionListView.xaml" />
+    </ItemGroup>
+    <ItemGroup>
+      <Page Update="Pages\CmdBarOptionsPage.xaml">
+        <Generator>MSBuild:Compile</Generator>
+      </Page>
     </ItemGroup>
     <ItemGroup>
       <Page Update="Views\CmdBarOptionsView.xaml">
@@ -93,6 +100,11 @@
     </ItemGroup>
     <ItemGroup>
       <Page Update="Views\CommandBarView.xaml">
+        <Generator>MSBuild:Compile</Generator>
+      </Page>
+    </ItemGroup>
+    <ItemGroup>
+      <Page Update="Pages\CmdBarHomePage.xaml">
         <Generator>MSBuild:Compile</Generator>
       </Page>
     </ItemGroup>

@@ -11,7 +11,7 @@
                     IsBackButtonVisible="Collapsed"
                     IsSettingsVisible="False"
                     SelectionChanged="CmdBarNavView_SelectionChanged"
-                    Loaded="_cmdBarNavView_Loaded">
+                    Loaded="CmdBarNavView_Loaded">
 
         <NavigationView.MenuItems>
             <NavigationViewItem Tag="{x:Bind HomeTagProp}" Content="Home" />
@@ -22,12 +22,9 @@
                       HorizontalScrollMode="Enabled"
                       HorizontalScrollBarVisibility="Auto"
                       VerticalScrollMode="Disabled"
-                      VerticalScrollBarVisibility="Disabled"
-                      Background="{ThemeResource AppBarBackgroundThemeBrush}">
+                      VerticalScrollBarVisibility="Disabled">
 
-            <ContentPresenter Padding="10,0,10,10"
-                            Background="{ThemeResource AppBarBackgroundThemeBrush}"
-                            Content="{x:Bind NavigationService.CurrentCmdBarView, Mode=OneWay}" />
+            <Frame x:Name="_contentFrame" Padding="10,0,10,10" Background="{ThemeResource AppBarBackgroundThemeBrush}" />
 
         </ScrollViewer>
 

@@ -14,7 +14,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <views:CommandBarView Grid.Row="0" NavigationService="{x:Bind ViewModel.CmdBarNavigationService}" />
+        <views:CommandBarView Grid.Row="0" ViewModel="{x:Bind ViewModel.CommandBarViewModel}" />
 
         <views:ActionListView Grid.Row="1" ViewModel="{x:Bind ViewModel.ActionListViewModel}" />
 

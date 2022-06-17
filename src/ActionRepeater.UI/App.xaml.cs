@@ -3,8 +3,6 @@ using Microsoft.UI.Xaml;
 using ActionRepeater.Win32;
 using ActionRepeater.Win32.WindowsAndMessages;
 using ActionRepeater.UI.Utilities;
-using ActionRepeater.UI.Services;
-using ActionRepeater.UI.ViewModels;
 
 namespace ActionRepeater.UI;
 
@@ -26,7 +24,6 @@ public partial class App : Application
     //private static Win32.POINT? _lastAbsPt;
 
     private readonly ActionHolder _copiedActionHolder = new();
-    private readonly CmdBarNavigationService _cmdBarNavService = new();
 
     /// <summary>
     /// Initializes the singleton application object.  This is the first line of authored code
@@ -126,12 +123,10 @@ public partial class App : Application
     /// <param name="args">Details about the launch request and process.</param>
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
-        //_cmdBarNavService.Navigate(CmdBarNavigationService.Tag.Home);
-
         MainWindow = new MainWindow
         {
             Title = MainWindowTitle,
-            ViewModel = new(_copiedActionHolder, _cmdBarNavService)
+            ViewModel = new(_copiedActionHolder)
         };
 
         // The Window object doesn't have Width and Height properties in WInUI 3.

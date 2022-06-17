@@ -1,5 +1,4 @@
-﻿using ActionRepeater.UI.Services;
-using ActionRepeater.UI.Utilities;
+﻿using ActionRepeater.UI.Utilities;
 
 namespace ActionRepeater.UI.ViewModels;
 
@@ -7,11 +6,11 @@ public class MainViewModel : ViewModelBase
 {
     public ActionListViewModel ActionListViewModel { get; }
 
-    public CmdBarNavigationService CmdBarNavigationService { get; }
+    public CommandBarViewModel CommandBarViewModel { get; }
 
-    public MainViewModel(ActionHolder copiedActionHolder, CmdBarNavigationService cmdBarNavService)
+    public MainViewModel(ActionHolder copiedActionHolder)
     {
         ActionListViewModel = new(copiedActionHolder);
-        CmdBarNavigationService = cmdBarNavService;
+        CommandBarViewModel = new();
     }
 }

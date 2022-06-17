@@ -1,5 +1,5 @@
 ﻿using System;
-using ActionRepeater.UI.Services;
+using ActionRepeater.UI.Pages;
 using ActionRepeater.UI.ViewModels;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -8,39 +8,41 @@ namespace ActionRepeater.UI.Views;
 
 public sealed partial class CommandBarView : UserControl
 {
-    public CmdBarNavigationService NavigationService { get; set; } = null!;
+    public CommandBarViewModel ViewModel { get; set; } = null!;
 
-    private string HomeTagProp => CmdBarNavigationService.Tag.Home.ToString();
-    private string OptionsTagProp => CmdBarNavigationService.Tag.Options.ToString();
+    private const string HomeTag = "h";
+    private const string OptionsTag = "o";
+
+    private string HomeTagProp => HomeTag;
+    private string OptionsTagProp => OptionsTag;
 
     public CommandBarView()
     {
         InitializeComponent();
     }
 
+    private void CmdBarNavView_Loaded(object sender, RoutedEventArgs e)
+    {
+        _cmdBarNavView.SelectedItem = _cmdBarNavView.MenuItems[0];
+        NavigateCommandBar(HomeTag, new Microsoft.UI.Xaml.Media.Animation.EntranceNavigationTransitionInfo());
+    }
+
     private void CmdBarNavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
-        //NavigateCommandBar(args.SelectedItemContainer.Tag.ToString(), args.RecommendedNavigationTransitionInfo);
-        NavigationService.Navigate(args.SelectedItemContainer.Tag.ToString());
+        NavigateCommandBar(args.SelectedItemContainer.Tag.ToString(), args.RecommendedNavigationTransitionInfo);
     }
 
-    private void _cmdBarNavView_Loaded(object sender, RoutedEventArgs e)
+    private void NavigateCommandBar(string? tag, Microsoft.UI.Xaml.Media.Animation.NavigationTransitionInfo navInfo)
     {
-        NavigationService.Navigate(CmdBarNavigationService.Tag.Home);
+        switch (tag)
+        {
+            case HomeTag:
+                _contentFrame.Navigate(typeof(CmdBarHomePage), ViewModel.HomeViewModel, navInfo);
+                break;
+
+            case OptionsTag:
+                _contentFrame.Navigate(typeof(CmdBarOptionsPage), ViewModel.OptionsViewModel, navInfo);
+                break;
+        }
     }
-
-    //private void NavigateCommandBar(string? tag, Microsoft.UI.Xaml.Media.Animation.NavigationTransitionInfo navInfo)
-    //{
-    //    Type? pageType = tag switch
-    //    {
-    //        HomePageTag => typeof(HomePage),
-    //        OptionsPageTag => typeof(OptionsPage),
-    //        _ => null
-    //    };
-
-    //    if (pageType is not null && !Equals(_navViewFrame.CurrentSourcePageType, pageType))
-    //    {
-    //        _navViewFrame.Navigate(pageType, null, navInfo);
-    //    }
-    //}
 }
