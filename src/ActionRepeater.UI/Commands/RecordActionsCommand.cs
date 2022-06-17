@@ -4,6 +4,13 @@ namespace ActionRepeater.UI.Commands;
 
 public class RecordActionsCommand : CommandBase
 {
+    public RecordActionsCommand()
+    {
+        Player.IsPlayingChanged += (_, _) => RaiseCanExecuteChanged();
+    }
+
+    public override bool CanExecute(object? parameter) => !Player.IsPlaying;
+
     public override void Execute(object? parameter)
     {
         if (Recorder.IsRecording)

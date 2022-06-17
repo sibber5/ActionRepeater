@@ -11,6 +11,7 @@ public static class Recorder
 {
     public static bool IsRecording { get; private set; }
 
+    public static event EventHandler<bool>? IsRecordingChanged;
     public static event EventHandler<InputAction>? ActionAdded;
 
     public static bool IsSubscribed { get; private set; }
@@ -51,6 +52,7 @@ public static class Recorder
         }
 
         IsRecording = true;
+        IsRecordingChanged?.Invoke(null, true);
     }
 
     public static void StopRecording()
@@ -65,6 +67,7 @@ public static class Recorder
         if (ActionManager.CursorPath.Count == 0) ActionManager.CursorPathStart = null;
 
         IsRecording = false;
+        IsRecordingChanged?.Invoke(null, false);
     }
 
     public static void RegisterRawInput(IntPtr targetWindowHandle)
@@ -328,15 +331,8 @@ public static class Recorder
         _lastNewActionTickCount = curTickCount;
     }
 
-    private static void ReplaceLastAction(InputAction newAction)
-    {
-        // the caller of this func always checks if the action list is not empty
-        if (ActionManager.Actions[^1] == ActionManager.ActionsExlKeyRepeat[^1])
-        {
-            ActionManager.ActionsExlKeyRepeat[^1] = newAction;
-        }
-        ActionManager.Actions[^1] = newAction;
-    }
+    // this is set in ActionManager's static ctor
+    public static Action<InputAction> ReplaceLastAction = null!;
 
     private static InputAction? GetLastAction()
     {

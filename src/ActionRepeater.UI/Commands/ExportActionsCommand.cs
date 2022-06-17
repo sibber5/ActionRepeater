@@ -1,11 +1,12 @@
-﻿using System.Collections.Specialized;
+﻿using System;
+using System.Collections.Specialized;
 using ActionRepeater.Core.Input;
 
 namespace ActionRepeater.UI.Commands;
 
-public class ClearActionsCommand : CommandBase
+public class ExportActionsCommand : CommandBase
 {
-    public ClearActionsCommand()
+    public ExportActionsCommand()
     {
         ActionManager.ActionCollectionChanged += Actions_CollectionChanged;
     }
@@ -22,5 +23,9 @@ public class ClearActionsCommand : CommandBase
 
     public override bool CanExecute(object? parameter) => ActionManager.Actions.Count > 0;
 
-    public override void Execute(object? parameter) => ActionManager.ClearActions();
+    public override void Execute(object? parameter)
+    {
+        // TODO: implement ExportActionsCommand.Execute
+        throw new NotImplementedException();
+    }
 }

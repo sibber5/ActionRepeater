@@ -32,8 +32,6 @@ public partial class App : Application
     public App()
     {
         InitializeComponent();
-        Core.Input.ActionManager.AddAction(new Core.Action.KeyAction(Core.Action.KeyAction.Type.KeyDown, Win32.Input.VirtualKey.A));
-        Core.Input.ActionManager.AddAction(new Core.Action.KeyAction(Core.Action.KeyAction.Type.KeyUp, Win32.Input.VirtualKey.A));
     }
 
     /// <summary>

@@ -10,7 +10,16 @@ namespace ActionRepeater.UI.Views;
 
 public sealed partial class ActionListView : UserControl
 {
-    public ActionListViewModel ViewModel { get; set; } = null!;
+    private ActionListViewModel _viewModel = null!;
+    public ActionListViewModel ViewModel
+    {
+        get => _viewModel;
+        set
+        {
+            _viewModel = value;
+            _viewModel.ShowErrorDialog = ShowErrorDialog;
+        }
+    }
 
     public ActionListView()
     {

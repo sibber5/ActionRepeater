@@ -15,7 +15,7 @@ public class RemoveActionCommand : CommandBase
 
     public override async void Execute(object? parameter)
     {
-        if (true) //(!ActionManager.TryRemoveAction(_listViewModel.SelectedAction!))
+        if (!ActionManager.TryRemoveAction(_listViewModel.SelectedAction!))
         {
             if (_listViewModel.ShowErrorDialog is null) return;
 

@@ -9,6 +9,8 @@ namespace ActionRepeater.Core.Input;
 
 public static class Player
 {
+    public static Action<System.Action>? ExecuteOnUIThread;
+
     private static CancellationTokenSource? _tokenSource;
 
     private static bool _isPlaying;
@@ -21,6 +23,7 @@ public static class Player
             IsPlayingChanged?.Invoke(null, value);
         }
     }
+
     public static event EventHandler<bool>? IsPlayingChanged;
 
     private static Task PlayCursorMovement(IReadOnlyList<MouseMovement> path, bool isPathRelative)
@@ -82,7 +85,14 @@ public static class Player
         {
             Debug.WriteLine("Finished play task.");
 
-            IsPlaying = false;
+            if (ExecuteOnUIThread is null)
+            {
+                IsPlaying = false;
+            }
+            else
+            {
+                ExecuteOnUIThread(() => IsPlaying = false);
+            }
             //App.MainWindow.DispatcherQueue.TryEnqueue(() => IsPlaying = false);
 
             Debug.WriteLine("Disposing token source...");
@@ -111,4 +121,6 @@ public static class Player
         Debug.WriteLine("Cancelling play task...");
         _tokenSource!.Cancel();
     }
+
+    public static void RefreshIsPlaying() => IsPlayingChanged?.Invoke(null, _isPlaying);
 }

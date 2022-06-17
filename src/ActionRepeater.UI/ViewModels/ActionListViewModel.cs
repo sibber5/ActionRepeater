@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -25,7 +26,7 @@ public class ActionListViewModel : ViewModelBase
         }
     }
 
-    public ObservableCollection<InputAction> FilteredActions { get => ShowKeyRepeatActions ? ActionManager.Actions : ActionManager.ActionsExlKeyRepeat; }
+    public IReadOnlyList<InputAction> FilteredActions { get => ShowKeyRepeatActions ? ActionManager.Actions : ActionManager.ActionsExlKeyRepeat; }
 
     private InputAction? _selectedAction;
     public InputAction? SelectedAction

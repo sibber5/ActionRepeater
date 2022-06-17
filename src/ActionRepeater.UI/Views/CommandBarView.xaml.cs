@@ -24,7 +24,7 @@ public sealed partial class CommandBarView : UserControl
     private void CmdBarNavView_Loaded(object sender, RoutedEventArgs e)
     {
         _cmdBarNavView.SelectedItem = _cmdBarNavView.MenuItems[0];
-        NavigateCommandBar(HomeTag, new Microsoft.UI.Xaml.Media.Animation.EntranceNavigationTransitionInfo());
+        NavigateCommandBar(HomeTag, new Microsoft.UI.Xaml.Media.Animation.SuppressNavigationTransitionInfo());
     }
 
     private void CmdBarNavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)

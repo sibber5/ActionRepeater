@@ -3,10 +3,11 @@ using ActionRepeater.Core.Input;
 
 namespace ActionRepeater.UI.Commands;
 
-public class ClearActionsCommand : CommandBase
+public class PlayActionsCommand : CommandBase
 {
-    public ClearActionsCommand()
+    public PlayActionsCommand()
     {
+        Recorder.IsRecordingChanged += (_, _) => RaiseCanExecuteChanged();
         ActionManager.ActionCollectionChanged += Actions_CollectionChanged;
     }
 
@@ -20,7 +21,13 @@ public class ClearActionsCommand : CommandBase
         }
     }
 
-    public override bool CanExecute(object? parameter) => ActionManager.Actions.Count > 0;
+    public override bool CanExecute(object? parameter) => !Recorder.IsRecording && ActionManager.Actions.Count > 0;
 
-    public override void Execute(object? parameter) => ActionManager.ClearActions();
+    public override void Execute(object? parameter)
+    {
+        if (!ActionManager.TryPlayActions())
+        {
+            Player.RefreshIsPlaying();
+        }
+    }
 }

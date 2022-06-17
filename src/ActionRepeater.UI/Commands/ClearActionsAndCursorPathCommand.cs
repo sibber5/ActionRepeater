@@ -7,7 +7,7 @@ public class ClearActionsAndCursorPathCommand : CommandBase
 {
     public ClearActionsAndCursorPathCommand()
     {
-        ActionManager.Actions.CollectionChanged += Actions_CollectionChanged;
+        ActionManager.ActionCollectionChanged += Actions_CollectionChanged;
         ActionManager.CursorPathStartChanged += ActionManager_CursorPathStartChanged;
     }
 

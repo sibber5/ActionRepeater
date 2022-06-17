@@ -89,7 +89,8 @@ public static class SerializationHelper
         {
             for (int i = 0; i < dat.Actions.Count; ++i)
             {
-                Input.ActionManager.Actions.Add(dat.Actions[i]);
+                // TODO: fix this:
+                //Input.ActionManager.Actions.Add(dat.Actions[i]);
             }
         }
 
