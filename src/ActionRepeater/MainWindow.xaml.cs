@@ -57,7 +57,7 @@ public sealed partial class MainWindow : Window, INotifyPropertyChanged
 
     private void OnActionAdded(object? sender, InputAction action)
     {
-        //ScrollActionList();
+        //ActionList.ScrollIntoView(ActionList.Items[^1]);
         ActionList.ScrollIntoView(action);
     }
 
@@ -125,11 +125,6 @@ public sealed partial class MainWindow : Window, INotifyPropertyChanged
         {
             NavViewFrame.Navigate(pageType, null, navInfo);
         }
-    }
-
-    public void ScrollActionList()
-    {
-        ActionList.ScrollIntoView(ActionList.Items[^1]);
     }
 
     private void ShowAutoRepeatActions_Toggled(object sender, RoutedEventArgs e)

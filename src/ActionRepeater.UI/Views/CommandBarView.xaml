@@ -1,0 +1,36 @@
+﻿<UserControl
+    x:Class="ActionRepeater.UI.Views.CommandBarView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <NavigationView x:Name="_cmdBarNavView"
+                    PaneDisplayMode="Top"
+                    IsBackButtonVisible="Collapsed"
+                    IsSettingsVisible="False"
+                    SelectionChanged="CmdBarNavView_SelectionChanged"
+                    Loaded="_cmdBarNavView_Loaded">
+
+        <NavigationView.MenuItems>
+            <NavigationViewItem Tag="{x:Bind HomeTagProp}" Content="Home" />
+            <NavigationViewItem Tag="{x:Bind OptionsTagProp}" Content="Options"/>
+        </NavigationView.MenuItems>
+
+        <ScrollViewer ZoomMode="Disabled"
+                      HorizontalScrollMode="Enabled"
+                      HorizontalScrollBarVisibility="Auto"
+                      VerticalScrollMode="Disabled"
+                      VerticalScrollBarVisibility="Disabled"
+                      Background="{ThemeResource AppBarBackgroundThemeBrush}">
+
+            <ContentPresenter Padding="10,0,10,10"
+                            Background="{ThemeResource AppBarBackgroundThemeBrush}"
+                            Content="{x:Bind NavigationService.CurrentCmdBarView, Mode=OneWay}" />
+
+        </ScrollViewer>
+
+    </NavigationView>
+    
+</UserControl>

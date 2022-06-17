@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using ActionRepeater.Core.Action;
 
@@ -6,11 +7,24 @@ namespace ActionRepeater.Core.Input;
 
 public static class ActionManager
 {
+    public static event EventHandler<MouseMovement?>? CursorPathStartChanged;
+
+    private static MouseMovement? _cursorPathStart;
     /// <remarks>
     /// If this is null then <see cref="CursorPath"/> is empty;
     /// and if <see cref="CursorPath"/> is not empty then this is not null.
     /// </remarks>
-    public static MouseMovement? CursorPathStart { get; set; }
+    public static MouseMovement? CursorPathStart
+    {
+        get => _cursorPathStart;
+        set
+        {
+            if (value == _cursorPathStart) return;
+
+            _cursorPathStart = value;
+            CursorPathStartChanged?.Invoke(null, value);
+        }
+    }
     public static List<MouseMovement> CursorPath { get; } = new();
     public static IReadOnlyList<MouseMovement> AbsoluteCursorPath
     {
@@ -130,6 +144,11 @@ public static class ActionManager
         }
     }
 
+    /// <returns>true if the action has been modified (in <see cref="ActionsExlKeyRepeat"/>).</returns>
+    /// <remarks>
+    /// A modified action is usually a <see cref="KeyAction"/> with extended duration which would be 
+    /// in place of the auto repeat actions in <see cref="Actions"/>.
+    /// </remarks>
     public static bool HasActionBeenModified(InputAction action)
     {
         foreach (int idx in _modifiedFilteredActionsIdxs)
@@ -143,6 +162,11 @@ public static class ActionManager
         return false;
     }
 
+    /// <returns>false if the action is a modified action (see remarks), otherwise true (indicating the action was removed).</returns>
+    /// <remarks>
+    /// A modified action is usually a <see cref="KeyAction"/> with extended duration which would be 
+    /// in place of the auto repeat actions in <see cref="Actions"/>.
+    /// </remarks>
     public static bool TryRemoveAction(InputAction action)
     {
         if (HasActionBeenModified(action)) return false;

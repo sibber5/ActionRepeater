@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "ActionRepeater.UI (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "ActionRepeater.UI (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
