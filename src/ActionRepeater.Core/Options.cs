@@ -12,7 +12,16 @@ public class Options : INotifyPropertyChanged
     public event PropertyChangedEventHandler? PropertyChanged;
     protected void NotifyPropertyChanged([CallerMemberName] string propertyName = "") => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
-    public CursorMovementMode CursorMovementMode { get; set; } = CursorMovementMode.None;
+    private CursorMovementMode _cursorMovementMode = CursorMovementMode.None;
+    public CursorMovementMode CursorMovementMode
+    {
+        get => _cursorMovementMode;
+        set
+        {
+            _cursorMovementMode = value;
+            NotifyPropertyChanged();
+        }
+    }
 
     private bool _useCursorPosOnClicks = true;
     public bool UseCursorPosOnClicks
@@ -34,7 +43,16 @@ public class Options : INotifyPropertyChanged
         }
     }
 
-    public int MaxClickInterval { get; set; } = 120;
+    private int _maxClickInterval = 120;
+    public int MaxClickInterval
+    {
+        get => _maxClickInterval;
+        set
+        {
+            _maxClickInterval = value;
+            NotifyPropertyChanged();
+        }
+    }
 
     private bool _sendKeyAutoRepeat = true;
     public bool SendKeyAutoRepeat
