@@ -10,7 +10,7 @@ public class Options : INotifyPropertyChanged
     public static Options Instance { get; } = new();
 
     public event PropertyChangedEventHandler? PropertyChanged;
-    protected void NotifyPropertyChanged([CallerMemberName] string propertyName = "") => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    protected void RaisePropertyChanged([CallerMemberName] string propertyName = null!) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
     private CursorMovementMode _cursorMovementMode = CursorMovementMode.None;
     public CursorMovementMode CursorMovementMode
@@ -19,7 +19,7 @@ public class Options : INotifyPropertyChanged
         set
         {
             _cursorMovementMode = value;
-            NotifyPropertyChanged();
+            RaisePropertyChanged();
         }
     }
 
@@ -39,7 +39,7 @@ public class Options : INotifyPropertyChanged
                 }
             }
             _useCursorPosOnClicks = value;
-            NotifyPropertyChanged();
+            RaisePropertyChanged();
         }
     }
 
@@ -50,7 +50,7 @@ public class Options : INotifyPropertyChanged
         set
         {
             _maxClickInterval = value;
-            NotifyPropertyChanged();
+            RaisePropertyChanged();
         }
     }
 
@@ -61,7 +61,7 @@ public class Options : INotifyPropertyChanged
         set
         {
             _sendKeyAutoRepeat = value;
-            NotifyPropertyChanged();
+            RaisePropertyChanged();
         }
     }
 }

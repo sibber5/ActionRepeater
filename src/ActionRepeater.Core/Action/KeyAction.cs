@@ -44,7 +44,7 @@ public sealed class KeyAction : InputAction, System.IEquatable<KeyAction>
 
             _key = value;
             UpdateDescription();
-            NotifyPropertyChanged(nameof(Description));
+            RaisePropertyChanged(nameof(Description));
         }
     }
 

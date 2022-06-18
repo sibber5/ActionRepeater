@@ -40,7 +40,7 @@ public sealed class MouseButtonAction : InputAction, System.IEquatable<MouseButt
 
             _button = value;
             UpdateDescription();
-            NotifyPropertyChanged(nameof(Description));
+            RaisePropertyChanged(nameof(Description));
         }
     }
 
@@ -54,7 +54,7 @@ public sealed class MouseButtonAction : InputAction, System.IEquatable<MouseButt
 
             _position = value;
             UpdateDescription();
-            NotifyPropertyChanged(nameof(Description));
+            RaisePropertyChanged(nameof(Description));
         }
     }
 
@@ -68,7 +68,7 @@ public sealed class MouseButtonAction : InputAction, System.IEquatable<MouseButt
 
             _usePosition = value;
             UpdateDescription();
-            NotifyPropertyChanged(nameof(Description));
+            RaisePropertyChanged(nameof(Description));
         }
     }
 

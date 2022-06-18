@@ -41,7 +41,7 @@ public sealed class MouseWheelAction : InputAction, System.IEquatable<MouseWheel
 
             _stepCount = value;
             UpdateDescription();
-            NotifyPropertyChanged(nameof(Description));
+            RaisePropertyChanged(nameof(Description));
         }
     }
 
@@ -55,7 +55,7 @@ public sealed class MouseWheelAction : InputAction, System.IEquatable<MouseWheel
 
             _duration = value;
             UpdateDescription();
-            NotifyPropertyChanged(nameof(Description));
+            RaisePropertyChanged(nameof(Description));
         }
     }
 

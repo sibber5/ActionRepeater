@@ -22,7 +22,7 @@ public sealed class WaitAction : InputAction, IEquatable<WaitAction>
 
             _duration = value;
             _description = ActionDescriptionTemplates.Duration(value);
-            NotifyPropertyChanged(nameof(Description));
+            RaisePropertyChanged(nameof(Description));
         }
     }
 

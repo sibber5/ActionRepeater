@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>disable</ImplicitUsings>
+    <Platforms>x64;ARM64</Platforms>
   </PropertyGroup>
 
 </Project>
