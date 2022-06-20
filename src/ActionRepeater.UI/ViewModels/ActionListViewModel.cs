@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using ActionRepeater.Core.Action;
@@ -12,8 +11,6 @@ namespace ActionRepeater.UI.ViewModels;
 
 public class ActionListViewModel : ViewModelBase
 {
-    public Func<string, string, Task>? ShowErrorDialog { get; set; }
-
     private bool _showKeyRepeatActions = false;
     public bool ShowKeyRepeatActions
     {
@@ -62,12 +59,12 @@ public class ActionListViewModel : ViewModelBase
     public ICommand ClearActionsCommand { get; }
     public ICommand ClearCursorPathCommand { get; }
 
-    public ActionListViewModel(ActionHolder copiedActionHolder)
+    public ActionListViewModel(ActionHolder copiedActionHolder, Func<string, string?, Task> showContentDialog)
     {
         CopyCommand = new StoreActionCommand(copiedActionHolder, this);
         PasteCommand = new AddActionCommand(copiedActionHolder);
         ReplaceCommand = new ReplaceActionCommand(copiedActionHolder, this);
-        RemoveCommand = new RemoveActionCommand(this);
+        RemoveCommand = new RemoveActionCommand(this, showContentDialog);
         ClearCommand = new ClearActionsAndCursorPathCommand();
         ClearActionsCommand = new ClearActionsCommand();
         ClearCursorPathCommand = new ClearCursorPathCommand();

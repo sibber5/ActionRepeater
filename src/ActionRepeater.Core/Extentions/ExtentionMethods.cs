@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 namespace ActionRepeater.Core.Extentions;
 
@@ -22,5 +24,10 @@ public static class ExtentionMethods
     public static bool ContainsInclusive(this System.Drawing.Rectangle rect, int x, int y)
     {
         return x >= rect.Left && x <= rect.Right && y >= rect.Top && y <= rect.Bottom;
+    }
+
+    public static bool IsNullOrEmpty<T>(this IEnumerable<T>? enumerable)
+    {
+        return enumerable is null || !enumerable.Any();
     }
 }

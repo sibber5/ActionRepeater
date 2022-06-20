@@ -1,4 +1,5 @@
-﻿using System.Windows.Input;
+﻿using System;
+using System.Windows.Input;
 using ActionRepeater.Core.Input;
 using ActionRepeater.UI.Commands;
 
@@ -14,12 +15,12 @@ public class CmdBarHomeViewModel : ViewModelBase
     public ICommand ImportCommand { get; }
     public ICommand ShowCursorPathCommand { get; }
 
-    public CmdBarHomeViewModel()
+    public CmdBarHomeViewModel(Func<string, string?, System.Threading.Tasks.Task> showContentDialog)
     {
         RecordCommand = new RecordActionsCommand();
         PlayCommand = new PlayActionsCommand();
-        ExportCommand = new ExportActionsCommand();
-        ImportCommand = new ImportActionsCommand();
+        ExportCommand = new ExportActionsCommand(showContentDialog);
+        ImportCommand = new ImportActionsCommand(showContentDialog);
         ShowCursorPathCommand = new ShowCursorPathCommand();
 
         Player.IsPlayingChanged += (_, _) => RaisePropertyChanged(nameof(IsPlayButtonChecked));

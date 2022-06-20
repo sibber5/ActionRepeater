@@ -1,4 +1,6 @@
-﻿namespace ActionRepeater.UI.ViewModels;
+﻿using System;
+
+namespace ActionRepeater.UI.ViewModels;
 
 public class CommandBarViewModel : ViewModelBase
 {
@@ -6,9 +8,9 @@ public class CommandBarViewModel : ViewModelBase
 
     public CmdBarOptionsViewModel OptionsViewModel { get; }
 
-    public CommandBarViewModel()
+    public CommandBarViewModel(Func<string, string?, System.Threading.Tasks.Task> showContentDialog)
     {
-        HomeViewModel = new();
+        HomeViewModel = new(showContentDialog);
         OptionsViewModel = new();
     }
 }

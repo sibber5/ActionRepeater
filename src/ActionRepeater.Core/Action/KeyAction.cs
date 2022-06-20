@@ -1,37 +1,54 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using ActionRepeater.Core.Input;
 using ActionRepeater.Core.Extentions;
 using VirtualKey = ActionRepeater.Win32.Input.VirtualKey;
 
 namespace ActionRepeater.Core.Action;
 
-// This is intentional because when selecting an action from the ui, two identical ones would not be considered the same one
-#pragma warning disable CS0659 // Type overrides Object.Equals(object o) but does not override Object.GetHashCode()
-
-public sealed class KeyAction : InputAction, System.IEquatable<KeyAction>
+public sealed class KeyAction : InputAction, IEquatable<KeyAction>
 {
     public enum @Type
     {
+        KeyPress = 1,
         KeyDown,
         KeyUp,
-        KeyPress
     }
 
     public @Type ActionType { get; }
 
-    public override string Name { get; }
+    private string? _name;
+    public override string Name
+    {
+        get
+        {
+            if (_name is null)
+            {
+                _name = ActionType.ToString().AddSpacesBetweenWords();
+            }
 
-    private string _description = default!;
-    public override string Description { get => _description; }
+            return _name;
+        }
+    }
+
+    private string? _description;
+    public override string Description
+    {
+        get
+        {
+            if (_description is null)
+            {
+                UpdateDescription();
+            }
+
+            return _description!;
+        }
+    }
     private void UpdateDescription()
     {
-        if (IsAutoRepeat)
-        {
-            _description = ActionDescriptionTemplates.KeyAutoRepeat(_key);
-            return;
-        }
-
-        _description = ActionDescriptionTemplates.KeyFriendlyName(_key);
+        _description = IsAutoRepeat
+            ? ActionDescriptionTemplates.KeyAutoRepeat(_key)
+            : ActionDescriptionTemplates.KeyFriendlyName(_key);
     }
 
     private VirtualKey _key = VirtualKey.NO_KEY;
@@ -50,6 +67,13 @@ public sealed class KeyAction : InputAction, System.IEquatable<KeyAction>
 
     public bool IsAutoRepeat { get; }
 
+    public KeyAction(@Type type, VirtualKey key, bool isAutoRepeat = false)
+    {
+        ActionType = type;
+        _key = key;
+        IsAutoRepeat = isAutoRepeat;
+    }
+
     public override void Play()
     {
         bool success = ActionType switch
@@ -67,17 +91,6 @@ public sealed class KeyAction : InputAction, System.IEquatable<KeyAction>
         }
     }
 
-    //public override InputAction Clone() => new KeyAction(ActionType, _key, IsAutoRepeat);
-
-    public KeyAction(@Type type, VirtualKey key, bool isAutoRepeat = false)
-    {
-        ActionType = type;
-        _key = key;
-        IsAutoRepeat = isAutoRepeat;
-        Name = type.ToString().AddSpacesBetweenWords();
-        UpdateDescription();
-    }
-
     /// <summary>
     /// Checks if the object's values are equal.<br/>
     /// Use equality operators (== and !=) to check if the references are equal or not.
@@ -90,7 +103,5 @@ public sealed class KeyAction : InputAction, System.IEquatable<KeyAction>
     /// <inheritdoc cref="Equals(KeyAction)"/>
     public override bool Equals(object? obj) => Equals(obj as KeyAction);
 
-    //public override int GetHashCode() => System.HashCode.Combine(ActionType, _key, IsAutoRepeat);
-
-    private KeyAction() { Name = ActionType.ToString().AddSpacesBetweenWords(); }
+    public override int GetHashCode() => HashCode.Combine(ActionType, _key, IsAutoRepeat);
 }

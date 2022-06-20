@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Xml.Serialization;
 
@@ -16,7 +17,7 @@ public abstract class InputAction : INotifyPropertyChanged
     public abstract string Name { get; }
     public abstract string Description { get; }
 
-    public virtual InputAction Clone() => (InputAction)this.MemberwiseClone();
+    public virtual InputAction Clone() => (InputAction)MemberwiseClone();
 
     public abstract void Play();
 }

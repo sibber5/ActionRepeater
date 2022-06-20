@@ -7,7 +7,7 @@
     xmlns:views="using:ActionRepeater.UI.Views"
     mc:Ignorable="d">
 
-    <Grid>
+    <Grid x:Name="_grid">
 
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>

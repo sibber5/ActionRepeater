@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using ActionRepeater.Core.Action;
+using ActionRepeater.Core.Extentions;
+using ActionRepeater.Core.Helpers;
 
 namespace ActionRepeater.Core.Input;
 
@@ -83,6 +85,35 @@ public static class ActionManager
 
     /// <summary>Contains the indecies of the modified actions in ActionsExlKeyRepeat.</summary>
     private static readonly List<int> _modifiedFilteredActionsIdxs = new();
+
+    public static void LoadActionData(ActionData data)
+    {
+        ClearAll();
+
+        // TODO: suppress observable collection events when doing stuff like deserializing:
+        if (data.Actions is not null)
+        {
+            for (int i = 0; i < data.Actions.Count; ++i)
+            {
+                _actions.Add(data.Actions[i]);
+            }
+        }
+
+        if (!data.CursorPathRel.IsNullOrEmpty())
+        {
+            if (data.CursorPathStartAbs is null)
+                throw new ArgumentException($"There is no start position ({nameof(data.CursorPathStartAbs)} is null), but the cursor path is not empty.", nameof(data));
+
+            CursorPathStart = data.CursorPathStartAbs;
+            CursorPath.AddRange(data.CursorPathRel!);
+        }
+        else if (data.CursorPathStartAbs is not null)
+        {
+            throw new ArgumentException($"The cursor path is not empty, but there is a start position ({nameof(data.CursorPathStartAbs)} is not null).", nameof(data));
+        }
+
+        FillFilteredActionList();
+    }
 
     public static void AddAction(InputAction action)
     {

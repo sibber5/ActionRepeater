@@ -1,18 +1,26 @@
-﻿using Math = System.Math;
+﻿using System;
 using System.ComponentModel;
 using ActionRepeater.Core.Input;
 
 namespace ActionRepeater.Core.Action;
 
-// This is intentional because when selecting an action from the ui, two identical ones would not be considered the same one
-#pragma warning disable CS0659 // Type overrides Object.Equals(object o) but does not override Object.GetHashCode()
-
-public sealed class MouseWheelAction : InputAction, System.IEquatable<MouseWheelAction>
+public sealed class MouseWheelAction : InputAction, IEquatable<MouseWheelAction>
 {
-    public override string Name { get => IsHorizontal ? "Horizontal Mouse Wheel" : "Mouse Wheel"; }
+    public override string Name => IsHorizontal ? "Horizontal Mouse Wheel" : "Mouse Wheel";
 
-    private string _description = default!;
-    public override string Description { get => _description; }
+    private string? _description;
+    public override string Description
+    {
+        get
+        {
+            if (_description is null)
+            {
+                UpdateDescription();
+            }
+
+            return _description!;
+        }
+    }
     private void UpdateDescription()
     {
         if (_duration == 0)
@@ -59,6 +67,14 @@ public sealed class MouseWheelAction : InputAction, System.IEquatable<MouseWheel
         }
     }
 
+    /// <param name="duration">The time it took/takes to scroll the wheel, in milliseconds/ticks.</param>
+    public MouseWheelAction(bool isHorizontal, int stepCount, int duration = 0)
+    {
+        IsHorizontal = isHorizontal;
+        _stepCount = stepCount;
+        _duration = duration;
+    }
+
     public override void Play()
     {
         int absStepCount = Math.Abs(_stepCount);
@@ -89,17 +105,6 @@ public sealed class MouseWheelAction : InputAction, System.IEquatable<MouseWheel
         }
     }
 
-    //public override InputAction Clone() => new MouseWheelAction(IsHorizontal, _stepCount, _duration);
-
-    /// <param name="duration">The time it took/takes to scroll the wheel, in milliseconds/ticks.</param>
-    public MouseWheelAction(bool isHorizontal, int stepCount, int duration = 0)
-    {
-        IsHorizontal = isHorizontal;
-        _stepCount = stepCount;
-        _duration = duration;
-        UpdateDescription();
-    }
-
     /// <summary>
     /// Checks if the object's values are equal.<br/>
     /// Use equality operators (== and !=) to check if the references are equal or not.
@@ -112,7 +117,5 @@ public sealed class MouseWheelAction : InputAction, System.IEquatable<MouseWheel
     /// <inheritdoc cref="Equals(MouseWheelAction)"/>
     public override bool Equals(object? obj) => Equals(obj as MouseWheelAction);
 
-    //public override int GetHashCode() => System.HashCode.Combine(IsHorizontal, _stepCount, _duration);
-
-    private MouseWheelAction() { }
+    public override int GetHashCode() => HashCode.Combine(IsHorizontal, _stepCount, _duration);
 }

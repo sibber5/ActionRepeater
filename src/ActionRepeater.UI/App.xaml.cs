@@ -121,11 +121,8 @@ public partial class App : Application
     /// <param name="args">Details about the launch request and process.</param>
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
-        MainWindow = new MainWindow
-        {
-            Title = MainWindowTitle,
-            ViewModel = new(_copiedActionHolder)
-        };
+        MainWindow = new MainWindow { Title = MainWindowTitle };
+        MainWindow.ViewModel = new(_copiedActionHolder, MainWindow.ShowContentDialog);
 
         // The Window object doesn't have Width and Height properties in WInUI 3.
         // You can use the Win32 API SetWindowPos to set the Width and Height.

@@ -1,28 +1,49 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using ActionRepeater.Core.Extentions;
 using static ActionRepeater.Core.Input.InputSimulator;
 using POINT = ActionRepeater.Win32.POINT;
 
 namespace ActionRepeater.Core.Action;
 
-// This is intentional because when selecting an action from the ui, two identical ones would not be considered the same one
-#pragma warning disable CS0659 // Type overrides Object.Equals(object o) but does not override Object.GetHashCode()
-
-public sealed class MouseButtonAction : InputAction, System.IEquatable<MouseButtonAction>
+public sealed class MouseButtonAction : InputAction, IEquatable<MouseButtonAction>
 {
     public enum @Type
     {
+        MouseButtonClick = 1,
         MouseButtonDown,
         MouseButtonUp,
-        MouseButtonClick
     }
 
     public @Type ActionType { get; }
 
-    public override string Name { get; }
+    private string? _name;
+    public override string Name
+    {
+        get
+        {
+            if (_name is null)
+            {
+                _name = ActionType.ToString().AddSpacesBetweenWords();
+            }
 
-    private string _description = default!;
-    public override string Description { get => _description; }
+            return _name;
+        }
+    }
+
+    private string? _description;
+    public override string Description
+    {
+        get
+        {
+            if (_description is null)
+            {
+                UpdateDescription();
+            }
+
+            return _description!;
+        }
+    }
     private void UpdateDescription()
     {
         _description = _usePosition
@@ -72,6 +93,14 @@ public sealed class MouseButtonAction : InputAction, System.IEquatable<MouseButt
         }
     }
 
+    public MouseButtonAction(@Type type, MouseButton button, POINT position, bool usePosition = true)
+    {
+        ActionType = type;
+        _button = button;
+        _position = position;
+        _usePosition = usePosition;
+    }
+
     public override void Play()
     {
         bool success = ActionType switch
@@ -89,18 +118,6 @@ public sealed class MouseButtonAction : InputAction, System.IEquatable<MouseButt
         }
     }
 
-    //public override InputAction Clone() => new MouseButtonAction(ActionType, _button, _position);
-
-    public MouseButtonAction(@Type type, MouseButton button, POINT position, bool usePosition = true)
-    {
-        ActionType = type;
-        _button = button;
-        _position = position;
-        _usePosition = usePosition;
-        Name = type.ToString().AddSpacesBetweenWords();
-        UpdateDescription();
-    }
-
     /// <summary>
     /// Checks if the object's values are equal.<br/>
     /// Use equality operators (== and !=) to check if the references are equal or not.
@@ -114,7 +131,5 @@ public sealed class MouseButtonAction : InputAction, System.IEquatable<MouseButt
     /// <inheritdoc cref="Equals(MouseButtonAction)"/>
     public override bool Equals(object? obj) => Equals(obj as MouseButtonAction);
 
-    //public override int GetHashCode() => System.HashCode.Combine(ActionType, _button, _position, _usePosition);
-
-    private MouseButtonAction() { Name = ActionType.ToString().AddSpacesBetweenWords(); }
+    public override int GetHashCode() => HashCode.Combine(ActionType, _button, _position, _usePosition);
 }

@@ -10,31 +10,11 @@ namespace ActionRepeater.UI.Views;
 
 public sealed partial class ActionListView : UserControl
 {
-    private ActionListViewModel _viewModel = null!;
-    public ActionListViewModel ViewModel
-    {
-        get => _viewModel;
-        set
-        {
-            _viewModel = value;
-            _viewModel.ShowErrorDialog = ShowErrorDialog;
-        }
-    }
+    public ActionListViewModel ViewModel { get; set; } = null!;
 
     public ActionListView()
     {
         InitializeComponent();
-    }
-
-    public async Task ShowErrorDialog(string title, string content)
-    {
-        await new ContentDialog
-        {
-            XamlRoot = ActionList.XamlRoot,
-            Title = $"❌ {title}",
-            Content = content,
-            CloseButtonText = "Ok"
-        }.ShowAsync();
     }
 
     private void ActionList_RightTapped(object sender, RightTappedRoutedEventArgs e)
