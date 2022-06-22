@@ -1,8 +1,5 @@
 ﻿using System.IO;
-using System.Xml;
-using System.Xml.Serialization;
 using System.Collections.Generic;
-using System;
 using System.Threading.Tasks;
 using ActionRepeater.Core.Action;
 using System.Text.Json;
@@ -37,16 +34,15 @@ public static class SerializationHelper
     /// <param name="path">The full path of the file, including its name and extention.</param>
     public static async Task SerializeActionsAsync(ActionData obj, string path)
     {
-        using FileStream createStream = File.Create(path);
+        await using FileStream createStream = File.Create(path);
 
         await JsonSerializer.SerializeAsync(createStream, obj, _serializerOptions);
-
-        await createStream.DisposeAsync();
     }
 
+    /// <param name="path">The full path of the file, including its name and extention.</param>
     public static async Task<ActionData?> DeserializeActionsAsync(string path)
     {
-        using FileStream openStream = File.OpenRead(path);
+        await using FileStream openStream = File.OpenRead(path);
 
         return await JsonSerializer.DeserializeAsync<ActionData?>(openStream, _serializerOptions);
     }
