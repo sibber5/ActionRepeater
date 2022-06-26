@@ -7,7 +7,9 @@ using System.Diagnostics;
 
 namespace PathWindows;
 
-// TODO: switch to win2d https://www.nuget.org/packages/Microsoft.Graphics.Win2D
+// TODO: switch to win2d when transparent backgronds are implemented
+// transparent window bg: https://github.com/microsoft/microsoft-ui-xaml/issues/1247
+// win2d: https://www.nuget.org/packages/Microsoft.Graphics.Win2D
 public sealed class PathWindow : IDisposable
 {
     private Thread? _thread;
