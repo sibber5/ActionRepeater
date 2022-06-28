@@ -84,7 +84,8 @@ public static partial class PInvoke
 	/// </remarks>
 	[DllImport("User32", ExactSpelling = true, SetLastError = true)]
 	[DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-	public static extern unsafe BOOL GetCursorPos(POINT* lpPoint);
+    [return: MarshalAs(UnmanagedType.Bool)]
+	public static extern unsafe bool GetCursorPos(POINT* lpPoint);
 
 	/// <summary>Returns the dots per inch (dpi) value for the associated window.</summary>
 	/// <param name="hwnd">The window you want to get information about.</param>
@@ -130,7 +131,8 @@ public static partial class PInvoke
 	/// </remarks>
 	[DllImport("User32", ExactSpelling = true, SetLastError = true)]
 	[DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-	public static extern BOOL SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, SetWindowPosFlags uFlags);
+    [return: MarshalAs(UnmanagedType.Bool)]
+	public static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, SetWindowPosFlags uFlags);
 
 	/// <inheritdoc cref="RegisterRawInputDevices"/>
 	public static unsafe bool RegisterRawInputDevices(Span<RAWINPUTDEVICE> pRawInputDevices)
@@ -162,7 +164,8 @@ public static partial class PInvoke
 	/// </remarks>
 	[DllImport("User32", ExactSpelling = true, SetLastError = true)]
 	[DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-	public static extern unsafe BOOL RegisterRawInputDevices(RAWINPUTDEVICE* pRawInputDevices, uint uiNumDevices, uint cbSize);
+    [return: MarshalAs(UnmanagedType.Bool)]
+	public static extern unsafe bool RegisterRawInputDevices(RAWINPUTDEVICE* pRawInputDevices, uint uiNumDevices, uint cbSize);
 
 	/// <summary>Calls the next handler in a window's subclass chain. The last handler in the subclass chain calls the original window procedure for the window.</summary>
 	/// <param name="hWnd">
@@ -216,7 +219,8 @@ public static partial class PInvoke
 	/// </remarks>
 	[DllImport("ComCtl32", ExactSpelling = true)]
 	[DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-	public static extern BOOL SetWindowSubclass(IntPtr hWnd, SUBCLASSPROC pfnSubclass, nuint uIdSubclass, nuint dwRefData);
+    [return : MarshalAs(UnmanagedType.Bool)]
+	public static extern bool SetWindowSubclass(IntPtr hWnd, SUBCLASSPROC pfnSubclass, nuint uIdSubclass, nuint dwRefData);
 
 	/// <summary>Removes a subclass callback from a window.</summary>
 	/// <param name="hWnd">
@@ -239,7 +243,8 @@ public static partial class PInvoke
 	/// </remarks>
 	[DllImport("ComCtl32", ExactSpelling = true)]
 	[DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-	public static extern BOOL RemoveWindowSubclass(IntPtr hWnd, SUBCLASSPROC pfnSubclass, nuint uIdSubclass);
+    [return: MarshalAs(UnmanagedType.Bool)]
+	public static extern bool RemoveWindowSubclass(IntPtr hWnd, SUBCLASSPROC pfnSubclass, nuint uIdSubclass);
 
 	/// <summary>Calls the default window procedure to provide default processing for any window messages that an application does not process.</summary>
 	/// <param name="hWnd">
