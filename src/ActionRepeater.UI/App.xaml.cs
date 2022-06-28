@@ -3,6 +3,7 @@ using Microsoft.UI.Xaml;
 using ActionRepeater.Win32;
 using ActionRepeater.Win32.WindowsAndMessages;
 using ActionRepeater.UI.Utilities;
+using ActionRepeater.UI.Services;
 
 namespace ActionRepeater.UI;
 
@@ -17,13 +18,8 @@ public partial class App : Application
 
     public static MainWindow MainWindow { get; private set; } = null!;
 
-    //public static bool IsPathWindowOpen => _pathWindow is not null;
-
-    //private static PathWindow? _pathWindow;
-    //private static int _lastCursorPtsCount;
-    //private static Win32.POINT? _lastAbsPt;
-
     private readonly ActionHolder _copiedActionHolder = new();
+    private readonly PathWindowService _pathWindowService = new();
 
     /// <summary>
     /// Initializes the singleton application object.  This is the first line of authored code
@@ -35,86 +31,6 @@ public partial class App : Application
     }
 
     /// <summary>
-    /// Opens the path window, unless the cursor path is empty.
-    /// </summary>
-    /// <returns>true if the function succeeds (the window has been opened), otherwise false (fails if the cursor path is empty).</returns>
-    public static void OpenPathWindow()
-    {
-        //Debug.Assert(_pathWindow is null, "Path window is not null.");
-
-        //if (ActionManager.CursorPathStart is null)
-        //{
-        //    _pathWindow = new();
-        //    _lastAbsPt = null;
-        //}
-        //else
-        //{
-        //    var absCursorPts = ActionManager.AbsoluteCursorPath.Select(p => (System.Drawing.Point)p.MovPoint).ToArray();
-        //    _lastAbsPt = absCursorPts[^1];
-
-        //    _pathWindow = new(absCursorPts);
-        //}
-
-        //UpdatePathWindow();
-
-        throw new NotImplementedException();
-    }
-
-    public static void ClosePathWindow()
-    {
-        //Debug.Assert(_pathWindow is not null, "Path window is null.");
-
-        //_pathWindow.Dispose();
-        //_pathWindow = null;
-
-        throw new NotImplementedException();
-    }
-
-    private static void UpdatePathWindow()
-    {
-        //System.Threading.Tasks.Task.Run(async () =>
-        //{
-        //    Debug.WriteLine("Update Window Task Started.");
-
-        //    var cursorPath = ActionManager.CursorPath;
-
-        //    _lastCursorPtsCount = cursorPath.Count;
-
-        //    while (_pathWindow is not null)
-        //    {
-        //        await System.Threading.Tasks.Task.Delay(40);
-
-        //        if (_lastCursorPtsCount == cursorPath.Count) continue;
-
-        //        if (_pathWindow is null) break;
-
-        //        if (cursorPath.Count == 0)
-        //        {
-        //            _lastAbsPt = ActionManager.CursorPathStart?.MovPoint;
-        //            _lastCursorPtsCount = cursorPath.Count;
-        //            _pathWindow.ClearPath();
-        //            continue;
-        //        }
-
-        //        _lastAbsPt ??= ActionManager.CursorPathStart!.MovPoint;
-
-        //        for (int i = _lastCursorPtsCount; i < cursorPath.Count; ++i)
-        //        {
-        //            var newPoint = Core.Action.MouseMovement.OffsetPointWithinScreens(_lastAbsPt.Value, cursorPath[i].MovPoint);
-        //            _pathWindow.AddLineToPath(_lastAbsPt.Value, newPoint);
-        //            _lastAbsPt = newPoint;
-        //        }
-
-        //        _lastCursorPtsCount = cursorPath.Count;
-        //    }
-
-        //    Debug.WriteLine("Update Window Task Finished.");
-        //});
-
-        throw new NotImplementedException();
-    }
-
-    /// <summary>
     /// Invoked when the application is launched normally by the end user.  Other entry points
     /// will be used such as when the application is launched to open a specific file.
     /// </summary>
@@ -122,7 +38,7 @@ public partial class App : Application
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
         MainWindow = new MainWindow { Title = MainWindowTitle };
-        MainWindow.ViewModel = new(_copiedActionHolder, MainWindow.ShowContentDialog);
+        MainWindow.ViewModel = new(_copiedActionHolder, MainWindow.ShowContentDialog, _pathWindowService);
 
         // The Window object doesn't have Width and Height properties in WInUI 3.
         // You can use the Win32 API SetWindowPos to set the Width and Height.

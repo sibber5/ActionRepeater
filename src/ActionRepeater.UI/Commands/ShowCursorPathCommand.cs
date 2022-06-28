@@ -1,20 +1,29 @@
-﻿using System;
-using ActionRepeater.Core.Input;
+﻿using ActionRepeater.Core.Input;
+using ActionRepeater.UI.Services;
 
 namespace ActionRepeater.UI.Commands;
 
 public class ShowCursorPathCommand : CommandBase
 {
-    public ShowCursorPathCommand()
+    private readonly PathWindowService _pathWindowService;
+
+    public ShowCursorPathCommand(PathWindowService pathWindowService)
     {
-        ActionManager.CursorPathStartChanged += (_, _) => RaiseCanExecuteChanged();
+        _pathWindowService = pathWindowService;
+        //ActionManager.CursorPathStartChanged += (_, _) => RaiseCanExecuteChanged();
     }
 
-    public override bool CanExecute(object? parameter) => ActionManager.CursorPathStart is not null;
+    //public override bool CanExecute(object? parameter) => ActionManager.CursorPathStart is not null;
 
     public override void Execute(object? parameter)
     {
-        // TODO: implement ShowCursorPathCommand.Execute
-        throw new NotImplementedException();
+        if (_pathWindowService.IsPathWindowOpen)
+        {
+            _pathWindowService.ClosePathWindow();
+        }
+        else
+        {
+            _pathWindowService.OpenPathWindow();
+        }
     }
 }
