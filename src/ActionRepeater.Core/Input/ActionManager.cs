@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using ActionRepeater.Core.Action;
 using ActionRepeater.Core.Extentions;
 using ActionRepeater.Core.Helpers;
+using ActionRepeater.Core.Utilities;
 
 namespace ActionRepeater.Core.Input;
 
@@ -71,10 +72,10 @@ public static class ActionManager
         }
     }
 
-    private static readonly ObservableCollection<InputAction> _actions = new();
+    private static readonly ObservableCollectionEx<InputAction> _actions = new();
     public static IReadOnlyList<InputAction> Actions => _actions;
 
-    private static readonly ObservableCollection<InputAction> _actionsExlKeyRepeat = new();
+    private static readonly ObservableCollectionEx<InputAction> _actionsExlKeyRepeat = new();
     public static IReadOnlyList<InputAction> ActionsExlKeyRepeat => _actionsExlKeyRepeat;
 
     public static event System.Collections.Specialized.NotifyCollectionChangedEventHandler? ActionCollectionChanged
@@ -90,13 +91,9 @@ public static class ActionManager
     {
         ClearAll();
 
-        // TODO: suppress observable collection events when doing stuff like deserializing:
         if (data.Actions is not null)
         {
-            for (int i = 0; i < data.Actions.Count; ++i)
-            {
-                _actions.Add(data.Actions[i]);
-            }
+            _actions.AddRange(data.Actions);
         }
 
         if (!data.CursorPathRel.IsNullOrEmpty())
@@ -160,6 +157,7 @@ public static class ActionManager
     /// <summary>Fills ActionsEclKeyRepeat from the actinos in Actions.</summary>
     public static void FillFilteredActionList()
     {
+        _actionsExlKeyRepeat.SuppressNotifications = true;
         _actionsExlKeyRepeat.Clear();
         _modifiedFilteredActionsIdxs.Clear();
 
@@ -195,6 +193,8 @@ public static class ActionManager
                 _actionsExlKeyRepeat.Add(action);
             }
         }
+
+        _actionsExlKeyRepeat.SuppressNotifications = false;
     }
 
     /// <returns>true if the action has been modified (in <see cref="_actionsExlKeyRepeat"/>).</returns>
