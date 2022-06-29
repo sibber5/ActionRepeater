@@ -1,9 +1,10 @@
 ﻿using System;
+using CommunityToolkit.Mvvm.ComponentModel;
 using ActionRepeater.Core;
 
 namespace ActionRepeater.UI.ViewModels;
 
-public class CmdBarOptionsViewModel : ViewModelBase
+public class CmdBarOptionsViewModel : ObservableObject
 {
     public int CursorMovementCBSelectedIdx
     {
@@ -39,11 +40,11 @@ public class CmdBarOptionsViewModel : ViewModelBase
         switch (e.PropertyName)
         {
             case nameof(Options.Instance.CursorMovementMode):
-                RaisePropertyChanged(nameof(CursorMovementCBSelectedIdx));
+                OnPropertyChanged(nameof(CursorMovementCBSelectedIdx));
                 break;
 
             default:
-                RaisePropertyChanged(e.PropertyName!);
+                OnPropertyChanged(e);
                 break;
         }
     }

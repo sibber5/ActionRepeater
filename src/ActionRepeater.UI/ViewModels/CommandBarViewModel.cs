@@ -3,7 +3,7 @@ using ActionRepeater.UI.Services;
 
 namespace ActionRepeater.UI.ViewModels;
 
-public class CommandBarViewModel : ViewModelBase
+public class CommandBarViewModel
 {
     public CmdBarHomeViewModel HomeViewModel { get; }
 

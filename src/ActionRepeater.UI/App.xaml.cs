@@ -1,9 +1,8 @@
 ﻿using System;
 using Microsoft.UI.Xaml;
+using ActionRepeater.UI.Services;
 using ActionRepeater.Win32;
 using ActionRepeater.Win32.WindowsAndMessages;
-using ActionRepeater.UI.Utilities;
-using ActionRepeater.UI.Services;
 
 namespace ActionRepeater.UI;
 
@@ -18,7 +17,6 @@ public partial class App : Application
 
     public static MainWindow MainWindow { get; private set; } = null!;
 
-    private readonly ActionHolder _copiedActionHolder = new();
     private readonly PathWindowService _pathWindowService = new();
 
     /// <summary>
@@ -38,7 +36,7 @@ public partial class App : Application
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
         MainWindow = new MainWindow { Title = MainWindowTitle };
-        MainWindow.ViewModel = new(_copiedActionHolder, MainWindow.ShowContentDialog, _pathWindowService);
+        MainWindow.ViewModel = new(MainWindow.ShowContentDialog, _pathWindowService);
 
         // The Window object doesn't have Width and Height properties in WInUI 3.
         // You can use the Win32 API SetWindowPos to set the Width and Height.
