@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -82,10 +81,10 @@ public class ObservableCollectionEx<T> : ObservableCollection<T>
 
         if (!raiseEvents) return;
 
-        OnPropertyChanged(new PropertyChangedEventArgs("Count"));
-        OnPropertyChanged(new PropertyChangedEventArgs("Item[]"));
+        OnPropertyChanged(EventArgsCache.CountPropertyChanged);
+        OnPropertyChanged(EventArgsCache.IndexerPropertyChanged);
 
-        if (collection is IList<T> rangeList)
+        if (collection is System.Collections.IList rangeList)
         {
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, rangeList, startIndex));
         }
