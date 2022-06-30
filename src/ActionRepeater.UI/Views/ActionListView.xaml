@@ -82,7 +82,7 @@
                                   HorizontalAlignment="Left"
                                   VerticalAlignment="Center"
                                   FontSize="{x:Bind GlyphSize, Mode=OneTime}"
-                                  Glyph="{x:Bind Glyph, Mode=OneWay}"/>
+                                  Glyph="{x:Bind Glyph, Mode=OneTime}"/>
                         
                         <TextBlock Text="{x:Bind Name, Mode=OneWay}"
                                    FontSize="14"

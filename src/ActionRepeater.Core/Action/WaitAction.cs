@@ -17,7 +17,7 @@ public sealed class WaitAction : InputAction, IEquatable<WaitAction>
             if (_duration == value) return;
 
             _duration = value;
-            RaisePropertyChanged(nameof(Description));
+            OnDescriptionChanged();
         }
     }
 

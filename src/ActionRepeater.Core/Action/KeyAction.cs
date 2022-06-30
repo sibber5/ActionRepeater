@@ -30,7 +30,7 @@ public sealed class KeyAction : InputAction, IEquatable<KeyAction>
             if (_key == value) return;
 
             _key = value;
-            RaisePropertyChanged(nameof(Description));
+            OnDescriptionChanged();
         }
     }
 

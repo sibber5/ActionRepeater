@@ -9,6 +9,7 @@ internal sealed class InputActionJsonConverter : JsonConverter<InputAction>
 {
     private const string _posX = "PositionX";
     private const string _posY = "PositionY";
+    private const string _typeDiscriminatorName = "$type";
 
     private static string GetPropertyNameExceptionMessage(string actionTypeName, string? propertyName)
         => $"Unexpected property name while deserializing {actionTypeName}: {propertyName}.";
@@ -22,7 +23,6 @@ internal sealed class InputActionJsonConverter : JsonConverter<InputAction>
     private static string GetPropertyCountExceptionMessage(string actionTypeName, int readPropertyCount, int expectedPropertyCount)
         => $"Unexpected number of properties for {actionTypeName}: {readPropertyCount}. Expected {expectedPropertyCount}";
 
-    // TODO: rename TypeDiscriminator property to $type (to support polymorphic deserialization when it comes out)
     private enum TypeDiscriminator
     {
         KeyAction = 1,
@@ -47,9 +47,9 @@ internal sealed class InputActionJsonConverter : JsonConverter<InputAction>
         }
 
         string? propertyName = reader.GetString();
-        if (propertyName != nameof(TypeDiscriminator))
+        if (propertyName != _typeDiscriminatorName)
         {
-            throw new JsonException(GetPropertyNameExceptionMessage(nameof(InputAction), propertyName, nameof(TypeDiscriminator)));
+            throw new JsonException(GetPropertyNameExceptionMessage(nameof(InputAction), propertyName, _typeDiscriminatorName));
         }
 
         reader.Read();
@@ -283,14 +283,14 @@ internal sealed class InputActionJsonConverter : JsonConverter<InputAction>
         switch (value)
         {
             case KeyAction keyAction:
-                writer.WriteNumber(nameof(TypeDiscriminator), (int)TypeDiscriminator.KeyAction);
+                writer.WriteNumber(_typeDiscriminatorName, (int)TypeDiscriminator.KeyAction);
                 writer.WriteNumber(nameof(keyAction.ActionType), (int)keyAction.ActionType);
                 writer.WriteNumber(nameof(keyAction.Key), (int)keyAction.Key);
                 writer.WriteBoolean(nameof(keyAction.IsAutoRepeat), keyAction.IsAutoRepeat);
                 break;
 
             case MouseButtonAction mbAction:
-                writer.WriteNumber(nameof(TypeDiscriminator), (int)TypeDiscriminator.MouseButtonAction);
+                writer.WriteNumber(_typeDiscriminatorName, (int)TypeDiscriminator.MouseButtonAction);
                 writer.WriteNumber(nameof(mbAction.ActionType), (int)mbAction.ActionType);
                 writer.WriteNumber(nameof(mbAction.Button), (int)mbAction.Button);
                 writer.WriteNumber(_posX, mbAction.Position.x);
@@ -299,14 +299,14 @@ internal sealed class InputActionJsonConverter : JsonConverter<InputAction>
                 break;
 
             case MouseWheelAction mwAction:
-                writer.WriteNumber(nameof(TypeDiscriminator), (int)TypeDiscriminator.MouseWheelAction);
+                writer.WriteNumber(_typeDiscriminatorName, (int)TypeDiscriminator.MouseWheelAction);
                 writer.WriteBoolean(nameof(mwAction.IsHorizontal), mwAction.IsHorizontal);
                 writer.WriteNumber(nameof(mwAction.StepCount), mwAction.StepCount);
                 writer.WriteNumber(nameof(mwAction.Duration), mwAction.Duration);
                 break;
 
             case WaitAction waitAction:
-                writer.WriteNumber(nameof(TypeDiscriminator), (int)TypeDiscriminator.WaitAction);
+                writer.WriteNumber(_typeDiscriminatorName, (int)TypeDiscriminator.WaitAction);
                 writer.WriteNumber(nameof(waitAction.Duration), waitAction.Duration);
                 break;
         }

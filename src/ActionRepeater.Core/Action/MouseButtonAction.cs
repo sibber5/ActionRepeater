@@ -30,7 +30,7 @@ public sealed class MouseButtonAction : InputAction, IEquatable<MouseButtonActio
             if (_button == value) return;
 
             _button = value;
-            RaisePropertyChanged(nameof(Description));
+            OnDescriptionChanged();
         }
     }
 
@@ -43,7 +43,7 @@ public sealed class MouseButtonAction : InputAction, IEquatable<MouseButtonActio
             if (_position == value) return;
 
             _position = value;
-            RaisePropertyChanged(nameof(Description));
+            OnDescriptionChanged();
         }
     }
 
@@ -56,7 +56,7 @@ public sealed class MouseButtonAction : InputAction, IEquatable<MouseButtonActio
             if (_usePosition == value) return;
 
             _usePosition = value;
-            RaisePropertyChanged(nameof(Description));
+            OnDescriptionChanged();
         }
     }
 

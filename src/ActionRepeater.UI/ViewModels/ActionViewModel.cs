@@ -7,8 +7,7 @@ public partial class ActionViewModel : ObservableObject
 {
     public double GlyphSize { get; }
 
-    [ObservableProperty]
-    private string? _glyph;
+    public string? Glyph { get; }
 
     [ObservableProperty]
     private string _name;
@@ -18,7 +17,7 @@ public partial class ActionViewModel : ObservableObject
 
     public ActionViewModel(string? glyph, string name, string description, double glyphSize = 20)
     {
-        _glyph = glyph;
+        Glyph = glyph;
         _name = name;
         _description = description;
         GlyphSize = glyphSize;
@@ -27,24 +26,13 @@ public partial class ActionViewModel : ObservableObject
     public ActionViewModel(InputAction inputAction)
     {
         var (glyph, size) = GetIconForAction(inputAction);
-        _glyph = glyph;
+        Glyph = glyph;
         _name = inputAction.Name;
         _description = inputAction.Description;
         GlyphSize = size;
 
-        inputAction.PropertyChanged += (s, e) =>
-        {
-            switch (e.PropertyName)
-            {
-                case nameof(Name):
-                    Name = ((InputAction)s!).Name;
-                    break;
-
-                case nameof(Description):
-                    Description = ((InputAction)s!).Description;
-                    break;
-            }
-        };
+        inputAction.NameChanged += (_, newName) => Name = newName;
+        inputAction.DescriptionChanged += (_, newDescription) => Description = newDescription;
     }
 
     public static (string? glyph, double size) GetIconForAction(InputAction a) => a switch

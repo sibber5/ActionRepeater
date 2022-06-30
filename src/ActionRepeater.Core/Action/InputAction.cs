@@ -1,12 +1,14 @@
-﻿using System.ComponentModel;
-using System.Runtime.CompilerServices;
+﻿using System;
 
 namespace ActionRepeater.Core.Action;
 
-public abstract class InputAction : INotifyPropertyChanged
+public abstract class InputAction
 {
-    public event PropertyChangedEventHandler? PropertyChanged;
-    protected void RaisePropertyChanged([CallerMemberName] string propertyName = null!) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    public event EventHandler<string>? NameChanged;
+    protected void OnNameChanged() => NameChanged?.Invoke(this, Name);
+
+    public event EventHandler<string>? DescriptionChanged;
+    protected void OnDescriptionChanged() => DescriptionChanged?.Invoke(this, Description);
 
     public abstract string Name { get; }
     public abstract string Description { get; }
