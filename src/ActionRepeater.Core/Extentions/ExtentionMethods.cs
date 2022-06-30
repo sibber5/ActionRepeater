@@ -30,4 +30,17 @@ public static class ExtentionMethods
     {
         return enumerable is null || !enumerable.Any();
     }
+
+    public static int RefIndexOfReverse<T>(this IReadOnlyList<T> list, T item)
+    {
+        for (int i = list.Count - 1; i > -1; i--)
+        {
+            if (ReferenceEquals(list[i], item))
+            {
+                return i;
+            }
+        }
+
+        return -1;
+    }
 }

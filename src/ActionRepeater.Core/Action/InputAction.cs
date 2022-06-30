@@ -4,9 +4,6 @@ namespace ActionRepeater.Core.Action;
 
 public abstract class InputAction
 {
-    public event EventHandler<string>? NameChanged;
-    protected void OnNameChanged() => NameChanged?.Invoke(this, Name);
-
     public event EventHandler<string>? DescriptionChanged;
     protected void OnDescriptionChanged() => DescriptionChanged?.Invoke(this, Description);
 

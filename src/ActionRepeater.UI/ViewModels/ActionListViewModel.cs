@@ -17,9 +17,9 @@ public partial class ActionListViewModel : ObservableObject
     [AlsoNotifyChangeFor(nameof(FilteredActions))]
     private bool _showKeyRepeatActions;
 
-    private readonly ViewModelCollection<ActionViewModel, InputAction> _actionVMs;
-    private readonly ViewModelCollection<ActionViewModel, InputAction> _actionsExlVMs;
-    public IReadOnlyList<ActionViewModel> FilteredActions => ShowKeyRepeatActions ? _actionVMs : _actionsExlVMs;
+    internal ViewModelCollection<ActionViewModel, InputAction> ActionVMs { get; }
+    internal ViewModelCollection<ActionViewModel, InputAction> ActionsExlVMs { get; }
+    public IReadOnlyList<ActionViewModel> FilteredActions => ShowKeyRepeatActions ? ActionVMs : ActionsExlVMs;
 
     public InputAction? SelectedAction => SelectedActionIndex == -1
         ? null
@@ -57,8 +57,8 @@ public partial class ActionListViewModel : ObservableObject
 
         Func<InputAction?, ActionViewModel> createVM = static (model) => new ActionViewModel(model!);
 
-        _actionVMs = new((ObservableCollection<InputAction?>)ActionManager.Actions, createVM);
-        _actionsExlVMs = new((ObservableCollection<InputAction?>)ActionManager.ActionsExlKeyRepeat, createVM);
+        ActionVMs = new((ObservableCollection<InputAction?>)ActionManager.Actions, createVM);
+        ActionsExlVMs = new((ObservableCollection<InputAction?>)ActionManager.ActionsExlKeyRepeat, createVM);
 
         Func<bool> isCopiedActionNull = () => CopiedAction is not null;
 
