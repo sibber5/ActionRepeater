@@ -17,39 +17,9 @@ public sealed class MouseButtonAction : InputAction, IEquatable<MouseButtonActio
 
     public @Type ActionType { get; }
 
-    private string? _name;
-    public override string Name
-    {
-        get
-        {
-            if (_name is null)
-            {
-                _name = ActionType.ToString().AddSpacesBetweenWords();
-            }
+    public override string Name => ActionType.ToString().AddSpacesBetweenWords();
 
-            return _name;
-        }
-    }
-
-    private string? _description;
-    public override string Description
-    {
-        get
-        {
-            if (_description is null)
-            {
-                UpdateDescription();
-            }
-
-            return _description!;
-        }
-    }
-    private void UpdateDescription()
-    {
-        _description = _usePosition
-            ? ActionDescriptionTemplates.ButtonPoint(_button, _position)
-            : ActionDescriptionTemplates.Button(_button);
-    }
+    public override string Description => UsePosition ? ActionDescriptionTemplates.ButtonPoint(Button, Position) : ActionDescriptionTemplates.Button(Button);
 
     private MouseButton _button;
     public MouseButton Button
@@ -60,7 +30,6 @@ public sealed class MouseButtonAction : InputAction, IEquatable<MouseButtonActio
             if (_button == value) return;
 
             _button = value;
-            UpdateDescription();
             RaisePropertyChanged(nameof(Description));
         }
     }
@@ -74,7 +43,6 @@ public sealed class MouseButtonAction : InputAction, IEquatable<MouseButtonActio
             if (_position == value) return;
 
             _position = value;
-            UpdateDescription();
             RaisePropertyChanged(nameof(Description));
         }
     }
@@ -88,7 +56,6 @@ public sealed class MouseButtonAction : InputAction, IEquatable<MouseButtonActio
             if (_usePosition == value) return;
 
             _usePosition = value;
-            UpdateDescription();
             RaisePropertyChanged(nameof(Description));
         }
     }

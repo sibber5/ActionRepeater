@@ -6,19 +6,7 @@ public sealed class WaitAction : InputAction, IEquatable<WaitAction>
 {
     public override string Name => "Wait";
 
-    private string? _description;
-    public override string Description
-    {
-        get
-        {
-            if (_description is null)
-            {
-                _description = ActionDescriptionTemplates.Duration(Duration);
-            }
-
-            return _description!;
-        }
-    }
+    public override string Description => ActionDescriptionTemplates.Duration(Duration);
 
     private int _duration;
     public int Duration
@@ -29,7 +17,6 @@ public sealed class WaitAction : InputAction, IEquatable<WaitAction>
             if (_duration == value) return;
 
             _duration = value;
-            _description = ActionDescriptionTemplates.Duration(value);
             RaisePropertyChanged(nameof(Description));
         }
     }

@@ -17,39 +17,9 @@ public sealed class KeyAction : InputAction, IEquatable<KeyAction>
 
     public @Type ActionType { get; }
 
-    private string? _name;
-    public override string Name
-    {
-        get
-        {
-            if (_name is null)
-            {
-                _name = ActionType.ToString().AddSpacesBetweenWords();
-            }
+    public override string Name => ActionType.ToString().AddSpacesBetweenWords();
 
-            return _name;
-        }
-    }
-
-    private string? _description;
-    public override string Description
-    {
-        get
-        {
-            if (_description is null)
-            {
-                UpdateDescription();
-            }
-
-            return _description!;
-        }
-    }
-    private void UpdateDescription()
-    {
-        _description = IsAutoRepeat
-            ? ActionDescriptionTemplates.KeyAutoRepeat(_key)
-            : ActionDescriptionTemplates.KeyFriendlyName(_key);
-    }
+    public override string Description => IsAutoRepeat ? ActionDescriptionTemplates.KeyAutoRepeat(Key) : ActionDescriptionTemplates.KeyFriendlyName(Key);
 
     private VirtualKey _key = VirtualKey.NO_KEY;
     public VirtualKey Key
@@ -60,7 +30,6 @@ public sealed class KeyAction : InputAction, IEquatable<KeyAction>
             if (_key == value) return;
 
             _key = value;
-            UpdateDescription();
             RaisePropertyChanged(nameof(Description));
         }
     }

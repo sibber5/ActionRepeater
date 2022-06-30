@@ -22,6 +22,7 @@ internal sealed class InputActionJsonConverter : JsonConverter<InputAction>
     private static string GetPropertyCountExceptionMessage(string actionTypeName, int readPropertyCount, int expectedPropertyCount)
         => $"Unexpected number of properties for {actionTypeName}: {readPropertyCount}. Expected {expectedPropertyCount}";
 
+    // TODO: rename TypeDiscriminator property to $type (to support polymorphic deserialization when it comes out)
     private enum TypeDiscriminator
     {
         KeyAction = 1,

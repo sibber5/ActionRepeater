@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ActionRepeater.Core.Action;
 using ActionRepeater.Core.Input;
+using ActionRepeater.UI.Utilities;
 
 namespace ActionRepeater.UI.ViewModels;
 
@@ -15,10 +17,13 @@ public partial class ActionListViewModel : ObservableObject
     [AlsoNotifyChangeFor(nameof(FilteredActions))]
     private bool _showKeyRepeatActions;
 
-    public IReadOnlyList<InputAction> FilteredActions { get => ShowKeyRepeatActions ? ActionManager.Actions : ActionManager.ActionsExlKeyRepeat; }
+    private readonly ViewModelCollection<ActionViewModel, InputAction> _actionVMs;
+    private readonly ViewModelCollection<ActionViewModel, InputAction> _actionsExlVMs;
+    public IReadOnlyList<ActionViewModel> FilteredActions => ShowKeyRepeatActions ? _actionVMs : _actionsExlVMs;
 
-    [ObservableProperty]
-    private InputAction? _selectedAction;
+    public InputAction? SelectedAction => SelectedActionIndex == -1
+        ? null
+        : (ShowKeyRepeatActions ? ActionManager.Actions[SelectedActionIndex] : ActionManager.ActionsExlKeyRepeat[SelectedActionIndex]);
 
     [ObservableProperty]
     private int _selectedActionIndex = -1;
@@ -49,6 +54,11 @@ public partial class ActionListViewModel : ObservableObject
     public ActionListViewModel(Func<string, string?, Task> showContentDialog)
     {
         _showContentDialog = showContentDialog;
+
+        Func<InputAction?, ActionViewModel> createVM = static (model) => new ActionViewModel(model!);
+
+        _actionVMs = new((ObservableCollection<InputAction?>)ActionManager.Actions, createVM);
+        _actionsExlVMs = new((ObservableCollection<InputAction?>)ActionManager.ActionsExlKeyRepeat, createVM);
 
         Func<bool> isCopiedActionNull = () => CopiedAction is not null;
 

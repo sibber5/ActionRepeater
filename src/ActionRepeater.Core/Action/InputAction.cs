@@ -1,14 +1,8 @@
-﻿using System;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Xml.Serialization;
 
 namespace ActionRepeater.Core.Action;
 
-[XmlInclude(typeof(KeyAction))]
-[XmlInclude(typeof(MouseButtonAction))]
-[XmlInclude(typeof(MouseWheelAction))]
-[XmlInclude(typeof(WaitAction))]
 public abstract class InputAction : INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler? PropertyChanged;
