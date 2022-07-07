@@ -8,10 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="7.1.2" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\ActionRepeater.Win32\ActionRepeater.Win32.csproj" />
   </ItemGroup>
 

@@ -12,29 +12,29 @@
 
         <ctrls:CmdBarToggleButton Glyph="&#xEA3A;"
                                   Text="Record"
-                                  Command="{x:Bind _viewModel.RecordCommand}"/>
+                                  Command="{x:Bind _viewModel.ToggleRecordingCommand}"/>
         
         <ctrls:CmdBarToggleButton Glyph="&#xE768;"
                                   Text="Play"
                                   IsChecked="{x:Bind _viewModel.IsPlayButtonChecked, Mode=OneWay}"
-                                  Command="{x:Bind _viewModel.PlayCommand}"/>
+                                  Command="{x:Bind _viewModel.PlayActionsCommand}"/>
 
         <AppBarSeparator Margin="5,0,5,0" />
 
         <ctrls:CmdBarButton Glyph="&#xE72D;"
                             Text="Export"
-                            Command="{x:Bind _viewModel.ExportCommand}"/>
+                            Command="{x:Bind _viewModel.ExportActionsCommand}"/>
         
         <ctrls:CmdBarButton Glyph="&#xE896;"
                             Text="Import"
-                            Command="{x:Bind _viewModel.ImportCommand}"/>
+                            Command="{x:Bind _viewModel.ImportActionsCommand}"/>
 
         <AppBarSeparator Margin="5,0,5,0" />
 
         <ctrls:CmdBarToggleButton Glyph="&#xF128;"
                                   Text="Cursor Path"
                                   ButtonWidth="70"
-                                  Command="{x:Bind _viewModel.ShowCursorPathCommand}"/>
+                                  Command="{x:Bind _viewModel.ToggleCursorPathWindowCommand}"/>
 
     </StackPanel>
     

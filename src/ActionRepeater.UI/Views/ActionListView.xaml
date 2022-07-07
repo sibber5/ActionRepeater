@@ -103,16 +103,16 @@
 
             <ListView.Resources>
                 <MenuFlyout x:Name="ActionItemMenuFlyout">
-                    <MenuFlyoutItem Text="Copy" Command="{x:Bind ViewModel.CopyCommand}" />
-                    <MenuFlyoutItem Text="Replace With Copied Action" Command="{x:Bind ViewModel.ReplaceCommand}" />
-                    <MenuFlyoutItem Text="Remove" Command="{x:Bind ViewModel.RemoveCommand}" />
+                    <MenuFlyoutItem Text="Copy" Command="{x:Bind ViewModel.StoreActionCommand}" />
+                    <MenuFlyoutItem Text="Replace With Copied Action" Command="{x:Bind ViewModel.ReplaceActionCommand}" />
+                    <MenuFlyoutItem Text="Remove" Command="{x:Bind ViewModel.RemoveActionCommand}" />
                     <MenuFlyoutSeparator  />
                     <MenuFlyoutItem Text="Clear Actions" Command="{x:Bind ViewModel.ClearActionsCommand}" />
                     <MenuFlyoutItem Text="Clear Cursor Path" Command="{x:Bind ViewModel.ClearCursorPathCommand}" />
                     <MenuFlyoutItem Text="Clear All" Command="{x:Bind ViewModel.ClearCommand}" />
                 </MenuFlyout>
                 <MenuFlyout x:Name="ActionListMenuFlyout">
-                    <MenuFlyoutItem Text="Paste" Command="{x:Bind ViewModel.PasteCommand}" />
+                    <MenuFlyoutItem Text="Paste" Command="{x:Bind ViewModel.AddActionCommand}" />
                     <MenuFlyoutSeparator  />
                     <MenuFlyoutItem Text="Clear Actions" Command="{x:Bind ViewModel.ClearActionsCommand}" />
                     <MenuFlyoutItem Text="Clear Cursor Path" Command="{x:Bind ViewModel.ClearCursorPathCommand}" />

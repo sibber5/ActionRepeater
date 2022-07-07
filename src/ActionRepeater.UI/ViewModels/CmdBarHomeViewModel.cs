@@ -14,17 +14,12 @@ using ActionRepeater.UI.Services;
 
 namespace ActionRepeater.UI.ViewModels;
 
-public class CmdBarHomeViewModel : ObservableObject
+public partial class CmdBarHomeViewModel : ObservableObject
 {
     private static readonly PropertyChangedEventArgs _playButtonCheckedChangedArgs = new(nameof(IsPlayButtonChecked));
 
     public bool IsPlayButtonChecked => Player.IsPlaying;
-
-    public IRelayCommand RecordCommand { get; }
-    public IRelayCommand PlayCommand { get; }
-    public IAsyncRelayCommand ExportCommand { get; }
-    public IAsyncRelayCommand ImportCommand { get; }
-    public IRelayCommand ShowCursorPathCommand { get; }
+    
 
     private readonly Func<string, string?, Task> _showContentDialog;
 
@@ -35,12 +30,6 @@ public class CmdBarHomeViewModel : ObservableObject
         _showContentDialog = showContentDialog;
         _pathWindowService = pathWindowService;
 
-        RecordCommand = new RelayCommand(ToggleRecordingActions, static () => !Player.IsPlaying);
-        PlayCommand = new RelayCommand(PlayActions, () => !Recorder.IsRecording && ActionManager.Actions.Count > 0);
-        ExportCommand = new AsyncRelayCommand(ExportActions, () => ActionManager.Actions.Count > 0);
-        ImportCommand = new AsyncRelayCommand(ImportActions);
-        ShowCursorPathCommand = new RelayCommand(ToggleCursorPathWindow);
-
         Player.IsPlayingChanged += Player_IsPlayingChanged;
         Recorder.IsRecordingChanged += Recorder_IsRecordingChanged;
         ActionManager.ActionCollectionChanged += ActionManager_ActionCollectionChanged;
@@ -49,12 +38,12 @@ public class CmdBarHomeViewModel : ObservableObject
     private void Player_IsPlayingChanged(object? sender, bool e)
     {
         OnPropertyChanged(nameof(_playButtonCheckedChangedArgs));
-        RecordCommand.NotifyCanExecuteChanged();
+        ToggleRecordingCommand.NotifyCanExecuteChanged();
     }
 
     private void Recorder_IsRecordingChanged(object? sender, bool e)
     {
-        PlayCommand.NotifyCanExecuteChanged();
+        PlayActionsCommand.NotifyCanExecuteChanged();
     }
 
     private void ActionManager_ActionCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -63,12 +52,13 @@ public class CmdBarHomeViewModel : ObservableObject
             || e.Action == NotifyCollectionChangedAction.Remove
             || e.Action == NotifyCollectionChangedAction.Reset)
         {
-            PlayCommand.NotifyCanExecuteChanged();
-            ExportCommand.NotifyCanExecuteChanged();
+            PlayActionsCommand.NotifyCanExecuteChanged();
+            ExportActionsCommand.NotifyCanExecuteChanged();
         }
     }
 
-    private static void ToggleRecordingActions()
+    [RelayCommand(CanExecute = nameof(CanToggleRecording))]
+    private static void ToggleRecording()
     {
         if (Recorder.IsRecording)
         {
@@ -80,7 +70,9 @@ public class CmdBarHomeViewModel : ObservableObject
 
         Recorder.StartRecording();
     }
+    private static bool CanToggleRecording() => !Player.IsPlaying;
 
+    [RelayCommand(CanExecute = nameof(CanPlayActions))]
     private static void PlayActions()
     {
         if (!ActionManager.TryPlayActions())
@@ -88,7 +80,9 @@ public class CmdBarHomeViewModel : ObservableObject
             Player.RefreshIsPlaying();
         }
     }
+    private static bool CanPlayActions() => !Recorder.IsRecording && ActionManager.Actions.Count > 0;
 
+    [RelayCommand(CanExecute = nameof(CanExportActions))]
     private async Task ExportActions()
     {
         if (ActionManager.Actions.Count == 0)
@@ -120,7 +114,9 @@ public class CmdBarHomeViewModel : ObservableObject
 
         await SerializationHelper.SerializeActionsAsync(dat, file.Path);
     }
+    private static bool CanExportActions() => ActionManager.Actions.Count > 0;
 
+    [RelayCommand]
     private async Task ImportActions()
     {
         FileOpenPicker openPicker = new();
@@ -154,6 +150,7 @@ public class CmdBarHomeViewModel : ObservableObject
         ActionManager.LoadActionData(data);
     }
 
+    [RelayCommand]
     private void ToggleCursorPathWindow()
     {
         if (_pathWindowService.IsPathWindowOpen)

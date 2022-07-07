@@ -14,7 +14,7 @@ namespace ActionRepeater.UI.ViewModels;
 public partial class ActionListViewModel : ObservableObject
 {
     [ObservableProperty]
-    [AlsoNotifyChangeFor(nameof(FilteredActions))]
+    [NotifyPropertyChangedFor(nameof(FilteredActions))]
     private bool _showKeyRepeatActions;
 
     internal ViewModelCollection<ActionViewModel, InputAction> ActionVMs { get; }
@@ -28,10 +28,6 @@ public partial class ActionListViewModel : ObservableObject
     [ObservableProperty]
     private int _selectedActionIndex = -1;
 
-    public IRelayCommand CopyCommand { get; }
-    public IRelayCommand PasteCommand { get; }
-    public IRelayCommand ReplaceCommand { get; }
-    public IAsyncRelayCommand RemoveCommand { get; }
     public IRelayCommand ClearCommand { get; }
     public IRelayCommand ClearActionsCommand { get; }
     public IRelayCommand ClearCursorPathCommand { get; }
@@ -43,9 +39,10 @@ public partial class ActionListViewModel : ObservableObject
         set
         {
             if (_copiedAction == value) return;
+
             _copiedAction = value;
-            PasteCommand.NotifyCanExecuteChanged();
-            ReplaceCommand.NotifyCanExecuteChanged();
+            AddActionCommand.NotifyCanExecuteChanged();
+            ReplaceActionCommand.NotifyCanExecuteChanged();
         }
     }
 
@@ -60,12 +57,6 @@ public partial class ActionListViewModel : ObservableObject
         ActionVMs = new((ObservableCollection<InputAction?>)ActionManager.Actions, createVM);
         ActionsExlVMs = new((ObservableCollection<InputAction?>)ActionManager.ActionsExlKeyRepeat, createVM);
 
-        Func<bool> isCopiedActionNull = () => CopiedAction is not null;
-
-        CopyCommand = new RelayCommand(StoreAction);
-        PasteCommand = new RelayCommand(AddAction, isCopiedActionNull);
-        ReplaceCommand = new RelayCommand(ReplaceAction, isCopiedActionNull);
-        RemoveCommand = new AsyncRelayCommand(RemoveAction);
         ClearCommand = new RelayCommand(ActionManager.ClearAll, static () => ActionManager.Actions.Count > 0 || ActionManager.CursorPathStart is not null);
         ClearActionsCommand = new RelayCommand(ActionManager.ClearActions, static () => ActionManager.Actions.Count > 0);
         ClearCursorPathCommand = new RelayCommand(ActionManager.ClearCursorPath, static () => ActionManager.CursorPathStart is not null);
@@ -91,9 +82,18 @@ public partial class ActionListViewModel : ObservableObject
         ClearCursorPathCommand.NotifyCanExecuteChanged();
     }
 
+    private bool IsCopiedActionNull() => CopiedAction is not null;
+
+    [RelayCommand]
     private void StoreAction() => CopiedAction = SelectedAction;
+
+    [RelayCommand(CanExecute = nameof(IsCopiedActionNull))]
     private void AddAction() => ActionManager.AddAction(CopiedAction!.Clone());
+
+    [RelayCommand(CanExecute = nameof(IsCopiedActionNull))]
     private void ReplaceAction() => ActionManager.ReplaceAction(!ShowKeyRepeatActions, SelectedActionIndex, CopiedAction!.Clone());
+
+    [RelayCommand]
     private async Task RemoveAction()
     {
         if (!ActionManager.TryRemoveAction(SelectedAction!))
