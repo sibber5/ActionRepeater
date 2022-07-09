@@ -12,6 +12,8 @@ public sealed partial class CmdBarHomePage : Page
     {
         NavigationCacheMode = NavigationCacheMode.Required;
         InitializeComponent();
+
+        Core.Input.Recorder.IsMouseOverExl ??= () => _recordButton.IsPointerOver;
     }
 
     protected override void OnNavigatedTo(NavigationEventArgs e)

@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Windows.Input;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls.Primitives;
 
 namespace ActionRepeater.UI.Controls;
 
@@ -40,6 +41,9 @@ public sealed partial class CmdBarButton : UserControl
         get => _button.Command;
         set => _button.Command = value;
     }
+
+    /// <inheritdoc cref="ButtonBase.IsPointerOver"/>
+    public bool IsPointerOver => _button.IsPointerOver;
 
     public CmdBarButton()
     {

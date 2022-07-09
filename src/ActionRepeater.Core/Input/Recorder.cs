@@ -22,6 +22,20 @@ public static class Recorder
     private static int _lastNewActionTickCount;
     private static readonly TimeConsistencyChecker _wheelMsgTCC = new();
 
+    /// <summary>
+    /// Function that returns true if the mouse click shouldnt be recorded.
+    /// </summary>
+    public static Func<bool>? IsMouseOverExl;
+
+    // this is set in ActionManager's static ctor
+    public static Action<InputAction> ReplaceLastAction = null!;
+
+    private static InputAction? GetLastAction()
+    {
+        if (ActionManager.Actions.Count > 0) return ActionManager.Actions[^1];
+        return null;
+    }
+
     public static void Reset()
     {
         _lastNewActionTickCount = Environment.TickCount;
@@ -32,9 +46,7 @@ public static class Recorder
     {
         if (!IsSubscribed)
         {
-            //return;
-            //RegisterRawInput();
-            throw new InvalidOperationException("Not currently registered for raw input. Call Recorder.RegisterRawInput(IntPtr) to register.");
+            throw new InvalidOperationException($"Not currently registered for raw input. Call {nameof(Recorder)}.{nameof(Recorder.RegisterRawInput)}(IntPtr) to register.");
         }
 
         Reset();
@@ -57,10 +69,7 @@ public static class Recorder
 
     public static void StopRecording()
     {
-        if (!IsSubscribed)
-        {
-            return;
-        }
+        if (!IsSubscribed) return;
 
         UnregisterRawInput();
 
@@ -100,16 +109,16 @@ public static class Recorder
 
     public static void UnregisterRawInput()
     {
-        RAWINPUTDEVICE[] rid = new[]
+        var inputDevices = new RAWINPUTDEVICE[]
         {
-            new RAWINPUTDEVICE()
+            new()
             {
                 usUsagePage = UsagePage.GenericDesktopControl,
                 usUsage = UsageId.Mouse,
                 dwFlags = RawInputFlags.REMOVE,
                 hwndTarget = IntPtr.Zero // hwndTarget must be IntPtr.Zero when RawInputFlags.REMOVE is set
             },
-            new RAWINPUTDEVICE()
+            new()
             {
                 usUsagePage = UsagePage.GenericDesktopControl,
                 usUsage = UsageId.Keyboard,
@@ -118,7 +127,7 @@ public static class Recorder
             }
         };
 
-        if (!Win32.PInvoke.RegisterRawInputDevices(rid))
+        if (!Win32.PInvoke.RegisterRawInputDevices(inputDevices))
         {
             throw new System.ComponentModel.Win32Exception(System.Runtime.InteropServices.Marshal.GetLastPInvokeError());
         }
@@ -141,11 +150,6 @@ public static class Recorder
 
                 if (data.rawButtonData.buttonInfo.usButtonFlags == 0) // move event
                 {
-                    //Debug.WriteLine($"{data.usFlags} - {data.lLastX}, {data.lLastY}");
-
-                    //var pos = Win32.PInvoke.Helpers.GetCursorPos();
-                    //Debug.WriteLine($"{data.usFlags} - {pos.x}, {pos.y}");
-
                     if (_shouldRecordMouseMovement)
                     {
                         int curTickCount = Environment.TickCount;
@@ -158,7 +162,6 @@ public static class Recorder
                 }
                 else // button/wheel event
                 {
-                    //Debug.WriteLine($"{data.rawButtonData.buttonInfo.usButtonFlags} - {data.rawButtonData.buttonInfo.usButtonData}\n");
                     var buttonInfo = data.rawButtonData.buttonInfo;
                     switch (buttonInfo.usButtonFlags)
                     {
@@ -183,13 +186,12 @@ public static class Recorder
                             break;
 
                         case RawMouseButtonState.LEFT_BUTTON_DOWN:
-                            // TODO: this: (and the one in the next case)
-                            //if (App.MainWindow.IsHoveringOverExcl) break;
+                            if (IsMouseOverExl?.Invoke() == true) break;
                             AddAction(new MouseButtonAction(MouseButtonAction.Type.MouseButtonDown, InputSimulator.MouseButton.Left,
                                 Win32.PInvoke.Helpers.GetCursorPos(), Options.Instance.UseCursorPosOnClicks));
                             break;
                         case RawMouseButtonState.LEFT_BUTTON_UP:
-                            //if (App.MainWindow.IsHoveringOverExcl) break;
+                            if (IsMouseOverExl?.Invoke() == true) break;
                             AddAction(new MouseButtonAction(MouseButtonAction.Type.MouseButtonUp, InputSimulator.MouseButton.Left,
                                 Win32.PInvoke.Helpers.GetCursorPos(), Options.Instance.UseCursorPosOnClicks));
                             break;
@@ -236,10 +238,7 @@ public static class Recorder
 
             case RawInputType.Keyboard:
                 VirtualKey key = inputData.data.keyboard.VKey;
-                if (key == VirtualKey.NO_KEY || (ushort)key == 255)
-                {
-                    break;
-                }
+                if (key == VirtualKey.NO_KEY || (ushort)key == 255) break;
 
                 var keyFlags = inputData.data.keyboard.Flags;
                 if (keyFlags.HasFlag(RawInputKeyFlags.BREAK))
@@ -263,8 +262,6 @@ public static class Recorder
                     AddAction(new KeyAction(KeyAction.Type.KeyDown, key, isAutoRepeat));
                 }
 
-                //Debug.WriteLine($"{key} - E0: {keyFlags.HasFlag(RawInputKeyFlags.E0)}  E1: {keyFlags.HasFlag(RawInputKeyFlags.E1)}");
-                //Debug.WriteLine(Convert.ToString((ushort)keyFlags, 2).PadLeft(4, '0'));
                 break;
         }
 
@@ -329,14 +326,5 @@ public static class Recorder
         ActionAdded?.Invoke(null, action);
 
         _lastNewActionTickCount = curTickCount;
-    }
-
-    // this is set in ActionManager's static ctor
-    public static Action<InputAction> ReplaceLastAction = null!;
-
-    private static InputAction? GetLastAction()
-    {
-        if (ActionManager.Actions.Count > 0) return ActionManager.Actions[^1];
-        return null;
     }
 }
