@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using ActionRepeater.Core.Action;
 using ActionRepeater.Core.Extentions;
 using ActionRepeater.Core.Helpers;
@@ -46,7 +45,7 @@ public static class ActionManager
     {
         get
         {
-            if (CursorPathStart is null) return System.Array.Empty<MouseMovement>();
+            if (CursorPathStart is null) return Array.Empty<MouseMovement>();
 
             List<MouseMovement> absPath = new();
 
@@ -243,7 +242,7 @@ public static class ActionManager
             _actionsExlKeyRepeat[index] = newAction;
 
             replacedActionIdx = _actions.IndexOf(actionToReplace);
-            if (replacedActionIdx == -1) throw new System.NotImplementedException("selected item not available in Actions.");
+            if (replacedActionIdx == -1) throw new NotImplementedException("selected item not available in Actions.");
             _actions[replacedActionIdx] = newAction;
 
             return;
@@ -254,7 +253,7 @@ public static class ActionManager
         _actions[index] = newAction;
 
         replacedActionIdx = _actionsExlKeyRepeat.IndexOf(actionToReplace);
-        if (replacedActionIdx == -1) throw new System.NotImplementedException("selected item not available in ActionsExlKeyRepeat.");
+        if (replacedActionIdx == -1) throw new NotImplementedException("selected item not available in ActionsExlKeyRepeat.");
         _actionsExlKeyRepeat[replacedActionIdx] = newAction;
     }
 
@@ -295,22 +294,15 @@ public static class ActionManager
             return false;
         }
 
-        var actionsToPlay = Options.Instance.SendKeyAutoRepeat ? _actions : _actionsExlKeyRepeat;
-
-        switch (Options.Instance.CursorMovementMode)
+        var actions = Options.Instance.SendKeyAutoRepeat ? _actions : _actionsExlKeyRepeat;
+        var cursorPath = Options.Instance.CursorMovementMode switch
         {
-            case CursorMovementMode.Absolute:
-                Player.PlayActions(actionsToPlay, AbsoluteCursorPath, false);
-                break;
+            CursorMovementMode.Absolute => AbsoluteCursorPath,
+            CursorMovementMode.Relative => CursorPath,
+            _ => null
+        };
 
-            case CursorMovementMode.Relative:
-                Player.PlayActions(actionsToPlay, CursorPath, true);
-                break;
-
-            default:
-                Player.PlayActions(actionsToPlay, null, false);
-                break;
-        }
+        Player.PlayActions(actions, cursorPath, Options.Instance.CursorMovementMode == CursorMovementMode.Relative);
 
         return true;
     }

@@ -17,8 +17,8 @@ public partial class ActionListViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(FilteredActions))]
     private bool _showKeyRepeatActions;
 
-    internal ViewModelCollection<ActionViewModel, InputAction> ActionVMs { get; }
-    internal ViewModelCollection<ActionViewModel, InputAction> ActionsExlVMs { get; }
+    internal SyncedObservableCollection<ActionViewModel, InputAction> ActionVMs { get; }
+    internal SyncedObservableCollection<ActionViewModel, InputAction> ActionsExlVMs { get; }
     public IReadOnlyList<ActionViewModel> FilteredActions => ShowKeyRepeatActions ? ActionVMs : ActionsExlVMs;
 
     public InputAction? SelectedAction => SelectedActionIndex == -1
