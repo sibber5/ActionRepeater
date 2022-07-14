@@ -4,8 +4,14 @@ namespace ActionRepeater.Core.Utilities;
 
 public class TimeConsistencyChecker
 {
-    private const int MaxTimeDelta = 1000;
-    private const int ConsistencyMargin = 150;
+    public int TickDeltasCount => _tickDeltasCount;
+
+    public int TickDeltasTotal => _tickDeltasTotal == 0 ? _baseline.GetValueOrDefault() : _tickDeltasTotal;
+
+    public int AverageTickDelta => _tickDeltasCount == 0 ? _baseline.GetValueOrDefault() : (_tickDeltasTotal / _tickDeltasCount);
+
+    private readonly int _maxTimeDelta;
+    private readonly int _consistencyMargin;
 
     private readonly bool _useLastTimeAsBaseline;
 
@@ -15,15 +21,11 @@ public class TimeConsistencyChecker
     private int _tickDeltasCount;
     private int _tickDeltasTotal;
 
-    public int TickDeltasCount => _tickDeltasCount;
-    //public int TickDeltasTotal => _tickDeltasTotal;
-    //public int AverageTickDelta => _tickDeltasCount == 0 ? 0 : (_tickDeltasTotal / _tickDeltasCount);
-    public int TickDeltasTotal => _tickDeltasTotal == 0 ? _baseline.GetValueOrDefault() : _tickDeltasTotal;
-    public int AverageTickDelta => _tickDeltasCount == 0 ? _baseline.GetValueOrDefault() : (_tickDeltasTotal / _tickDeltasCount);
-
-    public TimeConsistencyChecker(bool useLastTimeAsBaseline = false)
+    public TimeConsistencyChecker(bool useLastTimeAsBaseline = false, int maxTimeDelta = 1000, int consistencyMargin = 150)
     {
         _useLastTimeAsBaseline = useLastTimeAsBaseline;
+        _maxTimeDelta = maxTimeDelta;
+        _consistencyMargin = consistencyMargin;
     }
 
     public void Reset()
@@ -44,16 +46,16 @@ public class TimeConsistencyChecker
     public bool UpdateAndCheckIfConsistent()
     {
         int curTickCount = Environment.TickCount;
-        bool result = IsConsistent(in curTickCount);
-        if (!result)
+        bool isConsistent = IsConsistent(curTickCount);
+        if (!isConsistent)
         {
             Reset();
         }
         _lastTickCount = curTickCount;
-        return result;
+        return isConsistent;
     }
 
-    private bool IsConsistent(in int curTickCount)
+    private bool IsConsistent(int curTickCount)
     {
         if (_lastTickCount is null)
         {
@@ -62,7 +64,7 @@ public class TimeConsistencyChecker
 
         int curTickDelta = curTickCount - _lastTickCount.Value;
 
-        if (curTickDelta > MaxTimeDelta)
+        if (curTickDelta > _maxTimeDelta)
         {
             return false;
         }
@@ -82,6 +84,6 @@ public class TimeConsistencyChecker
             _baseline = curTickDelta;
         }
 
-        return curTickDelta > baseline - ConsistencyMargin && curTickDelta < baseline + ConsistencyMargin;
+        return curTickDelta > baseline - _consistencyMargin && curTickDelta < baseline + _consistencyMargin;
     }
 }

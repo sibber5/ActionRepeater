@@ -63,7 +63,18 @@ public class ObservableCollectionEx<T> : ObservableCollection<T>
     public ObservableCollectionEx(IEnumerable<T> collection) : base(collection) { }
     public ObservableCollectionEx(List<T> list) : base(list) { }
 
-    public void AddRange(IEnumerable<T> collection, bool sendAddActionEvenIfRequiresAllocatingList = false, bool raiseEvents = true)
+    /// <param name="raiseAddIfRequiresAllocation">
+    /// <para>
+    /// true if <see cref="NotifyCollectionChangedAction.Add"/> should be raised even
+    /// if allocatin a list is required.
+    /// </para>
+    /// <para>default is false.</para>
+    /// </param>
+    /// <param name="raiseEvents">
+    /// <para>Indicates wheather to raise colelction changed event(s).</para>
+    /// <para>default is true.</para>
+    /// </param>
+    public void AddRange(IEnumerable<T> collection, bool raiseAddIfRequiresAllocation = false, bool raiseEvents = true)
     {
         System.Diagnostics.Debug.Assert(collection is not null, $"{nameof(collection)} is null.");
 
@@ -88,7 +99,7 @@ public class ObservableCollectionEx<T> : ObservableCollection<T>
         {
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, rangeList, startIndex));
         }
-        else if (sendAddActionEvenIfRequiresAllocatingList)
+        else if (raiseAddIfRequiresAllocation)
         {
             OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, new List<T>(collection), startIndex));
         }
