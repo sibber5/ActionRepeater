@@ -202,45 +202,22 @@ internal static class ActionDescriptionTemplates
     };
 
     public static string Button(MouseButton b) => $"{b} Button";
+
     public static string ButtonPoint(MouseButton b, POINT p) => $"{b} Button at ({p.x}, {p.y})";
+
     public static string Duration(int ms) => $"{ms/1000.0:0.00} seconds";
-    public static string WheelSteps(int count)
-    {
-        if (count < 0)
-        {
-            return $"{-count} steps backward";
-        }
-        return $"{count} steps forward";
-    }
+
+    public static string WheelSteps(int count) => count < 0 ? $"{-count} steps backward" : $"{count} steps forward";
+
     public static string WheelSteps(int count, int ms)
-    {
-        if (count < 0)
-        {
-            return $"{-count} steps backward, over {Duration(ms)}";
-        }
-        return $"{count} steps forward, over {Duration(ms)}";
-    }
-    public static string HorizontalWheelSteps(int count)
-    {
-        if (count < 0)
-        {
-            return $"{-count} steps to the left";
-        }
-        return $"{count} steps to the right";
-    }
+        => count < 0 ? $"{-count} steps backward, over {Duration(ms)}" : $"{count} steps forward, over {Duration(ms)}";
+
+    public static string HorizontalWheelSteps(int count) => count < 0 ? $"{-count} steps to the left" : $"{count} steps to the right";
+
     public static string HorizontalWheelSteps(int count, int ms)
-    {
-        if (count < 0)
-        {
-            return $"{-count} steps to the left, over {Duration(ms)}";
-        }
-        return $"{count} steps to the right, over {Duration(ms)}";
-    }
-    public static string KeyFriendlyName(VirtualKey key)
-    {
-        if (_virtualKeyFriendlyNames.TryGetValue(key, out string? name)) return name;
-        return key.ToString();
-    }
+        => count < 0 ? $"{-count} steps to the left, over {Duration(ms)}" : $"{count} steps to the right, over {Duration(ms)}";
+
+    public static string KeyFriendlyName(VirtualKey key) => _virtualKeyFriendlyNames.TryGetValue(key, out string? name) ? name : key.ToString();
 
     public static string KeyAutoRepeat(VirtualKey key) => $"{KeyFriendlyName(key)} (auto-repeat)";
 }

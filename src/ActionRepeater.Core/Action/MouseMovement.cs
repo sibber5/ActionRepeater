@@ -35,27 +35,13 @@ public sealed class MouseMovement
         point.x += offset.x;
         if (!monitors.Any(m => m.ContainsInclusive(point.x, point.y)))
         {
-            if (offset.x < 0)
-            {
-                point.x = ogMonitor.Left;
-            }
-            else
-            {
-                point.x = ogMonitor.Right;
-            }
+            point.x = offset.x < 0 ? ogMonitor.Left : ogMonitor.Right;
         }
 
         point.y += offset.y;
         if (!monitors.Any(m => m.ContainsInclusive(point.x, point.y)))
         {
-            if (offset.y < 0)
-            {
-                point.y = ogMonitor.Top;
-            }
-            else
-            {
-                point.y = ogMonitor.Bottom;
-            }
+            point.y = offset.y < 0 ? ogMonitor.Top : ogMonitor.Bottom;
         }
 
         return point;

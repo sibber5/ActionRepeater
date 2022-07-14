@@ -26,7 +26,7 @@ public class PathWindowService
         }
         else
         {
-            var absCursorPts = ActionManager.AbsoluteCursorPath.Select(p => (System.Drawing.Point)p.MovPoint).ToArray();
+            var absCursorPts = ActionManager.GetAbsoluteCursorPath().Select(p => (System.Drawing.Point)p.MovPoint).ToArray();
             _lastAbsPt = absCursorPts[^1];
 
             _pathWindow = new(absCursorPts);

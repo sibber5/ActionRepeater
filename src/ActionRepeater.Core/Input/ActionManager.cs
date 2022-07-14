@@ -41,35 +41,6 @@ public static class ActionManager
         }
     }
     public static List<MouseMovement> CursorPath { get; } = new();
-    public static IReadOnlyList<MouseMovement> AbsoluteCursorPath
-    {
-        get
-        {
-            if (CursorPathStart is null) return Array.Empty<MouseMovement>();
-
-            List<MouseMovement> absPath = new();
-
-            absPath.Add(CursorPathStart);
-
-            for (int i = 0; i < CursorPath.Count; ++i)
-            {
-                MouseMovement delta = CursorPath[i];
-                MouseMovement lastAbs = absPath[^1];
-
-                Win32.POINT pt = MouseMovement.OffsetPointWithinScreens(lastAbs.MovPoint, delta.MovPoint);
-
-                if (pt == lastAbs.MovPoint)
-                {
-                    lastAbs.ActualDelay += delta.ActualDelay;
-                    continue;
-                }
-
-                absPath.Add(new MouseMovement(pt, delta.ActualDelay));
-            }
-
-            return absPath;
-        }
-    }
 
     private static readonly ObservableCollectionEx<InputAction> _actions = new();
     public static IReadOnlyList<InputAction> Actions => _actions;
@@ -85,6 +56,33 @@ public static class ActionManager
 
     /// <summary>Contains the indecies of the modified actions in ActionsExlKeyRepeat.</summary>
     private static readonly List<int> _modifiedFilteredActionsIdxs = new();
+
+    public static IReadOnlyList<MouseMovement> GetAbsoluteCursorPath()
+    {
+        if (CursorPathStart is null) return Array.Empty<MouseMovement>();
+
+        List<MouseMovement> absPath = new();
+
+        absPath.Add(CursorPathStart);
+
+        for (int i = 0; i < CursorPath.Count; ++i)
+        {
+            MouseMovement delta = CursorPath[i];
+            MouseMovement lastAbs = absPath[^1];
+
+            Win32.POINT pt = MouseMovement.OffsetPointWithinScreens(lastAbs.MovPoint, delta.MovPoint);
+
+            if (pt == lastAbs.MovPoint)
+            {
+                lastAbs.ActualDelay += delta.ActualDelay;
+                continue;
+            }
+
+            absPath.Add(new MouseMovement(pt, delta.ActualDelay));
+        }
+
+        return absPath;
+    }
 
     public static void LoadActionData(ActionData data)
     {
@@ -297,7 +295,7 @@ public static class ActionManager
         var actions = Options.Instance.SendKeyAutoRepeat ? _actions : _actionsExlKeyRepeat;
         var cursorPath = Options.Instance.CursorMovementMode switch
         {
-            CursorMovementMode.Absolute => AbsoluteCursorPath,
+            CursorMovementMode.Absolute => GetAbsoluteCursorPath(),
             CursorMovementMode.Relative => CursorPath,
             _ => null
         };
