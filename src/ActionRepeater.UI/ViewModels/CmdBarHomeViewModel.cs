@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Specialized;
-using System.ComponentModel;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -14,10 +13,8 @@ namespace ActionRepeater.UI.ViewModels;
 
 public partial class CmdBarHomeViewModel : ObservableObject
 {
-    private static readonly PropertyChangedEventArgs _playButtonCheckedChangedArgs = new(nameof(IsPlayButtonChecked));
-
-    public bool IsPlayButtonChecked => Player.IsPlaying;
-    
+    [ObservableProperty]
+    private bool _isPlayButtonChecked;
 
     private readonly Func<string, string?, Task> _showContentDialog;
 
@@ -35,7 +32,7 @@ public partial class CmdBarHomeViewModel : ObservableObject
 
     private void Player_IsPlayingChanged(object? sender, bool e)
     {
-        OnPropertyChanged(nameof(_playButtonCheckedChangedArgs));
+        IsPlayButtonChecked = e;
         ToggleRecordingCommand.NotifyCanExecuteChanged();
     }
 
