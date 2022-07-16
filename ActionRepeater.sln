@@ -16,7 +16,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ActionRepeater.Core", "src\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ActionRepeater.UI", "src\ActionRepeater.UI\ActionRepeater.UI.csproj", "{C51DBBBB-ACEA-4AD6-9FEB-4E787E4D9978}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ActionRepeater.Core.Tests", "tests\ActionRepeater.Core.Tests\ActionRepeater.Core.Tests.csproj", "{79D9A580-FA56-410C-88CF-225237AACF7B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ActionRepeater.Core.Tests", "tests\ActionRepeater.Core.Tests\ActionRepeater.Core.Tests.csproj", "{79D9A580-FA56-410C-88CF-225237AACF7B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ActionRepeater.UI.Tests", "tests\ActionRepeater.UI.Tests\ActionRepeater.UI.Tests.csproj", "{C2C04285-989A-4681-9AB9-3EE50BD8CBEA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -88,6 +90,18 @@ Global
 		{79D9A580-FA56-410C-88CF-225237AACF7B}.Release|arm64.Build.0 = Release|Any CPU
 		{79D9A580-FA56-410C-88CF-225237AACF7B}.Release|x64.ActiveCfg = Release|Any CPU
 		{79D9A580-FA56-410C-88CF-225237AACF7B}.Release|x64.Build.0 = Release|Any CPU
+		{C2C04285-989A-4681-9AB9-3EE50BD8CBEA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C2C04285-989A-4681-9AB9-3EE50BD8CBEA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C2C04285-989A-4681-9AB9-3EE50BD8CBEA}.Debug|arm64.ActiveCfg = Debug|Any CPU
+		{C2C04285-989A-4681-9AB9-3EE50BD8CBEA}.Debug|arm64.Build.0 = Debug|Any CPU
+		{C2C04285-989A-4681-9AB9-3EE50BD8CBEA}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C2C04285-989A-4681-9AB9-3EE50BD8CBEA}.Debug|x64.Build.0 = Debug|Any CPU
+		{C2C04285-989A-4681-9AB9-3EE50BD8CBEA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C2C04285-989A-4681-9AB9-3EE50BD8CBEA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C2C04285-989A-4681-9AB9-3EE50BD8CBEA}.Release|arm64.ActiveCfg = Release|Any CPU
+		{C2C04285-989A-4681-9AB9-3EE50BD8CBEA}.Release|arm64.Build.0 = Release|Any CPU
+		{C2C04285-989A-4681-9AB9-3EE50BD8CBEA}.Release|x64.ActiveCfg = Release|Any CPU
+		{C2C04285-989A-4681-9AB9-3EE50BD8CBEA}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
