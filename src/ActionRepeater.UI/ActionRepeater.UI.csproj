@@ -65,24 +65,12 @@
       <None Remove="Pages\CmdBarOptionsPage.xaml" />
       <None Remove="Styles.xaml" />
       <None Remove="Views\ActionListView.xaml" />
-      <None Remove="Views\CmdBarHomeView.xaml" />
-      <None Remove="Views\CmdBarOptionsView.xaml" />
     </ItemGroup>
     <ItemGroup>
       <Resource Remove="Views\ActionListView.xaml" />
     </ItemGroup>
     <ItemGroup>
       <Page Update="Pages\CmdBarOptionsPage.xaml">
-        <Generator>MSBuild:Compile</Generator>
-      </Page>
-    </ItemGroup>
-    <ItemGroup>
-      <Page Update="Views\CmdBarOptionsView.xaml">
-        <Generator>MSBuild:Compile</Generator>
-      </Page>
-    </ItemGroup>
-    <ItemGroup>
-      <Page Update="Views\CmdBarHomeView.xaml">
         <Generator>MSBuild:Compile</Generator>
       </Page>
     </ItemGroup>
