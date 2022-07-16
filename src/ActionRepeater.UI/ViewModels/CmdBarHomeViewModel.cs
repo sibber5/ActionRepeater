@@ -1,16 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Windows.Storage;
-using Windows.Storage.Pickers;
 using ActionRepeater.Core.Extentions;
 using ActionRepeater.Core.Helpers;
 using ActionRepeater.Core.Input;
 using ActionRepeater.UI.Services;
+using ActionRepeater.UI.Helpers;
 
 namespace ActionRepeater.UI.ViewModels;
 
@@ -91,18 +89,7 @@ public partial class CmdBarHomeViewModel : ObservableObject
             return;
         }
 
-        FileSavePicker savePicker = new()
-        {
-            SuggestedFileName = "Actions"
-        };
-
-        // Associate the HWND with the file picker
-        WinRT.Interop.InitializeWithWindow.Initialize(savePicker, App.MainWindow.Handle);
-
-        savePicker.FileTypeChoices.Add("ActionRepeater Actions", new List<string>() { ".acts" });
-        savePicker.FileTypeChoices.Add("JSON", new List<string>() { ".json" });
-
-        StorageFile file = await savePicker.PickSaveFileAsync();
+        var file = await FilePickerHelper.PickSaveFileAsync();
         if (file is null) return;
 
         ActionData dat = new()
@@ -119,15 +106,7 @@ public partial class CmdBarHomeViewModel : ObservableObject
     [RelayCommand]
     private async Task ImportActions()
     {
-        FileOpenPicker openPicker = new();
-
-        // Associate the HWND with the file picker
-        WinRT.Interop.InitializeWithWindow.Initialize(openPicker, App.MainWindow.Handle);
-
-        openPicker.FileTypeFilter.Add(".acts");
-        //openPicker.FileTypeFilter.Add(".json");
-
-        StorageFile file = await openPicker.PickSingleFileAsync();
+        var file = await FilePickerHelper.PickSingleFileAsync();
         if (file is null) return;
 
         ActionData? data = null;
