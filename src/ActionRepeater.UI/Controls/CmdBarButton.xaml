@@ -6,20 +6,14 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <UserControl.Resources>
-        <x:Double x:Key="ButtonSize">42</x:Double>
-        <x:Double x:Key="ButtonIconSize">22</x:Double>
-        <x:Double x:Key="FontSize">14</x:Double>
-    </UserControl.Resources>
-
     <Button x:Name="_button"
             Background="Transparent"
             BorderBrush="Transparent"
             Style="{StaticResource DisabledButtonSettableBg}">
 
-        <StackPanel x:Name="_stackpanel" Width="{StaticResource ButtonSize}" Height="{StaticResource ButtonSize}">
-            <FontIcon x:Name="_fontIcon" FontFamily="{StaticResource SymbolThemeFontFamily}" FontSize="{StaticResource ButtonIconSize}" />
-            <TextBlock x:Name="_textBlcok" FontSize="{StaticResource FontSize}" Margin="0,2,0,0" HorizontalAlignment="Center" />
+        <StackPanel x:Name="_stackpanel" Width="{StaticResource CommandBarButtonSize}" Height="{StaticResource CommandBarButtonSize}">
+            <FontIcon x:Name="_fontIcon" FontFamily="{StaticResource SymbolThemeFontFamily}" FontSize="{StaticResource CommandBarButtonIconSize}" />
+            <TextBlock x:Name="_textBlcok" FontSize="{StaticResource CommandBarFontSize}" Margin="0,2,0,0" HorizontalAlignment="Center" />
         </StackPanel>
         
     </Button>

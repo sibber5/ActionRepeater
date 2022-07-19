@@ -64,6 +64,17 @@ public class Options : INotifyPropertyChanged
             RaisePropertyChanged();
         }
     }
+
+    private int _playRepeatCount = 1;
+    public int PlayRepeatCount
+    {
+        get => _playRepeatCount;
+        set
+        {
+            _playRepeatCount = value;
+            RaisePropertyChanged();
+        }
+    }
 }
 
 public enum CursorMovementMode

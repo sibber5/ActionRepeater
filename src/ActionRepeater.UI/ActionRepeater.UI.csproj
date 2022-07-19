@@ -61,6 +61,7 @@
     <ItemGroup>
       <None Remove="Controls\CmdBarButton.xaml" />
       <None Remove="Controls\CmdBarToggleButton.xaml" />
+      <None Remove="GlobalResources.xaml" />
       <None Remove="Pages\CmdBarHomePage.xaml" />
       <None Remove="Pages\CmdBarOptionsPage.xaml" />
       <None Remove="Styles.xaml" />
@@ -68,6 +69,11 @@
     </ItemGroup>
     <ItemGroup>
       <Resource Remove="Views\ActionListView.xaml" />
+    </ItemGroup>
+    <ItemGroup>
+      <Page Update="GlobalResources.xaml">
+        <Generator>MSBuild:Compile</Generator>
+      </Page>
     </ItemGroup>
     <ItemGroup>
       <Page Update="Pages\CmdBarOptionsPage.xaml">

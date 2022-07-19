@@ -300,7 +300,7 @@ public static class ActionManager
             _ => null
         };
 
-        Player.PlayActions(actions, cursorPath, Options.Instance.CursorMovementMode == CursorMovementMode.Relative);
+        Player.PlayActions(actions, cursorPath, Options.Instance.CursorMovementMode == CursorMovementMode.Relative, Options.Instance.PlayRepeatCount);
 
         return true;
     }

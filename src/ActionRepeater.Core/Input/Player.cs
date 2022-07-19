@@ -34,7 +34,7 @@ public static class Player
 
     private static Action<Task>? _cleanUp;
 
-    public static void PlayActions(IReadOnlyList<InputAction> actions, IReadOnlyList<MouseMovement>? path, bool isPathRelative)
+    public static void PlayActions(IReadOnlyList<InputAction> actions, IReadOnlyList<MouseMovement>? path, bool isPathRelative, int repeatCount = 1)
     {
         _tokenSource?.Dispose();
         _tokenSource = new CancellationTokenSource();
@@ -90,17 +90,29 @@ public static class Player
             Debug.WriteLine("[Player] Disposed token source.");
         };
 
+        var playInputActions = repeatCount == 1 ? _playInputActionsAsync : async () =>
+        {
+            if (repeatCount < 0) while (true)
+            {
+                await _playInputActionsAsync();
+            }
+            else for (int i = 0; i < repeatCount; ++i)
+            {
+                await _playInputActionsAsync();
+            }
+        };
+
         IsPlaying = true;
         Debug.WriteLine("[Player] Started play task.");
 
         if (ActionManager.CursorPathStart is not null && path?.Count > 0)
         {
-            Task.WhenAll(Task.Run(_playInputActionsAsync, _tokenSource.Token), PlayCursorMovement(path, isPathRelative))
+            Task.WhenAll(Task.Run(playInputActions, _tokenSource.Token), PlayCursorMovement(path, isPathRelative))
                 .ContinueWith(_cleanUp);
         }
         else
         {
-            Task.Run(_playInputActionsAsync, _tokenSource.Token)
+            Task.Run(playInputActions, _tokenSource.Token)
                 .ContinueWith(_cleanUp);
         }
     }

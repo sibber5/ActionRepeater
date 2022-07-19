@@ -13,6 +13,12 @@ namespace ActionRepeater.UI.ViewModels;
 
 public partial class CmdBarHomeViewModel : ObservableObject
 {
+    public double PlayRepeatCount
+    {
+        get => Core.Options.Instance.PlayRepeatCount;
+        set => Core.Options.Instance.PlayRepeatCount = (int)Math.Round(value);
+    }
+
     [ObservableProperty]
     private bool _isPlayButtonChecked;
 
@@ -49,6 +55,11 @@ public partial class CmdBarHomeViewModel : ObservableObject
             System.Diagnostics.Debug.Assert(!Core.Options.Instance.SendKeyAutoRepeat);
 
             actionListVM.UpdateActionListIndex(true);
+        };
+
+        Core.Options.Instance.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(PlayRepeatCount)) OnPropertyChanged(e);
         };
 
         Player.IsPlayingChanged += Player_IsPlayingChanged;
