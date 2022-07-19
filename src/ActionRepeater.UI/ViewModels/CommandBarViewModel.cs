@@ -9,9 +9,9 @@ public class CommandBarViewModel
 
     public CmdBarOptionsViewModel OptionsViewModel { get; }
 
-    public CommandBarViewModel(Func<string, string?, System.Threading.Tasks.Task> showContentDialog, PathWindowService pathWindowService)
+    public CommandBarViewModel(Func<string, string?, System.Threading.Tasks.Task> showContentDialog, PathWindowService pathWindowService, ActionListViewModel actionListVM)
     {
-        HomeViewModel = new(showContentDialog, pathWindowService);
+        HomeViewModel = new(showContentDialog, pathWindowService, actionListVM);
         OptionsViewModel = new();
     }
 }

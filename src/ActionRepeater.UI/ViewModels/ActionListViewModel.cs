@@ -8,6 +8,7 @@ using CommunityToolkit.Mvvm.Input;
 using ActionRepeater.Core.Action;
 using ActionRepeater.Core.Input;
 using ActionRepeater.UI.Utilities;
+using Microsoft.UI.Dispatching;
 
 namespace ActionRepeater.UI.ViewModels;
 
@@ -32,6 +33,8 @@ public partial class ActionListViewModel : ObservableObject
     public IRelayCommand ClearActionsCommand { get; }
     public IRelayCommand ClearCursorPathCommand { get; }
 
+    public int CurrentSetActionIndex { get; set; }
+
     private InputAction? _copiedAction;
     public InputAction? CopiedAction
     {
@@ -46,11 +49,21 @@ public partial class ActionListViewModel : ObservableObject
         }
     }
 
+    public Action? ScrollToSelectedItem { get; set; }
+
     private readonly Func<string, string?, Task> _showContentDialog;
+
+    private readonly DispatcherQueueHandler _updateSelectedAction;
 
     public ActionListViewModel(Func<string, string?, Task> showContentDialog)
     {
         _showContentDialog = showContentDialog;
+
+        _updateSelectedAction = () =>
+        {
+            SelectedActionIndex = CurrentSetActionIndex;
+            ScrollToSelectedItem?.Invoke();
+        };
 
         Func<InputAction?, ActionViewModel> createVM = static (model) => new ActionViewModel(model!);
 
@@ -80,6 +93,32 @@ public partial class ActionListViewModel : ObservableObject
     {
         ClearCommand.NotifyCanExecuteChanged();
         ClearCursorPathCommand.NotifyCanExecuteChanged();
+    }
+
+    public void UpdateActionListIndex(bool skipAutoRepeat)
+    {
+        CurrentSetActionIndex++;
+
+        if (skipAutoRepeat)
+        {
+            var filteredActions = ShowKeyRepeatActions ? ActionManager.Actions : ActionManager.ActionsExlKeyRepeat;
+            for (int i = CurrentSetActionIndex; i < filteredActions.Count; i++)
+            {
+                if (IsAutoRepeatAction(filteredActions[i]) || (i > 0 && filteredActions[i] is WaitAction && IsAutoRepeatAction(filteredActions[i - 1])))
+                {
+                    continue;
+                }
+
+                CurrentSetActionIndex = i;
+                break;
+            }
+
+            static bool IsAutoRepeatAction(InputAction a) => a is KeyAction keyAction && keyAction.IsAutoRepeat;
+        }
+
+        if (CurrentSetActionIndex >= FilteredActions.Count) CurrentSetActionIndex = -1;
+
+        App.MainWindow.DispatcherQueue.TryEnqueue(_updateSelectedAction);
     }
 
     private bool IsCopiedActionNull() => CopiedAction is not null;

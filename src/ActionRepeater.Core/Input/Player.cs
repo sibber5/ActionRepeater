@@ -9,7 +9,9 @@ namespace ActionRepeater.Core.Input;
 
 public static class Player
 {
-    public static Action<System.Action>? ExecuteOnUIThread;
+    public static Action<System.Action>? ExecuteOnUIThread { get; set; }
+
+    public static Action<bool>? UpdateView { get; set; }
 
     private static CancellationTokenSource? _tokenSource;
 
@@ -25,6 +27,83 @@ public static class Player
     }
 
     public static event EventHandler<bool>? IsPlayingChanged;
+
+    private static IReadOnlyList<InputAction>? _actionsToPlay;
+
+    private static Func<Task>? _playInputActionsAsync;
+
+    private static Action<Task>? _cleanUp;
+
+    public static void PlayActions(IReadOnlyList<InputAction> actions, IReadOnlyList<MouseMovement>? path, bool isPathRelative)
+    {
+        _tokenSource?.Dispose();
+        _tokenSource = new CancellationTokenSource();
+
+        _actionsToPlay = actions;
+
+        _playInputActionsAsync ??= static async () =>
+        {
+            for (int i = 0; i < _actionsToPlay.Count; ++i)
+            {
+                if (_tokenSource.IsCancellationRequested) return;
+
+                UpdateView?.Invoke(IsAutoRepeatAction(_actionsToPlay[i]) || (i > 0 && _actionsToPlay[i] is WaitAction && IsAutoRepeatAction(_actionsToPlay[i - 1])));
+
+                if (_actionsToPlay[i] is WaitAction w)
+                {
+                    try
+                    {
+                        await Task.Delay(w.Duration, _tokenSource.Token);
+                    }
+                    catch (TaskCanceledException)
+                    {
+                        Debug.WriteLine("[Player] Delay task was cancelled.");
+                        return;
+                    }
+                    continue;
+                }
+
+                _actionsToPlay[i].Play();
+            }
+
+            // this will deselect the last action item in the list view
+            UpdateView?.Invoke(false);
+
+            static bool IsAutoRepeatAction(InputAction a) => a is KeyAction keyAction && keyAction.IsAutoRepeat;
+        };
+
+        _cleanUp ??= static task =>
+        {
+            Debug.WriteLine("[Player] Finished play task.");
+
+            if (ExecuteOnUIThread is null)
+            {
+                IsPlaying = false;
+            }
+            else
+            {
+                ExecuteOnUIThread(static () => IsPlaying = false);
+            }
+
+            _tokenSource!.Dispose();
+            _tokenSource = null;
+            Debug.WriteLine("[Player] Disposed token source.");
+        };
+
+        IsPlaying = true;
+        Debug.WriteLine("[Player] Started play task.");
+
+        if (ActionManager.CursorPathStart is not null && path?.Count > 0)
+        {
+            Task.WhenAll(Task.Run(_playInputActionsAsync, _tokenSource.Token), PlayCursorMovement(path, isPathRelative))
+                .ContinueWith(_cleanUp);
+        }
+        else
+        {
+            Task.Run(_playInputActionsAsync, _tokenSource.Token)
+                .ContinueWith(_cleanUp);
+        }
+    }
 
     private static Task PlayCursorMovement(IReadOnlyList<MouseMovement> path, bool isPathRelative)
     {
@@ -59,66 +138,11 @@ public static class Player
         }, _tokenSource!.Token);
     }
 
-    public static void PlayActions(IReadOnlyList<InputAction> actions, IReadOnlyList<MouseMovement>? path, bool isPathRelative)
-    {
-        _tokenSource?.Dispose();
-        _tokenSource = new CancellationTokenSource();
-
-        var playInputActionsAsync = async () =>
-        {
-            for (int i = 0; i < actions.Count; ++i)
-            {
-                if (_tokenSource.IsCancellationRequested) return;
-
-                if (actions[i] is WaitAction w)
-                {
-                    // await contiuation task to avoid TaskCancellationException
-                    await Task.Delay(w.Duration, _tokenSource.Token).ContinueWith(task => { });
-                    continue;
-                }
-
-                actions[i].Play();
-            }
-        };
-
-        Action<Task> cleanUp = task =>
-        {
-            Debug.WriteLine("Finished play task.");
-
-            if (ExecuteOnUIThread is null)
-            {
-                IsPlaying = false;
-            }
-            else
-            {
-                ExecuteOnUIThread(() => IsPlaying = false);
-            }
-            //App.MainWindow.DispatcherQueue.TryEnqueue(() => IsPlaying = false);
-
-            Debug.WriteLine("Disposing token source...");
-            _tokenSource!.Dispose();
-            _tokenSource = null;
-        };
-
-        if (ActionManager.CursorPathStart is not null && path?.Count > 0)
-        {
-            Task.WhenAll(Task.Run(playInputActionsAsync, _tokenSource.Token), PlayCursorMovement(path, isPathRelative))
-                .ContinueWith(cleanUp);
-        }
-        else
-        {
-            Task.Run(playInputActionsAsync, _tokenSource.Token).ContinueWith(cleanUp);
-        }
-
-        IsPlaying = true;
-        Debug.WriteLine("Started play task.");
-    }
-
     public static void Cancel()
     {
         Debug.Assert(_tokenSource is not null, $"{nameof(_tokenSource)} is null. A play task may not have been run.");
 
-        Debug.WriteLine("Cancelling play task...");
+        Debug.WriteLine("[Player] Cancelling play task...");
         _tokenSource!.Cancel();
     }
 

@@ -20,10 +20,36 @@ public partial class CmdBarHomeViewModel : ObservableObject
 
     private readonly PathWindowService _pathWindowService;
 
-    public CmdBarHomeViewModel(Func<string, string?, Task> showContentDialog, PathWindowService pathWindowService)
+    private readonly ActionListViewModel _actionListVM;
+
+    // These select the item in the list view that is currently being performed
+    private readonly Action<bool> _updateActionsView;
+    private readonly Action<bool> _updateActionsExlView;
+
+    public CmdBarHomeViewModel(Func<string, string?, Task> showContentDialog, PathWindowService pathWindowService, ActionListViewModel actionListVM)
     {
         _showContentDialog = showContentDialog;
         _pathWindowService = pathWindowService;
+        _actionListVM = actionListVM;
+
+        _updateActionsView = (isAutoRepeat) =>
+        {
+            // assume Actions (including key auto repeat) are playing
+            System.Diagnostics.Debug.Assert(Core.Options.Instance.SendKeyAutoRepeat);
+
+            if (actionListVM.ShowKeyRepeatActions || !isAutoRepeat)
+            {
+                actionListVM.UpdateActionListIndex(false);
+            }
+        };
+
+        _updateActionsExlView = (isAutoRepeat) =>
+        {
+            // assume Actions *excluding* key auto repeat are playing
+            System.Diagnostics.Debug.Assert(!Core.Options.Instance.SendKeyAutoRepeat);
+
+            actionListVM.UpdateActionListIndex(true);
+        };
 
         Player.IsPlayingChanged += Player_IsPlayingChanged;
         Recorder.IsRecordingChanged += Recorder_IsRecordingChanged;
@@ -68,11 +94,15 @@ public partial class CmdBarHomeViewModel : ObservableObject
     private static bool CanToggleRecording() => !Player.IsPlaying;
 
     [RelayCommand(CanExecute = nameof(CanPlayActions))]
-    private static void PlayActions()
+    private void PlayActions()
     {
+        _actionListVM.CurrentSetActionIndex = -1;
+        Player.UpdateView = Core.Options.Instance.SendKeyAutoRepeat ? _updateActionsView : _updateActionsExlView;
+
         if (!ActionManager.TryPlayActions())
         {
             Player.RefreshIsPlaying();
+            return;
         }
     }
     private static bool CanPlayActions() => !Recorder.IsRecording && ActionManager.Actions.Count > 0;

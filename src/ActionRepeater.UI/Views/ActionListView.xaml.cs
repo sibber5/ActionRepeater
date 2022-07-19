@@ -7,12 +7,23 @@ namespace ActionRepeater.UI.Views;
 
 public sealed partial class ActionListView : UserControl
 {
-    public ActionListViewModel ViewModel { get; set; } = null!;
+    private ActionListViewModel _viewModel = null!;
+    public ActionListViewModel ViewModel
+    {
+        get => _viewModel;
+        set
+        {
+            _viewModel = value;
+            _viewModel.ScrollToSelectedItem = ScrollToSelectedItem;
+        }
+    }
 
     public ActionListView()
     {
         InitializeComponent();
     }
+
+    public void ScrollToSelectedItem() => ActionList.ScrollIntoView(ActionList.SelectedItem);
 
     private void ActionList_RightTapped(object sender, RightTappedRoutedEventArgs e)
     {

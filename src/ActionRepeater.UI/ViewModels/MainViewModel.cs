@@ -12,6 +12,6 @@ public class MainViewModel
     public MainViewModel(Func<string, string?, System.Threading.Tasks.Task> showContentDialog, PathWindowService pathWindowService)
     {
         ActionListViewModel = new(showContentDialog);
-        CommandBarViewModel = new(showContentDialog, pathWindowService);
+        CommandBarViewModel = new(showContentDialog, pathWindowService, ActionListViewModel);
     }
 }
