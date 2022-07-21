@@ -8,14 +8,7 @@ namespace ActionRepeater.Core.Action;
 
 public sealed class MouseButtonAction : InputAction, IEquatable<MouseButtonAction>
 {
-    public enum @Type
-    {
-        MouseButtonClick = 1,
-        MouseButtonDown,
-        MouseButtonUp,
-    }
-
-    public @Type ActionType { get; }
+    public MouseButtonActionType ActionType { get; }
 
     public override string Name => ActionType.ToString().AddSpacesBetweenWords();
 
@@ -60,7 +53,7 @@ public sealed class MouseButtonAction : InputAction, IEquatable<MouseButtonActio
         }
     }
 
-    public MouseButtonAction(@Type type, MouseButton button, POINT position, bool usePosition = true)
+    public MouseButtonAction(MouseButtonActionType type, MouseButton button, POINT position, bool usePosition = true)
     {
         ActionType = type;
         _button = button;
@@ -72,9 +65,9 @@ public sealed class MouseButtonAction : InputAction, IEquatable<MouseButtonActio
     {
         bool success = ActionType switch
         {
-            @Type.MouseButtonDown  => _usePosition ? SendMouseButtonDown(_button, _position)  : SendMouseButtonDown(_button),
-            @Type.MouseButtonUp    => _usePosition ? SendMouseButtonUp(_button, _position)    : SendMouseButtonUp(_button),
-            @Type.MouseButtonClick => _usePosition ? SendMouseButtonClick(_button, _position) : SendMouseButtonClick(_button),
+            MouseButtonActionType.MouseButtonDown  => _usePosition ? SendMouseButtonDown(_button, _position)  : SendMouseButtonDown(_button),
+            MouseButtonActionType.MouseButtonUp    => _usePosition ? SendMouseButtonUp(_button, _position)    : SendMouseButtonUp(_button),
+            MouseButtonActionType.MouseButtonClick => _usePosition ? SendMouseButtonClick(_button, _position) : SendMouseButtonClick(_button),
             _ => throw new InvalidEnumArgumentException("Invalid mouse button action.")
         };
 
@@ -99,4 +92,11 @@ public sealed class MouseButtonAction : InputAction, IEquatable<MouseButtonActio
     public override bool Equals(object? obj) => Equals(obj as MouseButtonAction);
 
     public override int GetHashCode() => HashCode.Combine(ActionType, _button, _position, _usePosition);
+}
+
+public enum MouseButtonActionType
+{
+    MouseButtonClick = 1,
+    MouseButtonDown,
+    MouseButtonUp,
 }

@@ -8,17 +8,17 @@
     mc:Ignorable="d"
     Background="{ThemeResource AppBarBackgroundThemeBrush}">
 
-    <StackPanel Orientation="Horizontal" Margin="0,5,0,4">
+    <StackPanel Orientation="Horizontal" Margin="0,3,0,4">
 
         <ctrls:CmdBarToggleButton x:Name="_recordButton"
                                   Glyph="&#xEA3A;"
                                   Text="Record"
-                                  Command="{x:Bind _viewModel.ToggleRecordingCommand}"/>
+                                  Command="{x:Bind ViewModel.ToggleRecordingCommand}"/>
         
         <ctrls:CmdBarToggleButton Glyph="&#xE768;"
                                   Text="Play"
-                                  IsChecked="{x:Bind _viewModel.IsPlayButtonChecked, Mode=OneWay}"
-                                  Command="{x:Bind _viewModel.PlayActionsCommand}"/>
+                                  IsChecked="{x:Bind ViewModel.IsPlayButtonChecked, Mode=OneWay}"
+                                  Command="{x:Bind ViewModel.PlayActionsCommand}"/>
 
         <AppBarSeparator Margin="5,0,5,0" />
 
@@ -28,13 +28,15 @@
                        HorizontalAlignment="Center"
                        Margin="0,0,0,5"/>
 
-            <NumberBox SmallChange="1"
+            <NumberBox x:Name="_repeatActionsNumBox"
+                       SmallChange="1"
                        LargeChange="10"
                        Minimum="-1"
                        Maximum="9999"
                        SpinButtonPlacementMode="Inline"
+                       MinWidth="100"
                        ValidationMode="InvalidInputOverwritten"
-                       Value="{x:Bind _viewModel.PlayRepeatCount, Mode=TwoWay}"/>
+                       Value="{x:Bind ViewModel.PlayRepeatCount, Mode=TwoWay}"/>
         </StackPanel>
 
         <AppBarSeparator Margin="5,0,5,0" />
@@ -42,17 +44,54 @@
         <ctrls:CmdBarToggleButton Glyph="&#xF128;"
                                   Text="Cursor Path"
                                   ButtonWidth="70"
-                                  Command="{x:Bind _viewModel.ToggleCursorPathWindowCommand}"/>
+                                  Command="{x:Bind ViewModel.ToggleCursorPathWindowCommand}"/>
         
+        <AppBarSeparator Margin="5,0,5,0" />
+
+        <DropDownButton Height="55"
+                        Background="Transparent"
+                        BorderBrush="Transparent">
+            <DropDownButton.Content>
+                <StackPanel>
+                    <FontIcon Glyph="&#xE710;" FontSize="20"/>
+                    <TextBlock Text="Add" Margin="0,4,0,0"/>
+                </StackPanel>
+            </DropDownButton.Content>
+            <DropDownButton.Flyout>
+                <MenuFlyout Placement="Bottom">
+                    <MenuFlyoutItem Text="Key Action" Click="MenuFlyoutItem_Click">
+                        <MenuFlyoutItem.Icon>
+                            <FontIcon Glyph="&#xE92E;"/>
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem Text="Mouse Button Action">
+                        <MenuFlyoutItem.Icon>
+                            <FontIcon Glyph="&#xE962;"/>
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem Text="Mouse Wheel Action">
+                        <MenuFlyoutItem.Icon>
+                            <FontIcon Glyph="&#xE962;"/>
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                    <MenuFlyoutItem Text="Wait Action">
+                        <MenuFlyoutItem.Icon>
+                            <FontIcon Glyph="&#xED5A;"/>
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+                </MenuFlyout>
+            </DropDownButton.Flyout>
+        </DropDownButton>
+
         <AppBarSeparator Margin="5,0,5,0" />
 
         <ctrls:CmdBarButton Glyph="&#xE72D;"
                             Text="Export"
-                            Command="{x:Bind _viewModel.ExportActionsCommand}"/>
+                            Command="{x:Bind ViewModel.ExportActionsCommand}"/>
 
         <ctrls:CmdBarButton Glyph="&#xE896;"
                             Text="Import"
-                            Command="{x:Bind _viewModel.ImportActionsCommand}"/>
+                            Command="{x:Bind ViewModel.ImportActionsCommand}"/>
 
     </StackPanel>
     

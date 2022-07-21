@@ -187,48 +187,48 @@ public static class Recorder
 
                         case RawMouseButtonState.LEFT_BUTTON_DOWN:
                             if (IsMouseOverExl?.Invoke() == true) break;
-                            AddAction(new MouseButtonAction(MouseButtonAction.Type.MouseButtonDown, InputSimulator.MouseButton.Left,
+                            AddAction(new MouseButtonAction(MouseButtonActionType.MouseButtonDown, InputSimulator.MouseButton.Left,
                                 Win32.PInvoke.Helpers.GetCursorPos(), Options.Instance.UseCursorPosOnClicks));
                             break;
                         case RawMouseButtonState.LEFT_BUTTON_UP:
                             if (IsMouseOverExl?.Invoke() == true) break;
-                            AddAction(new MouseButtonAction(MouseButtonAction.Type.MouseButtonUp, InputSimulator.MouseButton.Left,
+                            AddAction(new MouseButtonAction(MouseButtonActionType.MouseButtonUp, InputSimulator.MouseButton.Left,
                                 Win32.PInvoke.Helpers.GetCursorPos(), Options.Instance.UseCursorPosOnClicks));
                             break;
 
                         case RawMouseButtonState.RIGHT_BUTTON_DOWN:
-                            AddAction(new MouseButtonAction(MouseButtonAction.Type.MouseButtonDown, InputSimulator.MouseButton.Right,
+                            AddAction(new MouseButtonAction(MouseButtonActionType.MouseButtonDown, InputSimulator.MouseButton.Right,
                                 Win32.PInvoke.Helpers.GetCursorPos(), Options.Instance.UseCursorPosOnClicks));
                             break;
                         case RawMouseButtonState.RIGHT_BUTTON_UP:
-                            AddAction(new MouseButtonAction(MouseButtonAction.Type.MouseButtonUp, InputSimulator.MouseButton.Right,
+                            AddAction(new MouseButtonAction(MouseButtonActionType.MouseButtonUp, InputSimulator.MouseButton.Right,
                                 Win32.PInvoke.Helpers.GetCursorPos(), Options.Instance.UseCursorPosOnClicks));
                             break;
 
                         case RawMouseButtonState.MIDDLE_BUTTON_DOWN:
-                            AddAction(new MouseButtonAction(MouseButtonAction.Type.MouseButtonDown, InputSimulator.MouseButton.Middle,
+                            AddAction(new MouseButtonAction(MouseButtonActionType.MouseButtonDown, InputSimulator.MouseButton.Middle,
                                 Win32.PInvoke.Helpers.GetCursorPos(), Options.Instance.UseCursorPosOnClicks));
                             break;
                         case RawMouseButtonState.MIDDLE_BUTTON_UP:
-                            AddAction(new MouseButtonAction(MouseButtonAction.Type.MouseButtonUp, InputSimulator.MouseButton.Middle,
+                            AddAction(new MouseButtonAction(MouseButtonActionType.MouseButtonUp, InputSimulator.MouseButton.Middle,
                                 Win32.PInvoke.Helpers.GetCursorPos(), Options.Instance.UseCursorPosOnClicks));
                             break;
 
                         case RawMouseButtonState.XBUTTON1_DOWN:
-                            AddAction(new MouseButtonAction(MouseButtonAction.Type.MouseButtonDown, InputSimulator.MouseButton.X1,
+                            AddAction(new MouseButtonAction(MouseButtonActionType.MouseButtonDown, InputSimulator.MouseButton.X1,
                                 Win32.PInvoke.Helpers.GetCursorPos(), Options.Instance.UseCursorPosOnClicks));
                             break;
                         case RawMouseButtonState.XBUTTON1_UP:
-                            AddAction(new MouseButtonAction(MouseButtonAction.Type.MouseButtonUp, InputSimulator.MouseButton.X1,
+                            AddAction(new MouseButtonAction(MouseButtonActionType.MouseButtonUp, InputSimulator.MouseButton.X1,
                                 Win32.PInvoke.Helpers.GetCursorPos(), Options.Instance.UseCursorPosOnClicks));
                             break;
 
                         case RawMouseButtonState.XBUTTON2_DOWN:
-                            AddAction(new MouseButtonAction(MouseButtonAction.Type.MouseButtonDown, InputSimulator.MouseButton.X2,
+                            AddAction(new MouseButtonAction(MouseButtonActionType.MouseButtonDown, InputSimulator.MouseButton.X2,
                                 Win32.PInvoke.Helpers.GetCursorPos(), Options.Instance.UseCursorPosOnClicks));
                             break;
                         case RawMouseButtonState.XBUTTON2_UP:
-                            AddAction(new MouseButtonAction(MouseButtonAction.Type.MouseButtonUp, InputSimulator.MouseButton.X2,
+                            AddAction(new MouseButtonAction(MouseButtonActionType.MouseButtonUp, InputSimulator.MouseButton.X2,
                                 Win32.PInvoke.Helpers.GetCursorPos(), Options.Instance.UseCursorPosOnClicks));
                             break;
                     }
@@ -243,7 +243,7 @@ public static class Recorder
                 var keyFlags = inputData.data.keyboard.Flags;
                 if (keyFlags.HasFlag(RawInputKeyFlags.BREAK))
                 {
-                    AddAction(new KeyAction(KeyAction.Type.KeyUp, key));
+                    AddAction(new KeyAction(KeyActionType.KeyUp, key));
                 }
                 else //if (keyFlags.HasFlag(RawInputKeyFlags.MAKE))
                 {
@@ -254,12 +254,12 @@ public static class Recorder
                         if (actions[i] is KeyAction keyActionI
                             && keyActionI.Key == key)
                         {
-                            isAutoRepeat = keyActionI.ActionType == KeyAction.Type.KeyDown;
+                            isAutoRepeat = keyActionI.ActionType == KeyActionType.KeyDown;
                             break;
                         }
                     }
 
-                    AddAction(new KeyAction(KeyAction.Type.KeyDown, key, isAutoRepeat));
+                    AddAction(new KeyAction(KeyActionType.KeyDown, key, isAutoRepeat));
                 }
 
                 break;
@@ -291,25 +291,25 @@ public static class Recorder
         if (ticksSinceLastAction <= Options.Instance.MaxClickInterval)
         {
             if (action is KeyAction curKeyAction
-                && curKeyAction.ActionType == KeyAction.Type.KeyUp
+                && curKeyAction.ActionType == KeyActionType.KeyUp
                 && GetLastAction() is KeyAction lastKeyAction
-                && lastKeyAction.ActionType == KeyAction.Type.KeyDown
+                && lastKeyAction.ActionType == KeyActionType.KeyDown
                 && !lastKeyAction.IsAutoRepeat
                 && lastKeyAction.Key == curKeyAction.Key)
             {
-                ReplaceLastAction(new KeyAction(KeyAction.Type.KeyPress, curKeyAction.Key));
+                ReplaceLastAction(new KeyAction(KeyActionType.KeyPress, curKeyAction.Key));
 
                 _lastNewActionTickCount = curTickCount;
                 return;
             }
             else if (action is MouseButtonAction curMBAction
-                && curMBAction.ActionType == MouseButtonAction.Type.MouseButtonUp
+                && curMBAction.ActionType == MouseButtonActionType.MouseButtonUp
                 && GetLastAction() is MouseButtonAction lastMBAction
-                && lastMBAction.ActionType == MouseButtonAction.Type.MouseButtonDown
+                && lastMBAction.ActionType == MouseButtonActionType.MouseButtonDown
                 && lastMBAction.Button == curMBAction.Button
                 && lastMBAction.Position == curMBAction.Position)
             {
-                ReplaceLastAction(new MouseButtonAction(MouseButtonAction.Type.MouseButtonClick, curMBAction.Button, curMBAction.Position, curMBAction.UsePosition));
+                ReplaceLastAction(new MouseButtonAction(MouseButtonActionType.MouseButtonClick, curMBAction.Button, curMBAction.Position, curMBAction.UsePosition));
 
                 _lastNewActionTickCount = curTickCount;
                 return;

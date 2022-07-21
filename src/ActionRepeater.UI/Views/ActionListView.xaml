@@ -42,7 +42,7 @@
 
         <ListView x:Name="ActionList"
                   Background="{ThemeResource ListViewBackgroundThemeBrush}"
-                  CornerRadius="4"
+                  CornerRadius="{ThemeResource ControlCornerRadius}"
                   BorderBrush="{ThemeResource ListViewBorderThemeBrush}"
                   BorderThickness="1"
                   Grid.Row="2"

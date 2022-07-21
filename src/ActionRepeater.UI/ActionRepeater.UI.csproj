@@ -66,9 +66,39 @@
       <None Remove="Pages\CmdBarOptionsPage.xaml" />
       <None Remove="Styles.xaml" />
       <None Remove="Views\ActionListView.xaml" />
+      <None Remove="Views\EditActionView.xaml" />
+      <None Remove="Views\EditKeyActionView.xaml" />
+      <None Remove="Views\EditMouseButtonActionView.xaml" />
+      <None Remove="Views\EditMouseWheelActionView.xaml" />
+      <None Remove="Views\EditWaitActionView.xaml" />
     </ItemGroup>
     <ItemGroup>
       <Resource Remove="Views\ActionListView.xaml" />
+    </ItemGroup>
+    <ItemGroup>
+      <Page Update="Views\EditMouseWheelActionView.xaml">
+        <Generator>MSBuild:Compile</Generator>
+      </Page>
+    </ItemGroup>
+    <ItemGroup>
+      <Page Update="Views\EditMouseButtonActionView.xaml">
+        <Generator>MSBuild:Compile</Generator>
+      </Page>
+    </ItemGroup>
+    <ItemGroup>
+      <Page Update="Views\EditKeyActionView.xaml">
+        <Generator>MSBuild:Compile</Generator>
+      </Page>
+    </ItemGroup>
+    <ItemGroup>
+      <Page Update="Views\EditActionView.xaml">
+        <Generator>MSBuild:Compile</Generator>
+      </Page>
+    </ItemGroup>
+    <ItemGroup>
+      <Page Update="Views\EditWaitActionView.xaml">
+        <Generator>MSBuild:Compile</Generator>
+      </Page>
     </ItemGroup>
     <ItemGroup>
       <Page Update="GlobalResources.xaml">

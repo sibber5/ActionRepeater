@@ -1,0 +1,45 @@
+﻿<UserControl
+    x:Class="ActionRepeater.UI.Views.EditKeyActionView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid MinWidth="{StaticResource EditActionViewWidth}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="Type:"
+                   Grid.Row="0"
+                   HorizontalAlignment="Left" VerticalAlignment="Center"/>
+        <ComboBox SelectedIndex="{x:Bind ViewModel.SelectedTypeIndex, Mode=TwoWay}"
+                  Grid.Row="0"
+                  HorizontalAlignment="Right">
+            <x:String>Key Press</x:String>
+            <x:String>Key Down</x:String>
+            <x:String>Key Up</x:String>
+        </ComboBox>
+
+        <TextBlock Text="Key:"
+                   Grid.Row="2"
+                   HorizontalAlignment="Left" VerticalAlignment="Center"/>
+        <StackPanel Grid.Row="2" Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Margin="30,0,0,0">
+            <FontIcon Glyph="&#xE783;"
+                      FontFamily="{StaticResource SymbolThemeFontFamily}"
+                      Foreground="Red"
+                      Visibility="{x:Bind ViewModel.HasErrors, Mode=OneWay}"
+                      VerticalAlignment="Center"
+                      Margin="0,0,5,0"
+                      ToolTipService.Placement="Top" ToolTipService.ToolTip="{x:Bind ViewModel.KeyNameErrorMessage, Mode=OneWay}"/>
+            <TextBox Text="{x:Bind ViewModel.KeyName, Mode=TwoWay}" MinWidth="35" GotFocus="TextBox_GotFocus"/>
+        </StackPanel>
+
+    </Grid>
+    
+</UserControl>

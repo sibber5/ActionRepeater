@@ -21,7 +21,7 @@
                 <ComboBox FontSize="{StaticResource CommandBarFontSize}"
                           Width="157"
                           Height="32"
-                          SelectedIndex="{x:Bind _viewModel.CursorMovementCBSelectedIdx, Mode=TwoWay}">
+                          SelectedIndex="{x:Bind ViewModel.CursorMovementCBSelectedIdx, Mode=TwoWay}">
                     <x:String>None</x:String>
                     <x:String>Absolute Position</x:String>
                     <x:String>Relative Position</x:String>
@@ -30,7 +30,7 @@
 
             <CheckBox Content="Set cursor position on clicks"
                       HorizontalAlignment="Left"
-                      IsChecked="{x:Bind _viewModel.UseCursorPosOnClicks, Mode=TwoWay}" />
+                      IsChecked="{x:Bind ViewModel.UseCursorPosOnClicks, Mode=TwoWay}" />
 
         </StackPanel>
 
@@ -45,18 +45,19 @@
                            HorizontalAlignment="Left"
                            VerticalAlignment="Center"/>
                 
-                <NumberBox SmallChange="10"
+                <NumberBox x:Name="_clickIntervalNumbox"
+                           SmallChange="10"
                            LargeChange="100"
                            Minimum="0"
                            Maximum="9999"
                            SpinButtonPlacementMode="Inline"
                            ValidationMode="InvalidInputOverwritten"
-                           Value="{x:Bind _viewModel.MaxClickInterval, Mode=TwoWay}"/>
+                           Value="{x:Bind ViewModel.MaxClickInterval, Mode=TwoWay}"/>
             </StackPanel>
 
             <CheckBox Content="Simulate keystroke auto-repeat"
                       HorizontalAlignment="Left"
-                      IsChecked="{x:Bind _viewModel.SendKeyAutoRepeat, Mode=TwoWay}"/>
+                      IsChecked="{x:Bind ViewModel.SendKeyAutoRepeat, Mode=TwoWay}"/>
 
         </StackPanel>
 

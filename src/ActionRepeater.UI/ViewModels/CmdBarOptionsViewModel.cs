@@ -18,10 +18,10 @@ public class CmdBarOptionsViewModel : ObservableObject
         set => Options.Instance.UseCursorPosOnClicks = value;
     }
 
-    public double MaxClickInterval
+    public int MaxClickInterval
     {
         get => Options.Instance.MaxClickInterval;
-        set => Options.Instance.MaxClickInterval = (int)Math.Round(value);
+        set => Options.Instance.MaxClickInterval = value;
     }
 
     public bool SendKeyAutoRepeat

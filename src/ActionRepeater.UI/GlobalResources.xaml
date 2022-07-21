@@ -6,4 +6,6 @@
     <x:Double x:Key="CommandBarButtonSize">42</x:Double>
     <x:Double x:Key="CommandBarButtonIconSize">22</x:Double>
 
+    <x:Double x:Key="EditActionViewWidth">270</x:Double>
+
 </ResourceDictionary>

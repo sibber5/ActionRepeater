@@ -8,14 +8,7 @@ namespace ActionRepeater.Core.Action;
 
 public sealed class KeyAction : InputAction, IEquatable<KeyAction>
 {
-    public enum @Type
-    {
-        KeyPress = 1,
-        KeyDown,
-        KeyUp,
-    }
-
-    public @Type ActionType { get; }
+    public KeyActionType ActionType { get; }
 
     public override string Name => ActionType.ToString().AddSpacesBetweenWords();
 
@@ -36,7 +29,7 @@ public sealed class KeyAction : InputAction, IEquatable<KeyAction>
 
     public bool IsAutoRepeat { get; }
 
-    public KeyAction(@Type type, VirtualKey key, bool isAutoRepeat = false)
+    public KeyAction(KeyActionType type, VirtualKey key, bool isAutoRepeat = false)
     {
         ActionType = type;
         _key = key;
@@ -47,9 +40,9 @@ public sealed class KeyAction : InputAction, IEquatable<KeyAction>
     {
         bool success = ActionType switch
         {
-            @Type.KeyDown => InputSimulator.SendKeyDown(_key),
-            @Type.KeyUp => InputSimulator.SendKeyUp(_key),
-            @Type.KeyPress => InputSimulator.SendKeyPress(_key),
+            KeyActionType.KeyDown => InputSimulator.SendKeyDown(_key),
+            KeyActionType.KeyUp => InputSimulator.SendKeyUp(_key),
+            KeyActionType.KeyPress => InputSimulator.SendKeyPress(_key),
             _ => throw new InvalidEnumArgumentException("Invalid key action."),
         };
 
@@ -73,4 +66,11 @@ public sealed class KeyAction : InputAction, IEquatable<KeyAction>
     public override bool Equals(object? obj) => Equals(obj as KeyAction);
 
     public override int GetHashCode() => HashCode.Combine(ActionType, _key, IsAutoRepeat);
+}
+
+public enum KeyActionType
+{
+    KeyPress = 1,
+    KeyDown,
+    KeyUp,
 }

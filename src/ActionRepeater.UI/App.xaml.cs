@@ -12,7 +12,7 @@ namespace ActionRepeater.UI;
 public partial class App : Application
 {
     private const string MainWindowTitle = "ActionRepeater";
-    private const int MainWindowWidth = 425;
+    private const int MainWindowWidth = 505;
     private const int MainWindowHeight = 600;
 
     public static MainWindow MainWindow { get; private set; } = null!;

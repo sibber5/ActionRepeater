@@ -13,10 +13,10 @@ namespace ActionRepeater.UI.ViewModels;
 
 public partial class CmdBarHomeViewModel : ObservableObject
 {
-    public double PlayRepeatCount
+    public int PlayRepeatCount
     {
         get => Core.Options.Instance.PlayRepeatCount;
-        set => Core.Options.Instance.PlayRepeatCount = (int)Math.Round(value);
+        set => Core.Options.Instance.PlayRepeatCount = value;
     }
 
     [ObservableProperty]

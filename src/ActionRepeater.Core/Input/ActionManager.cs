@@ -109,7 +109,7 @@ public static class ActionManager
         FillFilteredActionList();
     }
 
-    public static void AddAction(InputAction action)
+    public static void AddAction(InputAction action, bool addAutoRepeatIfKeyUpAct = false)
     {
         if (action is WaitAction waitAction)
         {
@@ -145,7 +145,20 @@ public static class ActionManager
 
         _actions.Add(action);
 
-        if (!(action is KeyAction keyAction && keyAction.IsAutoRepeat))
+        if (action is KeyAction keyAction)
+        {
+            if (!keyAction.IsAutoRepeat)
+            {
+                _actionsExlKeyRepeat.Add(action);
+            }
+
+            if (addAutoRepeatIfKeyUpAct && keyAction.ActionType == KeyActionType.KeyUp)
+            {
+                // TODO: implement adding auto repeat actions
+                throw new NotImplementedException();
+            }
+        }
+        else
         {
             _actionsExlKeyRepeat.Add(action);
         }

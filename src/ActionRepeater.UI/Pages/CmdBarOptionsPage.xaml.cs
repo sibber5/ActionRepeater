@@ -6,17 +6,19 @@ namespace ActionRepeater.UI.Pages;
 
 public sealed partial class CmdBarOptionsPage : Page
 {
-    private CmdBarOptionsViewModel _viewModel = null!;
+    public CmdBarOptionsViewModel ViewModel { get; set; } = null!;
 
     public CmdBarOptionsPage()
     {
         NavigationCacheMode = NavigationCacheMode.Required;
         InitializeComponent();
+
+        _clickIntervalNumbox.NumberFormatter = Helpers.NumberFormatterHelper.RoundToOneFormatter;
     }
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
-        _viewModel = (CmdBarOptionsViewModel)e.Parameter;
+        ViewModel = (CmdBarOptionsViewModel)e.Parameter;
         base.OnNavigatedTo(e);
     }
 }

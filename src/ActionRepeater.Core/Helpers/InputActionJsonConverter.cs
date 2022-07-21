@@ -73,7 +73,7 @@ internal sealed class InputActionJsonConverter : JsonConverter<InputAction>
     {
         const int keyActionPropertyCount = 3;
 
-        KeyAction.Type actionType = default;
+        KeyActionType actionType = default;
         Win32.Input.VirtualKey key = default;
         bool isAutoRepeat = default;
 
@@ -90,7 +90,7 @@ internal sealed class InputActionJsonConverter : JsonConverter<InputAction>
                 switch (propertyName)
                 {
                     case nameof(KeyAction.ActionType):
-                        actionType = (KeyAction.Type)reader.GetInt32();
+                        actionType = (KeyActionType)reader.GetInt32();
                         break;
 
                     case nameof(KeyAction.Key):
@@ -125,7 +125,7 @@ internal sealed class InputActionJsonConverter : JsonConverter<InputAction>
     {
         const int mouseButtonActionPropertyCount = 5;
 
-        MouseButtonAction.Type actionType = default;
+        MouseButtonActionType actionType = default;
         Input.InputSimulator.MouseButton button = default;
         int posX = default;
         int posY = default;
@@ -144,7 +144,7 @@ internal sealed class InputActionJsonConverter : JsonConverter<InputAction>
                 switch (propertyName)
                 {
                     case nameof(MouseButtonAction.ActionType):
-                        actionType = (MouseButtonAction.Type)reader.GetInt32();
+                        actionType = (MouseButtonActionType)reader.GetInt32();
                         break;
 
                     case nameof(MouseButtonAction.Button):
