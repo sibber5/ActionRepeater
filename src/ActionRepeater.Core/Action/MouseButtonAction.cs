@@ -8,7 +8,18 @@ namespace ActionRepeater.Core.Action;
 
 public sealed class MouseButtonAction : InputAction, IEquatable<MouseButtonAction>
 {
-    public MouseButtonActionType ActionType { get; }
+    private MouseButtonActionType _actionType;
+    public MouseButtonActionType ActionType
+    {
+        get => _actionType;
+        set
+        {
+            if (_actionType == value) return;
+
+            _actionType = value;
+            OnNameChanged();
+        }
+    }
 
     public override string Name => ActionType.ToString().AddSpacesBetweenWords();
 
@@ -73,7 +84,7 @@ public sealed class MouseButtonAction : InputAction, IEquatable<MouseButtonActio
 
         if (!success)
         {
-            System.Diagnostics.Debug.WriteLine($"Failed to send mosue event ({ActionType}).");
+            System.Diagnostics.Debug.WriteLine($"Failed to send mouse event ({ActionType}).");
             throw new Win32Exception(System.Runtime.InteropServices.Marshal.GetLastPInvokeError());
         }
     }

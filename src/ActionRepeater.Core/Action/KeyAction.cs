@@ -8,7 +8,18 @@ namespace ActionRepeater.Core.Action;
 
 public sealed class KeyAction : InputAction, IEquatable<KeyAction>
 {
-    public KeyActionType ActionType { get; }
+    private KeyActionType _actionType;
+    public KeyActionType ActionType
+    {
+        get => _actionType;
+        set
+        {
+            if (_actionType == value) return;
+
+            _actionType = value;
+            OnNameChanged();
+        }
+    }
 
     public override string Name => ActionType.ToString().AddSpacesBetweenWords();
 

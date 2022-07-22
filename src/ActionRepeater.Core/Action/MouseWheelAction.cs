@@ -8,24 +8,22 @@ public sealed class MouseWheelAction : InputAction, IEquatable<MouseWheelAction>
 {
     public override string Name => IsHorizontal ? "Horizontal Mouse Wheel" : "Mouse Wheel";
 
-    public override string Description
-    {
-        get
-        {
-            if (Duration == 0)
-            {
-                return IsHorizontal
-                    ? ActionDescriptionTemplates.HorizontalWheelSteps(StepCount)
-                    : ActionDescriptionTemplates.WheelSteps(StepCount);
-            }
+    public override string Description => IsHorizontal
+        ? ActionDescriptionTemplates.HorizontalWheelSteps(StepCount, Duration)
+        : ActionDescriptionTemplates.WheelSteps(StepCount, Duration);
 
-            return IsHorizontal
-                ? ActionDescriptionTemplates.HorizontalWheelSteps(StepCount, Duration)
-                : ActionDescriptionTemplates.WheelSteps(StepCount, Duration);
+    private bool _isHorizontal;
+    public bool IsHorizontal
+    {
+        get => _isHorizontal;
+        set
+        {
+            if (_isHorizontal == value) return;
+
+            _isHorizontal = value;
+            OnNameChanged();
         }
     }
-
-    public bool IsHorizontal { get; }
 
     private int _stepCount;
     public int StepCount

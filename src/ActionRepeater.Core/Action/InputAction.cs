@@ -7,6 +7,9 @@ public abstract class InputAction
     public event EventHandler<string>? DescriptionChanged;
     protected void OnDescriptionChanged() => DescriptionChanged?.Invoke(this, Description);
 
+    public event EventHandler<string>? NameChanged;
+    protected void OnNameChanged() => NameChanged?.Invoke(this, Name);
+
     public abstract string Name { get; }
     public abstract string Description { get; }
 

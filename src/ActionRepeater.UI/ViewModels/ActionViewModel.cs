@@ -32,25 +32,36 @@ public partial class ActionViewModel : ObservableObject
         _description = inputAction.Description;
         GlyphSize = size;
 
+        inputAction.NameChanged += InputAction_NameChanged;
         inputAction.DescriptionChanged += InputAction_DescriptionChanged;
     }
 
     // use static method to not capture `this` in order to decrease GC pressure because changing the description doesnt happen often.
+    // also avoids potential memory leaks, in case the action for this view model lives longer than the vm.
+    private static void InputAction_NameChanged(object? sender, string newName)
+    {
+        GetActionViewModel((InputAction)sender!).Name = newName;
+    }
+
     private static void InputAction_DescriptionChanged(object? sender, string newDescription)
+    {
+        GetActionViewModel((InputAction)sender!).Description = newDescription;
+    }
+
+    /// <returns>The <see cref="ActionViewModel"/> for the <paramref name="action"/>, that is currently bound to in the view.</returns>
+    private static ActionViewModel GetActionViewModel(InputAction action)
     {
         var actionListVM = App.MainWindow.ViewModel.ActionListViewModel;
 
-        InputAction senderAction = (InputAction)sender!;
-        int index = Core.Input.ActionManager.ActionsExlKeyRepeat.RefIndexOfReverse(senderAction);
+        int index = Core.Input.ActionManager.ActionsExlKeyRepeat.RefIndexOfReverse(action);
 
         if (index == -1)
         {
-            index = Core.Input.ActionManager.Actions.RefIndexOfReverse(senderAction);
-            actionListVM.ActionVMs[index].Description = newDescription;
-            return;
+            index = Core.Input.ActionManager.Actions.RefIndexOfReverse(action);
+            return actionListVM.ActionVMs[index];
         }
 
-        actionListVM.ActionsExlVMs[index].Description = newDescription;
+        return actionListVM.ActionsExlVMs[index];
     }
 
     public static (string? glyph, double size) GetIconForAction(InputAction a) => a switch

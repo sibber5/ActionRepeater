@@ -82,23 +82,20 @@ public partial class EditActionDialogViewModel : ObservableObject
         {
             case EditKeyActionViewModel keyVM:
                 var ka = (KeyAction)action;
-                // TODO: implement changing KeyAction.ActionType (make sure to update name in view model on change)
-                //ka.ActionType = keyVM.Type;
+                ka.ActionType = keyVM.Type;
                 ka.Key = keyVM.Key;
                 break;
 
             case EditMouseButtonActionViewModel mbVM:
                 var mba = (MouseButtonAction)action;
-                // TODO: implement changing MouseButtonAction.ActionType (make sure to update name in view model on change)
-                //mba.ActionType = mbVM.Type;
+                mba.ActionType = mbVM.Type;
                 mba.Button = mbVM.Button;
                 mba.Position = mbVM.Position;
                 break;
 
             case EditMouseWheelActionViewModel mwVM:
                 var mwa = (MouseWheelAction)action;
-                // TODO: implement changing MouseWheelAction.IsHorizontal
-                //mwa.IsHorizontal = mwVM.HorizontalScrolling;
+                mwa.IsHorizontal = mwVM.HorizontalScrolling;
                 mwa.StepCount = mwVM.Steps;
                 mwa.Duration = (int)(mwVM.DurationSecs * 1000);
                 break;
