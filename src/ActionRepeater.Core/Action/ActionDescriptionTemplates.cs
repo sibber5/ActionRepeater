@@ -5,9 +5,9 @@ using VirtualKey = ActionRepeater.Win32.Input.VirtualKey;
 
 namespace ActionRepeater.Core.Action;
 
-internal static class ActionDescriptionTemplates
+public static class ActionDescriptionTemplates
 {
-    private static readonly Dictionary<VirtualKey, string> _virtualKeyFriendlyNames = new()
+    public static readonly IReadOnlyDictionary<VirtualKey, string> VirtualKeyFriendlyNames = new Dictionary<VirtualKey, string>()
     {
         { VirtualKey.NO_KEY, "No Key" },
         { (VirtualKey)3, "Cancel" },
@@ -217,7 +217,7 @@ internal static class ActionDescriptionTemplates
     public static string HorizontalWheelSteps(int count, int ms)
         => count < 0 ? $"{-count} steps to the left, over {Duration(ms)}" : $"{count} steps to the right, over {Duration(ms)}";
 
-    public static string KeyFriendlyName(VirtualKey key) => _virtualKeyFriendlyNames.TryGetValue(key, out string? name) ? name : key.ToString();
+    public static string KeyFriendlyName(VirtualKey key) => VirtualKeyFriendlyNames.TryGetValue(key, out string? name) ? name : key.ToString();
 
     public static string KeyAutoRepeat(VirtualKey key) => $"{KeyFriendlyName(key)} (auto-repeat)";
 }

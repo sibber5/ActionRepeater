@@ -52,6 +52,18 @@ public partial class EditKeyActionViewModel : ObservableValidator
             return new("Key can't be empty.");
         }
 
+        VirtualKey keyFromTemplates = ActionDescriptionTemplates.VirtualKeyFriendlyNames.FirstOrDefault(x =>
+        {
+            var n = ExcludeDescriptionFromTemplateName(x.Value);
+            return n.Equals(keyName.AsSpan().Trim(), StringComparison.CurrentCultureIgnoreCase);
+        }).Key;
+
+        if (keyFromTemplates != VirtualKey.NO_KEY)
+        {
+            vm.Key = keyFromTemplates;
+            return ValidationResult.Success;
+        }
+
         var nameSpan = keyName.Replace("WINDOWS", "WIN", StringComparison.CurrentCultureIgnoreCase).AsSpan().Trim();
 
         if (nameSpan.Equals("ENTER", StringComparison.CurrentCultureIgnoreCase))
@@ -101,5 +113,33 @@ public partial class EditKeyActionViewModel : ObservableValidator
 
         vm.Key = VirtualKey.NO_KEY;
         return new("Key doesn't exist.");
+    }
+
+    public EditKeyActionViewModel() { }
+
+    public EditKeyActionViewModel(KeyAction keyAction)
+    {
+        Type = keyAction.ActionType;
+        if (ActionDescriptionTemplates.VirtualKeyFriendlyNames.TryGetValue(keyAction.Key, out string? name))
+        {
+            _keyName = ExcludeDescriptionFromTemplateName(name).ToString();
+        }
+        else
+        {
+            _keyName = ActionDescriptionTemplates.VirtualKeyFriendlyNames[VirtualKey.NO_KEY];
+        }
+        Key = keyAction.Key;
+    }
+
+    private static ReadOnlySpan<char> ExcludeDescriptionFromTemplateName(ReadOnlySpan<char> name)
+    {
+        if (!name.EndsWith("(numpad)", StringComparison.Ordinal))
+        {
+            int idx = name.IndexOf('(');
+            idx = idx == -1 ? name.Length : idx - 1;
+            return name[..idx];
+        }
+
+        return name;
     }
 }

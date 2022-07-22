@@ -1,5 +1,4 @@
-﻿using System;
-using ActionRepeater.UI.Services;
+﻿using ActionRepeater.UI.Services;
 
 namespace ActionRepeater.UI.ViewModels;
 
@@ -9,9 +8,9 @@ public class MainViewModel
 
     public CommandBarViewModel CommandBarViewModel { get; }
 
-    public MainViewModel(Func<string, string?, System.Threading.Tasks.Task> showContentDialog, PathWindowService pathWindowService)
+    public MainViewModel(ContentDialogService contentDialogService, PathWindowService pathWindowService)
     {
-        ActionListViewModel = new(showContentDialog);
-        CommandBarViewModel = new(showContentDialog, pathWindowService, ActionListViewModel);
+        ActionListViewModel = new(contentDialogService);
+        CommandBarViewModel = new(contentDialogService, pathWindowService, ActionListViewModel);
     }
 }

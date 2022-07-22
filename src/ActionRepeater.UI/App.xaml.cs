@@ -17,8 +17,6 @@ public partial class App : Application
 
     public static MainWindow MainWindow { get; private set; } = null!;
 
-    private readonly PathWindowService _pathWindowService = new();
-
     /// <summary>
     /// Initializes the singleton application object.  This is the first line of authored code
     /// executed, and as such is the logical equivalent of main() or WinMain().
@@ -35,8 +33,18 @@ public partial class App : Application
     /// <param name="args">Details about the launch request and process.</param>
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
-        MainWindow = new MainWindow { Title = MainWindowTitle };
-        MainWindow.ViewModel = new(MainWindow.ShowContentDialog, _pathWindowService);
+        MainWindow = new() { Title = MainWindowTitle };
+
+        ContentDialogService cds = new();
+
+        MainWindow.ViewModel = new(cds, new PathWindowService());
+
+        // XamlRoot has to be set after Content has loaded
+        ((FrameworkElement)MainWindow.Content).Loaded += (_, _) =>
+        {
+            cds.XamlRoot = App.MainWindow.GridXamlRoot;
+            System.Diagnostics.Debug.WriteLine("XamlRoot set.");
+        };
 
         // The Window object doesn't have Width and Height properties in WInUI 3.
         // You can use the Win32 API SetWindowPos to set the Width and Height.

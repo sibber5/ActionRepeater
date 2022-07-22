@@ -9,6 +9,7 @@ using ActionRepeater.Core.Action;
 using ActionRepeater.Core.Input;
 using ActionRepeater.UI.Utilities;
 using Microsoft.UI.Dispatching;
+using ActionRepeater.UI.Services;
 
 namespace ActionRepeater.UI.ViewModels;
 
@@ -51,13 +52,13 @@ public partial class ActionListViewModel : ObservableObject
 
     public Action? ScrollToSelectedItem { get; set; }
 
-    private readonly Func<string, string?, Task> _showContentDialog;
+    internal readonly ContentDialogService _contentDialogService;
 
     private readonly DispatcherQueueHandler _updateSelectedAction;
 
-    public ActionListViewModel(Func<string, string?, Task> showContentDialog)
+    public ActionListViewModel(ContentDialogService contentDialogService)
     {
-        _showContentDialog = showContentDialog;
+        _contentDialogService = contentDialogService;
 
         _updateSelectedAction = () =>
         {
@@ -137,8 +138,8 @@ public partial class ActionListViewModel : ObservableObject
     {
         if (!ActionManager.TryRemoveAction(SelectedAction!))
         {
-            await _showContentDialog(
-                "❌ Failed to remove action",
+            await _contentDialogService.ShowErrorDialog(
+                "Failed to remove action",
                 $"This action represents multiple hidden actions (because \"{nameof(ShowKeyRepeatActions)}\" is off).{Environment.NewLine}Removing it will result in unexpected behavior.");
         }
     }

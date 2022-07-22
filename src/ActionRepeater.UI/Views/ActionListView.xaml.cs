@@ -2,6 +2,8 @@
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using ActionRepeater.UI.ViewModels;
+using ActionRepeater.Core.Extentions;
+using ActionRepeater.Core.Action;
 
 namespace ActionRepeater.UI.Views;
 
@@ -27,26 +29,37 @@ public sealed partial class ActionListView : UserControl
 
     private void ActionList_RightTapped(object sender, RightTappedRoutedEventArgs e)
     {
-        var listView = (ListView)sender;
-
         if (((FrameworkElement)e.OriginalSource).DataContext is ActionViewModel actionItem)
         {
-            //ActionList.SelectedItem = actionItem;
-            var col = ViewModel.FilteredActions;
-            for (int i = 0; i < col.Count; ++i)
-            {
-                if (ReferenceEquals(col[i], actionItem))
-                {
-                    ActionList.SelectedIndex = i;
-                    break;
-                }
-            }
-
-            ActionItemMenuFlyout.ShowAt(listView, e.GetPosition(listView));
-
+            ActionList.SelectedIndex = ViewModel.FilteredActions.RefIndexOfReverse(actionItem);
+            ActionItemMenuFlyout.ShowAt(ActionList, e.GetPosition(ActionList));
             return;
         }
 
-        ActionListMenuFlyout.ShowAt(listView, e.GetPosition(listView));
+        ActionList.SelectedIndex = -1;
+        ActionListMenuFlyout.ShowAt(ActionList, e.GetPosition(ActionList));
+    }
+
+    private async void ActionList_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
+    {
+        if (((FrameworkElement)e.OriginalSource).DataContext is not ActionViewModel actionVM)
+        {
+            ActionList.SelectedIndex = -1;
+            return;
+        }
+
+        if (!ReferenceEquals(ActionList.SelectedItem, actionVM)) ActionList.SelectedItem = actionVM;
+        InputAction actionItem = ViewModel.SelectedAction!;
+
+        CommunityToolkit.Mvvm.ComponentModel.ObservableObject editActionVM = actionItem switch
+        {
+            KeyAction ka => new EditKeyActionViewModel(ka),
+            MouseButtonAction mba => new EditMouseButtonActionViewModel(mba),
+            MouseWheelAction mwa => new EditMouseWheelActionViewModel(mwa),
+            WaitAction wa => new EditWaitActionViewModel(wa),
+            _ => throw new System.NotSupportedException($"{actionItem.GetType()} not suppored.")
+        };
+
+        await ViewModel._contentDialogService.ShowEditActionDialog(editActionVM, actionItem);
     }
 }

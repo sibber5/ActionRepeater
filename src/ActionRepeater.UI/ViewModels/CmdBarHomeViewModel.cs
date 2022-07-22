@@ -22,7 +22,7 @@ public partial class CmdBarHomeViewModel : ObservableObject
     [ObservableProperty]
     private bool _isPlayButtonChecked;
 
-    private readonly Func<string, string?, Task> _showContentDialog;
+    private readonly ContentDialogService _contentDialogService;
 
     private readonly PathWindowService _pathWindowService;
 
@@ -32,9 +32,9 @@ public partial class CmdBarHomeViewModel : ObservableObject
     private readonly Action<bool> _updateActionsView;
     private readonly Action<bool> _updateActionsExlView;
 
-    public CmdBarHomeViewModel(Func<string, string?, Task> showContentDialog, PathWindowService pathWindowService, ActionListViewModel actionListVM)
+    public CmdBarHomeViewModel(ContentDialogService contentDialogService, PathWindowService pathWindowService, ActionListViewModel actionListVM)
     {
-        _showContentDialog = showContentDialog;
+        _contentDialogService = contentDialogService;
         _pathWindowService = pathWindowService;
         _actionListVM = actionListVM;
 
@@ -118,12 +118,31 @@ public partial class CmdBarHomeViewModel : ObservableObject
     }
     private static bool CanPlayActions() => !Recorder.IsRecording && ActionManager.Actions.Count > 0;
 
+    [RelayCommand]
+    private void ToggleCursorPathWindow()
+    {
+        if (_pathWindowService.IsPathWindowOpen)
+        {
+            _pathWindowService.ClosePathWindow();
+        }
+        else
+        {
+            _pathWindowService.OpenPathWindow();
+        }
+    }
+
+    [RelayCommand]
+    private async Task AddAction(ActionType actionType)
+    {
+        await _contentDialogService.ShowEditActionDialog(actionType);
+    }
+
     [RelayCommand(CanExecute = nameof(CanExportActions))]
     private async Task ExportActions()
     {
         if (ActionManager.Actions.Count == 0)
         {
-            await _showContentDialog("Actions list is empty.", null);
+            await _contentDialogService.ShowMessageDialog("Actions list is empty.");
             return;
         }
 
@@ -154,29 +173,16 @@ public partial class CmdBarHomeViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            await _showContentDialog($"❌ {file.Name} couldn't be loaded", ex.Message);
+            await _contentDialogService.ShowErrorDialog($"{file.Name} couldn't be loaded", ex.Message);
             return;
         }
 
         if (data is null || (data.Actions.IsNullOrEmpty() && data.CursorPathRel is null))
         {
-            await _showContentDialog("Actions empty", $"{nameof(ActionData)} is null");
+            await _contentDialogService.ShowErrorDialog("Actions empty", $"{nameof(ActionData)} is null");
             return;
         }
 
         ActionManager.LoadActionData(data);
-    }
-
-    [RelayCommand]
-    private void ToggleCursorPathWindow()
-    {
-        if (_pathWindowService.IsPathWindowOpen)
-        {
-            _pathWindowService.ClosePathWindow();
-        }
-        else
-        {
-            _pathWindowService.OpenPathWindow();
-        }
     }
 }

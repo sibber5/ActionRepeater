@@ -8,8 +8,8 @@ public sealed partial class EditActionView : UserControl, INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    private EditActionViewModel? _viewModel;
-    public EditActionViewModel ViewModel
+    private EditActionDialogViewModel? _viewModel;
+    public EditActionDialogViewModel ViewModel
     {
         get => _viewModel!;
         set

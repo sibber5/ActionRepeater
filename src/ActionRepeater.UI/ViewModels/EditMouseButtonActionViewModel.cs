@@ -32,7 +32,15 @@ public partial class EditMouseButtonActionViewModel : ObservableObject
         set => SelectedButtonIndex = (int)value;
     }
 
-    public Win32.POINT Position => new(PositionX, PositionY);
+    public Win32.POINT Position
+    {
+        get => new(PositionX, PositionY);
+        set
+        {
+            PositionX = value.x;
+            PositionY = value.y;
+        }
+    }
 
     [ObservableProperty]
     private int _selectedTypeIndex;
@@ -45,4 +53,13 @@ public partial class EditMouseButtonActionViewModel : ObservableObject
 
     [ObservableProperty]
     private int _positionY;
+
+    public EditMouseButtonActionViewModel() { }
+
+    public EditMouseButtonActionViewModel(MouseButtonAction mouseButtonAction)
+    {
+        Type = mouseButtonAction.ActionType;
+        Button = mouseButtonAction.Button;
+        Position = mouseButtonAction.Position;
+    }
 }

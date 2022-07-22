@@ -24,21 +24,4 @@ public sealed partial class CmdBarHomePage : Page
         ViewModel = (CmdBarHomeViewModel)e.Parameter;
         base.OnNavigatedTo(e);
     }
-
-    private async void MenuFlyoutItem_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
-    {
-        ContentDialog contentDialog = new()
-        {
-            XamlRoot = this.XamlRoot,
-            PrimaryButtonText = "Add",
-            SecondaryButtonText = "Cancel",
-        };
-
-        EditActionViewModel vm = new(SelectedAction.KeyAction, contentDialog);
-
-        contentDialog.Content = new Views.EditActionView() { ViewModel = vm };
-        contentDialog.PrimaryButtonCommand = vm.AddActionCommand;
-
-        await contentDialog.ShowAsync();
-    }
 }

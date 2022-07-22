@@ -53,7 +53,9 @@
                   ItemsSource="{x:Bind ViewModel.FilteredActions, Mode=OneWay}"
                   SelectedIndex="{x:Bind ViewModel.SelectedActionIndex, Mode=TwoWay}"
                   IsRightTapEnabled="True"
-                  RightTapped="ActionList_RightTapped">
+                  RightTapped="ActionList_RightTapped"
+                  IsDoubleTapEnabled="True"
+                  DoubleTapped="ActionList_DoubleTapped">
 
             <ListView.Style>
                 <Style TargetType="ListView">
