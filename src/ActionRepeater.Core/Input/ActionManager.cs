@@ -152,11 +152,13 @@ public static class ActionManager
                 _actionsExlKeyRepeat.Add(action);
             }
 
+#if DEBUG
             if (addAutoRepeatIfKeyUpAct && keyAction.ActionType == KeyActionType.KeyUp)
             {
                 // TODO: implement adding auto repeat actions
                 throw new NotImplementedException();
             }
+#endif
         }
         else
         {

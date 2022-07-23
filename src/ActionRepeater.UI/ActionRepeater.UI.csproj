@@ -11,8 +11,10 @@
         <UseWinUI>true</UseWinUI>
         <EnableMsixTooling>true</EnableMsixTooling>
         <WindowsPackageType>None</WindowsPackageType>
-        <WindowsAppSDKSelfContained>false</WindowsAppSDKSelfContained>
+        <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
         <Nullable>enable</Nullable>
+        <SignAssembly>False</SignAssembly>
+		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
     </PropertyGroup>
 
     <ItemGroup>
