@@ -49,17 +49,7 @@ public sealed partial class ActionListView : UserControl
         }
 
         if (!ReferenceEquals(ActionList.SelectedItem, actionVM)) ActionList.SelectedItem = actionVM;
-        InputAction actionItem = ViewModel.SelectedAction!;
 
-        CommunityToolkit.Mvvm.ComponentModel.ObservableObject editActionVM = actionItem switch
-        {
-            KeyAction ka => new EditKeyActionViewModel(ka),
-            MouseButtonAction mba => new EditMouseButtonActionViewModel(mba),
-            MouseWheelAction mwa => new EditMouseWheelActionViewModel(mwa),
-            WaitAction wa => new EditWaitActionViewModel(wa),
-            _ => throw new System.NotSupportedException($"{actionItem.GetType()} not suppored.")
-        };
-
-        await ViewModel._contentDialogService.ShowEditActionDialog(editActionVM, actionItem);
+        await ViewModel.EditSelectedAction();
     }
 }

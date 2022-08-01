@@ -33,10 +33,15 @@ public sealed partial class EditActionView : UserControl, INotifyPropertyChanged
         _ => null
     };
 
+    private readonly string _titleText;
+
     private PropertyChangedEventArgs? _currentViewChanged;
 
-    public EditActionView()
+    /// <param name="isAddView">If true, the title of the dialog will start with "Add:" instead of "Edit:".</param>
+    public EditActionView(bool isAddView = false)
     {
+        _titleText = isAddView ? "Add:" : "Edit:";
+
         InitializeComponent();
     }
 

@@ -51,7 +51,7 @@ public class ContentDialogService
 
         EditActionDialogViewModel vm = new(actionType, dialog);
 
-        dialog.Content = new Views.EditActionView() { ViewModel = vm };
+        dialog.Content = new Views.EditActionView(isAddView: true) { ViewModel = vm };
         dialog.PrimaryButtonCommand = vm.AddActionCommand;
 
         await dialog.ShowAsync();

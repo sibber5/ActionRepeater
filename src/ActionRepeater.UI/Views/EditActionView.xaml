@@ -14,11 +14,8 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Grid.Resources>
-        </Grid.Resources>
-
         <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,18">
-            <TextBlock Text="Add:" FontSize="16"
+            <TextBlock Text="{x:Bind _titleText, Mode=OneWay}" FontSize="16"
                        VerticalAlignment="Top"
                        Margin="0,5,5,10"/>
 

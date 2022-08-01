@@ -122,10 +122,27 @@ public partial class ActionListViewModel : ObservableObject
         App.MainWindow.DispatcherQueue.TryEnqueue(_updateSelectedAction);
     }
 
-    private bool IsCopiedActionNull() => CopiedAction is not null;
+    [RelayCommand]
+    internal async Task EditSelectedAction()
+    {
+        if (SelectedAction is null) throw new InvalidOperationException($"{nameof(SelectedAction)} is null");
+
+        ObservableObject editActionVM = SelectedAction switch
+        {
+            KeyAction ka => new EditKeyActionViewModel(ka),
+            MouseButtonAction mba => new EditMouseButtonActionViewModel(mba),
+            MouseWheelAction mwa => new EditMouseWheelActionViewModel(mwa),
+            WaitAction wa => new EditWaitActionViewModel(wa),
+            _ => throw new NotSupportedException($"{SelectedAction.GetType()} not suppored.")
+        };
+
+        await _contentDialogService.ShowEditActionDialog(editActionVM, SelectedAction);
+    }
 
     [RelayCommand]
     private void StoreAction() => CopiedAction = SelectedAction;
+
+    private bool IsCopiedActionNull() => CopiedAction is not null;
 
     [RelayCommand(CanExecute = nameof(IsCopiedActionNull))]
     private void AddAction() => ActionManager.AddAction(CopiedAction!.Clone());

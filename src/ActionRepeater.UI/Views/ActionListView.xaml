@@ -106,6 +106,7 @@
 
             <ListView.Resources>
                 <MenuFlyout x:Name="ActionItemMenuFlyout">
+                    <MenuFlyoutItem Text="Edit" Command="{x:Bind ViewModel.EditSelectedActionCommand}" />
                     <MenuFlyoutItem Text="Copy" Command="{x:Bind ViewModel.StoreActionCommand}" />
                     <MenuFlyoutItem Text="Replace With Copied Action" Command="{x:Bind ViewModel.ReplaceActionCommand}" />
                     <MenuFlyoutItem Text="Remove" Command="{x:Bind ViewModel.RemoveActionCommand}" />
