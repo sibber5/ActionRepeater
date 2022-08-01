@@ -5,7 +5,7 @@
         <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
         <RootNamespace>ActionRepeater.UI</RootNamespace>
         <ApplicationManifest>app.manifest</ApplicationManifest>
-        <Platforms>x64;arm64</Platforms>
+        <Platforms>x64</Platforms>
         <RuntimeIdentifiers>win10-x86;win10-x64;win10-arm64</RuntimeIdentifiers>
         <PublishProfile>win10-$(Platform).pubxml</PublishProfile>
         <UseWinUI>true</UseWinUI>
@@ -14,7 +14,7 @@
         <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
         <Nullable>enable</Nullable>
         <SignAssembly>False</SignAssembly>
-		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+        <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
     </PropertyGroup>
 
     <ItemGroup>
@@ -58,83 +58,83 @@
         <HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
     </PropertyGroup>
     <ItemGroup>
-      <CustomAdditionalCompileInputs Remove="Views\ActionListView.xaml" />
+        <CustomAdditionalCompileInputs Remove="Views\ActionListView.xaml" />
     </ItemGroup>
     <ItemGroup>
-      <None Remove="Controls\CmdBarButton.xaml" />
-      <None Remove="Controls\CmdBarToggleButton.xaml" />
-      <None Remove="GlobalResources.xaml" />
-      <None Remove="Pages\CmdBarHomePage.xaml" />
-      <None Remove="Pages\CmdBarOptionsPage.xaml" />
-      <None Remove="Styles.xaml" />
-      <None Remove="Views\ActionListView.xaml" />
-      <None Remove="Views\EditActionView.xaml" />
-      <None Remove="Views\EditKeyActionView.xaml" />
-      <None Remove="Views\EditMouseButtonActionView.xaml" />
-      <None Remove="Views\EditMouseWheelActionView.xaml" />
-      <None Remove="Views\EditWaitActionView.xaml" />
+        <None Remove="Controls\CmdBarButton.xaml" />
+        <None Remove="Controls\CmdBarToggleButton.xaml" />
+        <None Remove="GlobalResources.xaml" />
+        <None Remove="Pages\CmdBarHomePage.xaml" />
+        <None Remove="Pages\CmdBarOptionsPage.xaml" />
+        <None Remove="Styles.xaml" />
+        <None Remove="Views\ActionListView.xaml" />
+        <None Remove="Views\EditActionView.xaml" />
+        <None Remove="Views\EditKeyActionView.xaml" />
+        <None Remove="Views\EditMouseButtonActionView.xaml" />
+        <None Remove="Views\EditMouseWheelActionView.xaml" />
+        <None Remove="Views\EditWaitActionView.xaml" />
     </ItemGroup>
     <ItemGroup>
-      <Resource Remove="Views\ActionListView.xaml" />
+        <Resource Remove="Views\ActionListView.xaml" />
     </ItemGroup>
     <ItemGroup>
-      <Page Update="Views\EditMouseWheelActionView.xaml">
-        <Generator>MSBuild:Compile</Generator>
-      </Page>
+        <Page Update="Views\EditMouseWheelActionView.xaml">
+            <Generator>MSBuild:Compile</Generator>
+        </Page>
     </ItemGroup>
     <ItemGroup>
-      <Page Update="Views\EditMouseButtonActionView.xaml">
-        <Generator>MSBuild:Compile</Generator>
-      </Page>
+        <Page Update="Views\EditMouseButtonActionView.xaml">
+            <Generator>MSBuild:Compile</Generator>
+        </Page>
     </ItemGroup>
     <ItemGroup>
-      <Page Update="Views\EditKeyActionView.xaml">
-        <Generator>MSBuild:Compile</Generator>
-      </Page>
+        <Page Update="Views\EditKeyActionView.xaml">
+            <Generator>MSBuild:Compile</Generator>
+        </Page>
     </ItemGroup>
     <ItemGroup>
-      <Page Update="Views\EditActionView.xaml">
-        <Generator>MSBuild:Compile</Generator>
-      </Page>
+        <Page Update="Views\EditActionView.xaml">
+            <Generator>MSBuild:Compile</Generator>
+        </Page>
     </ItemGroup>
     <ItemGroup>
-      <Page Update="Views\EditWaitActionView.xaml">
-        <Generator>MSBuild:Compile</Generator>
-      </Page>
+        <Page Update="Views\EditWaitActionView.xaml">
+            <Generator>MSBuild:Compile</Generator>
+        </Page>
     </ItemGroup>
     <ItemGroup>
-      <Page Update="GlobalResources.xaml">
-        <Generator>MSBuild:Compile</Generator>
-      </Page>
+        <Page Update="GlobalResources.xaml">
+            <Generator>MSBuild:Compile</Generator>
+        </Page>
     </ItemGroup>
     <ItemGroup>
-      <Page Update="Pages\CmdBarOptionsPage.xaml">
-        <Generator>MSBuild:Compile</Generator>
-      </Page>
+        <Page Update="Pages\CmdBarOptionsPage.xaml">
+            <Generator>MSBuild:Compile</Generator>
+        </Page>
     </ItemGroup>
     <ItemGroup>
-      <Page Update="Controls\CmdBarButton.xaml">
-        <Generator>MSBuild:Compile</Generator>
-      </Page>
+        <Page Update="Controls\CmdBarButton.xaml">
+            <Generator>MSBuild:Compile</Generator>
+        </Page>
     </ItemGroup>
     <ItemGroup>
-      <Page Update="Styles.xaml">
-        <Generator>MSBuild:Compile</Generator>
-      </Page>
+        <Page Update="Styles.xaml">
+            <Generator>MSBuild:Compile</Generator>
+        </Page>
     </ItemGroup>
     <ItemGroup>
-      <Page Update="Controls\CmdBarToggleButton.xaml">
-        <Generator>MSBuild:Compile</Generator>
-      </Page>
+        <Page Update="Controls\CmdBarToggleButton.xaml">
+            <Generator>MSBuild:Compile</Generator>
+        </Page>
     </ItemGroup>
     <ItemGroup>
-      <Page Update="Views\CommandBarView.xaml">
-        <Generator>MSBuild:Compile</Generator>
-      </Page>
+        <Page Update="Views\CommandBarView.xaml">
+            <Generator>MSBuild:Compile</Generator>
+        </Page>
     </ItemGroup>
     <ItemGroup>
-      <Page Update="Pages\CmdBarHomePage.xaml">
-        <Generator>MSBuild:Compile</Generator>
-      </Page>
+        <Page Update="Pages\CmdBarHomePage.xaml">
+            <Generator>MSBuild:Compile</Generator>
+        </Page>
     </ItemGroup>
 </Project>
