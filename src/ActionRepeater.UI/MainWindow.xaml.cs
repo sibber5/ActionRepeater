@@ -3,7 +3,6 @@ using Microsoft.UI.Xaml;
 using ActionRepeater.UI.ViewModels;
 using ActionRepeater.Win32.WindowsAndMessages.Utilities;
 using ActionRepeater.Core.Input;
-using ActionRepeater.UI.Services;
 
 namespace ActionRepeater.UI;
 
@@ -26,6 +25,11 @@ public sealed partial class MainWindow : Window
         _msgMonitor.WindowMessageReceived += OnWindowMessageReceived;
 
         Player.ExecuteOnUIThread = (action) => DispatcherQueue.TryEnqueue(new Microsoft.UI.Dispatching.DispatcherQueueHandler(action));
+
+        if (App.Current.RequestedTheme == ApplicationTheme.Dark)
+        {
+            Win32.PInvoke.Helpers.SetWindowImmersiveDarkMode(Handle, true);
+        }
 
         InitializeComponent();
     }

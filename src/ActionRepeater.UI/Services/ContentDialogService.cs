@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using ActionRepeater.Core.Action;
 using ActionRepeater.UI.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
@@ -37,6 +38,20 @@ public class ContentDialogService
             Title = title,
             Content = message,
             CloseButtonText = "Ok",
+        }.ShowAsync();
+    }
+
+    public async Task ShowYesNoMessageDialog(string title, string? message = null, Action? onYesClick = null, Action? onNoClick = null)
+    {
+        await new ContentDialog()
+        {
+            XamlRoot = XamlRoot,
+            Title = title,
+            Content = message,
+            PrimaryButtonText = "Yes",
+            PrimaryButtonCommand = onYesClick is null ? null : new RelayCommand(onYesClick),
+            SecondaryButtonText = "No",
+            SecondaryButtonCommand = onNoClick is null ? null : new RelayCommand(onNoClick),
         }.ShowAsync();
     }
 

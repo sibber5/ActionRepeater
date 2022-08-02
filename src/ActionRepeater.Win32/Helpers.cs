@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Runtime.InteropServices;
 using ActionRepeater.Win32.Input;
 using ActionRepeater.Win32.WindowsAndMessages;
@@ -92,6 +93,15 @@ public static partial class PInvoke
                 throw new Win32Exception(Marshal.GetLastPInvokeError());
             }
             return result;
+        }
+
+        [System.Runtime.Versioning.SupportedOSPlatform("windows6.0.6000")]
+        public static unsafe void SetWindowImmersiveDarkMode(IntPtr hWnd, bool enabled)
+        {
+            const uint DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
+            int isEnabled = enabled ? 1 : 0;
+            int result = PInvoke.DwmSetWindowAttribute(hWnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &isEnabled, sizeof(int));
+            if (result != 0) throw new Win32Exception(result);
         }
     }
 }

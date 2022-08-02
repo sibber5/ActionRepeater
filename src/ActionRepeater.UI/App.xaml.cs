@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Microsoft.UI.Xaml;
 using ActionRepeater.UI.Services;
 using ActionRepeater.Win32;
@@ -24,6 +25,20 @@ public partial class App : Application
     public App()
     {
         InitializeComponent();
+
+        string[] args = Environment.GetCommandLineArgs();
+
+        const string themeParam = "--theme=";
+        string? themeArg = args.FirstOrDefault(x => x.StartsWith(themeParam));
+        if (themeArg is not null)
+        {
+            App.Current.RequestedTheme = themeArg[themeParam.Length..] switch
+            {
+                "dark" => ApplicationTheme.Dark,
+                "light" => ApplicationTheme.Light,
+                _ => throw new NotSupportedException()
+            };
+        }
     }
 
     /// <summary>

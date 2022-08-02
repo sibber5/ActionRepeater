@@ -14,10 +14,12 @@
             <!-- Other app resources here -->
             <ResourceDictionary.ThemeDictionaries>
                 <ResourceDictionary x:Key="Light">
-                    <SolidColorBrush x:Key="ListViewBackgroundThemeBrush" Color="#cccccc"/>
-                    <SolidColorBrush x:Key="ListViewBorderThemeBrush" Color="#cccccc"/>
+                    <SolidColorBrush x:Key="AppBackgroundThemeBrush" Color="White"/>
+                    <SolidColorBrush x:Key="ListViewBackgroundThemeBrush" Color="#f5f5f5"/>
+                    <SolidColorBrush x:Key="ListViewBorderThemeBrush" Color="#f0f0f0"/>
                 </ResourceDictionary>
                 <ResourceDictionary x:Key="Dark">
+                    <SolidColorBrush x:Key="AppBackgroundThemeBrush" Color="Black"/>
                     <SolidColorBrush x:Key="ListViewBackgroundThemeBrush" Color="#0f0f0f"/>
                     <SolidColorBrush x:Key="ListViewBorderThemeBrush" Color="#121212"/>
                 </ResourceDictionary>

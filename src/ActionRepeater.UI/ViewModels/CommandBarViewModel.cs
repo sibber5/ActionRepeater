@@ -11,6 +11,6 @@ public class CommandBarViewModel
     public CommandBarViewModel(ContentDialogService contentDialogService, PathWindowService pathWindowService, ActionListViewModel actionListVM)
     {
         HomeViewModel = new(contentDialogService, pathWindowService, actionListVM);
-        OptionsViewModel = new();
+        OptionsViewModel = new(contentDialogService);
     }
 }
