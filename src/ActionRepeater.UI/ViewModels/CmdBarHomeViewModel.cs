@@ -131,12 +131,6 @@ public partial class CmdBarHomeViewModel : ObservableObject
         }
     }
 
-    [RelayCommand]
-    private async Task AddAction(ActionType actionType)
-    {
-        await _contentDialogService.ShowEditActionDialog(actionType);
-    }
-
     [RelayCommand(CanExecute = nameof(CanExportActions))]
     private async Task ExportActions()
     {

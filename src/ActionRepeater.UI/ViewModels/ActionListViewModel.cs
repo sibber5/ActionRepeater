@@ -30,10 +30,6 @@ public partial class ActionListViewModel : ObservableObject
     [ObservableProperty]
     private int _selectedActionIndex = -1;
 
-    public IRelayCommand ClearCommand { get; }
-    public IRelayCommand ClearActionsCommand { get; }
-    public IRelayCommand ClearCursorPathCommand { get; }
-
     public int CurrentSetActionIndex { get; set; }
 
     private InputAction? _copiedAction;
@@ -70,30 +66,6 @@ public partial class ActionListViewModel : ObservableObject
 
         ActionVMs = new((ObservableCollection<InputAction?>)ActionManager.Actions, createVM);
         ActionsExlVMs = new((ObservableCollection<InputAction?>)ActionManager.ActionsExlKeyRepeat, createVM);
-
-        ClearCommand = new RelayCommand(ActionManager.ClearAll, static () => ActionManager.Actions.Count > 0 || ActionManager.CursorPathStart is not null);
-        ClearActionsCommand = new RelayCommand(ActionManager.ClearActions, static () => ActionManager.Actions.Count > 0);
-        ClearCursorPathCommand = new RelayCommand(ActionManager.ClearCursorPath, static () => ActionManager.CursorPathStart is not null);
-
-        ActionManager.ActionCollectionChanged += ActionManager_ActionCollectionChanged;
-        ActionManager.CursorPathStartChanged += ActionManager_CursorPathStartChanged;
-    }
-
-    private void ActionManager_ActionCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
-    {
-        if (e.Action == NotifyCollectionChangedAction.Add
-            || e.Action == NotifyCollectionChangedAction.Remove
-            || e.Action == NotifyCollectionChangedAction.Reset)
-        {
-            ClearCommand.NotifyCanExecuteChanged();
-            ClearActionsCommand.NotifyCanExecuteChanged();
-        }
-    }
-
-    private void ActionManager_CursorPathStartChanged(object? sender, MouseMovement? e)
-    {
-        ClearCommand.NotifyCanExecuteChanged();
-        ClearCursorPathCommand.NotifyCanExecuteChanged();
     }
 
     public void UpdateActionListIndex(bool skipAutoRepeat)

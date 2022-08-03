@@ -6,6 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ctrls="using:ActionRepeater.UI.Controls"
     xmlns:vms="using:ActionRepeater.UI.ViewModels"
+    xmlns:behavs="using:ActionRepeater.UI.Behaviors"
     mc:Ignorable="d"
     Background="{ThemeResource AppBackgroundThemeBrush}">
 
@@ -59,43 +60,8 @@
                 </StackPanel>
             </DropDownButton.Content>
             <DropDownButton.Flyout>
-                <MenuFlyout Placement="Bottom">
-                    <MenuFlyoutItem Text="Key Action" Command="{x:Bind ViewModel.AddActionCommand}">
-                        <MenuFlyoutItem.CommandParameter>
-                            <vms:ActionType>KeyAction</vms:ActionType>
-                        </MenuFlyoutItem.CommandParameter>
-                        <MenuFlyoutItem.Icon>
-                            <FontIcon Glyph="&#xE92E;"/>
-                        </MenuFlyoutItem.Icon>
-                    </MenuFlyoutItem>
-                    
-                    <MenuFlyoutItem Text="Mouse Button Action" Command="{x:Bind ViewModel.AddActionCommand}">
-                        <MenuFlyoutItem.CommandParameter>
-                            <vms:ActionType>MouseButtonAction</vms:ActionType>
-                        </MenuFlyoutItem.CommandParameter>
-                        <MenuFlyoutItem.Icon>
-                            <FontIcon Glyph="&#xE962;"/>
-                        </MenuFlyoutItem.Icon>
-                    </MenuFlyoutItem>
-
-                    <MenuFlyoutItem Text="Mouse Wheel Action" Command="{x:Bind ViewModel.AddActionCommand}">
-                        <MenuFlyoutItem.CommandParameter>
-                            <vms:ActionType>MouseWheelAction</vms:ActionType>
-                        </MenuFlyoutItem.CommandParameter>
-                        <MenuFlyoutItem.Icon>
-                            <FontIcon Glyph="&#xE962;"/>
-                        </MenuFlyoutItem.Icon>
-                    </MenuFlyoutItem>
-
-                    <MenuFlyoutItem Text="Wait Action" Command="{x:Bind ViewModel.AddActionCommand}">
-                        <MenuFlyoutItem.CommandParameter>
-                            <vms:ActionType>WaitAction</vms:ActionType>
-                        </MenuFlyoutItem.CommandParameter>
-                        <MenuFlyoutItem.Icon>
-                            <FontIcon Glyph="&#xED5A;"/>
-                        </MenuFlyoutItem.Icon>
-                    </MenuFlyoutItem>
-                </MenuFlyout>
+                <MenuFlyout x:Name="_actionsMenuFlyout" Placement="Bottom"
+                            behavs:AddActionMenuBehavior.MenuItemList="{x:Bind _actionsMenuFlyout.Items}"/>
             </DropDownButton.Flyout>
         </DropDownButton>
 

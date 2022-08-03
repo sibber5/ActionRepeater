@@ -18,6 +18,9 @@ public partial class App : Application
 
     public static MainWindow MainWindow { get; private set; } = null!;
 
+    private static readonly PathWindowService _pathWindowService = new();
+    private static readonly ContentDialogService _contentDialogService = new();
+
     /// <summary>
     /// Initializes the singleton application object.  This is the first line of authored code
     /// executed, and as such is the logical equivalent of main() or WinMain().
@@ -48,16 +51,18 @@ public partial class App : Application
     /// <param name="args">Details about the launch request and process.</param>
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
-        MainWindow = new() { Title = MainWindowTitle };
+        Behaviors.AddActionMenuBehavior.ContentDialogService = _contentDialogService;
 
-        ContentDialogService cds = new();
-
-        MainWindow.ViewModel = new(cds, new PathWindowService());
+        MainWindow = new()
+        {
+            Title = MainWindowTitle,
+            ViewModel = new(_contentDialogService, _pathWindowService)
+        };
 
         // XamlRoot has to be set after Content has loaded
-        ((FrameworkElement)MainWindow.Content).Loaded += (_, _) =>
+        ((FrameworkElement)MainWindow.Content).Loaded += static (_, _) =>
         {
-            cds.XamlRoot = App.MainWindow.GridXamlRoot;
+            _contentDialogService.XamlRoot = App.MainWindow.GridXamlRoot;
             System.Diagnostics.Debug.WriteLine("XamlRoot set.");
         };
 

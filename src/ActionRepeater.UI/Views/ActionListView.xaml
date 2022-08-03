@@ -5,6 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vms="using:ActionRepeater.UI.ViewModels"
+    xmlns:behavs="using:ActionRepeater.UI.Behaviors"
     mc:Ignorable="d">
 
     <Grid>
@@ -110,17 +111,17 @@
                     <MenuFlyoutItem Text="Copy" Command="{x:Bind ViewModel.StoreActionCommand}" />
                     <MenuFlyoutItem Text="Replace With Copied Action" Command="{x:Bind ViewModel.ReplaceActionCommand}" />
                     <MenuFlyoutItem Text="Remove" Command="{x:Bind ViewModel.RemoveActionCommand}" />
-                    <MenuFlyoutSeparator  />
-                    <MenuFlyoutItem Text="Clear Actions" Command="{x:Bind ViewModel.ClearActionsCommand}" />
-                    <MenuFlyoutItem Text="Clear Cursor Path" Command="{x:Bind ViewModel.ClearCursorPathCommand}" />
-                    <MenuFlyoutItem Text="Clear All" Command="{x:Bind ViewModel.ClearCommand}" />
+                    <MenuFlyoutSeparator />
+                    <MenuFlyoutSubItem Text="Clear" x:Name="_itemFlyoutClear"
+                                       behavs:ClearMenuBehavior.MenuItemList="{x:Bind _itemFlyoutClear.Items}"/>
                 </MenuFlyout>
                 <MenuFlyout x:Name="ActionListMenuFlyout">
+                    <MenuFlyoutSubItem Text="Add" x:Name="_listFlyoutAdd"
+                                       behavs:AddActionMenuBehavior.MenuItemList="{x:Bind _listFlyoutAdd.Items}"/>
                     <MenuFlyoutItem Text="Paste" Command="{x:Bind ViewModel.AddActionCommand}" />
-                    <MenuFlyoutSeparator  />
-                    <MenuFlyoutItem Text="Clear Actions" Command="{x:Bind ViewModel.ClearActionsCommand}" />
-                    <MenuFlyoutItem Text="Clear Cursor Path" Command="{x:Bind ViewModel.ClearCursorPathCommand}" />
-                    <MenuFlyoutItem Text="Clear All" Command="{x:Bind ViewModel.ClearCommand}" />
+                    <MenuFlyoutSeparator />
+                    <MenuFlyoutSubItem Text="Clear" x:Name="_listFlyoutClear"
+                                       behavs:ClearMenuBehavior.MenuItemList="{x:Bind _listFlyoutClear.Items}"/>
                 </MenuFlyout>
             </ListView.Resources>
 
