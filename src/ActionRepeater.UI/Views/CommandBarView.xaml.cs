@@ -10,11 +10,8 @@ public sealed partial class CommandBarView : UserControl
 {
     public CommandBarViewModel ViewModel { get; set; } = null!;
 
-    private const string HomeTag = "h";
-    private const string OptionsTag = "o";
-
-    private string HomeTagProp => HomeTag;
-    private string OptionsTagProp => OptionsTag;
+    internal const string HomeTag = "h";
+    internal const string OptionsTag = "o";
 
     public CommandBarView()
     {
@@ -23,7 +20,7 @@ public sealed partial class CommandBarView : UserControl
 
     private void CmdBarNavView_Loaded(object sender, RoutedEventArgs e)
     {
-        _cmdBarNavView.SelectedItem = _cmdBarNavView.MenuItems[0];
+        _cmdBarNavView.SelectedItem = _cmdBarNavView.MenuItems[1];
         NavigateCommandBar(HomeTag, new Microsoft.UI.Xaml.Media.Animation.SuppressNavigationTransitionInfo());
     }
 

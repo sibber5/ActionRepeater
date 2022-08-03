@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Collections.Specialized;
-using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using ActionRepeater.Core.Extentions;
-using ActionRepeater.Core.Helpers;
 using ActionRepeater.Core.Input;
 using ActionRepeater.UI.Services;
-using ActionRepeater.UI.Helpers;
 
 namespace ActionRepeater.UI.ViewModels;
 
@@ -22,8 +18,6 @@ public partial class CmdBarHomeViewModel : ObservableObject
     [ObservableProperty]
     private bool _isPlayButtonChecked;
 
-    private readonly ContentDialogService _contentDialogService;
-
     private readonly PathWindowService _pathWindowService;
 
     private readonly ActionListViewModel _actionListVM;
@@ -32,9 +26,8 @@ public partial class CmdBarHomeViewModel : ObservableObject
     private readonly Action<bool> _updateActionsView;
     private readonly Action<bool> _updateActionsExlView;
 
-    public CmdBarHomeViewModel(ContentDialogService contentDialogService, PathWindowService pathWindowService, ActionListViewModel actionListVM)
+    public CmdBarHomeViewModel(PathWindowService pathWindowService, ActionListViewModel actionListVM)
     {
-        _contentDialogService = contentDialogService;
         _pathWindowService = pathWindowService;
         _actionListVM = actionListVM;
 
@@ -62,26 +55,13 @@ public partial class CmdBarHomeViewModel : ObservableObject
             if (e.PropertyName == nameof(PlayRepeatCount)) OnPropertyChanged(e);
         };
 
-        Player.IsPlayingChanged += Player_IsPlayingChanged;
-        Recorder.IsRecordingChanged += Recorder_IsRecordingChanged;
-        ActionManager.ActionsCountChanged += ActionManager_ActionsCountChanged;
-    }
-
-    private void Player_IsPlayingChanged(object? sender, bool e)
-    {
-        IsPlayButtonChecked = e;
-        ToggleRecordingCommand.NotifyCanExecuteChanged();
-    }
-
-    private void Recorder_IsRecordingChanged(object? sender, bool e)
-    {
-        PlayActionsCommand.NotifyCanExecuteChanged();
-    }
-
-    private void ActionManager_ActionsCountChanged(object? sender, NotifyCollectionChangedEventArgs e)
-    {
-        PlayActionsCommand.NotifyCanExecuteChanged();
-        ExportActionsCommand.NotifyCanExecuteChanged();
+        Player.IsPlayingChanged += (_, newVal) =>
+        {
+            IsPlayButtonChecked = newVal;
+            ToggleRecordingCommand.NotifyCanExecuteChanged();
+        };
+        Recorder.IsRecordingChanged += (_, _) => PlayActionsCommand.NotifyCanExecuteChanged();
+        ActionManager.ActionsCountChanged += (_, _) => PlayActionsCommand.NotifyCanExecuteChanged();
     }
 
     [RelayCommand(CanExecute = nameof(CanToggleRecording))]
@@ -124,54 +104,5 @@ public partial class CmdBarHomeViewModel : ObservableObject
         {
             _pathWindowService.OpenPathWindow();
         }
-    }
-
-    [RelayCommand(CanExecute = nameof(CanExportActions))]
-    private async Task ExportActions()
-    {
-        if (ActionManager.Actions.Count == 0)
-        {
-            await _contentDialogService.ShowMessageDialog("Actions list is empty.");
-            return;
-        }
-
-        var file = await FilePickerHelper.PickSaveFileAsync();
-        if (file is null) return;
-
-        ActionData dat = new()
-        {
-            Actions = ActionManager.Actions,
-            CursorPathStartAbs = ActionManager.CursorPathStart,
-            CursorPathRel = ActionManager.CursorPath
-        };
-
-        await SerializationHelper.SerializeActionsAsync(dat, file.Path);
-    }
-    private static bool CanExportActions() => ActionManager.Actions.Count > 0;
-
-    [RelayCommand]
-    private async Task ImportActions()
-    {
-        var file = await FilePickerHelper.PickSingleFileAsync();
-        if (file is null) return;
-
-        ActionData? data = null;
-        try
-        {
-            data = await SerializationHelper.DeserializeActionsAsync(file.Path);
-        }
-        catch (Exception ex)
-        {
-            await _contentDialogService.ShowErrorDialog($"{file.Name} couldn't be loaded", ex.Message);
-            return;
-        }
-
-        if (data is null || (data.Actions.IsNullOrEmpty() && data.CursorPathRel is null))
-        {
-            await _contentDialogService.ShowErrorDialog("Actions empty", $"{nameof(ActionData)} is null");
-            return;
-        }
-
-        ActionManager.LoadActionData(data);
     }
 }

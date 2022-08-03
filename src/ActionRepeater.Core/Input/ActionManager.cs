@@ -106,13 +106,13 @@ public static class ActionManager
             _actions.AddRange(data.Actions);
         }
 
-        if (!data.CursorPathRel.IsNullOrEmpty())
+        if (!data.CursorPathRelative.IsNullOrEmpty())
         {
             if (data.CursorPathStartAbs is null)
                 throw new ArgumentException($"There is no start position ({nameof(data.CursorPathStartAbs)} is null), but the cursor path is not empty.", nameof(data));
 
             CursorPathStart = data.CursorPathStartAbs;
-            CursorPath.AddRange(data.CursorPathRel!);
+            CursorPath.AddRange(data.CursorPathRelative!);
         }
         else if (data.CursorPathStartAbs is not null)
         {

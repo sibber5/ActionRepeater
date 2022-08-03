@@ -51,8 +51,20 @@
         <AppBarSeparator Margin="5,0,5,0" />
 
         <DropDownButton Height="55"
+                        Width="68"
                         Background="Transparent"
                         BorderBrush="Transparent">
+            <DropDownButton.Resources>
+                <ResourceDictionary>
+                    <ResourceDictionary.ThemeDictionaries>
+                        <!-- setting a global theme resource doesnt work for some reason. nor does a static resource for this color.  -->
+                        <ResourceDictionary x:Key="Light">
+                            <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#fafafa"/>
+                        </ResourceDictionary>
+                    </ResourceDictionary.ThemeDictionaries>
+                </ResourceDictionary>
+            </DropDownButton.Resources>
+
             <DropDownButton.Content>
                 <StackPanel>
                     <FontIcon Glyph="&#xE710;" FontSize="20"/>
@@ -64,16 +76,6 @@
                             behavs:AddActionMenuBehavior.MenuItemList="{x:Bind _actionsMenuFlyout.Items}"/>
             </DropDownButton.Flyout>
         </DropDownButton>
-
-        <AppBarSeparator Margin="5,0,5,0" />
-
-        <ctrls:CmdBarButton Glyph="&#xE72D;"
-                            Text="Export"
-                            Command="{x:Bind ViewModel.ExportActionsCommand}"/>
-
-        <ctrls:CmdBarButton Glyph="&#xE896;"
-                            Text="Import"
-                            Command="{x:Bind ViewModel.ImportActionsCommand}"/>
 
     </StackPanel>
     

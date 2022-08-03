@@ -8,6 +8,8 @@ namespace ActionRepeater.UI.Helpers;
 
 public static class FilePickerHelper
 {
+    private const string FileExtension = ".ara"; // *A*cton*R*epeater *A*ctions
+
     public static async Task<StorageFile?> PickSaveFileAsync()
     {
         FileSavePicker savePicker = new()
@@ -18,7 +20,7 @@ public static class FilePickerHelper
         // Associate the HWND with the file picker
         WinRT.Interop.InitializeWithWindow.Initialize(savePicker, App.MainWindow.Handle);
 
-        savePicker.FileTypeChoices.Add("ActionRepeater Actions", new List<string>() { ".acts" });
+        savePicker.FileTypeChoices.Add("ActionRepeater Actions", new List<string>() { FileExtension });
         savePicker.FileTypeChoices.Add("JSON", new List<string>() { ".json" });
 
         return await savePicker.PickSaveFileAsync();
@@ -31,7 +33,7 @@ public static class FilePickerHelper
         // Associate the HWND with the file picker
         WinRT.Interop.InitializeWithWindow.Initialize(openPicker, App.MainWindow.Handle);
 
-        openPicker.FileTypeFilter.Add(".acts");
+        openPicker.FileTypeFilter.Add(FileExtension);
         //openPicker.FileTypeFilter.Add(".json");
 
         return await openPicker.PickSingleFileAsync();

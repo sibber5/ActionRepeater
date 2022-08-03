@@ -107,21 +107,29 @@
 
             <ListView.Resources>
                 <MenuFlyout x:Name="ActionItemMenuFlyout">
-                    <MenuFlyoutItem Text="Edit" Command="{x:Bind ViewModel.EditSelectedActionCommand}" />
-                    <MenuFlyoutItem Text="Copy" Command="{x:Bind ViewModel.StoreActionCommand}" />
-                    <MenuFlyoutItem Text="Replace With Copied Action" Command="{x:Bind ViewModel.ReplaceActionCommand}" />
-                    <MenuFlyoutItem Text="Remove" Command="{x:Bind ViewModel.RemoveActionCommand}" />
+                    <MenuFlyoutItem Text="Edit" Command="{x:Bind ViewModel.EditSelectedActionCommand}" Icon="Edit"/>
+                    <MenuFlyoutItem Text="Copy" Command="{x:Bind ViewModel.StoreActionCommand}" Icon="Copy"/>
+                    <MenuFlyoutItem Text="Replace With Copied Action" Command="{x:Bind ViewModel.ReplaceActionCommand}" Icon="Paste"/>
+                    <MenuFlyoutItem Text="Remove" Command="{x:Bind ViewModel.RemoveActionCommand}" Icon="Delete"/>
                     <MenuFlyoutSeparator />
                     <MenuFlyoutSubItem Text="Clear" x:Name="_itemFlyoutClear"
-                                       behavs:ClearMenuBehavior.MenuItemList="{x:Bind _itemFlyoutClear.Items}"/>
+                                       behavs:ClearMenuBehavior.MenuItemList="{x:Bind _itemFlyoutClear.Items}">
+                        <MenuFlyoutSubItem.Icon>
+                            <FontIcon Glyph="&#xE894;"/>
+                        </MenuFlyoutSubItem.Icon>
+                    </MenuFlyoutSubItem>
                 </MenuFlyout>
                 <MenuFlyout x:Name="ActionListMenuFlyout">
-                    <MenuFlyoutSubItem Text="Add" x:Name="_listFlyoutAdd"
+                    <MenuFlyoutSubItem Text="Add" x:Name="_listFlyoutAdd" Icon="Add"
                                        behavs:AddActionMenuBehavior.MenuItemList="{x:Bind _listFlyoutAdd.Items}"/>
-                    <MenuFlyoutItem Text="Paste" Command="{x:Bind ViewModel.AddActionCommand}" />
+                    <MenuFlyoutItem Text="Paste" Command="{x:Bind ViewModel.AddActionCommand}"  Icon="Paste"/>
                     <MenuFlyoutSeparator />
                     <MenuFlyoutSubItem Text="Clear" x:Name="_listFlyoutClear"
-                                       behavs:ClearMenuBehavior.MenuItemList="{x:Bind _listFlyoutClear.Items}"/>
+                                       behavs:ClearMenuBehavior.MenuItemList="{x:Bind _listFlyoutClear.Items}">
+                        <MenuFlyoutSubItem.Icon>
+                            <FontIcon Glyph="&#xE894;"/>
+                        </MenuFlyoutSubItem.Icon>
+                    </MenuFlyoutSubItem>
                 </MenuFlyout>
             </ListView.Resources>
 

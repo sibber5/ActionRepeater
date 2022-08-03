@@ -11,6 +11,17 @@
                   BorderBrush="Transparent"
                   Style="{StaticResource DisabledToggleButtonSettableBg}">
 
+        <ToggleButton.Resources>
+            <ResourceDictionary>
+                <ResourceDictionary.ThemeDictionaries>
+                    <!-- setting a global theme resource doesnt work for some reason. nor does a static resource for this color.  -->
+                    <ResourceDictionary x:Key="Light">
+                        <SolidColorBrush x:Key="ToggleButtonBackgroundPointerOver" Color="#fafafa"/>
+                    </ResourceDictionary>
+                </ResourceDictionary.ThemeDictionaries>
+            </ResourceDictionary>
+        </ToggleButton.Resources>
+        
         <StackPanel x:Name="_stackpanel" Width="{StaticResource CommandBarButtonSize}" Height="{StaticResource CommandBarButtonSize}">
             <FontIcon x:Name="_fontIcon" FontFamily="{StaticResource SymbolThemeFontFamily}" FontSize="{StaticResource CommandBarButtonIconSize}" />
             <TextBlock x:Name="_textBlcok" FontSize="{StaticResource CommandBarFontSize}" Margin="0,2,0,0" HorizontalAlignment="Center" />

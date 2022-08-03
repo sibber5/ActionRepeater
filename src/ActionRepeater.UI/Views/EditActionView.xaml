@@ -24,6 +24,21 @@
                       BorderBrush="Transparent"
                       SelectedIndex="{x:Bind ViewModel.SelectedActionIndex, Mode=TwoWay}"
                       IsEnabled="{x:Bind ViewModel.CanChangeAction, Mode=OneTime}">
+                <ComboBox.Resources>
+                    <ResourceDictionary>
+                        <ResourceDictionary.ThemeDictionaries>
+                            <ResourceDictionary x:Key="Light">
+                                <SolidColorBrush x:Key="ComboBoxBackgroundDisabled" Color="Transparent"/>
+                                <SolidColorBrush x:Key="ComboBoxBorderBrushDisabled" Color="Transparent"/>
+                            </ResourceDictionary>
+                            <ResourceDictionary x:Key="Dark">
+                                <SolidColorBrush x:Key="ComboBoxBackgroundDisabled" Color="Transparent"/>
+                                <SolidColorBrush x:Key="ComboBoxBorderBrushDisabled" Color="Transparent"/>
+                            </ResourceDictionary>
+                        </ResourceDictionary.ThemeDictionaries>
+                    </ResourceDictionary>
+                </ComboBox.Resources>
+                
                 <StackPanel Orientation="Horizontal">
                     <FontIcon Glyph="&#xE92E;" FontSize="20" Margin="0,3,6,0"/>
                     <TextBlock Text="Key Action"/>

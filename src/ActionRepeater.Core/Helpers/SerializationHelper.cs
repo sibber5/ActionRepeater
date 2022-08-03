@@ -6,14 +6,7 @@ using System.Text.Json;
 
 namespace ActionRepeater.Core.Helpers;
 
-public sealed class ActionData
-{
-    public IReadOnlyList<InputAction>? Actions { get; init; }
-
-    public MouseMovement? CursorPathStartAbs { get; init; }
-
-    public IReadOnlyList<MouseMovement>? CursorPathRel { get; init; }
-}
+public sealed record ActionData(IReadOnlyList<InputAction>? Actions, MouseMovement? CursorPathStartAbs, IReadOnlyList<MouseMovement>? CursorPathRelative);
 
 public static class SerializationHelper
 {
