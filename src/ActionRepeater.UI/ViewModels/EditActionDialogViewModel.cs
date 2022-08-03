@@ -24,14 +24,14 @@ public partial class EditActionDialogViewModel : ObservableObject
     private ObservableObject? _currentEditActionViewModel;
     partial void OnCurrentEditActionViewModelChanging(ObservableObject? value)
     {
-        if (_currentEditActionViewModel is ObservableValidator currentValidator)
+        if (_currentEditActionViewModel is ObservableValidator oldValidator)
         {
-            currentValidator.ErrorsChanged -= Validator_ErrorsChanged;
+            oldValidator.ErrorsChanged -= Validator_ErrorsChanged;
         }
 
-        if (value is ObservableValidator validator)
+        if (value is ObservableValidator newValidator)
         {
-            validator.ErrorsChanged += Validator_ErrorsChanged;
+            newValidator.ErrorsChanged += Validator_ErrorsChanged;
         }
     }
 

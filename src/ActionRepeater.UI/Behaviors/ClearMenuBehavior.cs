@@ -68,21 +68,16 @@ public class ClearMenuBehavior
 
         if (!_isSubscribedToColChanged)
         {
-            ActionManager.ActionCollectionChanged += ActionManager_ActionCollectionChanged;
+            ActionManager.ActionsCountChanged += ActionManager_ActionsCountChanged;
             ActionManager.CursorPathStartChanged += ActionManager_CursorPathStartChanged;
             _isSubscribedToColChanged = true;
         }
     }
 
-    private static void ActionManager_ActionCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    private static void ActionManager_ActionsCountChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
-        if (e.Action == NotifyCollectionChangedAction.Add
-            || e.Action == NotifyCollectionChangedAction.Remove
-            || e.Action == NotifyCollectionChangedAction.Reset)
-        {
-            ClearAllCommand.NotifyCanExecuteChanged();
-            ClearActionsCommand.NotifyCanExecuteChanged();
-        }
+        ClearAllCommand.NotifyCanExecuteChanged();
+        ClearActionsCommand.NotifyCanExecuteChanged();
     }
 
     private static void ActionManager_CursorPathStartChanged(object? sender, MouseMovement? e)

@@ -34,7 +34,7 @@ public sealed partial class MainWindow : Window
         InitializeComponent();
     }
 
-    private void OnWindowMessageReceived(object? sender, WindowMessageEventArgs e)
+    private static void OnWindowMessageReceived(object? sender, WindowMessageEventArgs e)
     {
         if (e.MessageType == Win32.WindowsAndMessages.WindowMessage.INPUT)
         {

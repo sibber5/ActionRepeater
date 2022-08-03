@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using ActionRepeater.Core.Action;
 using ActionRepeater.Core.Extentions;
 using ActionRepeater.Core.Helpers;
@@ -19,6 +20,16 @@ public static class ActionManager
                 _actionsExlKeyRepeat[^1] = act;
             }
             _actions[^1] = act;
+        };
+
+        ActionCollectionChanged += static (s, e) =>
+        {
+            if (e.Action == NotifyCollectionChangedAction.Add
+                || e.Action == NotifyCollectionChangedAction.Remove
+                || e.Action == NotifyCollectionChangedAction.Reset)
+            {
+                ActionsCountChanged?.Invoke(s, e);
+            }
         };
     }
 
@@ -48,11 +59,13 @@ public static class ActionManager
     private static readonly ObservableCollectionEx<InputAction> _actionsExlKeyRepeat = new();
     public static IReadOnlyList<InputAction> ActionsExlKeyRepeat => _actionsExlKeyRepeat;
 
-    public static event System.Collections.Specialized.NotifyCollectionChangedEventHandler? ActionCollectionChanged
+    public static event NotifyCollectionChangedEventHandler? ActionCollectionChanged
     {
         add => _actions.CollectionChanged += value;
         remove => _actions.CollectionChanged -= value;
     }
+
+    public static event NotifyCollectionChangedEventHandler? ActionsCountChanged;
 
     /// <summary>Contains the indecies of the modified actions in ActionsExlKeyRepeat.</summary>
     private static readonly List<int> _modifiedFilteredActionsIdxs = new();

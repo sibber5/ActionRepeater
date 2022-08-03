@@ -64,7 +64,7 @@ public partial class CmdBarHomeViewModel : ObservableObject
 
         Player.IsPlayingChanged += Player_IsPlayingChanged;
         Recorder.IsRecordingChanged += Recorder_IsRecordingChanged;
-        ActionManager.ActionCollectionChanged += ActionManager_ActionCollectionChanged;
+        ActionManager.ActionsCountChanged += ActionManager_ActionsCountChanged;
     }
 
     private void Player_IsPlayingChanged(object? sender, bool e)
@@ -78,15 +78,10 @@ public partial class CmdBarHomeViewModel : ObservableObject
         PlayActionsCommand.NotifyCanExecuteChanged();
     }
 
-    private void ActionManager_ActionCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    private void ActionManager_ActionsCountChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
-        if (e.Action == NotifyCollectionChangedAction.Add
-            || e.Action == NotifyCollectionChangedAction.Remove
-            || e.Action == NotifyCollectionChangedAction.Reset)
-        {
-            PlayActionsCommand.NotifyCanExecuteChanged();
-            ExportActionsCommand.NotifyCanExecuteChanged();
-        }
+        PlayActionsCommand.NotifyCanExecuteChanged();
+        ExportActionsCommand.NotifyCanExecuteChanged();
     }
 
     [RelayCommand(CanExecute = nameof(CanToggleRecording))]
