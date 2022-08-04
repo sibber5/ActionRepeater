@@ -4,19 +4,72 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:views="using:ActionRepeater.UI.Views"
+    xmlns:local="using:ActionRepeater.UI"
     mc:Ignorable="d">
 
-    <Grid x:Name="_grid">
+    <Grid x:Name="_grid" Margin="10">
 
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <views:CommandBarView Grid.Row="0" ViewModel="{x:Bind ViewModel.CommandBarViewModel}" />
+        <NavigationView x:Name="_navigationView"
+                        Margin="0,-15,0,0" Grid.Row="0"
+                        PaneDisplayMode="Top"
+                        IsBackButtonVisible="Collapsed"
+                        IsSettingsVisible="False"
+                        SelectionChanged="NavigationView_SelectionChanged"
+                        Loaded="NavigationView_Loaded">
 
-        <views:ActionListView Grid.Row="1" ViewModel="{x:Bind ViewModel.ActionListViewModel}" />
+            <NavigationView.MenuItems>
+                <!-- space for the file dropdown button -->
+                <NavigationViewItem Width="58" />
+                <NavigationViewItem Tag="{x:Bind local:MainWindow.HomeTag}" Content="Home" />
+                <NavigationViewItem Tag="{x:Bind local:MainWindow.OptionsTag}" Content="Options"/>
+            </NavigationView.MenuItems>
+
+            <Frame x:Name="_contentFrame" Background="{ThemeResource AppBackgroundThemeBrush}" />
+
+        </NavigationView>
+
+        <DropDownButton Grid.Row="0"
+                        HorizontalAlignment="Left" VerticalAlignment="Top"
+                        Margin="4,-6,0,0"
+                        Background="Transparent"
+                        BorderBrush="Transparent"
+                        Content="File">
+            <DropDownButton.Resources>
+                <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="Transparent"/>
+                <SolidColorBrush x:Key="ButtonBorderBrushPointerOver" Color="Transparent"/>
+
+                <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="Transparent"/>
+                <SolidColorBrush x:Key="ButtonBorderBrushPressed" Color="Transparent"/>
+            </DropDownButton.Resources>
+
+            <DropDownButton.Flyout>
+                <MenuFlyout x:Name="_fileMenuFlyout" Placement="Bottom">
+                    <MenuFlyoutItem Text="Open" Command="{x:Bind ViewModel.ImportActionsCommand}">
+                        <MenuFlyoutItem.Icon>
+                            <FontIcon Glyph="&#xE8E5;"/>
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+
+                    <MenuFlyoutItem Text="Save" Command="{x:Bind ViewModel.ExportActionsCommand}">
+                        <MenuFlyoutItem.Icon>
+                            <FontIcon Glyph="&#xE792;"/>
+                        </MenuFlyoutItem.Icon>
+                    </MenuFlyoutItem>
+
+                    <!-- TODO: <MenuFlyoutItem Text="Export to exe" Icon="Share"/> -->
+                </MenuFlyout>
+            </DropDownButton.Flyout>
+        </DropDownButton>
+
+        <!-- 1p height line to cover some random fucking gray line in the app in light mode. -->
+        <!-- i have no clue where it came from ive tried setting the background and border brush on everything in this view -->
+        <Rectangle Grid.Row="0" Margin="0,33,0,0"
+                   HorizontalAlignment="Stretch" VerticalAlignment="Top"
+                   Height="1" Fill="{ThemeResource AppBackgroundThemeBrush}"/>
 
     </Grid>
 

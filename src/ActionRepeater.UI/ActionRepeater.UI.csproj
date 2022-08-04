@@ -63,9 +63,11 @@
     <ItemGroup>
         <None Remove="Controls\CmdBarButton.xaml" />
         <None Remove="Controls\CmdBarToggleButton.xaml" />
+        <None Remove="Controls\OptionItem.xaml" />
+        <None Remove="Controls\OptionsSeperator.xaml" />
         <None Remove="GlobalResources.xaml" />
-        <None Remove="Pages\CmdBarHomePage.xaml" />
-        <None Remove="Pages\CmdBarOptionsPage.xaml" />
+        <None Remove="Pages\HomePage.xaml" />
+        <None Remove="Pages\OptionsPage.xaml" />
         <None Remove="Styles.xaml" />
         <None Remove="Views\ActionListView.xaml" />
         <None Remove="Views\EditActionView.xaml" />
@@ -76,6 +78,16 @@
     </ItemGroup>
     <ItemGroup>
         <Resource Remove="Views\ActionListView.xaml" />
+    </ItemGroup>
+    <ItemGroup>
+      <Page Update="Controls\OptionsSeperator.xaml">
+        <Generator>MSBuild:Compile</Generator>
+      </Page>
+    </ItemGroup>
+    <ItemGroup>
+      <Page Update="Controls\OptionItem.xaml">
+        <Generator>MSBuild:Compile</Generator>
+      </Page>
     </ItemGroup>
     <ItemGroup>
         <Page Update="Views\EditMouseWheelActionView.xaml">
@@ -108,7 +120,7 @@
         </Page>
     </ItemGroup>
     <ItemGroup>
-        <Page Update="Pages\CmdBarOptionsPage.xaml">
+        <Page Update="Pages\OptionsPage.xaml">
             <Generator>MSBuild:Compile</Generator>
         </Page>
     </ItemGroup>
@@ -128,12 +140,7 @@
         </Page>
     </ItemGroup>
     <ItemGroup>
-        <Page Update="Views\CommandBarView.xaml">
-            <Generator>MSBuild:Compile</Generator>
-        </Page>
-    </ItemGroup>
-    <ItemGroup>
-        <Page Update="Pages\CmdBarHomePage.xaml">
+        <Page Update="Pages\HomePage.xaml">
             <Generator>MSBuild:Compile</Generator>
         </Page>
     </ItemGroup>

@@ -1,15 +1,14 @@
-﻿using System;
-using ActionRepeater.UI.ViewModels;
+﻿using ActionRepeater.UI.ViewModels;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 
 namespace ActionRepeater.UI.Pages;
 
-public sealed partial class CmdBarHomePage : Page
+public sealed partial class HomePage : Page
 {
-    public CmdBarHomeViewModel ViewModel { get; set; } = null!;
+    public HomePageViewModel ViewModel { get; set; } = null!;
 
-    public CmdBarHomePage()
+    public HomePage()
     {
         NavigationCacheMode = NavigationCacheMode.Required;
         InitializeComponent();
@@ -21,7 +20,7 @@ public sealed partial class CmdBarHomePage : Page
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
-        ViewModel = (CmdBarHomeViewModel)e.Parameter;
+        ViewModel = (HomePageViewModel)e.Parameter;
         base.OnNavigatedTo(e);
     }
 }

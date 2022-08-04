@@ -18,7 +18,7 @@
         <TextBlock x:Name="ActionListHeader"
                    Text="Actions:"
                    Grid.Row="0"
-                   Margin="13,0,10,0"
+                   Margin="3,0,0,0"
                    VerticalAlignment="Bottom"
                    HorizontalAlignment="Left"
                    FontSize="18"/>
@@ -26,7 +26,7 @@
         <TextBlock x:Name="ShowAutoRepeatLabel"
                    Grid.Row="0"
                    FontSize="14"
-                   Margin="77,0,55,1"
+                   Margin="67,0,45,1"
                    VerticalAlignment="Bottom"
                    HorizontalAlignment="Right"
                    Text="show keystroke auto-repeat"/>
@@ -38,7 +38,7 @@
                       Grid.Row="0"
                       VerticalAlignment="Bottom"
                       HorizontalAlignment="Right"
-                      Margin="77,0,-105,-9"
+                      Margin="67,0,-115,-9"
                       Style="{StaticResource SmallToggleSwitch}"/>
 
         <ListView x:Name="ActionList"
@@ -49,7 +49,7 @@
                   Grid.Row="2"
                   HorizontalAlignment="Stretch"
                   VerticalAlignment="Stretch"
-                  Margin="10,5,10,10"
+                  Margin="0,5,0,0"
                   ScrollViewer.VerticalScrollBarVisibility="Visible"
                   ItemsSource="{x:Bind ViewModel.FilteredActions, Mode=OneWay}"
                   SelectedIndex="{x:Bind ViewModel.SelectedActionIndex, Mode=TwoWay}"

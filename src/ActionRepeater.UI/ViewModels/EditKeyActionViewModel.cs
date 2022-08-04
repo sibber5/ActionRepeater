@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using ActionRepeater.Core.Action;
+using ActionRepeater.Core.Extentions;
 using ActionRepeater.Win32.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -32,6 +34,8 @@ public partial class EditKeyActionViewModel : ObservableValidator
 
     public string? KeyNameErrorMessage => GetErrors(nameof(KeyName)).FirstOrDefault()?.ErrorMessage;
 
+    public IEnumerable<string> KeyActionTypesFriendlyNames => Enum.GetNames<KeyActionType>().Select(x => x.AddSpacesBetweenWords());
+
     [ObservableProperty]
     private int _selectedTypeIndex;
 
@@ -54,7 +58,7 @@ public partial class EditKeyActionViewModel : ObservableValidator
 
         VirtualKey keyFromTemplates = ActionDescriptionTemplates.VirtualKeyFriendlyNames.FirstOrDefault(x =>
         {
-            var n = ExcludeDescriptionFromTemplateName(x.Value);
+            var n = ExcludeDescriptionFromKeyFriendlyName(x.Value);
             return n.Equals(keyName.AsSpan().Trim(), StringComparison.CurrentCultureIgnoreCase);
         }).Key;
 
@@ -122,7 +126,7 @@ public partial class EditKeyActionViewModel : ObservableValidator
         Type = keyAction.ActionType;
         if (ActionDescriptionTemplates.VirtualKeyFriendlyNames.TryGetValue(keyAction.Key, out string? name))
         {
-            _keyName = ExcludeDescriptionFromTemplateName(name).ToString();
+            _keyName = ExcludeDescriptionFromKeyFriendlyName(name).ToString();
         }
         else
         {
@@ -131,7 +135,10 @@ public partial class EditKeyActionViewModel : ObservableValidator
         Key = keyAction.Key;
     }
 
-    private static ReadOnlySpan<char> ExcludeDescriptionFromTemplateName(ReadOnlySpan<char> name)
+    /// <summary>
+    /// Removes the part in brackets, if its an unecessary description.
+    /// </summary>
+    private static ReadOnlySpan<char> ExcludeDescriptionFromKeyFriendlyName(ReadOnlySpan<char> name)
     {
         if (!name.EndsWith("(numpad)", StringComparison.Ordinal))
         {

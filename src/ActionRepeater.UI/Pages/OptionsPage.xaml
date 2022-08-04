@@ -1,0 +1,84 @@
+﻿<Page
+    x:Class="ActionRepeater.UI.Pages.OptionsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ctrls="using:ActionRepeater.UI.Controls"
+    mc:Ignorable="d"
+    Background="{ThemeResource AppBackgroundThemeBrush}">
+
+    <StackPanel Orientation="Vertical" Margin="10" Spacing="5">
+
+        <StackPanel.Resources>
+            <x:Double x:Key="OptionControlWidth">160</x:Double>
+            <!-- for some reason toggle switches have a margin on the left?? so this is to remove that. -->
+            <Thickness x:Key="ToggleSwitchNegativeMargin">0,0,-82,0</Thickness>
+        </StackPanel.Resources>
+
+        <ctrls:OptionItem Text="Cursor movement:">
+            <ctrls:OptionItem.OptionContent>
+                <ComboBox HorizontalAlignment="Right"
+                          Width="{StaticResource OptionControlWidth}"
+                          ItemsSource="{x:Bind ViewModel.CursorMovementCBItems}"
+                          SelectedIndex="{x:Bind ViewModel.CursorMovementMode, Mode=TwoWay}"/>
+            </ctrls:OptionItem.OptionContent>
+        </ctrls:OptionItem>
+
+        <ctrls:OptionItem Text="Set cursor position on clicks">
+            <ctrls:OptionItem.OptionContent>
+                <ToggleSwitch IsOn="{x:Bind ViewModel.UseCursorPosOnClicks, Mode=TwoWay}" Margin="{StaticResource ToggleSwitchNegativeMargin}" Style="{StaticResource LeftSideTextToggleSwitch}"/>
+            </ctrls:OptionItem.OptionContent>
+        </ctrls:OptionItem>
+
+        <ctrls:OptionsSeperator/>
+
+        <ctrls:OptionItem Text="Max click interval (ms):"
+                          ToolTipService.ToolTip="The maximum time, in milliseconds, between pressing down a key/mouse button and releasing it for the action to be counted as a press/click (instead of button down and up actinos)">
+            <ctrls:OptionItem.OptionContent>
+                <NumberBox x:Name="_clickIntervalNumbox"
+                           MinWidth="{StaticResource OptionControlWidth}"
+                           SmallChange="10"
+                           LargeChange="100"
+                           Minimum="0"
+                           Maximum="9999"
+                           SpinButtonPlacementMode="Inline"
+                           ValidationMode="InvalidInputOverwritten"
+                           Value="{x:Bind ViewModel.MaxClickInterval, Mode=TwoWay}"/>
+            </ctrls:OptionItem.OptionContent>
+        </ctrls:OptionItem>
+
+        <ctrls:OptionItem Text="Simulate keystroke auto-repeat">
+            <ctrls:OptionItem.OptionContent>
+                <ToggleSwitch IsOn="{x:Bind ViewModel.SendKeyAutoRepeat, Mode=TwoWay}" Margin="{StaticResource ToggleSwitchNegativeMargin}" Style="{StaticResource LeftSideTextToggleSwitch}"/>
+            </ctrls:OptionItem.OptionContent>
+        </ctrls:OptionItem>
+
+        <ctrls:OptionsSeperator/>
+
+        <ctrls:OptionItem Text="Theme">
+            <ctrls:OptionItem.OptionContent>
+                <ComboBox HorizontalAlignment="Right"
+                          Width="{StaticResource OptionControlWidth}"
+                          ItemsSource="{x:Bind ViewModel.ThemeCBItems}"
+                          SelectedIndex="{x:Bind ViewModel.Theme, Mode=TwoWay}"/>
+            </ctrls:OptionItem.OptionContent>
+        </ctrls:OptionItem>
+
+        <ctrls:OptionsSeperator/>
+
+        <ctrls:OptionItem Text="Options file location">
+            <ctrls:OptionItem.OptionContent>
+                <ComboBox HorizontalAlignment="Right"
+                          Width="{StaticResource OptionControlWidth}"
+                          SelectedIndex="{x:Bind ViewModel.OptionsFileLocation, Mode=TwoWay}">
+                    <x:String>Don't Save</x:String>
+                    <x:String>AppData</x:String>
+                    <x:String>App Folder</x:String>
+                </ComboBox>
+            </ctrls:OptionItem.OptionContent>
+        </ctrls:OptionItem>
+
+    </StackPanel>
+    
+</Page>

@@ -16,13 +16,10 @@
         <TextBlock Text="Type:"
                    Grid.Row="0"
                    HorizontalAlignment="Left" VerticalAlignment="Center"/>
-        <ComboBox SelectedIndex="{x:Bind ViewModel.SelectedTypeIndex, Mode=TwoWay}"
+        <ComboBox ItemsSource="{x:Bind ViewModel.KeyActionTypesFriendlyNames}"
+                  SelectedIndex="{x:Bind ViewModel.SelectedTypeIndex, Mode=TwoWay}"
                   Grid.Row="0"
-                  HorizontalAlignment="Right">
-            <x:String>Key Press</x:String>
-            <x:String>Key Down</x:String>
-            <x:String>Key Up</x:String>
-        </ComboBox>
+                  HorizontalAlignment="Right"/>
 
         <TextBlock Text="Key:"
                    Grid.Row="2"

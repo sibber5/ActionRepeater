@@ -4,11 +4,11 @@ using Microsoft.UI.Xaml.Navigation;
 
 namespace ActionRepeater.UI.Pages;
 
-public sealed partial class CmdBarOptionsPage : Page
+public sealed partial class OptionsPage : Page
 {
-    public CmdBarOptionsViewModel ViewModel { get; set; } = null!;
+    public OptionsPageViewModel ViewModel { get; set; } = null!;
 
-    public CmdBarOptionsPage()
+    public OptionsPage()
     {
         NavigationCacheMode = NavigationCacheMode.Required;
         InitializeComponent();
@@ -18,7 +18,7 @@ public sealed partial class CmdBarOptionsPage : Page
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
-        ViewModel = (CmdBarOptionsViewModel)e.Parameter;
+        ViewModel = (OptionsPageViewModel)e.Parameter;
         base.OnNavigatedTo(e);
     }
 }

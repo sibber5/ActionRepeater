@@ -6,11 +6,15 @@ namespace ActionRepeater.Core;
 
 public class Options : INotifyPropertyChanged
 {
-    private Options() { }
-    public static Options Instance { get; } = new();
+    /// <summary>
+    /// For deserialization only. will be private once https://github.com/dotnet/runtime/issues/31511 is implemented.
+    /// </summary>
+    public Options() { }
+    private static Options? _instance;
+    public static Options Instance => _instance ??= new();
 
     public event PropertyChangedEventHandler? PropertyChanged;
-    protected void RaisePropertyChanged([CallerMemberName] string propertyName = null!) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    protected void OnPropertyChanged([CallerMemberName] string propertyName = null!) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
     private CursorMovementMode _cursorMovementMode = CursorMovementMode.None;
     public CursorMovementMode CursorMovementMode
@@ -19,7 +23,7 @@ public class Options : INotifyPropertyChanged
         set
         {
             _cursorMovementMode = value;
-            RaisePropertyChanged();
+            OnPropertyChanged();
         }
     }
 
@@ -39,7 +43,7 @@ public class Options : INotifyPropertyChanged
                 }
             }
             _useCursorPosOnClicks = value;
-            RaisePropertyChanged();
+            OnPropertyChanged();
         }
     }
 
@@ -50,7 +54,7 @@ public class Options : INotifyPropertyChanged
         set
         {
             _maxClickInterval = value;
-            RaisePropertyChanged();
+            OnPropertyChanged();
         }
     }
 
@@ -61,7 +65,7 @@ public class Options : INotifyPropertyChanged
         set
         {
             _sendKeyAutoRepeat = value;
-            RaisePropertyChanged();
+            OnPropertyChanged();
         }
     }
 
@@ -72,8 +76,13 @@ public class Options : INotifyPropertyChanged
         set
         {
             _playRepeatCount = value;
-            RaisePropertyChanged();
+            OnPropertyChanged();
         }
+    }
+
+    public static void Load(Options options)
+    {
+        _instance = options;
     }
 }
 

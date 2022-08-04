@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Specialized;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ActionRepeater.Core.Input;
@@ -7,8 +6,10 @@ using ActionRepeater.UI.Services;
 
 namespace ActionRepeater.UI.ViewModels;
 
-public partial class CmdBarHomeViewModel : ObservableObject
+public partial class HomePageViewModel : ObservableObject
 {
+    public ActionListViewModel ActionListViewModel { get; }
+
     public int PlayRepeatCount
     {
         get => Core.Options.Instance.PlayRepeatCount;
@@ -20,16 +21,15 @@ public partial class CmdBarHomeViewModel : ObservableObject
 
     private readonly PathWindowService _pathWindowService;
 
-    private readonly ActionListViewModel _actionListVM;
-
     // These select the item in the list view that is currently being performed
     private readonly Action<bool> _updateActionsView;
     private readonly Action<bool> _updateActionsExlView;
 
-    public CmdBarHomeViewModel(PathWindowService pathWindowService, ActionListViewModel actionListVM)
+    public HomePageViewModel(ActionListViewModel actionListVM, PathWindowService pathWindowService)
     {
+        ActionListViewModel = actionListVM;
+
         _pathWindowService = pathWindowService;
-        _actionListVM = actionListVM;
 
         _updateActionsView = (isAutoRepeat) =>
         {
@@ -82,7 +82,7 @@ public partial class CmdBarHomeViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanPlayActions))]
     private void PlayActions()
     {
-        _actionListVM.CurrentSetActionIndex = -1;
+        ActionListViewModel.CurrentSetActionIndex = -1;
         Player.UpdateView = Core.Options.Instance.SendKeyAutoRepeat ? _updateActionsView : _updateActionsExlView;
 
         if (!ActionManager.TryPlayActions())

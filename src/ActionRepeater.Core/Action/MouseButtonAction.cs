@@ -107,7 +107,7 @@ public sealed class MouseButtonAction : InputAction, IEquatable<MouseButtonActio
 
 public enum MouseButtonActionType
 {
-    MouseButtonClick = 1,
+    MouseButtonClick,
     MouseButtonDown,
     MouseButtonUp,
 }

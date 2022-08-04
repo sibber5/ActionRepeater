@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using ActionRepeater.Core.Action;
+using ActionRepeater.Core.Extentions;
 using ActionRepeater.Core.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -9,21 +12,8 @@ public partial class EditMouseButtonActionViewModel : ObservableObject
 {
     public MouseButtonActionType Type
     {
-        get => SelectedTypeIndex switch
-        {
-            0 => MouseButtonActionType.MouseButtonClick,
-            1 => MouseButtonActionType.MouseButtonDown,
-            2 => MouseButtonActionType.MouseButtonUp,
-            _ => throw new NotImplementedException()
-        };
-
-        set => SelectedTypeIndex = value switch
-        {
-            MouseButtonActionType.MouseButtonClick => 0,
-            MouseButtonActionType.MouseButtonDown => 1,
-            MouseButtonActionType.MouseButtonUp => 2,
-            _ => throw new NotImplementedException()
-        };
+        get => (MouseButtonActionType)SelectedTypeIndex;
+        set => SelectedTypeIndex = (int)value;
     }
 
     public InputSimulator.MouseButton Button
@@ -41,6 +31,8 @@ public partial class EditMouseButtonActionViewModel : ObservableObject
             PositionY = value.y;
         }
     }
+
+    public IEnumerable<string> MBActionTypesFriendlyNames => Enum.GetNames<MouseButtonActionType>().Select(x => x.AddSpacesBetweenWords());
 
     [ObservableProperty]
     private int _selectedTypeIndex;
