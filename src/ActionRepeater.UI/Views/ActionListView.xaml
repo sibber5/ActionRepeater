@@ -120,7 +120,7 @@
                     </MenuFlyoutSubItem>
                 </MenuFlyout>
                 <MenuFlyout x:Name="ActionListMenuFlyout">
-                    <MenuFlyoutSubItem Text="Add" x:Name="_listFlyoutAdd" Icon="Add"
+                    <MenuFlyoutSubItem Text="Add" x:Name="_listFlyoutAdd" Icon="Add" IsEnabled="{x:Bind ViewModel.CanAddAction, Mode=OneWay}"
                                        behavs:AddActionMenuBehavior.MenuItemList="{x:Bind _listFlyoutAdd.Items}"/>
                     <MenuFlyoutItem Text="Paste" Command="{x:Bind ViewModel.AddActionCommand}"  Icon="Paste"/>
                     <MenuFlyoutSeparator />

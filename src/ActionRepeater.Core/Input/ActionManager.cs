@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Linq;
 using ActionRepeater.Core.Action;
 using ActionRepeater.Core.Extentions;
 using ActionRepeater.Core.Helpers;
@@ -68,6 +69,10 @@ public static class ActionManager
     public static event NotifyCollectionChangedEventHandler? ActionsCountChanged;
 
     /// <summary>Contains the indecies of the modified actions in ActionsExlKeyRepeat.</summary>
+    /// <remarks>
+    /// A modified action is usually a <see cref="WaitAction"/> with extended duration which would be 
+    /// in place of the auto repeat actions in <see cref="_actions"/>.
+    /// </remarks>
     private static readonly List<int> _modifiedFilteredActionsIdxs = new();
 
     public static IReadOnlyList<MouseMovement> GetAbsoluteCursorPath()
@@ -122,7 +127,7 @@ public static class ActionManager
         FillFilteredActionList();
     }
 
-    public static void AddAction(InputAction action, bool addAutoRepeatIfKeyUpAct = false)
+    public static void AddAction(InputAction action, bool addAutoRepeatIfActIsKeyUp = false)
     {
         if (action is WaitAction waitAction)
         {
@@ -135,47 +140,126 @@ public static class ActionManager
                 _actions.Add(action);
             }
 
-            int lastFilteredActionIdx = _actionsExlKeyRepeat.Count - 1;
-            if (_actionsExlKeyRepeat.Count > 0 && _actionsExlKeyRepeat[lastFilteredActionIdx] is WaitAction lastFilteredWaitAction)
-            {
-                if (_modifiedFilteredActionsIdxs.Contains(lastFilteredActionIdx))
-                {
-                    lastFilteredWaitAction.Duration += waitAction.Duration;
-                }
-                else if (!ReferenceEquals(_actions[^1], lastFilteredWaitAction))
-                {
-                    _actionsExlKeyRepeat[lastFilteredActionIdx] = new WaitAction(lastFilteredWaitAction.Duration + waitAction.Duration);
-                    _modifiedFilteredActionsIdxs.Add(lastFilteredActionIdx);
-                }
-            }
-            else
-            {
-                _actionsExlKeyRepeat.Add(action);
-            }
+            AddOrUpdateWaitActionInExl(waitAction, _actions[^1]);
 
             return;
         }
 
-        _actions.Add(action);
-
-        if (action is KeyAction keyAction)
-        {
-            if (!keyAction.IsAutoRepeat)
-            {
-                _actionsExlKeyRepeat.Add(action);
-            }
-
-#if DEBUG
-            if (addAutoRepeatIfKeyUpAct && keyAction.ActionType == KeyActionType.KeyUp)
-            {
-                // TODO: implement adding auto repeat actions
-                throw new NotImplementedException();
-            }
-#endif
-        }
-        else
+        if (action is not KeyAction ka || !ka.IsAutoRepeat)
         {
             _actionsExlKeyRepeat.Add(action);
+        }
+
+        if (addAutoRepeatIfActIsKeyUp && action is KeyAction keyAction && keyAction.ActionType == KeyActionType.KeyUp)
+        {
+            // TODO: fix bug with action collections and views
+
+            KeyAction? lastKeyDownAct = (KeyAction?)_actions
+                .LastOrDefault(x => x is KeyAction xAsKeyAct
+                                    && xAsKeyAct.ActionType == KeyActionType.KeyDown
+                                    && xAsKeyAct.Key == keyAction.Key
+                                    && !xAsKeyAct.IsAutoRepeat);
+
+            if (lastKeyDownAct is not null)
+            {
+                AddKeyAutoRepeatActions(lastKeyDownAct, keyAction);
+            }
+        }
+
+        _actions.Add(action);
+    }
+
+    /// <summary>
+    /// Adds key auto repeat actions between the specified key down and key up actions.
+    /// </summary>
+    /// <remarks>
+    /// Both actions passed must be in <see cref="_actions"/>.<br/>
+    /// <paramref name="keyUpAction"/> must come after <paramref name="keyDownAction"/> in the collection.
+    /// </remarks>
+    private static void AddKeyAutoRepeatActions(KeyAction keyDownAction, KeyAction keyUpAction)
+    {
+        int lastKeyDownActIdx = _actions.RefIndexOfReverse(keyDownAction);
+
+        int iterationsToSkip = 0; // to skip the key repeat actions we add (because we know what they are)
+        bool keyDelayAdded = false;
+        int curWaitDuration = 0;
+        for (int i = lastKeyDownActIdx + 1; i < _actions.Count; i++)
+        {
+            if (iterationsToSkip > 0)
+            {
+                iterationsToSkip--;
+                continue;
+            }
+
+            InputAction act = _actions[i];
+
+            if (act is not WaitAction waitAct) continue;
+
+            curWaitDuration += waitAct.Duration;
+
+            if (!keyDelayAdded)
+            {
+                AddAutoRepeatActionAfterXTime(Win32.SystemInformation.KeyRepeatDelayMS);
+
+                keyDelayAdded = true;
+                continue;
+            }
+
+            AddAutoRepeatActionAfterXTime(Win32.SystemInformation.KeyRepeatInterval);
+
+            // Adds a key auto repeat action after the specified milliseonds.
+            // e.g. if milliseconds == 500 (0.5s), and there was a wait action for 2 seconds (2000 ms)
+            // it would be split into one 0.5s, and then the auto repeat actions would be added, and
+            // then the rest of the wait duration of 1.5s.
+            void AddAutoRepeatActionAfterXTime(double milliseconds)
+            {
+                if (AreWaitDurationsNearlyEqual(milliseconds, curWaitDuration))
+                {
+                    // if there are more than one auto repeat actions, insert this one below them.
+                    int insertIndex = i + 1;
+                    for (int j = insertIndex; j < _actions.Count; j++)
+                    {
+                        if (!(_actions[j] is KeyAction ka && ka.IsAutoRepeat))
+                        {
+                            insertIndex = j;
+                            break;
+                        }
+                    }
+                    _actions.Insert(insertIndex, new KeyAction(KeyActionType.KeyDown, keyUpAction.Key, true));
+
+                    iterationsToSkip = 1;
+                    curWaitDuration = 0;
+                }
+                else if (curWaitDuration > milliseconds)
+                {
+                    int durationToKeyDelay = (int)Math.Round(milliseconds) - (curWaitDuration - waitAct.Duration);
+                    int durationLeft = waitAct.Duration - durationToKeyDelay;
+
+                    // create a modified wait action for _actionsExlKeyRepeat
+                    // (see _modifiedFilteredActionsIdxs remarks for what a modified wait action is)
+                    int actionsExlWaitIdx = _actionsExlKeyRepeat.RefIndexOfReverse(waitAct);
+                    if (actionsExlWaitIdx != -1)
+                    {
+                        _actionsExlKeyRepeat[actionsExlWaitIdx] = new WaitAction(waitAct.Duration);
+                        _modifiedFilteredActionsIdxs.Add(actionsExlWaitIdx);
+                    }
+
+                    waitAct.Duration = durationToKeyDelay;
+                    _actions.Insert(i + 1, new KeyAction(KeyActionType.KeyDown, keyUpAction.Key, true));
+                    _actions.Insert(i + 2, new WaitAction(durationLeft));
+
+                    iterationsToSkip = 1;
+                    curWaitDuration = 0;
+                }
+
+                static bool AreWaitDurationsNearlyEqual(double duration, int durationToCompare)
+                {
+                    int floor = (int)Math.Floor(duration / 10) * 10;
+                    int ceiling = (int)Math.Ceiling(duration / 10) * 10;
+
+                    return durationToCompare >= floor - 4 && durationToCompare <= ceiling + 4;
+                }
+            }
         }
     }
 
@@ -192,24 +276,7 @@ public static class ActionManager
 
             if (action is WaitAction waitAction)
             {
-                int lastFilteredActionIdx = _actionsExlKeyRepeat.Count - 1;
-                if (_actionsExlKeyRepeat.Count > 0 && _actionsExlKeyRepeat[lastFilteredActionIdx] is WaitAction lastFilteredWaitAction)
-                {
-                    if (_modifiedFilteredActionsIdxs.Contains(lastFilteredActionIdx))
-                    {
-                        lastFilteredWaitAction.Duration += waitAction.Duration;
-                    }
-                    else if (!ReferenceEquals(_actions[i - 1], lastFilteredWaitAction))
-                    {
-                        _actionsExlKeyRepeat[lastFilteredActionIdx] = new WaitAction(lastFilteredWaitAction.Duration + waitAction.Duration);
-                        _modifiedFilteredActionsIdxs.Add(lastFilteredActionIdx);
-                    }
-                }
-                else
-                {
-                    _actionsExlKeyRepeat.Add(action);
-                }
-
+                AddOrUpdateWaitActionInExl(waitAction, _actions[i - 1]);
                 continue;
             }
 
@@ -222,9 +289,32 @@ public static class ActionManager
         _actionsExlKeyRepeat.SuppressNotifications = false;
     }
 
+    private static void AddOrUpdateWaitActionInExl(WaitAction curWaitAction, InputAction prevUnfilteredAction)
+    {
+        int actionsExlLastIdx = _actionsExlKeyRepeat.Count - 1;
+        if (_actionsExlKeyRepeat.Count > 0 && _actionsExlKeyRepeat[actionsExlLastIdx] is WaitAction lastFilteredWaitAction)
+        {
+            // if there is a modified wait action for _actionsExlKeyRepeat, update it. otherwise create one.
+            // (see _modifiedFilteredActionsIdxs remarks for what a modified wait action is)
+            if (_modifiedFilteredActionsIdxs.Contains(actionsExlLastIdx))
+            {
+                lastFilteredWaitAction.Duration += curWaitAction.Duration;
+            }
+            else if (!ReferenceEquals(prevUnfilteredAction, lastFilteredWaitAction))
+            {
+                _actionsExlKeyRepeat[actionsExlLastIdx] = new WaitAction(lastFilteredWaitAction.Duration + curWaitAction.Duration);
+                _modifiedFilteredActionsIdxs.Add(actionsExlLastIdx);
+            }
+        }
+        else
+        {
+            _actionsExlKeyRepeat.Add(curWaitAction);
+        }
+    }
+
     /// <returns>true if the action has been modified (in <see cref="_actionsExlKeyRepeat"/>).</returns>
     /// <remarks>
-    /// A modified action is usually a <see cref="KeyAction"/> with extended duration which would be 
+    /// A modified action is usually a <see cref="WaitAction"/> with extended duration which would be 
     /// in place of the auto repeat actions in <see cref="_actions"/>.
     /// </remarks>
     public static bool HasActionBeenModified(InputAction action)

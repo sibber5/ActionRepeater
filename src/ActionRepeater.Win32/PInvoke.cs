@@ -276,10 +276,13 @@ public static partial class PInvoke
     /// <summary>Retrieves the raw input from the specified device.</summary>
     /// <para>Type: <b>HRAWINPUT</b> A handle to the <a href="https://docs.microsoft.com/windows/desktop/api/winuser/ns-winuser-rawinput">RAWINPUT</a> structure. This comes from the <i>lParam</i> in <see cref="WindowMessage.INPUT"/>.</para>
     /// <returns><typeparamref name="true"/> if successful, otherwise <typeparamref name="false"/>.</returns>
-    public static bool GetRawInputData(nint hRawInput, out RAWINPUT pData)
+    public static unsafe bool GetRawInputData(nint hRawInput, out RAWINPUT pData)
     {
-        uint rawInputSize = (uint)Marshal.SizeOf<RAWINPUT>();
-        return GetRawInputData(hRawInput, 0x10000003u, out pData, ref rawInputSize, (uint)RAWINPUTHEADER.SIZE) != unchecked((uint)-1);
+        uint rawInputSize = (uint)RAWINPUT.SIZE;
+        fixed (RAWINPUT* pDataPtr = &pData)
+        {
+            return GetRawInputData(hRawInput, 0x10000003u, pDataPtr, &rawInputSize, (uint)RAWINPUTHEADER.SIZE) != unchecked((uint)-1);
+        }
     }
 
     /// <summary>Retrieves the raw input from the specified device.</summary>
@@ -317,7 +320,7 @@ public static partial class PInvoke
     /// </remarks>
     [DllImport("User32", ExactSpelling = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    public static extern uint GetRawInputData(nint hRawInput, uint uiCommand, out RAWINPUT pData, ref uint pcbSize, uint cbSizeHeader);
+    public static extern unsafe uint GetRawInputData(nint hRawInput, uint uiCommand, void* pData, uint* pcbSize, uint cbSizeHeader);
 
     /// <summary>The EnumDisplayMonitors function enumerates display monitors (including invisible pseudo-monitors associated with the mirroring drivers) that intersect a region formed by the intersection of a specified clipping rectangle and the visible region of a device context. EnumDisplayMonitors calls an application-defined MonitorEnumProc callback function once for each monitor that is enumerated. Note that GetSystemMetrics (SM_CMONITORS) counts only the display monitors.</summary>
     /// <param name="hdc">
@@ -355,4 +358,33 @@ public static partial class PInvoke
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     [SupportedOSPlatform("windows6.0.6000")]
     public static extern unsafe int DwmSetWindowAttribute(IntPtr hwnd, uint dwAttribute, void* pvAttribute, uint cbAttribute);
+
+    /// <summary>Retrieves or sets the value of one of the system-wide parameters.</summary>
+    /// <param name="uiAction">
+    /// <para>Type: <b>UINT</b> The system-wide parameter to be retrieved or set. The possible values are organized in the following tables of related parameters: </para>
+    /// <para>This doc was truncated.</para>
+    /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-systemparametersinfow#parameters">Read more on docs.microsoft.com</see>.</para>
+    /// </param>
+    /// <param name="uiParam">
+    /// <para>Type: <b>UINT</b> A parameter whose usage and format depends on the system parameter being queried or set. For more information about system-wide parameters, see the <i>uiAction</i> parameter. If not otherwise indicated, you must specify zero for this parameter.</para>
+    /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-systemparametersinfow#parameters">Read more on docs.microsoft.com</see>.</para>
+    /// </param>
+    /// <param name="pvParam">
+    /// <para>Type: <b>PVOID</b> A parameter whose usage and format depends on the system parameter being queried or set. For more information about system-wide parameters, see the <i>uiAction</i> parameter. If not otherwise indicated, you must specify <b>NULL</b> for this parameter. For information on the <b>PVOID</b> datatype, see <a href="https://docs.microsoft.com/windows/desktop/WinProg/windows-data-types">Windows Data Types</a>.</para>
+    /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-systemparametersinfow#parameters">Read more on docs.microsoft.com</see>.</para>
+    /// </param>
+    /// <param name="fWinIni">
+    /// <para>Type: <b>UINT</b> If a system parameter is being set, specifies whether the user profile is to be updated, and if so, whether the <a href="https://docs.microsoft.com/windows/desktop/winmsg/wm-settingchange">WM_SETTINGCHANGE</a> message is to be broadcast to all top-level windows to notify them of the change.</para>
+    /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-systemparametersinfow#parameters">Read more on docs.microsoft.com</see>.</para>
+    /// </param>
+    /// <returns>
+    /// <para>Type: <b>BOOL</b> If the function succeeds, the return value is a nonzero value. If the function fails, the return value is zero. To get extended error information, call <a href="/windows/desktop/api/errhandlingapi/nf-errhandlingapi-getlasterror">GetLastError</a>.</para>
+    /// </returns>
+    /// <remarks>
+    /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-systemparametersinfow">Learn more about this API from docs.microsoft.com</see>.</para>
+    /// </remarks>
+    [DllImport("User32", ExactSpelling = true, EntryPoint = "SystemParametersInfoW", SetLastError = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern unsafe bool SystemParametersInfo(SystemParameter uiAction, uint uiParam, void* pvParam, SystemParameterUpdateAction fWinIni);
 }

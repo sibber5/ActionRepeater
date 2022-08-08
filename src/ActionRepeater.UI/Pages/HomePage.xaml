@@ -66,13 +66,20 @@
 
                 <DropDownButton Height="55"
                                 Background="Transparent"
-                                BorderBrush="Transparent">
+                                BorderBrush="Transparent"
+                                IsEnabled="{x:Bind ViewModel.CanAddAction, Mode=OneWay}">
                     <DropDownButton.Resources>
                         <ResourceDictionary>
                             <ResourceDictionary.ThemeDictionaries>
                                 <!-- setting a global theme resource doesnt work for some reason. nor does a static resource for this color.  -->
                                 <ResourceDictionary x:Key="Light">
                                     <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#fafafa"/>
+                                    <SolidColorBrush x:Key="ButtonBackgroundDisabled" Color="Transparent"/>
+                                    <SolidColorBrush x:Key="ButtonBorderBrushDisabled" Color="Transparent"/>
+                                </ResourceDictionary>
+                                <ResourceDictionary x:Key="Dark">
+                                    <SolidColorBrush x:Key="ButtonBackgroundDisabled" Color="Transparent"/>
+                                    <SolidColorBrush x:Key="ButtonBorderBrushDisabled" Color="Transparent"/>
                                 </ResourceDictionary>
                             </ResourceDictionary.ThemeDictionaries>
                         </ResourceDictionary>

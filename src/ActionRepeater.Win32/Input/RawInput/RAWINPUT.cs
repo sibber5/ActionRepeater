@@ -10,6 +10,8 @@ namespace ActionRepeater.Win32.Input;
 [StructLayout(LayoutKind.Sequential)]
 public struct RAWINPUT
 {
+	public static readonly int SIZE = Marshal.SizeOf<RAWINPUT>();
+
 	/// <summary>
 	/// <para>Type: <b><a href="https://docs.microsoft.com/windows/desktop/api/winuser/ns-winuser-rawinputheader">RAWINPUTHEADER</a></b> The raw input data.</para>
 	/// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/ns-winuser-rawinput#members">Read more on docs.microsoft.com</see>.</para>

@@ -19,6 +19,8 @@ public partial class HomePageViewModel : ObservableObject
     [ObservableProperty]
     private bool _isPlayButtonChecked;
 
+    public bool CanAddAction => !Recorder.IsRecording;
+
     private readonly PathWindowService _pathWindowService;
 
     // These select the item in the list view that is currently being performed
@@ -60,7 +62,11 @@ public partial class HomePageViewModel : ObservableObject
             IsPlayButtonChecked = newVal;
             ToggleRecordingCommand.NotifyCanExecuteChanged();
         };
-        Recorder.IsRecordingChanged += (_, _) => PlayActionsCommand.NotifyCanExecuteChanged();
+        Recorder.IsRecordingChanged += (_, _) =>
+        {
+            PlayActionsCommand.NotifyCanExecuteChanged();
+            OnPropertyChanged(nameof(CanAddAction));
+        };
         ActionManager.ActionsCountChanged += (_, _) => PlayActionsCommand.NotifyCanExecuteChanged();
     }
 

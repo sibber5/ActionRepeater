@@ -21,18 +21,17 @@ public partial class App : Application
 
     public static string AppDataOptionsDir => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), nameof(ActionRepeater));
     public static string AppFolderOptionsDir => Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly()!.Location)!;
-
     public static string OptionsFileName => "Options.json";
 
     public static MainWindow MainWindow { get; private set; } = null!;
+
+    private static readonly PathWindowService _pathWindowService = new();
+    private static readonly ContentDialogService _contentDialogService = new();
 
     private static bool _saveOptions;
     private static bool _saveOnExit = true;
 
     private static Exception? _loadingOptionsException;
-
-    private static readonly PathWindowService _pathWindowService = new();
-    private static readonly ContentDialogService _contentDialogService = new();
 
     private static ObservablePropertyReverter<OptionsFileLocation>? _optsFileLocReverter;
 

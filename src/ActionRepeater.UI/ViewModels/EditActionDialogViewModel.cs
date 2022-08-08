@@ -72,7 +72,7 @@ public partial class EditActionDialogViewModel : ObservableObject
             _ => throw new System.NotSupportedException($"{CurrentEditActionViewModel?.GetType()} not supported.")
         };
 
-        ActionManager.AddAction(action, addAutoRepeatIfKeyUpAct: true);
+        ActionManager.AddAction(action, addAutoRepeatIfActIsKeyUp: true);
     }
 
     [RelayCommand]

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -46,9 +45,11 @@ public partial class ActionListViewModel : ObservableObject
         }
     }
 
-    public Action? ScrollToSelectedItem { get; set; }
+    public bool CanAddAction => !Recorder.IsRecording;
 
-    internal readonly ContentDialogService _contentDialogService;
+    internal Action? ScrollToSelectedItem { get; set; }
+
+    private readonly ContentDialogService _contentDialogService;
 
     private readonly DispatcherQueueHandler _updateSelectedAction;
 
@@ -66,6 +67,8 @@ public partial class ActionListViewModel : ObservableObject
 
         ActionVMs = new((ObservableCollection<InputAction?>)ActionManager.Actions, createVM);
         ActionsExlVMs = new((ObservableCollection<InputAction?>)ActionManager.ActionsExlKeyRepeat, createVM);
+
+        Recorder.IsRecordingChanged += (_, _) => OnPropertyChanged(nameof(CanAddAction));
     }
 
     public void UpdateActionListIndex(bool skipAutoRepeat)
