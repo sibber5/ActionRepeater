@@ -36,14 +36,15 @@ public class SyncedObservableCollection<T, TSource> : ObservableCollectionEx<T>
             case NotifyCollectionChangedAction.Add:
                 CheckReentrancy();
 
-                int startIndex = Count;
+                int startIndex = e.NewStartingIndex;
                 var newItems = new T?[e.NewItems!.Count];
 
+                int index = startIndex;
                 for (int i = 0; i < e.NewItems!.Count; i++)
                 {
                     var item = _createT((TSource?)e.NewItems![i]);
                     newItems[i] = item;
-                    Items.Add(item);
+                    Items.Insert(index++, item);
                 }
 
                 OnPropertyChanged(EventArgsCache.CountPropertyChanged);
