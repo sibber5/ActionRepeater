@@ -18,13 +18,14 @@
         </Grid.RowDefinitions>
         
         <ScrollViewer Grid.Row="0"
+                      Margin="0,0,0,-2"
                       ZoomMode="Disabled"
                       HorizontalScrollMode="Enabled"
                       HorizontalScrollBarVisibility="Auto"
                       VerticalScrollMode="Disabled"
                       VerticalScrollBarVisibility="Disabled">
             
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
 
                 <ctrls:CmdBarToggleButton x:Name="_recordButton"
                                           Glyph="&#xEA3A;"
@@ -50,7 +51,7 @@
                                Minimum="-1"
                                Maximum="9999"
                                SpinButtonPlacementMode="Inline"
-                               MinWidth="100"
+                               MinWidth="90"
                                ValidationMode="InvalidInputOverwritten"
                                Value="{x:Bind ViewModel.PlayRepeatCount, Mode=TwoWay}"/>
                 </StackPanel>

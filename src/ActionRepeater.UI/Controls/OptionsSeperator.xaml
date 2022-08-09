@@ -8,6 +8,6 @@
 
     <Rectangle Margin="15,10,15,10"
                    HorizontalAlignment="Stretch" VerticalAlignment="Top"
-                   Height="2" Fill="{ThemeResource ListViewBackgroundThemeBrush}"/>
+                   Height="2" Fill="{ThemeResource OptionsSeperatorThemeBrush}"/>
     
 </UserControl>
