@@ -145,6 +145,8 @@ public static class ActionManager
             return;
         }
 
+        _actions.Add(action);
+
         if (action is not KeyAction ka || !ka.IsAutoRepeat)
         {
             _actionsExlKeyRepeat.Add(action);
@@ -162,11 +164,9 @@ public static class ActionManager
 
             if (lastKeyDownAct is not null)
             {
-                AddKeyAutoRepeatActions(lastKeyDownAct, keyAction);
+                InsertKeyAutoRepeatActions(lastKeyDownAct, keyAction);
             }
         }
-
-        _actions.Add(action);
     }
 
     /// <summary>
@@ -176,14 +176,15 @@ public static class ActionManager
     /// Both actions passed must be in <see cref="_actions"/>.<br/>
     /// <paramref name="keyUpAction"/> must come after <paramref name="keyDownAction"/> in the collection.
     /// </remarks>
-    private static void AddKeyAutoRepeatActions(KeyAction keyDownAction, KeyAction keyUpAction)
+    private static void InsertKeyAutoRepeatActions(KeyAction keyDownAction, KeyAction keyUpAction)
     {
-        int lastKeyDownActIdx = _actions.RefIndexOfReverse(keyDownAction);
+        int keyDownActIdx = _actions.RefIndexOfReverse(keyDownAction);
+        int keyUpActIdxCountOffset = _actions.RefIndexOfReverse(keyUpAction) - _actions.Count; // use offset from end because the count will change
 
         int iterationsToSkip = 0; // to skip the key repeat actions we add (because we know what they are)
         bool keyDelayAdded = false;
         int curWaitDuration = 0;
-        for (int i = lastKeyDownActIdx + 1; i < _actions.Count; i++)
+        for (int i = keyDownActIdx + 1; i < _actions.Count + keyUpActIdxCountOffset; i++)
         {
             if (iterationsToSkip > 0)
             {
@@ -191,27 +192,25 @@ public static class ActionManager
                 continue;
             }
 
-            InputAction act = _actions[i];
-
-            if (act is not WaitAction waitAct) continue;
+            if (_actions[i] is not WaitAction waitAct) continue;
 
             curWaitDuration += waitAct.Duration;
 
             if (!keyDelayAdded)
             {
-                AddAutoRepeatActionAfterXTime(Win32.SystemInformation.KeyRepeatDelayMS);
+                InsertAutoRepeatActionAfterXTime(Win32.SystemInformation.KeyRepeatDelayMS);
 
                 keyDelayAdded = true;
                 continue;
             }
 
-            AddAutoRepeatActionAfterXTime(Win32.SystemInformation.KeyRepeatInterval);
+            InsertAutoRepeatActionAfterXTime(Win32.SystemInformation.KeyRepeatInterval);
 
             // Adds a key auto repeat action after the specified milliseonds.
             // e.g. if milliseconds == 500 (0.5s), and there was a wait action for 2 seconds (2000 ms)
             // it would be split into one 0.5s, and then the auto repeat actions would be added, and
             // then the rest of the wait duration of 1.5s.
-            void AddAutoRepeatActionAfterXTime(double milliseconds)
+            void InsertAutoRepeatActionAfterXTime(double milliseconds)
             {
                 if (AreWaitDurationsNearlyEqual(milliseconds, curWaitDuration))
                 {
