@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using ActionRepeater.Core.Action;
+using ActionRepeater.Core.Input;
 using ActionRepeater.UI.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -74,6 +75,15 @@ public class ContentDialogService
 
     public async Task ShowEditActionDialog(ObservableObject editActionViewModel, InputAction actionToEdit)
     {
+        if (ActionManager.IsActionTiedToModifiedAction(actionToEdit))
+        {
+            await ShowErrorDialog("This action is not editable.", (actionToEdit is KeyAction ka && ka.IsAutoRepeat)
+                ? "This is an auto repeat action, edit the original key down action if you want to change the key."
+                : ActionManager.ActionTiedToModifiedActMsg);
+
+            return;
+        }
+
         ContentDialog dialog = new()
         {
             XamlRoot = XamlRoot,

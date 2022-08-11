@@ -11,6 +11,8 @@ namespace ActionRepeater.Core.Input;
 
 public static class ActionManager
 {
+    public const string ActionTiedToModifiedActMsg = "The specified action is tied to a modified action (an action that represents multiple actions, e.g. a wait action that represents key auto repeat actions).";
+
     static ActionManager()
     {
         Recorder.ReplaceLastAction = (act) =>
@@ -34,7 +36,17 @@ public static class ActionManager
         };
     }
 
+
     public static event EventHandler<MouseMovement?>? CursorPathStartChanged;
+
+    public static event NotifyCollectionChangedEventHandler? ActionsCountChanged;
+
+    public static event NotifyCollectionChangedEventHandler? ActionCollectionChanged
+    {
+        add => _actions.CollectionChanged += value;
+        remove => _actions.CollectionChanged -= value;
+    }
+
 
     private static MouseMovement? _cursorPathStart;
     /// <remarks>
@@ -52,21 +64,15 @@ public static class ActionManager
             CursorPathStartChanged?.Invoke(null, value);
         }
     }
+    
     public static List<MouseMovement> CursorPath { get; } = new();
 
-    private static readonly ObservableCollectionEx<InputAction> _actions = new();
     public static IReadOnlyList<InputAction> Actions => _actions;
-
-    private static readonly ObservableCollectionEx<InputAction> _actionsExlKeyRepeat = new();
     public static IReadOnlyList<InputAction> ActionsExlKeyRepeat => _actionsExlKeyRepeat;
 
-    public static event NotifyCollectionChangedEventHandler? ActionCollectionChanged
-    {
-        add => _actions.CollectionChanged += value;
-        remove => _actions.CollectionChanged -= value;
-    }
 
-    public static event NotifyCollectionChangedEventHandler? ActionsCountChanged;
+    private static readonly ObservableCollectionEx<InputAction> _actions = new();
+    private static readonly ObservableCollectionEx<InputAction> _actionsExlKeyRepeat = new();
 
     /// <summary>Contains the indecies of the modified actions in ActionsExlKeyRepeat.</summary>
     /// <remarks>
@@ -74,6 +80,7 @@ public static class ActionManager
     /// in place of the auto repeat actions in <see cref="_actions"/>.
     /// </remarks>
     private static readonly List<int> _modifiedFilteredActionsIdxs = new();
+
 
     public static IReadOnlyList<MouseMovement> GetAbsoluteCursorPath()
     {
@@ -102,6 +109,7 @@ public static class ActionManager
         return absPath;
     }
 
+
     public static void LoadActionData(ActionData data)
     {
         ClearAll();
@@ -126,6 +134,33 @@ public static class ActionManager
 
         FillFilteredActionList();
     }
+
+    /// <summary>Fills ActionsEclKeyRepeat from the actinos in Actions.</summary>
+    public static void FillFilteredActionList()
+    {
+        _actionsExlKeyRepeat.SuppressNotifications = true;
+        _actionsExlKeyRepeat.Clear();
+        _modifiedFilteredActionsIdxs.Clear();
+
+        for (int i = 0; i < _actions.Count; ++i)
+        {
+            InputAction action = _actions[i];
+
+            if (action is WaitAction waitAction)
+            {
+                AddOrUpdateWaitActionInExl(waitAction, _actions[i - 1]);
+                continue;
+            }
+
+            if (!(action is KeyAction keyAction && keyAction.IsAutoRepeat))
+            {
+                _actionsExlKeyRepeat.Add(action);
+            }
+        }
+
+        _actionsExlKeyRepeat.SuppressNotifications = false;
+    }
+
 
     public static void AddAction(InputAction action, bool addAutoRepeatIfActIsKeyUp = false)
     {
@@ -154,8 +189,6 @@ public static class ActionManager
 
         if (addAutoRepeatIfActIsKeyUp && action is KeyAction keyAction && keyAction.ActionType == KeyActionType.KeyUp)
         {
-            // TODO: fix bug with action collections and views
-
             KeyAction? lastKeyDownAct = (KeyAction?)_actions
                 .LastOrDefault(x => x is KeyAction xAsKeyAct
                                     && xAsKeyAct.ActionType == KeyActionType.KeyDown
@@ -166,6 +199,218 @@ public static class ActionManager
             {
                 InsertKeyAutoRepeatActions(lastKeyDownAct, keyAction);
             }
+        }
+    }
+
+    /// <returns>The message if removing failed, otherwise null.</returns>
+    public static string? TryRemoveAction(InputAction action)
+    {
+        int exlIndex = IndexOfModifiedAction(action);
+        if (exlIndex != -1)
+        {
+            var (startIdx, count) = GetRangeTiedToModifiedActionIdx(exlIndex);
+
+            // TODO: add ObservableCollectionEx.RemoveRange
+            _actions.SuppressNotifications = true;
+            for (int i = 0; i < count; i++)
+            {
+                _actions.RemoveAt(startIdx);
+            }
+            _actions.SuppressNotifications = false;
+
+            _actionsExlKeyRepeat.RemoveAt(exlIndex);
+
+            return null;
+        }
+
+        if (IsActionTiedToModifiedAction(action)) return ActionTiedToModifiedActMsg;
+
+        int idx = _actions.RefIndexOfReverse(action);
+        int exlIdx = _actionsExlKeyRepeat.RefIndexOfReverse(action);
+
+        if (action is KeyAction keyAct && keyAct.ActionType == KeyActionType.KeyDown)
+        {
+            UpdateKeyAutoRepeatActions(idx, null);
+        }
+
+        _actions.RemoveAt(idx);
+        _actionsExlKeyRepeat.RemoveAt(exlIdx);
+
+        // merge adjacent wait actions
+        if (_actions[idx] is WaitAction wa && _actionsExlKeyRepeat[exlIdx] is WaitAction exlWa
+            && wa.Equals(exlWa))
+        {
+            _modifiedFilteredActionsIdxs.Remove(exlIdx);
+
+            if (!ReferenceEquals(wa, exlWa)) _actionsExlKeyRepeat[exlIdx] = wa;
+
+            // merge current and next wait action if possible
+            if (idx + 1 < _actions.Count && exlIdx + 1 < _actionsExlKeyRepeat.Count
+                && _actions[idx + 1] is WaitAction nextWa
+                && _actions[idx + 1] == _actionsExlKeyRepeat[exlIdx + 1])
+            {
+                wa.Duration += nextWa.Duration;
+
+                _actions.RemoveAt(idx + 1);
+                _actionsExlKeyRepeat.RemoveAt(exlIdx + 1);
+            }
+
+            // merge current and previous wait action if possible
+            if (idx > 0 && exlIdx > 0
+                && _actions[idx - 1] is WaitAction prevWa
+                && _actions[idx - 1] == _actionsExlKeyRepeat[exlIdx - 1])
+            {
+                prevWa.Duration += wa.Duration;
+
+                _actions.RemoveAt(idx);
+                _actionsExlKeyRepeat.RemoveAt(exlIdx);
+            }
+        }
+
+        return null;
+    }
+
+    /// <param name="isFilteredList">true if the action to replace is in the filtered list (<see cref="_actionsExlKeyRepeat"/>)</param>
+    /// <param name="index">The index of the action to replace in the list.</param>
+    /// <returns>The message if replacing failed, otherwise null.</returns>
+    public static string? TryReplaceAction(bool isFilteredList, int index, InputAction newAction)
+    {
+        InputAction actionToReplace;
+        int replacedActionIdx;
+
+        if (isFilteredList)
+        {
+            if (HasActionBeenModified(index))
+            {
+                if (newAction is not WaitAction) throw new NotSupportedException("modified action is not WaitAction.");
+
+                var (startIdx, count) = GetRangeTiedToModifiedActionIdx(index);
+
+                // TODO: add ObservableCollectionEx.RemoveRange
+                _actions.SuppressNotifications = true;
+                for (int i = 0; i < count; i++)
+                {
+                    _actions.RemoveAt(startIdx);
+                }
+
+                _actionsExlKeyRepeat[index] = newAction;
+                _actions.Insert(startIdx, newAction);
+
+                InsertKeyAutoRepeatActions((KeyAction)_actions[startIdx - 1], (KeyAction)_actions[startIdx + 1]);
+
+                _actions.SuppressNotifications = false;
+
+                return null;
+            }
+
+            actionToReplace = _actionsExlKeyRepeat[index];
+
+            _actionsExlKeyRepeat[index] = newAction;
+
+            replacedActionIdx = _actions.RefIndexOfReverse(actionToReplace);
+            if (replacedActionIdx == -1) throw new NotImplementedException("selected item not available in Actions.");
+            _actions[replacedActionIdx] = newAction;
+
+            return null;
+        }
+
+        actionToReplace = _actions[index];
+
+        if (IsActionTiedToModifiedAction(actionToReplace)) return ActionTiedToModifiedActMsg;
+
+        if (actionToReplace is KeyAction keyAct && keyAct.ActionType == KeyActionType.KeyDown)
+        {
+            if (newAction is KeyAction newKeyAct && newKeyAct.ActionType == KeyActionType.KeyDown)
+            {
+                UpdateKeyAutoRepeatActions(index, newKeyAct.Key);
+            }
+            else
+            {
+                UpdateKeyAutoRepeatActions(index, null);
+            }
+        }
+
+        _actions[index] = newAction;
+
+        replacedActionIdx = _actionsExlKeyRepeat.RefIndexOfReverse(actionToReplace);
+        if (replacedActionIdx == -1) throw new NotImplementedException("selected item not available in ActionsExlKeyRepeat.");
+        _actionsExlKeyRepeat[replacedActionIdx] = newAction;
+
+        return null;
+    }
+
+
+    public static void ClearCursorPath()
+    {
+        CursorPathStart = null;
+        CursorPath.Clear();
+    }
+
+    public static void ClearActions()
+    {
+        _actions.Clear();
+        _actionsExlKeyRepeat.Clear();
+        _modifiedFilteredActionsIdxs.Clear();
+
+        Recorder.Reset();
+    }
+
+    public static void ClearAll()
+    {
+        ClearCursorPath();
+        ClearActions();
+    }
+
+    /// <returns>
+    /// false if there are no actions to play or its already playing, otherwise true.
+    /// </returns>
+    public static bool TryPlayActions()
+    {
+        if (_actions.Count == 0 && CursorPathStart is null)
+        {
+            return false;
+        }
+
+        if (Player.IsPlaying)
+        {
+            Player.Cancel();
+            return false;
+        }
+
+        var actions = Options.Instance.SendKeyAutoRepeat ? _actions : _actionsExlKeyRepeat;
+        var cursorPath = Options.Instance.CursorMovementMode switch
+        {
+            CursorMovementMode.Absolute => GetAbsoluteCursorPath(),
+            CursorMovementMode.Relative => CursorPath,
+            _ => null
+        };
+
+        Player.PlayActions(actions, cursorPath, Options.Instance.CursorMovementMode == CursorMovementMode.Relative, Options.Instance.PlayRepeatCount);
+
+        return true;
+    }
+
+
+    private static void AddOrUpdateWaitActionInExl(WaitAction curWaitAction, InputAction prevUnfilteredAction)
+    {
+        int actionsExlLastIdx = _actionsExlKeyRepeat.Count - 1;
+        if (_actionsExlKeyRepeat.Count > 0 && _actionsExlKeyRepeat[actionsExlLastIdx] is WaitAction lastFilteredWaitAction)
+        {
+            // if there is a modified wait action for _actionsExlKeyRepeat, update it. otherwise create one.
+            // (see _modifiedFilteredActionsIdxs remarks for what a modified wait action is)
+            if (HasActionBeenModified(actionsExlLastIdx))
+            {
+                lastFilteredWaitAction.Duration += curWaitAction.Duration;
+            }
+            else if (!ReferenceEquals(prevUnfilteredAction, lastFilteredWaitAction))
+            {
+                _actionsExlKeyRepeat[actionsExlLastIdx] = new WaitAction(lastFilteredWaitAction.Duration + curWaitAction.Duration);
+                _modifiedFilteredActionsIdxs.Add(actionsExlLastIdx);
+            }
+        }
+        else
+        {
+            _actionsExlKeyRepeat.Add(curWaitAction);
         }
     }
 
@@ -262,163 +507,129 @@ public static class ActionManager
         }
     }
 
-    /// <summary>Fills ActionsEclKeyRepeat from the actinos in Actions.</summary>
-    public static void FillFilteredActionList()
+    /// <summary>
+    /// If <paramref name="newKey"/> is null, auto repeat actions will be removed.
+    /// </summary>
+    /// <param name="keyDownIndex">Index (in <see cref="_actions"/>) of the key down action (not auto repeat).</param>
+    public static void UpdateKeyAutoRepeatActions(int keyDownIndex, Win32.Input.VirtualKey? newKey)
     {
-        _actionsExlKeyRepeat.SuppressNotifications = true;
-        _actionsExlKeyRepeat.Clear();
-        _modifiedFilteredActionsIdxs.Clear();
+        int startIdx = keyDownIndex + 1;
 
-        for (int i = 0; i < _actions.Count; ++i)
+        int end = _actions.Count;
+        for (int i = startIdx; i < _actions.Count; i++)
         {
-            InputAction action = _actions[i];
-
-            if (action is WaitAction waitAction)
+            if (_actions[i] is KeyAction ka && ka.ActionType == KeyActionType.KeyUp && ka.Key == ((KeyAction)_actions[keyDownIndex]).Key)
             {
-                AddOrUpdateWaitActionInExl(waitAction, _actions[i - 1]);
-                continue;
-            }
-
-            if (!(action is KeyAction keyAction && keyAction.IsAutoRepeat))
-            {
-                _actionsExlKeyRepeat.Add(action);
+                end = i;
+                break;
             }
         }
 
-        _actionsExlKeyRepeat.SuppressNotifications = false;
+        if (newKey != null)
+        {
+            for (int i = startIdx; i < end; i++)
+            {
+                if (_actions[i] is not KeyAction keyAct || !keyAct.IsAutoRepeat) continue;
+
+                keyAct.Key = newKey.Value;
+            }
+
+            return;
+        }
+
+        _actions.SuppressNotifications = true;
+
+        // remove auto repeat actions
+        int curIndex = startIdx;
+        for (int i = startIdx; i < end; i++)
+        {
+            bool removed = false;
+
+            if (_actions[curIndex] is KeyAction keyAct && keyAct.IsAutoRepeat)
+            {
+                _actions.RemoveAt(curIndex);
+
+                if (curIndex >= _actions.Count) break;
+
+                removed = true;
+            }
+
+            // merge adjacent wait actions
+            if (_actions[curIndex] is WaitAction curWaitAct && _actions[curIndex - 1] is WaitAction prevWaitAct)
+            {
+                prevWaitAct.Duration += curWaitAct.Duration;
+                _actions.RemoveAt(curIndex);
+
+                removed = true;
+            }
+
+            if (!removed) curIndex++;
+
+            if (curIndex >= _actions.Count) break;
+        }
+
+        _actions.SuppressNotifications = false;
     }
 
-    private static void AddOrUpdateWaitActionInExl(WaitAction curWaitAction, InputAction prevUnfilteredAction)
-    {
-        int actionsExlLastIdx = _actionsExlKeyRepeat.Count - 1;
-        if (_actionsExlKeyRepeat.Count > 0 && _actionsExlKeyRepeat[actionsExlLastIdx] is WaitAction lastFilteredWaitAction)
-        {
-            // if there is a modified wait action for _actionsExlKeyRepeat, update it. otherwise create one.
-            // (see _modifiedFilteredActionsIdxs remarks for what a modified wait action is)
-            if (_modifiedFilteredActionsIdxs.Contains(actionsExlLastIdx))
-            {
-                lastFilteredWaitAction.Duration += curWaitAction.Duration;
-            }
-            else if (!ReferenceEquals(prevUnfilteredAction, lastFilteredWaitAction))
-            {
-                _actionsExlKeyRepeat[actionsExlLastIdx] = new WaitAction(lastFilteredWaitAction.Duration + curWaitAction.Duration);
-                _modifiedFilteredActionsIdxs.Add(actionsExlLastIdx);
-            }
-        }
-        else
-        {
-            _actionsExlKeyRepeat.Add(curWaitAction);
-        }
-    }
 
-    /// <returns>true if the action has been modified (in <see cref="_actionsExlKeyRepeat"/>).</returns>
+
+    /// <returns>true if the action has been modified (in <see cref="ActionsExlKeyRepeat"/>).</returns>
     /// <remarks>
     /// A modified action is usually a <see cref="WaitAction"/> with extended duration which would be 
-    /// in place of the auto repeat actions in <see cref="_actions"/>.
+    /// in place of the auto repeat actions in <see cref="Actions"/>.
     /// </remarks>
-    public static bool HasActionBeenModified(InputAction action)
+    public static bool HasActionBeenModified(InputAction action) => IndexOfModifiedAction(action) != -1;
+
+    /// <inheritdoc cref="HasActionBeenModified(InputAction)"/>
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    public static bool HasActionBeenModified(int actionIndex) => _modifiedFilteredActionsIdxs.Contains(actionIndex);
+
+
+    /// <returns>The index of <paramref name="action"/> in <see cref="ActionsExlKeyRepeat"/> <b>if</b> it is a modified action, otherwise -1.</returns>
+    public static int IndexOfModifiedAction(InputAction action)
     {
         foreach (int idx in _modifiedFilteredActionsIdxs)
         {
             if (_actionsExlKeyRepeat[idx] == action)
             {
-                return true;
+                return idx;
             }
         }
 
-        return false;
+        return -1;
     }
 
-    /// <returns>false if the action is a modified action (see remarks), otherwise true (indicating the action was removed).</returns>
-    /// <remarks>
-    /// A modified action is usually a <see cref="KeyAction"/> with extended duration which would be 
-    /// in place of the auto repeat actions in <see cref="_actions"/>.
-    /// </remarks>
-    public static bool TryRemoveAction(InputAction action)
+    public static (int StartIndex, int Count) GetRangeTiedToModifiedActionIdx(int modifiedActionIndex)
     {
-        if (HasActionBeenModified(action)) return false;
+        int startIdx = _actions.RefIndexOfReverse(_actionsExlKeyRepeat[modifiedActionIndex - 1]) + 1;
+        if (startIdx == 0) throw new InvalidOperationException($"action {nameof(_actionsExlKeyRepeat)}[{modifiedActionIndex - 1}] doesnt exist in {nameof(_actions)}.");
 
-        _actions.Remove(action);
-        _actionsExlKeyRepeat.Remove(action);
-        return true;
+        int endIdx = _actions.RefIndexOfReverse(_actionsExlKeyRepeat[modifiedActionIndex + 1]);
+        if (endIdx == -1) throw new InvalidOperationException($"action {nameof(_actionsExlKeyRepeat)}[{modifiedActionIndex + 1}] doesnt exist in {nameof(_actions)}.");
+
+        int count = endIdx - startIdx;
+
+        return (startIdx, count);
     }
 
-    /// <param name="isFilteredList">true if the action to replace is in the filtered list (<see cref="_actionsExlKeyRepeat"/>)</param>
-    /// <param name="index">The index of the action to replace in the list.</param>
-    public static void ReplaceAction(bool isFilteredList, int index, InputAction newAction)
+    public static IEnumerable<InputAction> GetActionsFromRange(int startIndex, int count)
     {
-        InputAction actionToReplace;
-        int replacedActionIdx;
-
-        if (isFilteredList)
-        {
-            actionToReplace = _actionsExlKeyRepeat[index];
-
-            _actionsExlKeyRepeat[index] = newAction;
-
-            replacedActionIdx = _actions.IndexOf(actionToReplace);
-            if (replacedActionIdx == -1) throw new NotImplementedException("selected item not available in Actions.");
-            _actions[replacedActionIdx] = newAction;
-
-            return;
-        }
-
-        actionToReplace = _actions[index];
-
-        _actions[index] = newAction;
-
-        replacedActionIdx = _actionsExlKeyRepeat.IndexOf(actionToReplace);
-        if (replacedActionIdx == -1) throw new NotImplementedException("selected item not available in ActionsExlKeyRepeat.");
-        _actionsExlKeyRepeat[replacedActionIdx] = newAction;
+        for (int i = 0; i < count; i++) yield return _actions[startIndex++];
     }
+    
+    public static IEnumerable<InputAction> GetActionsFromRange((int StartIndex, int Count) rangeTuple) => GetActionsFromRange(rangeTuple.StartIndex, rangeTuple.Count);
 
-    public static void ClearCursorPath()
+    /// <returns>A sequence of the ranges (start indecies and count) that are tied to each modified action.</returns>
+    public static IEnumerable<(int StartIndex, int Count)> GetRangesTiedToModifiedActions()
     {
-        CursorPathStart = null;
-        CursorPath.Clear();
+        foreach (int idx in _modifiedFilteredActionsIdxs) yield return GetRangeTiedToModifiedActionIdx(idx);
     }
 
-    public static void ClearActions()
+    /// <returns>A sequence of the <see cref="InputAction"/>s that are tied to each modified action.</returns>
+    public static IEnumerable<IEnumerable<InputAction>> GetActionsTiedToModifiedActions()
     {
-        _actions.Clear();
-        _actionsExlKeyRepeat.Clear();
-        _modifiedFilteredActionsIdxs.Clear();
-
-        Recorder.Reset();
+        foreach (int idx in _modifiedFilteredActionsIdxs) yield return GetActionsFromRange(GetRangeTiedToModifiedActionIdx(idx));
     }
 
-    public static void ClearAll()
-    {
-        ClearCursorPath();
-        ClearActions();
-    }
-
-    /// <returns>
-    /// false if there are no actions to play or its already playing, otherwise true.
-    /// </returns>
-    public static bool TryPlayActions()
-    {
-        if (_actions.Count == 0 && CursorPathStart is null)
-        {
-            return false;
-        }
-
-        if (Player.IsPlaying)
-        {
-            Player.Cancel();
-            return false;
-        }
-
-        var actions = Options.Instance.SendKeyAutoRepeat ? _actions : _actionsExlKeyRepeat;
-        var cursorPath = Options.Instance.CursorMovementMode switch
-        {
-            CursorMovementMode.Absolute => GetAbsoluteCursorPath(),
-            CursorMovementMode.Relative => CursorPath,
-            _ => null
-        };
-
-        Player.PlayActions(actions, cursorPath, Options.Instance.CursorMovementMode == CursorMovementMode.Relative, Options.Instance.PlayRepeatCount);
-
-        return true;
-    }
+    public static bool IsActionTiedToModifiedAction(InputAction action) => GetActionsTiedToModifiedActions().Any(x => x.Contains(action, ReferenceEqualityComparer.Instance));
 }

@@ -14,8 +14,8 @@ namespace ActionRepeater.UI.ViewModels;
 
 public partial class ActionListViewModel : ObservableObject
 {
-    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(FilteredActions))]
+    [ObservableProperty]
     private bool _showKeyRepeatActions;
 
     internal SyncedObservableCollection<ActionViewModel, InputAction> ActionVMs { get; }
@@ -26,6 +26,7 @@ public partial class ActionListViewModel : ObservableObject
         ? null
         : (ShowKeyRepeatActions ? ActionManager.Actions[SelectedActionIndex] : ActionManager.ActionsExlKeyRepeat[SelectedActionIndex]);
 
+    [NotifyCanExecuteChangedFor(nameof(StoreActionCommand))]
     [ObservableProperty]
     private int _selectedActionIndex = -1;
 
@@ -114,25 +115,42 @@ public partial class ActionListViewModel : ObservableObject
         await _contentDialogService.ShowEditActionDialog(editActionVM, SelectedAction);
     }
 
-    [RelayCommand]
+    private bool IsSelectedActionNotAutoRepeat() => SelectedAction is not KeyAction ka || !ka.IsAutoRepeat;
+
+    [RelayCommand(CanExecute = nameof(IsSelectedActionNotAutoRepeat))]
     private void StoreAction() => CopiedAction = SelectedAction;
 
-    private bool IsCopiedActionNull() => CopiedAction is not null;
+    private bool IsActionStored() => CopiedAction is not null;
 
-    [RelayCommand(CanExecute = nameof(IsCopiedActionNull))]
+    [RelayCommand(CanExecute = nameof(IsActionStored))]
     private void AddAction() => ActionManager.AddAction(CopiedAction!.Clone());
 
-    [RelayCommand(CanExecute = nameof(IsCopiedActionNull))]
-    private void ReplaceAction() => ActionManager.ReplaceAction(!ShowKeyRepeatActions, SelectedActionIndex, CopiedAction!.Clone());
+    [RelayCommand(CanExecute = nameof(IsActionStored))]
+    private async Task ReplaceAction()
+    {
+        string? message = ActionManager.TryReplaceAction(!ShowKeyRepeatActions, SelectedActionIndex, CopiedAction!.Clone());
+        if (message is not null)
+        {
+            await _contentDialogService.ShowErrorDialog("Failed to replace action", message);
+        }
+    }
 
     [RelayCommand]
     private async Task RemoveAction()
     {
-        if (!ActionManager.TryRemoveAction(SelectedAction!))
+        if (ActionManager.HasActionBeenModified(SelectedAction!))
         {
-            await _contentDialogService.ShowErrorDialog(
-                "Failed to remove action",
-                $"This action represents multiple hidden actions (because \"{nameof(ShowKeyRepeatActions)}\" is off).{Environment.NewLine}Removing it will result in unexpected behavior.");
+            await _contentDialogService.ShowYesNoMessageDialog("Are you sure you want to remove this action?",
+                $"This action represents multiple hidden actions (because \"{nameof(ShowKeyRepeatActions)}\" is off).{Environment.NewLine}If you remove it the multiple actions it represents will be removed.",
+                onYesClick: () => ActionManager.TryRemoveAction(SelectedAction!));
+
+            return;
+        }
+
+        string? message = ActionManager.TryRemoveAction(SelectedAction!);
+        if (message is not null)
+        {
+            await _contentDialogService.ShowErrorDialog("Failed to remove action", message);
         }
     }
 }

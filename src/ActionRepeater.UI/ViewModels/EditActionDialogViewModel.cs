@@ -1,4 +1,5 @@
 ﻿using ActionRepeater.Core.Action;
+using ActionRepeater.Core.Extentions;
 using ActionRepeater.Core.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -82,6 +83,13 @@ public partial class EditActionDialogViewModel : ObservableObject
         {
             case EditKeyActionViewModel keyVM:
                 var ka = (KeyAction)action;
+
+                if (ka.ActionType == KeyActionType.KeyDown)
+                {
+                    ActionManager.TryReplaceAction(false, ActionManager.Actions.RefIndexOfReverse(action), new KeyAction(keyVM.Type, keyVM.Key));
+                    break;
+                }
+
                 ka.ActionType = keyVM.Type;
                 ka.Key = keyVM.Key;
                 break;
@@ -101,6 +109,12 @@ public partial class EditActionDialogViewModel : ObservableObject
                 break;
 
             case EditWaitActionViewModel waitVM:
+                if (ActionManager.HasActionBeenModified(action))
+                {
+                    ActionManager.TryReplaceAction(true, ActionManager.ActionsExlKeyRepeat.RefIndexOfReverse(action), new WaitAction((int)(waitVM.DurationSecs * 1000)));
+                    break;
+                }
+
                 var wa = (WaitAction)action;
                 wa.Duration = (int)(waitVM.DurationSecs * 1000);
                 break;
