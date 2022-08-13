@@ -55,7 +55,7 @@ public partial class ActionViewModel : ObservableObject
     /// <returns>The <see cref="ActionViewModel"/> for the <paramref name="action"/>, that is currently bound to in the view.</returns>
     private static (ActionViewModel? actionsVM, ActionViewModel? actionsExlVM) GetActionViewModels(InputAction action)
     {
-        var actionListVM = App.MainWindow.ViewModel.ActionListViewModel;
+        var actionListVM = App.Current.MainWindow.ViewModel.ActionListViewModel;
 
         int actionsIndex = Core.Input.ActionManager.Actions.RefIndexOfReverse(action);
         ActionViewModel? actionVM = actionsIndex == -1 ? null : actionListVM.ActionVMs[actionsIndex];

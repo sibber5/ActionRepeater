@@ -95,7 +95,7 @@ public partial class ActionListViewModel : ObservableObject
 
         if (CurrentSetActionIndex >= FilteredActions.Count) CurrentSetActionIndex = -1;
 
-        App.MainWindow.DispatcherQueue.TryEnqueue(_updateSelectedAction);
+        App.Current.MainWindow.DispatcherQueue.TryEnqueue(_updateSelectedAction);
     }
 
     [RelayCommand]

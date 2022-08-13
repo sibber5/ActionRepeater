@@ -79,7 +79,7 @@ public partial class HomePageViewModel : ObservableObject
             return;
         }
 
-        if (!Recorder.IsSubscribed) Recorder.RegisterRawInput(App.MainWindow.Handle);
+        if (!Recorder.IsSubscribed) Recorder.RegisterRawInput(App.Current.MainWindow.Handle);
 
         Recorder.StartRecording();
     }

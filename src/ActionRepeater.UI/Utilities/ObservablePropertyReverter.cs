@@ -28,7 +28,7 @@ public sealed class ObservablePropertyReverter<T>
         {
             var comparer = EqualityComparer<T>.Default;
             while (comparer.Equals(_getProperty(), PreviousValue)) await Task.Delay(10);
-            App.MainWindow.DispatcherQueue.TryEnqueue(() =>
+            App.Current.MainWindow.DispatcherQueue.TryEnqueue(() =>
             {
                 IsReverting = true;
                 _setProperty(PreviousValue);

@@ -18,7 +18,7 @@ public static class FilePickerHelper
         };
 
         // Associate the HWND with the file picker
-        WinRT.Interop.InitializeWithWindow.Initialize(savePicker, App.MainWindow.Handle);
+        WinRT.Interop.InitializeWithWindow.Initialize(savePicker, App.Current.MainWindow.Handle);
 
         savePicker.FileTypeChoices.Add("ActionRepeater Actions", new List<string>() { FileExtension });
         savePicker.FileTypeChoices.Add("JSON", new List<string>() { ".json" });
@@ -31,7 +31,7 @@ public static class FilePickerHelper
         FileOpenPicker openPicker = new();
 
         // Associate the HWND with the file picker
-        WinRT.Interop.InitializeWithWindow.Initialize(openPicker, App.MainWindow.Handle);
+        WinRT.Interop.InitializeWithWindow.Initialize(openPicker, App.Current.MainWindow.Handle);
 
         openPicker.FileTypeFilter.Add(FileExtension);
         //openPicker.FileTypeFilter.Add(".json");

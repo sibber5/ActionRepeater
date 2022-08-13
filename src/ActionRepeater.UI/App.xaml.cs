@@ -15,6 +15,8 @@ namespace ActionRepeater.UI;
 /// </summary>
 public partial class App : Application
 {
+    public static new App Current => (App)Application.Current;
+
     private const string MainWindowTitle = "ActionRepeater";
     private const int MainWindowWidth = 507;
     private const int MainWindowHeight = 600;
@@ -23,22 +25,22 @@ public partial class App : Application
     public static string AppFolderOptionsDir => Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly()!.Location)!;
     public static string OptionsFileName => "Options.json";
 
-    public static MainWindow MainWindow { get; private set; } = null!;
+    public MainWindow MainWindow { get; private set; } = null!;
 
-    private static readonly PathWindowService _pathWindowService = new();
-    private static readonly ContentDialogService _contentDialogService = new();
+    private readonly PathWindowService _pathWindowService = new();
+    private readonly ContentDialogService _contentDialogService = new();
 
-    private static bool _saveOptions;
-    private static bool _saveOnExit = true;
+    private bool _saveOptions;
+    private bool _saveOnExit = true;
 
-    private static Exception? _loadingOptionsException;
+    private Exception? _loadingOptionsException;
 
-    private static ObservablePropertyReverter<OptionsFileLocation>? _optsFileLocReverter;
+    private ObservablePropertyReverter<OptionsFileLocation>? _optsFileLocReverter;
 
     // used to check what UIOptions.Theme was changed from, when its changed
-    private static bool _wasAppThemeSet = false;
+    private bool _wasAppThemeSet = false;
 
-    private static bool _isRevertingTheme = false;
+    private bool _isRevertingTheme = false;
 
     /// <summary>
     /// Initializes the singleton application object.  This is the first line of authored code
@@ -90,12 +92,12 @@ public partial class App : Application
         // XamlRoot has to be set after Content has loaded
         ((FrameworkElement)MainWindow.Content).Loaded += static async (_, _) =>
         {
-            _contentDialogService.XamlRoot = App.MainWindow.GridXamlRoot;
+            Current._contentDialogService.XamlRoot = App.Current.MainWindow.GridXamlRoot;
             System.Diagnostics.Debug.WriteLine("XamlRoot set.");
 
-            if (_loadingOptionsException is not null)
+            if (Current._loadingOptionsException is not null)
             {
-                await _contentDialogService.ShowErrorDialog("Could not load options", _loadingOptionsException.Message);
+                await Current._contentDialogService.ShowErrorDialog("Could not load options", Current._loadingOptionsException.Message);
             }
         };
 
@@ -108,14 +110,14 @@ public partial class App : Application
         MainWindow.Activate();
     }
 
-    private static async void MainWindow_Closed(object sender, WindowEventArgs args)
+    private async void MainWindow_Closed(object sender, WindowEventArgs args)
     {
         if (!_saveOnExit) return;
 
         await SaveOptions();
     }
 
-    private static async void UIOptions_PropertyChanging(object? sender, System.ComponentModel.PropertyChangingEventArgs e)
+    private async void UIOptions_PropertyChanging(object? sender, System.ComponentModel.PropertyChangingEventArgs e)
     {
         if (e.PropertyName == nameof(UIOptions.Instance.OptionsFileLocation))
         {
@@ -159,7 +161,7 @@ public partial class App : Application
         }
     }
 
-    private static async void UIOptions_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    private async void UIOptions_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
         switch (e.PropertyName)
         {
@@ -168,11 +170,11 @@ public partial class App : Application
 
                 Action revertThemeOption = static () =>
                 {
-                    _isRevertingTheme = true;
-                    MainWindow.DispatcherQueue.TryEnqueue(static () =>
+                    Current._isRevertingTheme = true;
+                    Current.MainWindow.DispatcherQueue.TryEnqueue(static () =>
                     {
                         Theme previousTheme;
-                        if (_wasAppThemeSet)
+                        if (Current._wasAppThemeSet)
                         {
                             previousTheme = UIOptions.Instance.Theme == Theme.Light ? Theme.Dark : Theme.Light;
                         }
@@ -182,7 +184,7 @@ public partial class App : Application
                         }
 
                         UIOptions.Instance.Theme = previousTheme;
-                        _isRevertingTheme = false;
+                        Current._isRevertingTheme = false;
                     });
                 };
 
@@ -200,8 +202,8 @@ public partial class App : Application
                     {
                         string path = Path.ChangeExtension(System.Reflection.Assembly.GetEntryAssembly()!.Location, ".exe");
 
-                        await SaveOptions();
-                        _saveOnExit = false;
+                        await Current.SaveOptions();
+                        Current._saveOnExit = false;
 
                         System.Diagnostics.Process.Start(path);
                         Application.Current.Exit();
@@ -217,7 +219,7 @@ public partial class App : Application
         }
     }
 
-    private static async Task SaveOptions()
+    private async Task SaveOptions()
     {
         if (!_saveOptions) return;
 
@@ -252,7 +254,7 @@ public partial class App : Application
         }
     }
 
-    private static bool TryLoadOptions(string path)
+    private bool TryLoadOptions(string path)
     {
         try
         {
