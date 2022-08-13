@@ -63,11 +63,11 @@ public sealed partial class MainWindow : Window
         switch (tag)
         {
             case HomeTag:
-                _contentFrame.Navigate(typeof(HomePage), ViewModel.HomeViewModel, navInfo);
+                _contentFrame.Navigate(typeof(HomePage), null, navInfo);
                 break;
 
             case OptionsTag:
-                _contentFrame.Navigate(typeof(OptionsPage), ViewModel.OptionsViewModel, navInfo);
+                _contentFrame.Navigate(typeof(OptionsPage), null, navInfo);
                 break;
         }
     }

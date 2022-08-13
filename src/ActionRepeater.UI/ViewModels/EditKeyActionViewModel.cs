@@ -46,6 +46,22 @@ public partial class EditKeyActionViewModel : ObservableValidator
     [CustomValidation(typeof(EditKeyActionViewModel), nameof(ValidateKeyName))]
     private string? _keyName;
 
+    public EditKeyActionViewModel() { }
+
+    public EditKeyActionViewModel(KeyAction keyAction)
+    {
+        Type = keyAction.ActionType;
+        if (ActionDescriptionTemplates.VirtualKeyFriendlyNames.TryGetValue(keyAction.Key, out string? name))
+        {
+            _keyName = ExcludeDescriptionFromKeyFriendlyName(name).ToString();
+        }
+        else
+        {
+            _keyName = ActionDescriptionTemplates.VirtualKeyFriendlyNames[VirtualKey.NO_KEY];
+        }
+        Key = keyAction.Key;
+    }
+
     public static ValidationResult? ValidateKeyName(string? keyName, ValidationContext context)
     {
         var vm = (EditKeyActionViewModel)context.ObjectInstance;
@@ -117,22 +133,6 @@ public partial class EditKeyActionViewModel : ObservableValidator
 
         vm.Key = VirtualKey.NO_KEY;
         return new("Key doesn't exist.");
-    }
-
-    public EditKeyActionViewModel() { }
-
-    public EditKeyActionViewModel(KeyAction keyAction)
-    {
-        Type = keyAction.ActionType;
-        if (ActionDescriptionTemplates.VirtualKeyFriendlyNames.TryGetValue(keyAction.Key, out string? name))
-        {
-            _keyName = ExcludeDescriptionFromKeyFriendlyName(name).ToString();
-        }
-        else
-        {
-            _keyName = ActionDescriptionTemplates.VirtualKeyFriendlyNames[VirtualKey.NO_KEY];
-        }
-        Key = keyAction.Key;
     }
 
     /// <summary>

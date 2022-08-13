@@ -11,20 +11,10 @@ namespace ActionRepeater.UI.ViewModels;
 
 public partial class MainViewModel
 {
-    public ActionListViewModel ActionListViewModel { get; }
-
-    public HomePageViewModel HomeViewModel { get; }
-
-    public OptionsPageViewModel OptionsViewModel { get; }
-
     private readonly ContentDialogService _contentDialogService;
 
-    public MainViewModel(ContentDialogService contentDialogService, PathWindowService pathWindowService)
+    public MainViewModel(ContentDialogService contentDialogService)
     {
-        ActionListViewModel = new(contentDialogService);
-        HomeViewModel = new(ActionListViewModel, pathWindowService);
-        OptionsViewModel = new();
-
         _contentDialogService = contentDialogService;
 
         ActionManager.ActionsCountChanged += (_, _) => ExportActionsCommand.NotifyCanExecuteChanged();

@@ -3,25 +3,19 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using ActionRepeater.UI.ViewModels;
 using ActionRepeater.Core.Extentions;
-using ActionRepeater.Core.Action;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ActionRepeater.UI.Views;
 
 public sealed partial class ActionListView : UserControl
 {
-    private ActionListViewModel _viewModel = null!;
-    public ActionListViewModel ViewModel
-    {
-        get => _viewModel;
-        set
-        {
-            _viewModel = value;
-            _viewModel.ScrollToSelectedItem = ScrollToSelectedItem;
-        }
-    }
+    private readonly ActionListViewModel _viewModel;
 
     public ActionListView()
     {
+        _viewModel = App.Current.Services.GetRequiredService<ActionListViewModel>();
+        _viewModel.ScrollToSelectedItem = ScrollToSelectedItem;
+
         InitializeComponent();
     }
 
@@ -31,7 +25,7 @@ public sealed partial class ActionListView : UserControl
     {
         if (((FrameworkElement)e.OriginalSource).DataContext is ActionViewModel actionItem)
         {
-            ActionList.SelectedIndex = ViewModel.FilteredActions.RefIndexOfReverse(actionItem);
+            ActionList.SelectedIndex = _viewModel.FilteredActions.RefIndexOfReverse(actionItem);
             ActionItemMenuFlyout.ShowAt(ActionList, e.GetPosition(ActionList));
             return;
         }
@@ -50,6 +44,6 @@ public sealed partial class ActionListView : UserControl
 
         if (!ReferenceEquals(ActionList.SelectedItem, actionVM)) ActionList.SelectedItem = actionVM;
 
-        await ViewModel.EditSelectedAction();
+        await _viewModel.EditSelectedAction();
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using ActionRepeater.UI.Services;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using ActionType = ActionRepeater.UI.ViewModels.ActionType;
@@ -9,8 +10,8 @@ namespace ActionRepeater.UI.Behaviors;
 
 public class AddActionMenuBehavior
 {
-    // should be set on app startup
-    public static ContentDialogService ContentDialogService { get; set; } = null!;
+    private static ContentDialogService? _contentDialogService;
+    private static ContentDialogService ContentDialogService => _contentDialogService ??= App.Current.Services.GetRequiredService<ContentDialogService>();
 
     #region MenuItemList DP
 

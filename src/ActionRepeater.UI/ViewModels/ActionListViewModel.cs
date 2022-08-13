@@ -41,7 +41,7 @@ public partial class ActionListViewModel : ObservableObject
             if (_copiedAction == value) return;
 
             _copiedAction = value;
-            AddActionCommand.NotifyCanExecuteChanged();
+            AddStoredActionCommand.NotifyCanExecuteChanged();
             ReplaceActionCommand.NotifyCanExecuteChanged();
         }
     }
@@ -123,7 +123,7 @@ public partial class ActionListViewModel : ObservableObject
     private bool IsActionStored() => CopiedAction is not null;
 
     [RelayCommand(CanExecute = nameof(IsActionStored))]
-    private void AddAction() => ActionManager.AddAction(CopiedAction!.Clone());
+    private void AddStoredAction() => ActionManager.AddAction(CopiedAction!.Clone());
 
     [RelayCommand(CanExecute = nameof(IsActionStored))]
     private async Task ReplaceAction()

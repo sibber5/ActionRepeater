@@ -34,7 +34,7 @@
         <ToggleSwitch x:Name="ShowAutoRepeatToggle"
                       OnContent=""
                       OffContent=""
-                      IsOn="{x:Bind ViewModel.ShowKeyRepeatActions, Mode=TwoWay}"
+                      IsOn="{x:Bind _viewModel.ShowKeyRepeatActions, Mode=TwoWay}"
                       Grid.Row="0"
                       VerticalAlignment="Bottom"
                       HorizontalAlignment="Right"
@@ -51,8 +51,8 @@
                   VerticalAlignment="Stretch"
                   Margin="0,5,0,0"
                   ScrollViewer.VerticalScrollBarVisibility="Visible"
-                  ItemsSource="{x:Bind ViewModel.FilteredActions, Mode=OneWay}"
-                  SelectedIndex="{x:Bind ViewModel.SelectedActionIndex, Mode=TwoWay}"
+                  ItemsSource="{x:Bind _viewModel.FilteredActions, Mode=OneWay}"
+                  SelectedIndex="{x:Bind _viewModel.SelectedActionIndex, Mode=TwoWay}"
                   IsRightTapEnabled="True"
                   RightTapped="ActionList_RightTapped"
                   IsDoubleTapEnabled="True"
@@ -107,10 +107,10 @@
 
             <ListView.Resources>
                 <MenuFlyout x:Name="ActionItemMenuFlyout">
-                    <MenuFlyoutItem Text="Edit" Command="{x:Bind ViewModel.EditSelectedActionCommand}" Icon="Edit"/>
-                    <MenuFlyoutItem Text="Copy" Command="{x:Bind ViewModel.StoreActionCommand}" Icon="Copy"/>
-                    <MenuFlyoutItem Text="Replace With Copied Action" Command="{x:Bind ViewModel.ReplaceActionCommand}" Icon="Paste"/>
-                    <MenuFlyoutItem Text="Remove" Command="{x:Bind ViewModel.RemoveActionCommand}" Icon="Delete"/>
+                    <MenuFlyoutItem Text="Edit" Command="{x:Bind _viewModel.EditSelectedActionCommand}" Icon="Edit"/>
+                    <MenuFlyoutItem Text="Copy" Command="{x:Bind _viewModel.StoreActionCommand}" Icon="Copy"/>
+                    <MenuFlyoutItem Text="Replace With Copied Action" Command="{x:Bind _viewModel.ReplaceActionCommand}" Icon="Paste"/>
+                    <MenuFlyoutItem Text="Remove" Command="{x:Bind _viewModel.RemoveActionCommand}" Icon="Delete"/>
                     <MenuFlyoutSeparator />
                     <MenuFlyoutSubItem Text="Clear" x:Name="_itemFlyoutClear"
                                        behavs:ClearMenuBehavior.MenuItemList="{x:Bind _itemFlyoutClear.Items}">
@@ -120,9 +120,9 @@
                     </MenuFlyoutSubItem>
                 </MenuFlyout>
                 <MenuFlyout x:Name="ActionListMenuFlyout">
-                    <MenuFlyoutSubItem Text="Add" x:Name="_listFlyoutAdd" Icon="Add" IsEnabled="{x:Bind ViewModel.CanAddAction, Mode=OneWay}"
+                    <MenuFlyoutSubItem Text="Add" x:Name="_listFlyoutAdd" Icon="Add" IsEnabled="{x:Bind _viewModel.CanAddAction, Mode=OneWay}"
                                        behavs:AddActionMenuBehavior.MenuItemList="{x:Bind _listFlyoutAdd.Items}"/>
-                    <MenuFlyoutItem Text="Paste" Command="{x:Bind ViewModel.AddActionCommand}"  Icon="Paste"/>
+                    <MenuFlyoutItem Text="Paste" Command="{x:Bind _viewModel.AddStoredActionCommand}"  Icon="Paste"/>
                     <MenuFlyoutSeparator />
                     <MenuFlyoutSubItem Text="Clear" x:Name="_listFlyoutClear"
                                        behavs:ClearMenuBehavior.MenuItemList="{x:Bind _listFlyoutClear.Items}">

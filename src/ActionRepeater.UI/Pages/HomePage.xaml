@@ -30,12 +30,12 @@
                 <ctrls:CmdBarToggleButton x:Name="_recordButton"
                                           Glyph="&#xEA3A;"
                                           Text="Record"
-                                          Command="{x:Bind ViewModel.ToggleRecordingCommand}"/>
+                                          Command="{x:Bind _viewModel.ToggleRecordingCommand}"/>
 
                 <ctrls:CmdBarToggleButton Glyph="&#xE768;"
                                           Text="Play"
-                                          IsChecked="{x:Bind ViewModel.IsPlayButtonChecked, Mode=OneWay}"
-                                          Command="{x:Bind ViewModel.PlayActionsCommand}"/>
+                                          IsChecked="{x:Bind _viewModel.IsPlayButtonChecked, Mode=OneWay}"
+                                          Command="{x:Bind _viewModel.PlayActionsCommand}"/>
 
                 <AppBarSeparator Margin="5,0,5,0" />
 
@@ -53,7 +53,7 @@
                                SpinButtonPlacementMode="Inline"
                                MinWidth="90"
                                ValidationMode="InvalidInputOverwritten"
-                               Value="{x:Bind ViewModel.PlayRepeatCount, Mode=TwoWay}"/>
+                               Value="{x:Bind _viewModel.PlayRepeatCount, Mode=TwoWay}"/>
                 </StackPanel>
 
                 <AppBarSeparator Margin="5,0,5,0" />
@@ -61,14 +61,14 @@
                 <ctrls:CmdBarToggleButton Glyph="&#xF128;"
                                           Text="Cursor Path"
                                           ButtonWidth="70"
-                                          Command="{x:Bind ViewModel.ToggleCursorPathWindowCommand}"/>
+                                          Command="{x:Bind _viewModel.ToggleCursorPathWindowCommand}"/>
 
                 <AppBarSeparator Margin="5,0,5,0" />
 
                 <DropDownButton Height="55"
                                 Background="Transparent"
                                 BorderBrush="Transparent"
-                                IsEnabled="{x:Bind ViewModel.CanAddAction, Mode=OneWay}">
+                                IsEnabled="{x:Bind _viewModel.CanAddAction, Mode=OneWay}">
                     <DropDownButton.Resources>
                         <ResourceDictionary>
                             <ResourceDictionary.ThemeDictionaries>
@@ -102,7 +102,7 @@
         
         </ScrollViewer>
         
-        <views:ActionListView Grid.Row="1" ViewModel="{x:Bind ViewModel.ActionListViewModel}" />
+        <views:ActionListView Grid.Row="1" />
 
     </Grid>
 

@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using System.IO;
 using ActionRepeater.Core.Helpers;
 using ActionRepeater.UI.Utilities;
+using Microsoft.Extensions.DependencyInjection;
+using ActionRepeater.UI.ViewModels;
 
 namespace ActionRepeater.UI;
 
@@ -27,8 +29,9 @@ public partial class App : Application
 
     public MainWindow MainWindow { get; private set; } = null!;
 
-    private readonly PathWindowService _pathWindowService = new();
-    private readonly ContentDialogService _contentDialogService = new();
+    public IServiceProvider Services { get; }
+
+    private readonly ContentDialogService _contentDialogService;
 
     private bool _saveOptions;
     private bool _saveOnExit = true;
@@ -48,6 +51,10 @@ public partial class App : Application
     /// </summary>
     public App()
     {
+        Services = ConfigureServices();
+
+        _contentDialogService = Services.GetRequiredService<ContentDialogService>();
+
         InitializeComponent();
 
         if (!TryLoadOptions(Path.Combine(AppDataOptionsDir, OptionsFileName)))
@@ -74,6 +81,21 @@ public partial class App : Application
         UIOptions.Instance.PropertyChanged += UIOptions_PropertyChanged;
     }
 
+    private static IServiceProvider ConfigureServices()
+    {
+        ServiceCollection services = new();
+
+        services.AddSingleton<PathWindowService>();
+        services.AddSingleton<ContentDialogService>();
+
+        services.AddSingleton<MainViewModel>();
+        services.AddSingleton<ActionListViewModel>();
+        services.AddSingleton<HomePageViewModel>();
+        services.AddSingleton<OptionsPageViewModel>();
+
+        return services.BuildServiceProvider();
+    }
+
     /// <summary>
     /// Invoked when the application is launched normally by the end user.  Other entry points
     /// will be used such as when the application is launched to open a specific file.
@@ -81,12 +103,10 @@ public partial class App : Application
     /// <param name="args">Details about the launch request and process.</param>
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
-        Behaviors.AddActionMenuBehavior.ContentDialogService = _contentDialogService;
-
         MainWindow = new()
         {
             Title = MainWindowTitle,
-            ViewModel = new(_contentDialogService, _pathWindowService)
+            ViewModel = Services.GetRequiredService<MainViewModel>()
         };
 
         // XamlRoot has to be set after Content has loaded

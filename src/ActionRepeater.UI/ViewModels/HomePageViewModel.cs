@@ -8,8 +8,6 @@ namespace ActionRepeater.UI.ViewModels;
 
 public partial class HomePageViewModel : ObservableObject
 {
-    public ActionListViewModel ActionListViewModel { get; }
-
     public int PlayRepeatCount
     {
         get => Core.Options.Instance.PlayRepeatCount;
@@ -21,6 +19,8 @@ public partial class HomePageViewModel : ObservableObject
 
     public bool CanAddAction => !Recorder.IsRecording;
 
+    private readonly ActionListViewModel _actionListViewModel;
+
     private readonly PathWindowService _pathWindowService;
 
     // These select the item in the list view that is currently being performed
@@ -29,7 +29,7 @@ public partial class HomePageViewModel : ObservableObject
 
     public HomePageViewModel(ActionListViewModel actionListVM, PathWindowService pathWindowService)
     {
-        ActionListViewModel = actionListVM;
+        _actionListViewModel = actionListVM;
 
         _pathWindowService = pathWindowService;
 
@@ -88,7 +88,7 @@ public partial class HomePageViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanPlayActions))]
     private void PlayActions()
     {
-        ActionListViewModel.CurrentSetActionIndex = -1;
+        _actionListViewModel.CurrentSetActionIndex = -1;
         Player.UpdateView = Core.Options.Instance.SendKeyAutoRepeat ? _updateActionsView : _updateActionsExlView;
 
         if (!ActionManager.TryPlayActions())

@@ -1,11 +1,15 @@
 ﻿using ActionRepeater.Core.Action;
 using ActionRepeater.Core.Extentions;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ActionRepeater.UI.ViewModels;
 
 public partial class ActionViewModel : ObservableObject
 {
+    private static ActionListViewModel? _actionListViewModel;
+    public static ActionListViewModel ActionListViewModel => _actionListViewModel ??= App.Current.Services.GetRequiredService<ActionListViewModel>();
+
     public double GlyphSize { get; }
 
     public string? Glyph { get; }
@@ -15,14 +19,6 @@ public partial class ActionViewModel : ObservableObject
 
     [ObservableProperty]
     private string _description;
-
-    public ActionViewModel(string? glyph, string name, string description, double glyphSize = 20)
-    {
-        Glyph = glyph;
-        _name = name;
-        _description = description;
-        GlyphSize = glyphSize;
-    }
 
     public ActionViewModel(InputAction inputAction)
     {
@@ -55,13 +51,11 @@ public partial class ActionViewModel : ObservableObject
     /// <returns>The <see cref="ActionViewModel"/> for the <paramref name="action"/>, that is currently bound to in the view.</returns>
     private static (ActionViewModel? actionsVM, ActionViewModel? actionsExlVM) GetActionViewModels(InputAction action)
     {
-        var actionListVM = App.Current.MainWindow.ViewModel.ActionListViewModel;
-
         int actionsIndex = Core.Input.ActionManager.Actions.RefIndexOfReverse(action);
-        ActionViewModel? actionVM = actionsIndex == -1 ? null : actionListVM.ActionVMs[actionsIndex];
+        ActionViewModel? actionVM = actionsIndex == -1 ? null : ActionListViewModel.ActionVMs[actionsIndex];
 
         int actionsExlIndex = Core.Input.ActionManager.ActionsExlKeyRepeat.RefIndexOfReverse(action);
-        ActionViewModel? actionExlVM = actionsExlIndex == -1 ? null : actionListVM.ActionsExlVMs[actionsExlIndex];
+        ActionViewModel? actionExlVM = actionsExlIndex == -1 ? null : ActionListViewModel.ActionsExlVMs[actionsExlIndex];
 
         return (actionVM, actionExlVM);
     }
