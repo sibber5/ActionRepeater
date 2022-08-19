@@ -1,8 +1,8 @@
 ﻿using System;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 using ActionRepeater.Core.Input;
 using ActionRepeater.UI.Services;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 namespace ActionRepeater.UI.ViewModels;
 
@@ -26,6 +26,8 @@ public partial class HomePageViewModel : ObservableObject
     // These select the item in the list view that is currently being performed
     private readonly Action<bool> _updateActionsView;
     private readonly Action<bool> _updateActionsExlView;
+
+    private readonly Microsoft.UI.Dispatching.DispatcherQueueHandler _onIsPlayingChanged;
 
     public HomePageViewModel(ActionListViewModel actionListVM, PathWindowService pathWindowService)
     {
@@ -52,15 +54,20 @@ public partial class HomePageViewModel : ObservableObject
             actionListVM.UpdateActionListIndex(true);
         };
 
+        _onIsPlayingChanged = () =>
+        {
+            IsPlayButtonChecked = Player.IsPlaying;
+            ToggleRecordingCommand.NotifyCanExecuteChanged();
+        };
+
         Core.Options.Instance.PropertyChanged += (_, e) =>
         {
             if (e.PropertyName == nameof(PlayRepeatCount)) OnPropertyChanged(e);
         };
 
-        Player.IsPlayingChanged += (_, newVal) =>
+        Player.IsPlayingChanged += (_, _) =>
         {
-            IsPlayButtonChecked = newVal;
-            ToggleRecordingCommand.NotifyCanExecuteChanged();
+            App.Current.MainWindow.DispatcherQueue.TryEnqueue(_onIsPlayingChanged);
         };
         Recorder.IsRecordingChanged += (_, _) =>
         {

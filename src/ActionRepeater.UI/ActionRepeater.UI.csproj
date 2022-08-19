@@ -15,9 +15,15 @@
         <Nullable>enable</Nullable>
         <SignAssembly>False</SignAssembly>
         <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <AssemblyName>ActionRepeater</AssemblyName>
+        <ApplicationIcon>Assets\Icon.ico</ApplicationIcon>
     </PropertyGroup>
 
     <ItemGroup>
+        <Content Include="Assets\Icon.ico">
+            <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+        </Content>
         <Content Include="Assets\SplashScreen.scale-200.png" />
         <Content Include="Assets\LockScreenLogo.scale-200.png" />
         <Content Include="Assets\Square150x150Logo.scale-200.png" />

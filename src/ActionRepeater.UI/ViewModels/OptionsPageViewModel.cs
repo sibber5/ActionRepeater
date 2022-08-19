@@ -1,9 +1,9 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using ActionRepeater.Core;
 using ActionRepeater.Core.Extentions;
-using System.Collections.Generic;
-using System;
-using System.Linq;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ActionRepeater.UI.ViewModels;
 

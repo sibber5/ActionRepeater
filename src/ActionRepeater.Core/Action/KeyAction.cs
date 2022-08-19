@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
-using ActionRepeater.Core.Input;
 using ActionRepeater.Core.Extentions;
+using ActionRepeater.Core.Input;
 using VirtualKey = ActionRepeater.Win32.Input.VirtualKey;
 
 namespace ActionRepeater.Core.Action;

@@ -1,6 +1,6 @@
-﻿using ActionRepeater.UI.ViewModels;
+﻿using ActionRepeater.UI.Helpers;
+using ActionRepeater.UI.ViewModels;
 using Microsoft.UI.Xaml.Controls;
-using ActionRepeater.UI.Helpers;
 
 namespace ActionRepeater.UI.Views;
 

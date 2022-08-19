@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading.Tasks;
 using ActionRepeater.Core.Action;
 using ActionRepeater.Core.Input;
 using ActionRepeater.UI.ViewModels;
@@ -7,6 +6,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Windows.Foundation;
 
 namespace ActionRepeater.UI.Services;
 
@@ -20,9 +20,9 @@ public class ContentDialogService
         System.Diagnostics.Debug.WriteLineIf(XamlRoot is null, "XamlRoot should be set.");
     }
 
-    public async Task ShowErrorDialog(string title, string message)
+    public IAsyncOperation<ContentDialogResult> ShowErrorDialog(string title, string message)
     {
-        await new ContentDialog()
+        return new ContentDialog()
         {
             XamlRoot = XamlRoot,
             Title = $"❌ {title}",
@@ -31,9 +31,9 @@ public class ContentDialogService
         }.ShowAsync();
     }
 
-    public async Task ShowMessageDialog(string title, string? message = null)
+    public IAsyncOperation<ContentDialogResult> ShowMessageDialog(string title, string? message = null)
     {
-        await new ContentDialog()
+        return new ContentDialog()
         {
             XamlRoot = XamlRoot,
             Title = title,
@@ -42,9 +42,9 @@ public class ContentDialogService
         }.ShowAsync();
     }
 
-    public async Task ShowYesNoMessageDialog(string title, string? message = null, Action? onYesClick = null, Action? onNoClick = null)
+    public IAsyncOperation<ContentDialogResult> ShowYesNoMessageDialog(string title, string? message = null, Action? onYesClick = null, Action? onNoClick = null)
     {
-        await new ContentDialog()
+        return new ContentDialog()
         {
             XamlRoot = XamlRoot,
             Title = title,
@@ -56,7 +56,7 @@ public class ContentDialogService
         }.ShowAsync();
     }
 
-    public async Task ShowEditActionDialog(ActionType actionType)
+    public IAsyncOperation<ContentDialogResult> ShowEditActionDialog(ActionType actionType)
     {
         ContentDialog dialog = new()
         {
@@ -70,18 +70,16 @@ public class ContentDialogService
         dialog.Content = new Views.EditActionView(isAddView: true) { ViewModel = vm };
         dialog.PrimaryButtonCommand = vm.AddActionCommand;
 
-        await dialog.ShowAsync();
+        return dialog.ShowAsync();
     }
 
-    public async Task ShowEditActionDialog(ObservableObject editActionViewModel, InputAction actionToEdit)
+    public IAsyncOperation<ContentDialogResult> ShowEditActionDialog(ObservableObject editActionViewModel, InputAction actionToEdit)
     {
         if (ActionManager.IsActionTiedToModifiedAction(actionToEdit))
         {
-            await ShowErrorDialog("This action is not editable.", (actionToEdit is KeyAction ka && ka.IsAutoRepeat)
+            return ShowErrorDialog("This action is not editable.", (actionToEdit is KeyAction ka && ka.IsAutoRepeat)
                 ? "This is an auto repeat action, edit the original key down action if you want to change the key."
                 : ActionManager.ActionTiedToModifiedActMsg);
-
-            return;
         }
 
         ContentDialog dialog = new()
@@ -97,6 +95,6 @@ public class ContentDialogService
         dialog.PrimaryButtonCommand = vm.UpdateActionCommand;
         dialog.PrimaryButtonCommandParameter = actionToEdit;
 
-        await dialog.ShowAsync();
+        return dialog.ShowAsync();
     }
 }

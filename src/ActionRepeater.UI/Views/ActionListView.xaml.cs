@@ -1,9 +1,9 @@
-﻿using Microsoft.UI.Xaml;
+﻿using ActionRepeater.Core.Extentions;
+using ActionRepeater.UI.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
-using ActionRepeater.UI.ViewModels;
-using ActionRepeater.Core.Extentions;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace ActionRepeater.UI.Views;
 

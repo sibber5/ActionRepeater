@@ -94,7 +94,7 @@
                     </DropDownButton.Content>
                     <DropDownButton.Flyout>
                         <MenuFlyout x:Name="_actionsMenuFlyout" Placement="Bottom"
-                                behavs:AddActionMenuBehavior.MenuItemList="{x:Bind _actionsMenuFlyout.Items}"/>
+                                    behavs:AddActionMenuBehavior.MenuItemList="{x:Bind _actionsMenuFlyout.Items}"/>
                     </DropDownButton.Flyout>
                 </DropDownButton>
 

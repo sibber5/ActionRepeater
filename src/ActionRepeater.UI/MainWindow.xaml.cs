@@ -1,49 +1,75 @@
 ﻿using System;
-using Microsoft.UI.Xaml;
-using ActionRepeater.UI.ViewModels;
-using ActionRepeater.Win32.WindowsAndMessages.Utilities;
+using System.IO;
 using ActionRepeater.Core.Input;
-using Microsoft.UI.Xaml.Controls;
 using ActionRepeater.UI.Pages;
+using ActionRepeater.UI.ViewModels;
+using ActionRepeater.Win32.WindowsAndMessages;
+using ActionRepeater.Win32.WindowsAndMessages.Utilities;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.UI;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 
 namespace ActionRepeater.UI;
 
 public sealed partial class MainWindow : Window
 {
+    private const string WindowTitle = "ActionRepeater";
+    private const int StartupWidth = 507;
+    private const int StartupHeight = 700;
+    private const int MinWidth = 356;
+    private const int MinHeight = 206;
+
     public IntPtr Handle { get; }
 
-    // set on init in App.OnLaunched
-    public MainViewModel ViewModel { get; set; } = null!;
+    private readonly MainViewModel _viewModel;
 
-    internal XamlRoot GridXamlRoot => _grid.XamlRoot;
+    public XamlRoot GridXamlRoot => _grid.XamlRoot;
 
-    internal const string HomeTag = "h";
-    internal const string OptionsTag = "o";
+    public const string HomeTag = "h";
+    public const string OptionsTag = "o";
 
     private readonly WindowMessageMonitor _msgMonitor;
 
     public MainWindow()
     {
         Handle = WinRT.Interop.WindowNative.GetWindowHandle(this);
+        
+        Title = WindowTitle;
+        App.SetWindowSize(Handle, StartupWidth, StartupHeight);
+        
+        // set window icon
+        var windowId = Win32Interop.GetWindowIdFromWindow(Handle);
+        var appWindow = Microsoft.UI.Windowing.AppWindow.GetFromWindowId(windowId);
+        appWindow.SetIcon(Path.Combine(App.AppFolderDir, @"Assets\Icon.ico"));
 
         _msgMonitor = new(Handle);
         _msgMonitor.WindowMessageReceived += OnWindowMessageReceived;
-
-        Player.ExecuteOnUIThread = (action) => DispatcherQueue.TryEnqueue(new Microsoft.UI.Dispatching.DispatcherQueueHandler(action));
 
         if (App.Current.RequestedTheme == ApplicationTheme.Dark)
         {
             Win32.PInvoke.Helpers.SetWindowImmersiveDarkMode(Handle, true);
         }
 
+        _viewModel = App.Current.Services.GetRequiredService<MainViewModel>();
+
         InitializeComponent();
     }
 
-    private static void OnWindowMessageReceived(object? sender, WindowMessageEventArgs e)
+    private unsafe void OnWindowMessageReceived(object? sender, WindowMessageEventArgs e)
     {
-        if (e.MessageType == Win32.WindowsAndMessages.WindowMessage.INPUT)
+        switch (e.MessageType)
         {
-            Recorder.OnInputMessage(e);
+            case WindowMessage.INPUT:
+                Recorder.OnInputMessage(e);
+                break;
+
+            case WindowMessage.GETMINMAXINFO:
+                float scalingFactor = App.GetWindowScalingFactor(Handle);
+                MINMAXINFO* info = (MINMAXINFO*)e.Message.lParam;
+                info->ptMinTrackSize.x = (int)(MinWidth * scalingFactor);
+                info->ptMinTrackSize.y = (int)(MinHeight * scalingFactor);
+                break;
         }
     }
 

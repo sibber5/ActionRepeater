@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
-using ActionRepeater.Win32.Input;
-using ActionRepeater.Win32.WindowsAndMessages.Utilities;
 using ActionRepeater.Core.Action;
 using ActionRepeater.Core.Utilities;
+using ActionRepeater.Win32.Input;
+using ActionRepeater.Win32.WindowsAndMessages.Utilities;
 
 namespace ActionRepeater.Core.Input;
 

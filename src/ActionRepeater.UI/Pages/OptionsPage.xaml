@@ -8,35 +8,41 @@
     mc:Ignorable="d"
     Background="{ThemeResource AppBackgroundThemeBrush}">
 
-    <StackPanel Orientation="Vertical" Margin="10" Spacing="5">
+    <ScrollViewer ZoomMode="Disabled"
+                  HorizontalScrollMode="Disabled"
+                  HorizontalScrollBarVisibility="Disabled"
+                  VerticalScrollMode="Enabled"
+                  VerticalScrollBarVisibility="Auto">
 
-        <StackPanel.Resources>
-            <x:Double x:Key="OptionControlWidth">160</x:Double>
-            <!-- for some reason toggle switches have a margin on the left?? so this is to remove that. -->
-            <Thickness x:Key="ToggleSwitchNegativeMargin">0,0,-82,0</Thickness>
-        </StackPanel.Resources>
+        <StackPanel Orientation="Vertical" Margin="10" Spacing="5">
 
-        <ctrls:OptionItem Text="Cursor movement:">
-            <ctrls:OptionItem.OptionContent>
-                <ComboBox HorizontalAlignment="Right"
+            <StackPanel.Resources>
+                <x:Double x:Key="OptionControlWidth">160</x:Double>
+                <!-- for some reason toggle switches have a margin on the left?? so this is to remove that. -->
+                <Thickness x:Key="ToggleSwitchNegativeMargin">0,0,-82,0</Thickness>
+            </StackPanel.Resources>
+
+            <ctrls:OptionItem Text="Cursor movement">
+                <ctrls:OptionItem.OptionContent>
+                    <ComboBox HorizontalAlignment="Right"
                           Width="{StaticResource OptionControlWidth}"
                           ItemsSource="{x:Bind _viewModel.CursorMovementCBItems}"
                           SelectedIndex="{x:Bind _viewModel.CursorMovementMode, Mode=TwoWay}"/>
-            </ctrls:OptionItem.OptionContent>
-        </ctrls:OptionItem>
+                </ctrls:OptionItem.OptionContent>
+            </ctrls:OptionItem>
 
-        <ctrls:OptionItem Text="Set cursor position on clicks">
-            <ctrls:OptionItem.OptionContent>
-                <ToggleSwitch IsOn="{x:Bind _viewModel.UseCursorPosOnClicks, Mode=TwoWay}" Margin="{StaticResource ToggleSwitchNegativeMargin}" Style="{StaticResource LeftSideTextToggleSwitch}"/>
-            </ctrls:OptionItem.OptionContent>
-        </ctrls:OptionItem>
+            <ctrls:OptionItem Text="Set cursor position on clicks">
+                <ctrls:OptionItem.OptionContent>
+                    <ToggleSwitch IsOn="{x:Bind _viewModel.UseCursorPosOnClicks, Mode=TwoWay}" Margin="{StaticResource ToggleSwitchNegativeMargin}" Style="{StaticResource LeftSideTextToggleSwitch}"/>
+                </ctrls:OptionItem.OptionContent>
+            </ctrls:OptionItem>
 
-        <ctrls:OptionsSeperator/>
+            <ctrls:OptionsSeperator/>
 
-        <ctrls:OptionItem Text="Max click interval (ms):"
+            <ctrls:OptionItem Text="Max click interval (ms)"
                           ToolTipService.ToolTip="The maximum time, in milliseconds, between pressing down a key/mouse button and releasing it for the action to be counted as a press/click (instead of button down and up actinos)">
-            <ctrls:OptionItem.OptionContent>
-                <NumberBox x:Name="_clickIntervalNumbox"
+                <ctrls:OptionItem.OptionContent>
+                    <NumberBox x:Name="_clickIntervalNumbox"
                            MinWidth="{StaticResource OptionControlWidth}"
                            SmallChange="10"
                            LargeChange="100"
@@ -45,40 +51,42 @@
                            SpinButtonPlacementMode="Inline"
                            ValidationMode="InvalidInputOverwritten"
                            Value="{x:Bind _viewModel.MaxClickInterval, Mode=TwoWay}"/>
-            </ctrls:OptionItem.OptionContent>
-        </ctrls:OptionItem>
+                </ctrls:OptionItem.OptionContent>
+            </ctrls:OptionItem>
 
-        <ctrls:OptionItem Text="Simulate keystroke auto-repeat">
-            <ctrls:OptionItem.OptionContent>
-                <ToggleSwitch IsOn="{x:Bind _viewModel.SendKeyAutoRepeat, Mode=TwoWay}" Margin="{StaticResource ToggleSwitchNegativeMargin}" Style="{StaticResource LeftSideTextToggleSwitch}"/>
-            </ctrls:OptionItem.OptionContent>
-        </ctrls:OptionItem>
+            <ctrls:OptionItem Text="Simulate keystroke auto-repeat">
+                <ctrls:OptionItem.OptionContent>
+                    <ToggleSwitch IsOn="{x:Bind _viewModel.SendKeyAutoRepeat, Mode=TwoWay}" Margin="{StaticResource ToggleSwitchNegativeMargin}" Style="{StaticResource LeftSideTextToggleSwitch}"/>
+                </ctrls:OptionItem.OptionContent>
+            </ctrls:OptionItem>
 
-        <ctrls:OptionsSeperator/>
+            <ctrls:OptionsSeperator/>
 
-        <ctrls:OptionItem Text="Theme">
-            <ctrls:OptionItem.OptionContent>
-                <ComboBox HorizontalAlignment="Right"
+            <ctrls:OptionItem Text="Theme">
+                <ctrls:OptionItem.OptionContent>
+                    <ComboBox HorizontalAlignment="Right"
                           Width="{StaticResource OptionControlWidth}"
                           ItemsSource="{x:Bind _viewModel.ThemeCBItems}"
                           SelectedIndex="{x:Bind _viewModel.Theme, Mode=TwoWay}"/>
-            </ctrls:OptionItem.OptionContent>
-        </ctrls:OptionItem>
+                </ctrls:OptionItem.OptionContent>
+            </ctrls:OptionItem>
 
-        <ctrls:OptionsSeperator/>
+            <ctrls:OptionsSeperator/>
 
-        <ctrls:OptionItem Text="Options file location">
-            <ctrls:OptionItem.OptionContent>
-                <ComboBox HorizontalAlignment="Right"
+            <ctrls:OptionItem Text="Options file location">
+                <ctrls:OptionItem.OptionContent>
+                    <ComboBox HorizontalAlignment="Right"
                           Width="{StaticResource OptionControlWidth}"
                           SelectedIndex="{x:Bind _viewModel.OptionsFileLocation, Mode=TwoWay}">
-                    <x:String>Don't Save</x:String>
-                    <x:String>AppData</x:String>
-                    <x:String>App Folder</x:String>
-                </ComboBox>
-            </ctrls:OptionItem.OptionContent>
-        </ctrls:OptionItem>
+                        <x:String>Don't Save</x:String>
+                        <x:String>AppData</x:String>
+                        <x:String>App Folder</x:String>
+                    </ComboBox>
+                </ctrls:OptionItem.OptionContent>
+            </ctrls:OptionItem>
 
-    </StackPanel>
-    
+        </StackPanel>
+
+    </ScrollViewer>
+
 </Page>

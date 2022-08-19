@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 using ActionRepeater.Win32.Input;
-using ActionRepeater.Win32.WindowsAndMessages;
 
 namespace ActionRepeater.Win32;
 

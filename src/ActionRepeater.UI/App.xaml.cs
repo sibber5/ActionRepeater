@@ -1,14 +1,14 @@
 ﻿using System;
-using Microsoft.UI.Xaml;
+using System.IO;
+using System.Threading.Tasks;
+using ActionRepeater.Core.Helpers;
 using ActionRepeater.UI.Services;
+using ActionRepeater.UI.Utilities;
+using ActionRepeater.UI.ViewModels;
 using ActionRepeater.Win32;
 using ActionRepeater.Win32.WindowsAndMessages;
-using System.Threading.Tasks;
-using System.IO;
-using ActionRepeater.Core.Helpers;
-using ActionRepeater.UI.Utilities;
 using Microsoft.Extensions.DependencyInjection;
-using ActionRepeater.UI.ViewModels;
+using Microsoft.UI.Xaml;
 
 namespace ActionRepeater.UI;
 
@@ -19,12 +19,8 @@ public partial class App : Application
 {
     public static new App Current => (App)Application.Current;
 
-    private const string MainWindowTitle = "ActionRepeater";
-    private const int MainWindowWidth = 507;
-    private const int MainWindowHeight = 600;
-
     public static string AppDataOptionsDir => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), nameof(ActionRepeater));
-    public static string AppFolderOptionsDir => Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly()!.Location)!;
+    public static string AppFolderDir => Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly()!.Location)!;
     public static string OptionsFileName => "Options.json";
 
     public MainWindow MainWindow { get; private set; } = null!;
@@ -59,7 +55,7 @@ public partial class App : Application
 
         if (!TryLoadOptions(Path.Combine(AppDataOptionsDir, OptionsFileName)))
         {
-            TryLoadOptions(Path.Combine(AppFolderOptionsDir, OptionsFileName));
+            TryLoadOptions(Path.Combine(AppFolderDir, OptionsFileName));
         }
 
         _saveOptions = UIOptions.Instance.OptionsFileLocation != OptionsFileLocation.None;
@@ -103,11 +99,7 @@ public partial class App : Application
     /// <param name="args">Details about the launch request and process.</param>
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
-        MainWindow = new()
-        {
-            Title = MainWindowTitle,
-            ViewModel = Services.GetRequiredService<MainViewModel>()
-        };
+        MainWindow = new();
 
         // XamlRoot has to be set after Content has loaded
         ((FrameworkElement)MainWindow.Content).Loaded += static async (_, _) =>
@@ -122,10 +114,6 @@ public partial class App : Application
         };
 
         MainWindow.Closed += MainWindow_Closed;
-
-        // The Window object doesn't have Width and Height properties in WInUI 3.
-        // You can use the Win32 API SetWindowPos to set the Width and Height.
-        SetWindowSize(MainWindow.Handle, MainWindowWidth, MainWindowHeight);
 
         MainWindow.Activate();
     }
@@ -167,14 +155,14 @@ public partial class App : Application
                     break;
 
                 case OptionsFileLocation.AppFolder:
-                    string path = Path.Combine(AppFolderOptionsDir, OptionsFileName);
+                    string path = Path.Combine(AppFolderDir, OptionsFileName);
 
                     if (!File.Exists(path)) break;
 
                     await _contentDialogService.ShowYesNoMessageDialog(
                         "Options file in app folder will be deleted",
                         "Are you sure you want to change the options file location?",
-                        onYesClick: static () => File.Delete(Path.Combine(AppFolderOptionsDir, OptionsFileName)),
+                        onYesClick: static () => File.Delete(Path.Combine(AppFolderDir, OptionsFileName)),
                         onNoClick: _optsFileLocReverter.Revert);
                     break;
             }
@@ -255,7 +243,7 @@ public partial class App : Application
                     break;
 
                 case OptionsFileLocation.AppFolder:
-                    path = Path.Combine(AppFolderOptionsDir, OptionsFileName);
+                    path = Path.Combine(AppFolderDir, OptionsFileName);
                     break;
 
                 case OptionsFileLocation.None:
@@ -293,11 +281,18 @@ public partial class App : Application
         }
     }
 
-    private static void SetWindowSize(IntPtr hwnd, int width, int height)
+    /// <summary>
+    /// Win32 uses pixels and WinUI 3 uses effective pixels, so this method returns the dpi scale factor.
+    /// </summary>
+    public static float GetWindowScalingFactor(IntPtr hwnd)
     {
-        // Win32 uses pixels and WinUI 3 uses effective pixels, so you should apply the DPI scale factor
         uint dpi = PInvoke.GetDpiForWindow(hwnd);
-        float scalingFactor = dpi / 96f;
+        return dpi / 96f;
+    }
+
+    public static void SetWindowSize(IntPtr hwnd, int width, int height)
+    {
+        float scalingFactor = GetWindowScalingFactor(hwnd);
         width = (int)(width * scalingFactor);
         height = (int)(height * scalingFactor);
 

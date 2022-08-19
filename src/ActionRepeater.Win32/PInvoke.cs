@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using SupportedOSPlatformAttribute = System.Runtime.Versioning.SupportedOSPlatformAttribute;
+using ActionRepeater.Win32.Graphics;
 using ActionRepeater.Win32.Input;
 using ActionRepeater.Win32.WindowsAndMessages;
-using ActionRepeater.Win32.Graphics;
+using SupportedOSPlatformAttribute = System.Runtime.Versioning.SupportedOSPlatformAttribute;
 
 #pragma warning disable CA1401 // P/Invokes should not be visible
 [assembly: SupportedOSPlatform("windows5.1.2600")]

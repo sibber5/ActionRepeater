@@ -1,16 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Diagnostics;
 using ActionRepeater.Core.Action;
 
 namespace ActionRepeater.Core.Input;
 
 public static class Player
 {
-    public static Action<System.Action>? ExecuteOnUIThread { get; set; }
-
     public static Action<bool>? UpdateView { get; set; }
 
     private static CancellationTokenSource? _tokenSource;
@@ -26,6 +24,9 @@ public static class Player
         }
     }
 
+    /// <summary>
+    /// Note: This is usually invoked from a thread pool thread.
+    /// </summary>
     public static event EventHandler<bool>? IsPlayingChanged;
 
     private static IReadOnlyList<InputAction>? _actionsToPlay;
@@ -76,14 +77,7 @@ public static class Player
         {
             Debug.WriteLine("[Player] Finished play task.");
 
-            if (ExecuteOnUIThread is null)
-            {
-                IsPlaying = false;
-            }
-            else
-            {
-                ExecuteOnUIThread(static () => IsPlaying = false);
-            }
+            IsPlaying = false;
 
             _tokenSource!.Dispose();
             _tokenSource = null;

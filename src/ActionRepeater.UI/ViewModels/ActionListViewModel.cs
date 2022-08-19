@@ -2,18 +2,21 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 using ActionRepeater.Core.Action;
 using ActionRepeater.Core.Input;
-using ActionRepeater.UI.Utilities;
-using Microsoft.UI.Dispatching;
 using ActionRepeater.UI.Services;
+using ActionRepeater.UI.Utilities;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Microsoft.UI.Dispatching;
 
 namespace ActionRepeater.UI.ViewModels;
 
 public partial class ActionListViewModel : ObservableObject
 {
+    private readonly System.ComponentModel.PropertyChangedEventArgs _actionListHeaderChangedArgs = new(nameof(ActionListHeaderWithCount));
+    public string ActionListHeaderWithCount => $"Actions ({FilteredActions.Count}):";
+
     [NotifyPropertyChangedFor(nameof(FilteredActions))]
     [ObservableProperty]
     private bool _showKeyRepeatActions;
@@ -69,6 +72,13 @@ public partial class ActionListViewModel : ObservableObject
         ActionVMs = new((ObservableCollection<InputAction?>)ActionManager.Actions, createVM);
         ActionsExlVMs = new((ObservableCollection<InputAction?>)ActionManager.ActionsExlKeyRepeat, createVM);
 
+        ((System.ComponentModel.INotifyPropertyChanged)FilteredActions).PropertyChanged += (s, e) =>
+        {
+            if (nameof(FilteredActions.Count).Equals(e.PropertyName, StringComparison.Ordinal))
+            {
+                OnPropertyChanged(_actionListHeaderChangedArgs);
+            }
+        };
         Recorder.IsRecordingChanged += (_, _) => OnPropertyChanged(nameof(CanAddAction));
     }
 

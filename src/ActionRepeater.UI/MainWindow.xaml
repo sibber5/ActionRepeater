@@ -4,7 +4,6 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:local="using:ActionRepeater.UI"
     mc:Ignorable="d">
 
     <Grid x:Name="_grid" Margin="10">
@@ -23,9 +22,10 @@
 
             <NavigationView.MenuItems>
                 <!-- space for the file dropdown button -->
-                <NavigationViewItem Width="58" />
-                <NavigationViewItem Tag="{x:Bind local:MainWindow.HomeTag}" Content="Home" />
-                <NavigationViewItem Tag="{x:Bind local:MainWindow.OptionsTag}" Content="Options"/>
+                <NavigationViewItem Width="53" />
+                <!-- binding the tag suddenly stopped working for some fucking reason, so now its hardcoded -->
+                <NavigationViewItem Tag="h" Content="Home" />
+                <NavigationViewItem Tag="o" Content="Options"/>
             </NavigationView.MenuItems>
 
             <Frame x:Name="_contentFrame" Background="{ThemeResource AppBackgroundThemeBrush}" />
@@ -34,7 +34,7 @@
 
         <DropDownButton Grid.Row="0"
                         HorizontalAlignment="Left" VerticalAlignment="Top"
-                        Margin="4,-6,0,0"
+                        Margin="-6,-6,0,0"
                         Background="Transparent"
                         BorderBrush="Transparent"
                         Content="File">
@@ -48,13 +48,13 @@
 
             <DropDownButton.Flyout>
                 <MenuFlyout x:Name="_fileMenuFlyout" Placement="Bottom">
-                    <MenuFlyoutItem Text="Open" Command="{x:Bind ViewModel.ImportActionsCommand}">
+                    <MenuFlyoutItem Text="Open" Command="{x:Bind _viewModel.ImportActionsCommand}">
                         <MenuFlyoutItem.Icon>
                             <FontIcon Glyph="&#xE8E5;"/>
                         </MenuFlyoutItem.Icon>
                     </MenuFlyoutItem>
 
-                    <MenuFlyoutItem Text="Save" Command="{x:Bind ViewModel.ExportActionsCommand}">
+                    <MenuFlyoutItem Text="Save" Command="{x:Bind _viewModel.ExportActionsCommand}">
                         <MenuFlyoutItem.Icon>
                             <FontIcon Glyph="&#xE792;"/>
                         </MenuFlyoutItem.Icon>

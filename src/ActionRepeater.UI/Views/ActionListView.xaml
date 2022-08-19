@@ -16,12 +16,12 @@
         </Grid.RowDefinitions>
 
         <TextBlock x:Name="ActionListHeader"
-                   Text="Actions:"
+                   Text="{x:Bind _viewModel.ActionListHeaderWithCount, Mode=OneWay}"
                    Grid.Row="0"
-                   Margin="3,0,0,0"
+                   Margin="3,0,0,1"
                    VerticalAlignment="Bottom"
                    HorizontalAlignment="Left"
-                   FontSize="18"/>
+                   FontSize="17"/>
 
         <TextBlock x:Name="ShowAutoRepeatLabel"
                    Grid.Row="0"
@@ -29,7 +29,7 @@
                    Margin="67,0,45,1"
                    VerticalAlignment="Bottom"
                    HorizontalAlignment="Right"
-                   Text="show keystroke auto-repeat"/>
+                   Text="show key auto-repeat actions"/>
 
         <ToggleSwitch x:Name="ShowAutoRepeatToggle"
                       OnContent=""

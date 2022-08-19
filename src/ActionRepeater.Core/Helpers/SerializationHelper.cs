@@ -1,8 +1,8 @@
-﻿using System.IO;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Text.Json;
 using System.Threading.Tasks;
 using ActionRepeater.Core.Action;
-using System.Text.Json;
 
 namespace ActionRepeater.Core.Helpers;
 
