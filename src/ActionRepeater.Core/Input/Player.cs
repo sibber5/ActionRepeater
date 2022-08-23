@@ -7,14 +7,15 @@ using ActionRepeater.Core.Action;
 
 namespace ActionRepeater.Core.Input;
 
-public static class Player
+public sealed class Player
 {
-    public static Action<bool>? UpdateView { get; set; }
+    /// <summary>
+    /// Note: This is usually invoked from a thread pool thread.
+    /// </summary>
+    public event EventHandler<bool>? IsPlayingChanged;
 
-    private static CancellationTokenSource? _tokenSource;
-
-    private static bool _isPlaying;
-    public static bool IsPlaying
+    private bool _isPlaying;
+    public bool IsPlaying
     {
         get => _isPlaying;
         private set
@@ -25,24 +26,65 @@ public static class Player
     }
 
     /// <summary>
-    /// Note: This is usually invoked from a thread pool thread.
+    /// void UpdateView(bool isAutoRepeat)
     /// </summary>
-    public static event EventHandler<bool>? IsPlayingChanged;
+    public Action<bool>? UpdateView { get; set; }
 
-    private static IReadOnlyList<InputAction>? _actionsToPlay;
 
-    private static Func<Task>? _playInputActionsAsync;
+    private CancellationTokenSource? _tokenSource;
 
-    private static Action<Task>? _cleanUp;
 
-    public static void PlayActions(IReadOnlyList<InputAction> actions, IReadOnlyList<MouseMovement>? path, bool isPathRelative, int repeatCount = 1)
+    private IReadOnlyList<InputAction>? _actionsToPlay;
+
+    private Func<Task>? _playInputActionsAsync;
+
+    private Action<Task>? _cleanUp;
+
+
+    private readonly ActionCollection _actionCollection;
+
+    public Player(ActionCollection actionCollection)
+    {
+        _actionCollection = actionCollection;
+    }
+
+    /// <returns>
+    /// false if there are no actions to play or its already playing, otherwise true.
+    /// </returns>
+    public bool TryPlayActions()
+    {
+        if (_actionCollection.Actions.Count == 0 && _actionCollection.CursorPathStart is null)
+        {
+            return false;
+        }
+
+        if (IsPlaying)
+        {
+            Cancel();
+            return false;
+        }
+
+        var actions = Options.Instance.SendKeyAutoRepeat ? _actionCollection.Actions : _actionCollection.ActionsExlKeyRepeat;
+        var cursorPath = Options.Instance.CursorMovementMode switch
+        {
+            CursorMovementMode.Absolute => _actionCollection.GetAbsoluteCursorPath(),
+            CursorMovementMode.Relative => _actionCollection.CursorPath,
+            _ => null
+        };
+
+        PlayActions(actions, cursorPath, Options.Instance.CursorMovementMode == CursorMovementMode.Relative, Options.Instance.PlayRepeatCount);
+
+        return true;
+    }
+
+    public void PlayActions(IReadOnlyList<InputAction> actions, IReadOnlyList<MouseMovement>? path, bool isPathRelative, int repeatCount = 1)
     {
         _tokenSource?.Dispose();
         _tokenSource = new CancellationTokenSource();
 
         _actionsToPlay = actions;
 
-        _playInputActionsAsync ??= static async () =>
+        _playInputActionsAsync ??= async () =>
         {
             for (int i = 0; i < _actionsToPlay.Count; ++i)
             {
@@ -73,7 +115,7 @@ public static class Player
             static bool IsAutoRepeatAction(InputAction a) => a is KeyAction keyAction && keyAction.IsAutoRepeat;
         };
 
-        _cleanUp ??= static task =>
+        _cleanUp ??= task =>
         {
             Debug.WriteLine("[Player] Finished play task.");
 
@@ -99,7 +141,7 @@ public static class Player
         IsPlaying = true;
         Debug.WriteLine("[Player] Started play task.");
 
-        if (ActionManager.CursorPathStart is not null && path?.Count > 0)
+        if (_actionCollection.CursorPathStart is not null && path?.Count > 0)
         {
             Task.WhenAll(Task.Run(playInputActions, _tokenSource.Token), PlayCursorMovement(path, isPathRelative))
                 .ContinueWith(_cleanUp);
@@ -111,7 +153,7 @@ public static class Player
         }
     }
 
-    private static Task PlayCursorMovement(IReadOnlyList<MouseMovement> path, bool isPathRelative)
+    private Task PlayCursorMovement(IReadOnlyList<MouseMovement> path, bool isPathRelative)
     {
         if (isPathRelative)
         {
@@ -119,8 +161,8 @@ public static class Player
             {
                 if (_tokenSource!.IsCancellationRequested) return;
 
-                await Task.Delay(ActionManager.CursorPathStart!.DelayDuration, _tokenSource!.Token).ContinueWith(task => { });
-                InputSimulator.MoveMouse(ActionManager.CursorPathStart!.MovPoint, false, false);
+                await Task.Delay(_actionCollection.CursorPathStart!.DelayDuration, _tokenSource!.Token).ContinueWith(task => { });
+                InputSimulator.MoveMouse(_actionCollection.CursorPathStart!.MovPoint, false, false);
 
                 for (int i = 0; i < path.Count; ++i)
                 {
@@ -144,13 +186,13 @@ public static class Player
         }, _tokenSource!.Token);
     }
 
-    public static void Cancel()
+    public void Cancel()
     {
         Debug.Assert(_tokenSource is not null, $"{nameof(_tokenSource)} is null. A play task may not have been run.");
 
-        Debug.WriteLine("[Player] Cancelling play task...");
+        Debug.WriteLine($"[{nameof(Player)}] Cancelling play task...");
         _tokenSource!.Cancel();
     }
 
-    public static void RefreshIsPlaying() => IsPlayingChanged?.Invoke(null, _isPlaying);
+    public void RefreshIsPlaying() => IsPlayingChanged?.Invoke(null, _isPlaying);
 }

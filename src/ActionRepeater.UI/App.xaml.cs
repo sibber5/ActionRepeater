@@ -2,6 +2,8 @@
 using System.IO;
 using System.Threading.Tasks;
 using ActionRepeater.Core.Helpers;
+using ActionRepeater.Core.Input;
+using ActionRepeater.UI.Factories;
 using ActionRepeater.UI.Services;
 using ActionRepeater.UI.Utilities;
 using ActionRepeater.UI.ViewModels;
@@ -81,6 +83,10 @@ public partial class App : Application
     {
         ServiceCollection services = new();
 
+        services.AddSingleton<ActionCollection>();
+        services.AddSingleton<Recorder>();
+        services.AddSingleton<Player>();
+
         services.AddSingleton<PathWindowService>();
         services.AddSingleton<ContentDialogService>();
 
@@ -88,6 +94,8 @@ public partial class App : Application
         services.AddSingleton<ActionListViewModel>();
         services.AddSingleton<HomePageViewModel>();
         services.AddSingleton<OptionsPageViewModel>();
+
+        services.AddSingleton<EditActionDialogViewModelFactory>();
 
         return services.BuildServiceProvider();
     }

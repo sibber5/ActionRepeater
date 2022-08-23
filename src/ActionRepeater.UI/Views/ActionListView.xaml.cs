@@ -1,4 +1,5 @@
 ﻿using ActionRepeater.Core.Extentions;
+using ActionRepeater.Core.Input;
 using ActionRepeater.UI.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
@@ -15,6 +16,8 @@ public sealed partial class ActionListView : UserControl
     {
         _viewModel = App.Current.Services.GetRequiredService<ActionListViewModel>();
         _viewModel.ScrollToSelectedItem = ScrollToSelectedItem;
+
+        App.Current.Services.GetRequiredService<Recorder>().ActionAdded += (_, _) => ActionList.ScrollIntoView(_viewModel.FilteredActions[^1]);
 
         InitializeComponent();
     }

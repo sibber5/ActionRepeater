@@ -12,18 +12,20 @@ namespace ActionRepeater.UI.ViewModels;
 public partial class MainViewModel
 {
     private readonly ContentDialogService _contentDialogService;
+    private readonly ActionCollection _actionCollection;
 
-    public MainViewModel(ContentDialogService contentDialogService)
+    public MainViewModel(ContentDialogService contentDialogService, ActionCollection actionCollection)
     {
         _contentDialogService = contentDialogService;
+        _actionCollection = actionCollection;
 
-        ActionManager.ActionsCountChanged += (_, _) => ExportActionsCommand.NotifyCanExecuteChanged();
+        _actionCollection.ActionsCountChanged += (_, _) => ExportActionsCommand.NotifyCanExecuteChanged();
     }
 
     [RelayCommand(CanExecute = nameof(CanExportActions))]
     private async Task ExportActions()
     {
-        if (ActionManager.Actions.Count == 0)
+        if (_actionCollection.Actions.Count == 0)
         {
             await _contentDialogService.ShowMessageDialog("Actions list is empty.");
             return;
@@ -32,11 +34,11 @@ public partial class MainViewModel
         var file = await FilePickerHelper.PickSaveFileAsync();
         if (file is null) return;
 
-        ActionData dat = new(ActionManager.Actions, ActionManager.CursorPathStart, ActionManager.CursorPath);
+        ActionData dat = new(_actionCollection.Actions, _actionCollection.CursorPathStart, _actionCollection.CursorPath);
 
         await SerializationHelper.SerializeActionsAsync(dat, file.Path);
     }
-    private static bool CanExportActions() => ActionManager.Actions.Count > 0;
+    private bool CanExportActions() => _actionCollection.Actions.Count > 0;
 
     [RelayCommand]
     private async Task ImportActions()
@@ -61,6 +63,6 @@ public partial class MainViewModel
             return;
         }
 
-        ActionManager.LoadActionData(data);
+        _actionCollection.LoadActionData(data);
     }
 }

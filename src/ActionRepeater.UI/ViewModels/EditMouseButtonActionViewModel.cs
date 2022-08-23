@@ -16,9 +16,9 @@ public partial class EditMouseButtonActionViewModel : ObservableObject
         set => SelectedTypeIndex = (int)value;
     }
 
-    public InputSimulator.MouseButton Button
+    public MouseButton Button
     {
-        get => (InputSimulator.MouseButton)SelectedButtonIndex;
+        get => (MouseButton)SelectedButtonIndex;
         set => SelectedButtonIndex = (int)value;
     }
 

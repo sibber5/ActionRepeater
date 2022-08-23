@@ -27,7 +27,7 @@ public partial class ActionListViewModel : ObservableObject
 
     public InputAction? SelectedAction => SelectedActionIndex == -1
         ? null
-        : (ShowKeyRepeatActions ? ActionManager.Actions[SelectedActionIndex] : ActionManager.ActionsExlKeyRepeat[SelectedActionIndex]);
+        : (ShowKeyRepeatActions ? _actionCollection.Actions[SelectedActionIndex] : _actionCollection.ActionsExlKeyRepeat[SelectedActionIndex]);
 
     [NotifyCanExecuteChangedFor(nameof(StoreActionCommand))]
     [ObservableProperty]
@@ -49,7 +49,7 @@ public partial class ActionListViewModel : ObservableObject
         }
     }
 
-    public bool CanAddAction => !Recorder.IsRecording;
+    public bool CanAddAction => !_recorder.IsRecording;
 
     internal Action? ScrollToSelectedItem { get; set; }
 
@@ -57,9 +57,14 @@ public partial class ActionListViewModel : ObservableObject
 
     private readonly DispatcherQueueHandler _updateSelectedAction;
 
-    public ActionListViewModel(ContentDialogService contentDialogService)
+    private readonly ActionCollection _actionCollection;
+    private readonly Recorder _recorder;
+
+    public ActionListViewModel(ContentDialogService contentDialogService, ActionCollection actionCollection, Recorder recorder)
     {
         _contentDialogService = contentDialogService;
+        _actionCollection = actionCollection;
+        _recorder = recorder;
 
         _updateSelectedAction = () =>
         {
@@ -69,8 +74,8 @@ public partial class ActionListViewModel : ObservableObject
 
         Func<InputAction?, ActionViewModel> createVM = static (model) => new ActionViewModel(model!);
 
-        ActionVMs = new((ObservableCollection<InputAction?>)ActionManager.Actions, createVM);
-        ActionsExlVMs = new((ObservableCollection<InputAction?>)ActionManager.ActionsExlKeyRepeat, createVM);
+        ActionVMs = new((ObservableCollection<InputAction?>)_actionCollection.Actions, createVM);
+        ActionsExlVMs = new((ObservableCollection<InputAction?>)_actionCollection.ActionsExlKeyRepeat, createVM);
 
         ((System.ComponentModel.INotifyPropertyChanged)FilteredActions).PropertyChanged += (s, e) =>
         {
@@ -79,7 +84,7 @@ public partial class ActionListViewModel : ObservableObject
                 OnPropertyChanged(_actionListHeaderChangedArgs);
             }
         };
-        Recorder.IsRecordingChanged += (_, _) => OnPropertyChanged(nameof(CanAddAction));
+        _recorder.IsRecordingChanged += (_, _) => OnPropertyChanged(nameof(CanAddAction));
     }
 
     public void UpdateActionListIndex(bool skipAutoRepeat)
@@ -88,7 +93,7 @@ public partial class ActionListViewModel : ObservableObject
 
         if (skipAutoRepeat)
         {
-            var filteredActions = ShowKeyRepeatActions ? ActionManager.Actions : ActionManager.ActionsExlKeyRepeat;
+            var filteredActions = ShowKeyRepeatActions ? _actionCollection.Actions : _actionCollection.ActionsExlKeyRepeat;
             for (int i = CurrentSetActionIndex; i < filteredActions.Count; i++)
             {
                 if (IsAutoRepeatAction(filteredActions[i]) || (i > 0 && filteredActions[i] is WaitAction && IsAutoRepeatAction(filteredActions[i - 1])))
@@ -133,12 +138,12 @@ public partial class ActionListViewModel : ObservableObject
     private bool IsActionStored() => CopiedAction is not null;
 
     [RelayCommand(CanExecute = nameof(IsActionStored))]
-    private void AddStoredAction() => ActionManager.AddAction(CopiedAction!.Clone());
+    private void AddStoredAction() => _actionCollection.Add(CopiedAction!.Clone());
 
     [RelayCommand(CanExecute = nameof(IsActionStored))]
     private async Task ReplaceAction()
     {
-        string? message = ActionManager.TryReplaceAction(!ShowKeyRepeatActions, SelectedActionIndex, CopiedAction!.Clone());
+        string? message = _actionCollection.TryReplace(!ShowKeyRepeatActions, SelectedActionIndex, CopiedAction!.Clone());
         if (message is not null)
         {
             await _contentDialogService.ShowErrorDialog("Failed to replace action", message);
@@ -148,16 +153,16 @@ public partial class ActionListViewModel : ObservableObject
     [RelayCommand]
     private async Task RemoveAction()
     {
-        if (ActionManager.HasActionBeenModified(SelectedAction!))
+        if (_actionCollection.HasActionBeenModified(SelectedAction!))
         {
             await _contentDialogService.ShowYesNoMessageDialog("Are you sure you want to remove this action?",
                 $"This action represents multiple hidden actions (because \"{nameof(ShowKeyRepeatActions)}\" is off).{Environment.NewLine}If you remove it the multiple actions it represents will be removed.",
-                onYesClick: () => ActionManager.TryRemoveAction(SelectedAction!));
+                onYesClick: () => _actionCollection.TryRemove(SelectedAction!));
 
             return;
         }
 
-        string? message = ActionManager.TryRemoveAction(SelectedAction!);
+        string? message = _actionCollection.TryRemove(SelectedAction!);
         if (message is not null)
         {
             await _contentDialogService.ShowErrorDialog("Failed to remove action", message);

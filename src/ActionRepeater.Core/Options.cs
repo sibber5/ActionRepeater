@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using ActionRepeater.Core.Action;
 
 namespace ActionRepeater.Core;
 
@@ -35,13 +34,15 @@ public class Options : INotifyPropertyChanged
         {
             if (_useCursorPosOnClicks == value) return;
 
-            foreach (InputAction action in Input.ActionManager.Actions)
-            {
-                if (action is MouseButtonAction mbAction)
-                {
-                    mbAction.UsePosition = value;
-                }
-            }
+            // TODO: [High-Priority] add option to record the position instead of enabling using it in MouseButtonAction
+            //foreach (InputAction action in Input.ActionCollection.Actions)
+            //{
+            //    if (action is MouseButtonAction mbAction)
+            //    {
+            //        mbAction.UsePosition = value;
+            //    }
+            //}
+
             _useCursorPosOnClicks = value;
             OnPropertyChanged();
         }

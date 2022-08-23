@@ -17,11 +17,15 @@ public partial class HomePageViewModel : ObservableObject
     [ObservableProperty]
     private bool _isPlayButtonChecked;
 
-    public bool CanAddAction => !Recorder.IsRecording;
+    public bool CanAddAction => !_recorder.IsRecording;
 
     private readonly ActionListViewModel _actionListViewModel;
 
     private readonly PathWindowService _pathWindowService;
+
+    private readonly ActionCollection _actionCollection;
+    private readonly Recorder _recorder;
+    private readonly Player _player;
 
     // These select the item in the list view that is currently being performed
     private readonly Action<bool> _updateActionsView;
@@ -29,11 +33,15 @@ public partial class HomePageViewModel : ObservableObject
 
     private readonly Microsoft.UI.Dispatching.DispatcherQueueHandler _onIsPlayingChanged;
 
-    public HomePageViewModel(ActionListViewModel actionListVM, PathWindowService pathWindowService)
+    public HomePageViewModel(ActionListViewModel actionListVM, PathWindowService pathWindowService, ActionCollection actionCollection, Recorder recorder, Player player)
     {
         _actionListViewModel = actionListVM;
 
         _pathWindowService = pathWindowService;
+
+        _actionCollection = actionCollection;
+        _recorder = recorder;
+        _player = player;
 
         _updateActionsView = (isAutoRepeat) =>
         {
@@ -56,7 +64,7 @@ public partial class HomePageViewModel : ObservableObject
 
         _onIsPlayingChanged = () =>
         {
-            IsPlayButtonChecked = Player.IsPlaying;
+            IsPlayButtonChecked = _player.IsPlaying;
             ToggleRecordingCommand.NotifyCanExecuteChanged();
         };
 
@@ -65,46 +73,45 @@ public partial class HomePageViewModel : ObservableObject
             if (e.PropertyName == nameof(PlayRepeatCount)) OnPropertyChanged(e);
         };
 
-        Player.IsPlayingChanged += (_, _) =>
+        _player.IsPlayingChanged += (_, _) =>
         {
             App.Current.MainWindow.DispatcherQueue.TryEnqueue(_onIsPlayingChanged);
         };
-        Recorder.IsRecordingChanged += (_, _) =>
+        _recorder.IsRecordingChanged += (_, _) =>
         {
             PlayActionsCommand.NotifyCanExecuteChanged();
             OnPropertyChanged(nameof(CanAddAction));
         };
-        ActionManager.ActionsCountChanged += (_, _) => PlayActionsCommand.NotifyCanExecuteChanged();
+        _actionCollection.ActionsCountChanged += (_, _) => PlayActionsCommand.NotifyCanExecuteChanged();
     }
 
     [RelayCommand(CanExecute = nameof(CanToggleRecording))]
-    private static void ToggleRecording()
+    private void ToggleRecording()
     {
-        if (Recorder.IsRecording)
+        if (_recorder.IsRecording)
         {
-            Recorder.StopRecording();
+            _recorder.StopRecording();
             return;
         }
 
-        if (!Recorder.IsSubscribed) Recorder.RegisterRawInput(App.Current.MainWindow.Handle);
+        if (!_recorder.IsSubscribed) _recorder.RegisterRawInput(App.Current.MainWindow.Handle);
 
-        Recorder.StartRecording();
+        _recorder.StartRecording();
     }
-    private static bool CanToggleRecording() => !Player.IsPlaying;
+    private bool CanToggleRecording() => !_player.IsPlaying;
 
     [RelayCommand(CanExecute = nameof(CanPlayActions))]
     private void PlayActions()
     {
         _actionListViewModel.CurrentSetActionIndex = -1;
-        Player.UpdateView = Core.Options.Instance.SendKeyAutoRepeat ? _updateActionsView : _updateActionsExlView;
+        _player.UpdateView = Core.Options.Instance.SendKeyAutoRepeat ? _updateActionsView : _updateActionsExlView;
 
-        if (!ActionManager.TryPlayActions())
+        if (!_player.TryPlayActions())
         {
-            Player.RefreshIsPlaying();
-            return;
+            _player.RefreshIsPlaying();
         }
     }
-    private static bool CanPlayActions() => !Recorder.IsRecording && ActionManager.Actions.Count > 0;
+    private bool CanPlayActions() => !_recorder.IsRecording && _actionCollection.Actions.Count > 0;
 
     [RelayCommand]
     private void ToggleCursorPathWindow()
@@ -112,10 +119,9 @@ public partial class HomePageViewModel : ObservableObject
         if (_pathWindowService.IsPathWindowOpen)
         {
             _pathWindowService.ClosePathWindow();
+            return;
         }
-        else
-        {
-            _pathWindowService.OpenPathWindow();
-        }
+
+        _pathWindowService.OpenPathWindow();
     }
 }

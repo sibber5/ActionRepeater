@@ -7,42 +7,68 @@ using ActionRepeater.Win32.WindowsAndMessages.Utilities;
 
 namespace ActionRepeater.Core.Input;
 
-public static class Recorder
+public sealed class Recorder
 {
-    public static bool IsRecording { get; private set; }
+    public event EventHandler<bool>? IsRecordingChanged;
+    public event EventHandler<InputAction>? ActionAdded;
 
-    public static event EventHandler<bool>? IsRecordingChanged;
-    public static event EventHandler<InputAction>? ActionAdded;
+    public bool IsRecording { get; private set; }
 
-    public static bool IsSubscribed { get; private set; }
-
-    private static bool _shouldRecordMouseMovement;
-
-    private static int _lastMouseMoveTickCount;
-    private static int _lastNewActionTickCount;
-    private static readonly TimeConsistencyChecker _wheelMsgTCC = new();
+    public bool IsSubscribed { get; private set; }
 
     /// <summary>
     /// Function that returns true if the mouse click shouldnt be recorded.
     /// </summary>
-    public static Func<bool>? IsMouseOverExl;
+    public Func<bool>? ShouldRecordMouseClick;
 
-    // this is set in ActionManager's static ctor
-    public static Action<InputAction> ReplaceLastAction = null!;
+    private bool _shouldRecordMouseMovement;
 
-    private static InputAction? GetLastAction()
+    private int _lastMouseMoveTickCount;
+    private int _lastNewActionTickCount;
+    private readonly TimeConsistencyChecker _wheelMsgTCC = new();
+
+    private readonly ActionCollection _actionCollection;
+
+    public Recorder(ActionCollection actionCollection)
     {
-        if (ActionManager.Actions.Count > 0) return ActionManager.Actions[^1];
+        _actionCollection = actionCollection;
+
+        // this *could* cause a memory leak *if* the action collection should live longer than this recorder instance,
+        // *but* this will not happen with the current usage of these.
+        // if for some reason in the future that changed this class would implement IDisposable
+        // and unsubscribe from the event in Dispose.
+        _actionCollection.ActionsCountChanged += (_, _) =>
+        {
+            if (_actionCollection.Actions.Count == 0)
+            {
+                Reset();
+            }
+        };
+    }
+
+    private InputAction? GetLastAction()
+    {
+        if (_actionCollection.Actions.Count > 0) return _actionCollection.Actions[^1];
         return null;
     }
 
-    public static void Reset()
+    private void ReplaceLastAction(InputAction action)
+    {
+        // the caller of this func always checks if the action list is not empty
+        if (_actionCollection.Actions[^1] == _actionCollection.ActionsExlKeyRepeat[^1])
+        {
+            ((ObservableCollectionEx<InputAction>)_actionCollection.ActionsExlKeyRepeat)[^1] = action;
+        }
+        ((ObservableCollectionEx<InputAction>)_actionCollection.Actions)[^1] = action;
+    }
+
+    public void Reset()
     {
         _lastNewActionTickCount = Environment.TickCount;
         _wheelMsgTCC.Reset();
     }
 
-    public static void StartRecording()
+    public void StartRecording()
     {
         if (!IsSubscribed)
         {
@@ -55,42 +81,42 @@ public static class Recorder
 
         if (_shouldRecordMouseMovement)
         {
-            if (ActionManager.CursorPathStart is null)
+            if (_actionCollection.CursorPathStart is null)
             {
-                ActionManager.CursorPathStart = new(Win32.PInvoke.Helpers.GetCursorPos(), 0);
-                Debug.WriteLine($"set cursor start path pos to: {ActionManager.CursorPathStart.MovPoint}");
+                _actionCollection.CursorPathStart = new(Win32.PInvoke.Helpers.GetCursorPos(), 0);
+                Debug.WriteLine($"set cursor start path pos to: {_actionCollection.CursorPathStart.MovPoint}");
             }
             _lastMouseMoveTickCount = Environment.TickCount;
         }
 
         IsRecording = true;
-        IsRecordingChanged?.Invoke(null, true);
+        IsRecordingChanged?.Invoke(this, true);
     }
 
-    public static void StopRecording()
+    public void StopRecording()
     {
         if (!IsSubscribed) return;
 
         UnregisterRawInput();
 
-        if (ActionManager.CursorPath.Count == 0) ActionManager.CursorPathStart = null;
+        if (_actionCollection.CursorPath.Count == 0) _actionCollection.CursorPathStart = null;
 
         IsRecording = false;
-        IsRecordingChanged?.Invoke(null, false);
+        IsRecordingChanged?.Invoke(this, false);
     }
 
-    public static void RegisterRawInput(IntPtr targetWindowHandle)
+    public void RegisterRawInput(IntPtr targetWindowHandle)
     {
-        RAWINPUTDEVICE[] rid = new[]
+        var rid = new RAWINPUTDEVICE[]
         {
-            new RAWINPUTDEVICE()
+            new()
             {
                 usUsagePage = UsagePage.GenericDesktopControl,
                 usUsage = UsageId.Mouse,
                 dwFlags = RawInputFlags.INPUTSINK,
                 hwndTarget = targetWindowHandle
             },
-            new RAWINPUTDEVICE()
+            new()
             {
                 usUsagePage = UsagePage.GenericDesktopControl,
                 usUsage = UsageId.Keyboard,
@@ -107,7 +133,7 @@ public static class Recorder
         IsSubscribed = true;
     }
 
-    public static void UnregisterRawInput()
+    public void UnregisterRawInput()
     {
         var inputDevices = new RAWINPUTDEVICE[]
         {
@@ -135,7 +161,7 @@ public static class Recorder
         IsSubscribed = false;
     }
 
-    public static void OnInputMessage(WindowMessageEventArgs e)
+    public void OnInputMessage(WindowMessageEventArgs e)
     {
         var inputCode = unchecked(e.Message.wParam & 0xff);
         if (!Win32.PInvoke.GetRawInputData(e.Message.lParam, out RAWINPUT inputData))
@@ -150,15 +176,7 @@ public static class Recorder
 
                 if (data.rawButtonData.buttonInfo.usButtonFlags == 0) // move event
                 {
-                    if (_shouldRecordMouseMovement)
-                    {
-                        int curTickCount = Environment.TickCount;
-                        int ticksSinceLastMov = curTickCount - _lastMouseMoveTickCount;
-
-                        ActionManager.CursorPath.Add(new(new Win32.POINT(data.lLastX, data.lLastY), ticksSinceLastMov));
-
-                        _lastMouseMoveTickCount = curTickCount;
-                    }
+                    OnMouseMove(data.lLastX, data.lLastY);
                 }
                 else // button/wheel event
                 {
@@ -167,69 +185,11 @@ public static class Recorder
                     {
                         case RawMouseButtonState.HWHEEL:
                         case RawMouseButtonState.WHEEL:
-                            int wheelStepCount = unchecked((short)buttonInfo.usButtonData) / 120;
-
-                            if (_wheelMsgTCC.UpdateAndCheckIfConsistent()
-                                && GetLastAction() is MouseWheelAction lastMWAction)
-                            {
-                                int prevWheelStepCount = lastMWAction.StepCount;
-
-                                if ((wheelStepCount < 0) == (prevWheelStepCount < 0))
-                                {
-                                    lastMWAction.StepCount = prevWheelStepCount + wheelStepCount;
-                                    lastMWAction.Duration = _wheelMsgTCC.TickDeltasTotal;
-                                    break;
-                                }
-                            }
-
-                            AddAction(new MouseWheelAction(buttonInfo.usButtonFlags == RawMouseButtonState.HWHEEL, wheelStepCount));
+                            OnMouseWheelMessage(buttonInfo);
                             break;
 
-                        case RawMouseButtonState.LEFT_BUTTON_DOWN:
-                            if (IsMouseOverExl?.Invoke() == true) break;
-                            AddAction(new MouseButtonAction(MouseButtonActionType.MouseButtonDown, InputSimulator.MouseButton.Left,
-                                Win32.PInvoke.Helpers.GetCursorPos(), Options.Instance.UseCursorPosOnClicks));
-                            break;
-                        case RawMouseButtonState.LEFT_BUTTON_UP:
-                            if (IsMouseOverExl?.Invoke() == true) break;
-                            AddAction(new MouseButtonAction(MouseButtonActionType.MouseButtonUp, InputSimulator.MouseButton.Left,
-                                Win32.PInvoke.Helpers.GetCursorPos(), Options.Instance.UseCursorPosOnClicks));
-                            break;
-
-                        case RawMouseButtonState.RIGHT_BUTTON_DOWN:
-                            AddAction(new MouseButtonAction(MouseButtonActionType.MouseButtonDown, InputSimulator.MouseButton.Right,
-                                Win32.PInvoke.Helpers.GetCursorPos(), Options.Instance.UseCursorPosOnClicks));
-                            break;
-                        case RawMouseButtonState.RIGHT_BUTTON_UP:
-                            AddAction(new MouseButtonAction(MouseButtonActionType.MouseButtonUp, InputSimulator.MouseButton.Right,
-                                Win32.PInvoke.Helpers.GetCursorPos(), Options.Instance.UseCursorPosOnClicks));
-                            break;
-
-                        case RawMouseButtonState.MIDDLE_BUTTON_DOWN:
-                            AddAction(new MouseButtonAction(MouseButtonActionType.MouseButtonDown, InputSimulator.MouseButton.Middle,
-                                Win32.PInvoke.Helpers.GetCursorPos(), Options.Instance.UseCursorPosOnClicks));
-                            break;
-                        case RawMouseButtonState.MIDDLE_BUTTON_UP:
-                            AddAction(new MouseButtonAction(MouseButtonActionType.MouseButtonUp, InputSimulator.MouseButton.Middle,
-                                Win32.PInvoke.Helpers.GetCursorPos(), Options.Instance.UseCursorPosOnClicks));
-                            break;
-
-                        case RawMouseButtonState.XBUTTON1_DOWN:
-                            AddAction(new MouseButtonAction(MouseButtonActionType.MouseButtonDown, InputSimulator.MouseButton.X1,
-                                Win32.PInvoke.Helpers.GetCursorPos(), Options.Instance.UseCursorPosOnClicks));
-                            break;
-                        case RawMouseButtonState.XBUTTON1_UP:
-                            AddAction(new MouseButtonAction(MouseButtonActionType.MouseButtonUp, InputSimulator.MouseButton.X1,
-                                Win32.PInvoke.Helpers.GetCursorPos(), Options.Instance.UseCursorPosOnClicks));
-                            break;
-
-                        case RawMouseButtonState.XBUTTON2_DOWN:
-                            AddAction(new MouseButtonAction(MouseButtonActionType.MouseButtonDown, InputSimulator.MouseButton.X2,
-                                Win32.PInvoke.Helpers.GetCursorPos(), Options.Instance.UseCursorPosOnClicks));
-                            break;
-                        case RawMouseButtonState.XBUTTON2_UP:
-                            AddAction(new MouseButtonAction(MouseButtonActionType.MouseButtonUp, InputSimulator.MouseButton.X2,
-                                Win32.PInvoke.Helpers.GetCursorPos(), Options.Instance.UseCursorPosOnClicks));
+                        default:
+                            OnMouseButtonMessage(buttonInfo.usButtonFlags);
                             break;
                     }
                 }
@@ -240,28 +200,7 @@ public static class Recorder
                 VirtualKey key = inputData.data.keyboard.VKey;
                 if (key == VirtualKey.NO_KEY || (ushort)key == 255) break;
 
-                var keyFlags = inputData.data.keyboard.Flags;
-                if (keyFlags.HasFlag(RawInputKeyFlags.BREAK))
-                {
-                    AddAction(new KeyAction(KeyActionType.KeyUp, key));
-                }
-                else //if (keyFlags.HasFlag(RawInputKeyFlags.MAKE))
-                {
-                    var actions = ActionManager.Actions;
-                    bool isAutoRepeat = false;
-                    for (int i = actions.Count - 1; i > -1; --i)
-                    {
-                        if (actions[i] is KeyAction keyActionI
-                            && keyActionI.Key == key)
-                        {
-                            isAutoRepeat = keyActionI.ActionType == KeyActionType.KeyDown;
-                            break;
-                        }
-                    }
-
-                    AddAction(new KeyAction(KeyActionType.KeyDown, key, isAutoRepeat));
-                }
-
+                OnKeyboardMessage(key, inputData.data.keyboard.Flags);
                 break;
         }
 
@@ -272,7 +211,92 @@ public static class Recorder
         }
     }
 
-    private static void AddAction(InputAction action)
+    private void OnMouseMove(int deltaX, int deltaY)
+    {
+        if (!_shouldRecordMouseMovement) return;
+
+        int curTickCount = Environment.TickCount;
+        int ticksSinceLastMov = curTickCount - _lastMouseMoveTickCount;
+
+        _actionCollection.CursorPath.Add(new(new Win32.POINT(deltaX, deltaY), ticksSinceLastMov));
+
+        _lastMouseMoveTickCount = curTickCount;
+    }
+
+    private void OnMouseWheelMessage(RAWMOUSE.RawButtonData.RawButtonInfo buttonInfo)
+    {
+        int wheelStepCount = unchecked((short)buttonInfo.usButtonData) / 120;
+
+        if (_wheelMsgTCC.UpdateAndCheckIfConsistent() && GetLastAction() is MouseWheelAction lastMWAction)
+        {
+            int prevWheelStepCount = lastMWAction.StepCount;
+
+            if ((wheelStepCount < 0) == (prevWheelStepCount < 0))
+            {
+                lastMWAction.StepCount = prevWheelStepCount + wheelStepCount;
+                lastMWAction.Duration = _wheelMsgTCC.TickDeltasTotal;
+                return;
+            }
+        }
+
+        AddAction(new MouseWheelAction(buttonInfo.usButtonFlags == RawMouseButtonState.HWHEEL, wheelStepCount));
+    }
+
+    private void OnMouseButtonMessage(RawMouseButtonState buttonState)
+    {
+        var (button, type) = buttonState switch
+        {
+            RawMouseButtonState.LEFT_BUTTON_DOWN   => (MouseButton.Left, MouseButtonActionType.MouseButtonDown),
+            RawMouseButtonState.LEFT_BUTTON_UP     => (MouseButton.Left, MouseButtonActionType.MouseButtonUp),
+
+            RawMouseButtonState.RIGHT_BUTTON_DOWN  => (MouseButton.Right, MouseButtonActionType.MouseButtonDown),
+            RawMouseButtonState.RIGHT_BUTTON_UP    => (MouseButton.Right, MouseButtonActionType.MouseButtonUp),
+
+            RawMouseButtonState.MIDDLE_BUTTON_DOWN => (MouseButton.Middle, MouseButtonActionType.MouseButtonDown),
+            RawMouseButtonState.MIDDLE_BUTTON_UP   => (MouseButton.Middle, MouseButtonActionType.MouseButtonUp),
+
+            RawMouseButtonState.XBUTTON1_DOWN      => (MouseButton.X1, MouseButtonActionType.MouseButtonDown),
+            RawMouseButtonState.XBUTTON1_UP        => (MouseButton.X1, MouseButtonActionType.MouseButtonUp),
+
+            RawMouseButtonState.XBUTTON2_DOWN      => (MouseButton.X2, MouseButtonActionType.MouseButtonDown),
+            RawMouseButtonState.XBUTTON2_UP        => (MouseButton.X2, MouseButtonActionType.MouseButtonUp),
+
+            _ => throw new NotSupportedException($"{buttonState} not supported.")
+        };
+
+        if (button == MouseButton.Left && ShouldRecordMouseClick?.Invoke() == true) return;
+
+        AddAction(new MouseButtonAction(type, button, Win32.PInvoke.Helpers.GetCursorPos(), Options.Instance.UseCursorPosOnClicks));
+    }
+
+    private void OnKeyboardMessage(VirtualKey key, RawInputKeyFlags keyFlags)
+    {
+        if (keyFlags.HasFlag(RawInputKeyFlags.BREAK)) // key up
+        {
+            AddAction(new KeyAction(KeyActionType.KeyUp, key));
+        }
+        else //if (keyFlags.HasFlag(RawInputKeyFlags.MAKE))
+        {
+            AddAction(new KeyAction(KeyActionType.KeyDown, key, IsAutoRepeat()));
+        }
+
+        bool IsAutoRepeat()
+        {
+            var actions = _actionCollection.Actions;
+
+            for (int i = actions.Count - 1; i > -1; --i)
+            {
+                if (actions[i] is KeyAction keyActionI && keyActionI.Key == key)
+                {
+                    return keyActionI.ActionType == KeyActionType.KeyDown;
+                }
+            }
+
+            return false;
+        }
+    }
+
+    private void AddAction(InputAction action)
     {
         if (action is null)
         {
@@ -318,13 +342,13 @@ public static class Recorder
 
         if (ticksSinceLastAction > 10)
         {
-            ActionManager.AddAction(new WaitAction(ticksSinceLastAction));
+            _actionCollection.Add(new WaitAction(ticksSinceLastAction));
         }
 
-        ActionManager.AddAction(action);
-
-        ActionAdded?.Invoke(null, action);
+        _actionCollection.Add(action);
 
         _lastNewActionTickCount = curTickCount;
+
+        ActionAdded?.Invoke(this, action);
     }
 }

@@ -39,20 +39,28 @@ public partial class EditActionDialogViewModel : ObservableObject
     // reference to content dialog to manually enable and disabled add button, because CanExecute doesnt do that for some reason.
     private readonly ContentDialog _contentDialog;
 
-    public EditActionDialogViewModel(ActionType actionType, ContentDialog contentDialog, bool canChangeAction = true)
+    private readonly ActionCollection _actionsCollection;
+
+    public EditActionDialogViewModel(ActionType actionType, ContentDialog contentDialog, ActionCollection actionsCollection, bool canChangeAction = true)
     {
         CanChangeAction = canChangeAction;
         SelectedAction = actionType;
         CurrentEditActionViewModel = GetViewModelForAction(actionType);
+
         _contentDialog = contentDialog;
+
+        _actionsCollection = actionsCollection;
     }
 
-    public EditActionDialogViewModel(ObservableObject editActionViewModel, ContentDialog contentDialog, bool canChangeAction = false)
+    public EditActionDialogViewModel(ObservableObject editActionViewModel, ContentDialog contentDialog, ActionCollection actionsCollection, bool canChangeAction = false)
     {
         CanChangeAction = canChangeAction;
         SelectedAction = GetActionForViewModel(editActionViewModel);
         CurrentEditActionViewModel = editActionViewModel;
+
         _contentDialog = contentDialog;
+
+        _actionsCollection = actionsCollection;
     }
 
     private void Validator_ErrorsChanged(object? sender, System.ComponentModel.DataErrorsChangedEventArgs e)
@@ -73,7 +81,7 @@ public partial class EditActionDialogViewModel : ObservableObject
             _ => throw new System.NotSupportedException($"{CurrentEditActionViewModel?.GetType()} not supported.")
         };
 
-        ActionManager.AddAction(action, addAutoRepeatIfActIsKeyUp: true);
+        _actionsCollection.Add(action, addAutoRepeatIfActIsKeyUp: true);
     }
 
     [RelayCommand]
@@ -86,7 +94,7 @@ public partial class EditActionDialogViewModel : ObservableObject
 
                 if (ka.ActionType == KeyActionType.KeyDown)
                 {
-                    ActionManager.TryReplaceAction(false, ActionManager.Actions.RefIndexOfReverse(action), new KeyAction(keyVM.Type, keyVM.Key));
+                    _actionsCollection.TryReplace(false, _actionsCollection.Actions.RefIndexOfReverse(action), new KeyAction(keyVM.Type, keyVM.Key));
                     break;
                 }
 
@@ -109,9 +117,9 @@ public partial class EditActionDialogViewModel : ObservableObject
                 break;
 
             case EditWaitActionViewModel waitVM:
-                if (ActionManager.HasActionBeenModified(action))
+                if (_actionsCollection.HasActionBeenModified(action))
                 {
-                    ActionManager.TryReplaceAction(true, ActionManager.ActionsExlKeyRepeat.RefIndexOfReverse(action), new WaitAction((int)(waitVM.DurationSecs * 1000)));
+                    _actionsCollection.TryReplace(true, _actionsCollection.ActionsExlKeyRepeat.RefIndexOfReverse(action), new WaitAction((int)(waitVM.DurationSecs * 1000)));
                     break;
                 }
 

@@ -1,5 +1,6 @@
 ﻿using ActionRepeater.Core.Action;
 using ActionRepeater.Core.Extentions;
+using ActionRepeater.Core.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -7,9 +8,6 @@ namespace ActionRepeater.UI.ViewModels;
 
 public partial class ActionViewModel : ObservableObject
 {
-    private static ActionListViewModel? _actionListViewModel;
-    public static ActionListViewModel ActionListViewModel => _actionListViewModel ??= App.Current.Services.GetRequiredService<ActionListViewModel>();
-
     public double GlyphSize { get; }
 
     public string? Glyph { get; }
@@ -19,6 +17,12 @@ public partial class ActionViewModel : ObservableObject
 
     [ObservableProperty]
     private string _description;
+
+    private static ActionListViewModel? _actionListViewModel;
+    private static ActionListViewModel ActionListViewModel => _actionListViewModel ??= App.Current.Services.GetRequiredService<ActionListViewModel>();
+
+    private static ActionCollection? _actionCollection;
+    private static ActionCollection ActionCollection => _actionCollection ??= App.Current.Services.GetRequiredService<ActionCollection>();
 
     public ActionViewModel(InputAction inputAction)
     {
@@ -51,10 +55,10 @@ public partial class ActionViewModel : ObservableObject
     /// <returns>The <see cref="ActionViewModel"/> for the <paramref name="action"/>, that is currently bound to in the view.</returns>
     private static (ActionViewModel? actionsVM, ActionViewModel? actionsExlVM) GetActionViewModels(InputAction action)
     {
-        int actionsIndex = Core.Input.ActionManager.Actions.RefIndexOfReverse(action);
+        int actionsIndex = ActionCollection.Actions.RefIndexOfReverse(action);
         ActionViewModel? actionVM = actionsIndex == -1 ? null : ActionListViewModel.ActionVMs[actionsIndex];
 
-        int actionsExlIndex = Core.Input.ActionManager.ActionsExlKeyRepeat.RefIndexOfReverse(action);
+        int actionsExlIndex = ActionCollection.ActionsExlKeyRepeat.RefIndexOfReverse(action);
         ActionViewModel? actionExlVM = actionsExlIndex == -1 ? null : ActionListViewModel.ActionsExlVMs[actionsExlIndex];
 
         return (actionVM, actionExlVM);

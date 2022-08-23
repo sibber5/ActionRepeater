@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using MouseButton = ActionRepeater.Core.Input.InputSimulator.MouseButton;
+using ActionRepeater.Core.Input;
 using POINT = ActionRepeater.Win32.POINT;
 using VirtualKey = ActionRepeater.Win32.Input.VirtualKey;
 

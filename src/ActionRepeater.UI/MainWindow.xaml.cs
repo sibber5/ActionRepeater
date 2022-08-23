@@ -31,6 +31,8 @@ public sealed partial class MainWindow : Window
 
     private readonly WindowMessageMonitor _msgMonitor;
 
+    private readonly Recorder _recorder;
+
     public MainWindow()
     {
         Handle = WinRT.Interop.WindowNative.GetWindowHandle(this);
@@ -52,6 +54,7 @@ public sealed partial class MainWindow : Window
         }
 
         _viewModel = App.Current.Services.GetRequiredService<MainViewModel>();
+        _recorder = App.Current.Services.GetRequiredService<Recorder>();
 
         InitializeComponent();
     }
@@ -61,7 +64,7 @@ public sealed partial class MainWindow : Window
         switch (e.MessageType)
         {
             case WindowMessage.INPUT:
-                Recorder.OnInputMessage(e);
+                _recorder.OnInputMessage(e);
                 break;
 
             case WindowMessage.GETMINMAXINFO:

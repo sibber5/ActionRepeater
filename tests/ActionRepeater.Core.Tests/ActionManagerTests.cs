@@ -1,6 +1,6 @@
 ﻿namespace ActionRepeater.Core.Tests;
 
-public class ActionManagerTests
+public class ActionServiceTests
 {
 
 }

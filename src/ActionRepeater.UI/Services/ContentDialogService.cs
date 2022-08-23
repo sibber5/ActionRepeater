@@ -1,6 +1,7 @@
 ﻿using System;
 using ActionRepeater.Core.Action;
 using ActionRepeater.Core.Input;
+using ActionRepeater.UI.Factories;
 using ActionRepeater.UI.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -15,9 +16,16 @@ public class ContentDialogService
     // would have set it in the ctor but it must be set after MainWindow.Content has loaded.
     internal XamlRoot XamlRoot { get; set; } = null!;
 
-    public ContentDialogService()
+    private readonly ActionCollection _actionCollection;
+
+    private readonly EditActionDialogViewModelFactory _editActionDialogViewModelFactory;
+
+    public ContentDialogService(ActionCollection actionCollection, EditActionDialogViewModelFactory editActionDialogViewModelFactory)
     {
         System.Diagnostics.Debug.WriteLineIf(XamlRoot is null, "XamlRoot should be set.");
+
+        _actionCollection = actionCollection;
+        _editActionDialogViewModelFactory = editActionDialogViewModelFactory;
     }
 
     public IAsyncOperation<ContentDialogResult> ShowErrorDialog(string title, string message)
@@ -65,7 +73,7 @@ public class ContentDialogService
             SecondaryButtonText = "Cancel",
         };
 
-        EditActionDialogViewModel vm = new(actionType, dialog);
+        EditActionDialogViewModel vm = _editActionDialogViewModelFactory.Create(actionType, dialog);
 
         dialog.Content = new Views.EditActionView(isAddView: true) { ViewModel = vm };
         dialog.PrimaryButtonCommand = vm.AddActionCommand;
@@ -75,11 +83,11 @@ public class ContentDialogService
 
     public IAsyncOperation<ContentDialogResult> ShowEditActionDialog(ObservableObject editActionViewModel, InputAction actionToEdit)
     {
-        if (ActionManager.IsActionTiedToModifiedAction(actionToEdit))
+        if (_actionCollection.IsActionTiedToModifiedAction(actionToEdit))
         {
             return ShowErrorDialog("This action is not editable.", (actionToEdit is KeyAction ka && ka.IsAutoRepeat)
                 ? "This is an auto repeat action, edit the original key down action if you want to change the key."
-                : ActionManager.ActionTiedToModifiedActMsg);
+                : ActionCollection.ActionTiedToModifiedActMsg);
         }
 
         ContentDialog dialog = new()
@@ -89,7 +97,7 @@ public class ContentDialogService
             SecondaryButtonText = "Cancel",
         };
 
-        EditActionDialogViewModel vm = new(editActionViewModel, dialog);
+        EditActionDialogViewModel vm = _editActionDialogViewModelFactory.Create(editActionViewModel, dialog);
 
         dialog.Content = new Views.EditActionView() { ViewModel = vm };
         dialog.PrimaryButtonCommand = vm.UpdateActionCommand;

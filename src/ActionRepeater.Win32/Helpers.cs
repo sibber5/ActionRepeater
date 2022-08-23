@@ -25,24 +25,13 @@ public static partial class PInvoke
         /// </returns>
         public static bool SendMouseEvent(MOUSEEVENTF eventFlags, uint data = 0, int dx = 0, int dy = 0)
         {
-            INPUT[] input = new[]
-            {
-                new INPUT
-                {
-                    type = INPUT.TYPE.MOUSE,
-                    union = new INPUT.UNION
-                    {
-                        mi = new MOUSEINPUT
-                        {
-                            dx = dx,
-                            dy = dy,
-                            mouseData = data,
-                            dwFlags = eventFlags,
-                            time = 0
-                        }
-                    }
-                }
-            };
+            Span<INPUT> input = stackalloc INPUT[1];
+
+            input[0].type = INPUT.TYPE.MOUSE;
+            input[0].union.mi.dx = dx;
+            input[0].union.mi.dy = dy;
+            input[0].union.mi.mouseData = data;
+            input[0].union.mi.dwFlags = eventFlags;
 
             return PInvoke.SendInput(input) == 1;
         }
@@ -60,22 +49,11 @@ public static partial class PInvoke
         /// </returns>
         public static bool SendKeyEvent(KEYEVENTF eventFlags, ushort scanCode)
         {
-            INPUT[] input = new[]
-            {
-                new INPUT
-                {
-                    type = INPUT.TYPE.KEYBOARD,
-                    union = new INPUT.UNION
-                    {
-                        ki = new KEYBDINPUT
-                        {
-                            wScan = scanCode,
-                            dwFlags = eventFlags,
-                            time = 0
-                        }
-                    }
-                }
-            };
+            Span<INPUT> input = stackalloc INPUT[1];
+
+            input[0].type = INPUT.TYPE.KEYBOARD;
+            input[0].union.ki.wScan = scanCode;
+            input[0].union.ki.dwFlags = eventFlags;
 
             return PInvoke.SendInput(input) == 1;
         }

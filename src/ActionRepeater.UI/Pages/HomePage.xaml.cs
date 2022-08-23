@@ -19,6 +19,6 @@ public sealed partial class HomePage : Page
 
         _repeatActionsNumBox.NumberFormatter = Helpers.NumberFormatterHelper.RoundToOneFormatter;
 
-        Core.Input.Recorder.IsMouseOverExl ??= () => _recordButton.IsPointerOver;
+        App.Current.Services.GetRequiredService<Core.Input.Recorder>().ShouldRecordMouseClick ??= () => _recordButton.IsPointerOver;
     }
 }

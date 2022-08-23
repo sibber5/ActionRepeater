@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using ActionRepeater.Core.Extentions;
-using static ActionRepeater.Core.Input.InputSimulator;
+using ActionRepeater.Core.Input;
 using POINT = ActionRepeater.Win32.POINT;
 
 namespace ActionRepeater.Core.Action;
@@ -76,9 +76,9 @@ public sealed class MouseButtonAction : InputAction, IEquatable<MouseButtonActio
     {
         bool success = ActionType switch
         {
-            MouseButtonActionType.MouseButtonDown  => _usePosition ? SendMouseButtonDown(_button, _position)  : SendMouseButtonDown(_button),
-            MouseButtonActionType.MouseButtonUp    => _usePosition ? SendMouseButtonUp(_button, _position)    : SendMouseButtonUp(_button),
-            MouseButtonActionType.MouseButtonClick => _usePosition ? SendMouseButtonClick(_button, _position) : SendMouseButtonClick(_button),
+            MouseButtonActionType.MouseButtonDown  => _usePosition ? InputSimulator.SendMouseButtonDown(_button, _position)  : InputSimulator.SendMouseButtonDown(_button),
+            MouseButtonActionType.MouseButtonUp    => _usePosition ? InputSimulator.SendMouseButtonUp(_button, _position)    : InputSimulator.SendMouseButtonUp(_button),
+            MouseButtonActionType.MouseButtonClick => _usePosition ? InputSimulator.SendMouseButtonClick(_button, _position) : InputSimulator.SendMouseButtonClick(_button),
             _ => throw new InvalidEnumArgumentException("Invalid mouse button action.")
         };
 

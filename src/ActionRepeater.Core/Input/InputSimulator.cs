@@ -7,30 +7,6 @@ namespace ActionRepeater.Core.Input;
 
 public static class InputSimulator
 {
-    public enum MouseButton
-    {
-        /// <summary>
-        /// The left button.
-        /// </summary>
-        Left,
-        /// <summary>
-        /// The middle button (wheel button)
-        /// </summary>
-        Middle,
-        /// <summary>
-        /// The right button.
-        /// </summary>
-        Right,
-        /// <summary>
-        /// The first X button (extra mouse [usually] side button)
-        /// </summary>
-        X1,
-        /// <summary>
-        /// The second X button (extra mouse [usually] side button)
-        /// </summary>
-        X2
-    }
-
     /// <summary>
     /// Extended keys which are preceded by 0xE0. This array is sorted.
     /// </summary>
@@ -160,33 +136,15 @@ public static class InputSimulator
     /// </returns>
     public static bool SendMouseButtonDown(MouseButton button)
     {
-        uint data = 0;
-        MOUSEEVENTF flags = default;
-
-        switch (button)
+        (MOUSEEVENTF flags, uint data) = button switch
         {
-            case MouseButton.X1:
-                data = MOUSEINPUT.XBUTTON1;
-                flags = MOUSEEVENTF.XDOWN;
-                break;
-
-            case MouseButton.X2:
-                data = MOUSEINPUT.XBUTTON2;
-                flags = MOUSEEVENTF.XDOWN;
-                break;
-
-            case MouseButton.Left:
-                flags = MOUSEEVENTF.LEFTDOWN;
-                break;
-
-            case MouseButton.Right:
-                flags = MOUSEEVENTF.RIGHTDOWN;
-                break;
-
-            case MouseButton.Middle:
-                flags = MOUSEEVENTF.MIDDLEDOWN;
-                break;
-        }
+            MouseButton.X1     => (MOUSEEVENTF.XDOWN, MOUSEINPUT.XBUTTON1),
+            MouseButton.X2     => (MOUSEEVENTF.XDOWN, MOUSEINPUT.XBUTTON2),
+            MouseButton.Left   => (MOUSEEVENTF.LEFTDOWN, 0u),
+            MouseButton.Right  => (MOUSEEVENTF.RIGHTDOWN, 0u),
+            MouseButton.Middle => (MOUSEEVENTF.MIDDLEDOWN, 0u),
+            _ => throw new NotSupportedException()
+        };
 
         return SendMouseEvent(
             eventFlags: flags,
@@ -206,33 +164,15 @@ public static class InputSimulator
     /// </returns>
     public static bool SendMouseButtonDown(MouseButton button, POINT pos, bool relative = false)
     {
-        uint data = 0;
-        MOUSEEVENTF flags = MOUSEEVENTF.MOVE;
-
-        switch (button)
+        (MOUSEEVENTF flags, uint data) = button switch
         {
-            case MouseButton.X1:
-                data = MOUSEINPUT.XBUTTON1;
-                flags |= MOUSEEVENTF.XDOWN;
-                break;
-
-            case MouseButton.X2:
-                data = MOUSEINPUT.XBUTTON2;
-                flags |= MOUSEEVENTF.XDOWN;
-                break;
-
-            case MouseButton.Left:
-                flags |= MOUSEEVENTF.LEFTDOWN;
-                break;
-
-            case MouseButton.Right:
-                flags |= MOUSEEVENTF.RIGHTDOWN;
-                break;
-
-            case MouseButton.Middle:
-                flags |= MOUSEEVENTF.MIDDLEDOWN;
-                break;
-        }
+            MouseButton.X1     => (MOUSEEVENTF.MOVE | MOUSEEVENTF.XDOWN, MOUSEINPUT.XBUTTON1),
+            MouseButton.X2     => (MOUSEEVENTF.MOVE | MOUSEEVENTF.XDOWN, MOUSEINPUT.XBUTTON2),
+            MouseButton.Left   => (MOUSEEVENTF.MOVE | MOUSEEVENTF.LEFTDOWN, 0u),
+            MouseButton.Right  => (MOUSEEVENTF.MOVE | MOUSEEVENTF.RIGHTDOWN, 0u),
+            MouseButton.Middle => (MOUSEEVENTF.MOVE | MOUSEEVENTF.MIDDLEDOWN, 0u),
+            _ => throw new NotSupportedException()
+        };
 
         if (!relative)
         {
@@ -255,33 +195,15 @@ public static class InputSimulator
     /// </returns>
     public static bool SendMouseButtonUp(MouseButton button)
     {
-        uint data = 0;
-        MOUSEEVENTF flags = default;
-
-        switch (button)
+        (MOUSEEVENTF flags, uint data) = button switch
         {
-            case MouseButton.X1:
-                data = MOUSEINPUT.XBUTTON1;
-                flags = MOUSEEVENTF.XUP;
-                break;
-
-            case MouseButton.X2:
-                data = MOUSEINPUT.XBUTTON2;
-                flags = MOUSEEVENTF.XUP;
-                break;
-
-            case MouseButton.Left:
-                flags = MOUSEEVENTF.LEFTUP;
-                break;
-
-            case MouseButton.Right:
-                flags = MOUSEEVENTF.RIGHTUP;
-                break;
-
-            case MouseButton.Middle:
-                flags = MOUSEEVENTF.MIDDLEUP;
-                break;
-        }
+            MouseButton.X1     => (MOUSEEVENTF.XUP, MOUSEINPUT.XBUTTON1),
+            MouseButton.X2     => (MOUSEEVENTF.XUP, MOUSEINPUT.XBUTTON2),
+            MouseButton.Left   => (MOUSEEVENTF.LEFTUP, 0u),
+            MouseButton.Right  => (MOUSEEVENTF.RIGHTUP, 0u),
+            MouseButton.Middle => (MOUSEEVENTF.MIDDLEUP, 0u),
+            _ => throw new NotSupportedException()
+        };
 
         return SendMouseEvent(
             eventFlags: flags,
@@ -301,33 +223,15 @@ public static class InputSimulator
     /// </returns>
     public static bool SendMouseButtonUp(MouseButton button, POINT pos, bool relative = false)
     {
-        uint data = 0;
-        MOUSEEVENTF flags = MOUSEEVENTF.MOVE;
-
-        switch (button)
+        (MOUSEEVENTF flags, uint data) = button switch
         {
-            case MouseButton.X1:
-                data = MOUSEINPUT.XBUTTON1;
-                flags |= MOUSEEVENTF.XUP;
-                break;
-
-            case MouseButton.X2:
-                data = MOUSEINPUT.XBUTTON2;
-                flags |= MOUSEEVENTF.XUP;
-                break;
-
-            case MouseButton.Left:
-                flags |= MOUSEEVENTF.LEFTUP;
-                break;
-
-            case MouseButton.Right:
-                flags |= MOUSEEVENTF.RIGHTUP;
-                break;
-
-            case MouseButton.Middle:
-                flags |= MOUSEEVENTF.MIDDLEUP;
-                break;
-        }
+            MouseButton.X1     => (MOUSEEVENTF.MOVE | MOUSEEVENTF.XUP, MOUSEINPUT.XBUTTON1),
+            MouseButton.X2     => (MOUSEEVENTF.MOVE | MOUSEEVENTF.XUP, MOUSEINPUT.XBUTTON2),
+            MouseButton.Left   => (MOUSEEVENTF.MOVE | MOUSEEVENTF.LEFTUP, 0u),
+            MouseButton.Right  => (MOUSEEVENTF.MOVE | MOUSEEVENTF.RIGHTUP, 0u),
+            MouseButton.Middle => (MOUSEEVENTF.MOVE | MOUSEEVENTF.MIDDLEUP, 0u),
+            _ => throw new NotSupportedException()
+        };
 
         if (!relative)
         {
@@ -350,69 +254,25 @@ public static class InputSimulator
     /// </returns>
     public static bool SendMouseButtonClick(MouseButton button)
     {
-        uint data = 0;
-        MOUSEEVENTF flags0 = default;
-        MOUSEEVENTF flags1 = default;
-
-        switch (button)
+        (MOUSEEVENTF flags0, MOUSEEVENTF flags1, uint data) = button switch
         {
-            case MouseButton.X1:
-                data = MOUSEINPUT.XBUTTON1;
-                flags0 = MOUSEEVENTF.XDOWN;
-                flags1 = MOUSEEVENTF.XUP;
-                break;
-
-            case MouseButton.X2:
-                data = MOUSEINPUT.XBUTTON2;
-                flags0 = MOUSEEVENTF.XDOWN;
-                flags1 = MOUSEEVENTF.XUP;
-                break;
-
-            case MouseButton.Left:
-                flags0 = MOUSEEVENTF.LEFTDOWN;
-                flags1 = MOUSEEVENTF.LEFTUP;
-                break;
-
-            case MouseButton.Right:
-                flags0 = MOUSEEVENTF.RIGHTDOWN;
-                flags1 = MOUSEEVENTF.RIGHTUP;
-                break;
-
-            case MouseButton.Middle:
-                flags0 = MOUSEEVENTF.MIDDLEDOWN;
-                flags1 = MOUSEEVENTF.MIDDLEUP;
-                break;
-        }
-
-        INPUT[] input = new[]
-        {
-            new INPUT
-            {
-                type = INPUT.TYPE.MOUSE,
-                union = new INPUT.UNION
-                {
-                    mi = new MOUSEINPUT
-                    {
-                        mouseData = data,
-                        dwFlags = flags0,
-                        time = 0
-                    }
-                }
-            },
-            new INPUT
-            {
-                type = INPUT.TYPE.MOUSE,
-                union = new INPUT.UNION
-                {
-                    mi = new MOUSEINPUT
-                    {
-                        mouseData = data,
-                        dwFlags = flags1,
-                        time = 0
-                    }
-                }
-            },
+            MouseButton.X1     => (MOUSEEVENTF.XDOWN, MOUSEEVENTF.XUP, MOUSEINPUT.XBUTTON1),
+            MouseButton.X2     => (MOUSEEVENTF.XDOWN, MOUSEEVENTF.XUP, MOUSEINPUT.XBUTTON2),
+            MouseButton.Left   => (MOUSEEVENTF.LEFTDOWN, MOUSEEVENTF.LEFTUP, 0u),
+            MouseButton.Right  => (MOUSEEVENTF.RIGHTDOWN, MOUSEEVENTF.RIGHTUP, 0u),
+            MouseButton.Middle => (MOUSEEVENTF.MIDDLEDOWN, MOUSEEVENTF.MIDDLEUP, 0u),
+            _ => throw new NotSupportedException()
         };
+
+        Span<INPUT> input = stackalloc INPUT[2];
+
+        input[0].type = INPUT.TYPE.MOUSE;
+        input[0].union.mi.mouseData = data;
+        input[0].union.mi.dwFlags = flags0;
+
+        input[1].type = INPUT.TYPE.MOUSE;
+        input[1].union.mi.mouseData = data;
+        input[1].union.mi.dwFlags = flags1;
 
         return PInvoke.SendInput(input) == 2;
     }
@@ -429,39 +289,15 @@ public static class InputSimulator
     /// </returns>
     public static bool SendMouseButtonClick(MouseButton button, POINT pos, bool relative = false)
     {
-        uint data = 0;
-        MOUSEEVENTF flags0 = MOUSEEVENTF.MOVE;
-        MOUSEEVENTF flags1 = default;
-
-        switch (button)
+        (MOUSEEVENTF flags0, MOUSEEVENTF flags1, uint data) = button switch
         {
-            case MouseButton.X1:
-                data = MOUSEINPUT.XBUTTON1;
-                flags0 |= MOUSEEVENTF.XDOWN;
-                flags1 = MOUSEEVENTF.XUP;
-                break;
-
-            case MouseButton.X2:
-                data = MOUSEINPUT.XBUTTON2;
-                flags0 |= MOUSEEVENTF.XDOWN;
-                flags1 = MOUSEEVENTF.XUP;
-                break;
-
-            case MouseButton.Left:
-                flags0 |= MOUSEEVENTF.LEFTDOWN;
-                flags1 = MOUSEEVENTF.LEFTUP;
-                break;
-
-            case MouseButton.Right:
-                flags0 |= MOUSEEVENTF.RIGHTDOWN;
-                flags1 = MOUSEEVENTF.RIGHTUP;
-                break;
-
-            case MouseButton.Middle:
-                flags0 |= MOUSEEVENTF.MIDDLEDOWN;
-                flags1 = MOUSEEVENTF.MIDDLEUP;
-                break;
-        }
+            MouseButton.X1     => (MOUSEEVENTF.MOVE | MOUSEEVENTF.XDOWN, MOUSEEVENTF.XUP, MOUSEINPUT.XBUTTON1),
+            MouseButton.X2     => (MOUSEEVENTF.MOVE | MOUSEEVENTF.XDOWN, MOUSEEVENTF.XUP, MOUSEINPUT.XBUTTON2),
+            MouseButton.Left   => (MOUSEEVENTF.MOVE | MOUSEEVENTF.LEFTDOWN, MOUSEEVENTF.LEFTUP, 0u),
+            MouseButton.Right  => (MOUSEEVENTF.MOVE | MOUSEEVENTF.RIGHTDOWN, MOUSEEVENTF.RIGHTUP, 0u),
+            MouseButton.Middle => (MOUSEEVENTF.MOVE | MOUSEEVENTF.MIDDLEDOWN, MOUSEEVENTF.MIDDLEUP, 0u),
+            _ => throw new NotSupportedException()
+        };
 
         if (!relative)
         {
@@ -470,37 +306,17 @@ public static class InputSimulator
             pos.y -= curPos.y;
         }
 
-        INPUT[] input = new[]
-        {
-            new INPUT
-            {
-                type = INPUT.TYPE.MOUSE,
-                union = new INPUT.UNION
-                {
-                    mi = new MOUSEINPUT
-                    {
-                        dx = pos.x,
-                        dy = pos.y,
-                        mouseData = data,
-                        dwFlags = flags0,
-                        time = 0
-                    }
-                }
-            },
-            new INPUT
-            {
-                type = INPUT.TYPE.MOUSE,
-                union = new INPUT.UNION
-                {
-                    mi = new MOUSEINPUT
-                    {
-                        mouseData = data,
-                        dwFlags = flags1,
-                        time = 0
-                    }
-                }
-            },
-        };
+        Span<INPUT> input = stackalloc INPUT[2];
+
+        input[0].type = INPUT.TYPE.MOUSE;
+        input[0].union.mi.dx = pos.x;
+        input[0].union.mi.dy = pos.y;
+        input[0].union.mi.mouseData = data;
+        input[0].union.mi.dwFlags = flags0;
+
+        input[1].type = INPUT.TYPE.MOUSE;
+        input[1].union.mi.mouseData = data;
+        input[1].union.mi.dwFlags = flags1;
 
         return PInvoke.SendInput(input) == 2;
     }
@@ -526,35 +342,15 @@ public static class InputSimulator
                 return SendKeyEvent(KEYEVENTF.SCANCODE | KEYEVENTF.EXTENDEDKEY, scanCode);
             }
 
-            INPUT[] input = new[]
-            {
-                new INPUT
-                {
-                    type = INPUT.TYPE.KEYBOARD,
-                    union = new INPUT.UNION
-                    {
-                        ki = new KEYBDINPUT
-                        {
-                            wScan = 0xE1,
-                            dwFlags = KEYEVENTF.SCANCODE,
-                            time = 0
-                        }
-                    }
-                },
-                new INPUT
-                {
-                    type = INPUT.TYPE.KEYBOARD,
-                    union = new INPUT.UNION
-                    {
-                        ki = new KEYBDINPUT
-                        {
-                            wScan = scanCode,
-                            dwFlags = KEYEVENTF.SCANCODE,
-                            time = 0
-                        }
-                    }
-                }
-            };
+            Span<INPUT> input = stackalloc INPUT[2];
+
+            input[0].type = INPUT.TYPE.KEYBOARD;
+            input[0].union.ki.wScan = 0xE1;
+            input[0].union.ki.dwFlags = KEYEVENTF.SCANCODE;
+
+            input[1].type = INPUT.TYPE.KEYBOARD;
+            input[1].union.ki.wScan = scanCode;
+            input[1].union.ki.dwFlags = KEYEVENTF.SCANCODE;
 
             return PInvoke.SendInput(input) == 2;
         }
@@ -583,35 +379,15 @@ public static class InputSimulator
                 return SendKeyEvent(KEYEVENTF.KEYUP | KEYEVENTF.SCANCODE | KEYEVENTF.EXTENDEDKEY, scanCode);
             }
 
-            INPUT[] input = new[]
-            {
-                new INPUT
-                {
-                    type = INPUT.TYPE.KEYBOARD,
-                    union = new INPUT.UNION
-                    {
-                        ki = new KEYBDINPUT
-                        {
-                            wScan = 0xE1,
-                            dwFlags = KEYEVENTF.KEYUP | KEYEVENTF.SCANCODE,
-                            time = 0
-                        }
-                    }
-                },
-                new INPUT
-                {
-                    type = INPUT.TYPE.KEYBOARD,
-                    union = new INPUT.UNION
-                    {
-                        ki = new KEYBDINPUT
-                        {
-                            wScan = scanCode,
-                            dwFlags = KEYEVENTF.KEYUP | KEYEVENTF.SCANCODE,
-                            time = 0
-                        }
-                    }
-                }
-            };
+            Span<INPUT> input = stackalloc INPUT[2];
+
+            input[0].type = INPUT.TYPE.KEYBOARD;
+            input[0].union.ki.wScan = 0xE1;
+            input[0].union.ki.dwFlags = KEYEVENTF.KEYUP | KEYEVENTF.SCANCODE;
+
+            input[1].type = INPUT.TYPE.KEYBOARD;
+            input[1].union.ki.wScan = scanCode;
+            input[1].union.ki.dwFlags = KEYEVENTF.KEYUP | KEYEVENTF.SCANCODE;
 
             return PInvoke.SendInput(input) == 2;
         }
@@ -637,95 +413,38 @@ public static class InputSimulator
 
         if (hasE1Prefix)
         {
-            INPUT[] inputE1 = new[]
-            {
-                new INPUT
-                {
-                    type = INPUT.TYPE.KEYBOARD,
-                    union = new INPUT.UNION
-                    {
-                        ki = new KEYBDINPUT
-                        {
-                            wScan = 0xE1,
-                            dwFlags = KEYEVENTF.SCANCODE,
-                            time = 0
-                        }
-                    }
-                },
-                new INPUT
-                {
-                    type = INPUT.TYPE.KEYBOARD,
-                    union = new INPUT.UNION
-                    {
-                        ki = new KEYBDINPUT
-                        {
-                            wScan = scanCode,
-                            dwFlags = KEYEVENTF.SCANCODE,
-                            time = 0
-                        }
-                    }
-                },
-                new INPUT
-                {
-                    type = INPUT.TYPE.KEYBOARD,
-                    union = new INPUT.UNION
-                    {
-                        ki = new KEYBDINPUT
-                        {
-                            wScan = 0xE1,
-                            dwFlags = KEYEVENTF.KEYUP | KEYEVENTF.SCANCODE,
-                            time = 0
-                        }
-                    }
-                },
-                new INPUT
-                {
-                    type = INPUT.TYPE.KEYBOARD,
-                    union = new INPUT.UNION
-                    {
-                        ki = new KEYBDINPUT
-                        {
-                            wScan = scanCode,
-                            dwFlags = KEYEVENTF.KEYUP | KEYEVENTF.SCANCODE,
-                            time = 0
-                        }
-                    }
-                }
-            };
+            Span<INPUT> inputE1 = stackalloc INPUT[4];
+
+            inputE1[0].type = INPUT.TYPE.KEYBOARD;
+            inputE1[0].union.ki.wScan = 0xE1;
+            inputE1[0].union.ki.dwFlags = KEYEVENTF.SCANCODE;
+
+            inputE1[1].type = INPUT.TYPE.KEYBOARD;
+            inputE1[1].union.ki.wScan = scanCode;
+            inputE1[1].union.ki.dwFlags = KEYEVENTF.SCANCODE;
+
+            inputE1[2].type = INPUT.TYPE.KEYBOARD;
+            inputE1[2].union.ki.wScan = 0xE1;
+            inputE1[2].union.ki.dwFlags = KEYEVENTF.KEYUP | KEYEVENTF.SCANCODE;
+
+            inputE1[3].type = INPUT.TYPE.KEYBOARD;
+            inputE1[3].union.ki.wScan = scanCode;
+            inputE1[3].union.ki.dwFlags = KEYEVENTF.KEYUP | KEYEVENTF.SCANCODE;
 
             return PInvoke.SendInput(inputE1) == 2;
         }
 
         KEYEVENTF eventFlags = KEYEVENTF.SCANCODE | (useExtendedKey ? KEYEVENTF.EXTENDEDKEY : 0);
-        INPUT[] input = new[]
-        {
-            new INPUT
-            {
-                type = INPUT.TYPE.KEYBOARD,
-                union = new INPUT.UNION
-                {
-                    ki = new KEYBDINPUT
-                    {
-                        wScan = scanCode,
-                        dwFlags = eventFlags,
-                        time = 0
-                    }
-                }
-            },
-            new INPUT
-            {
-                type = INPUT.TYPE.KEYBOARD,
-                union = new INPUT.UNION
-                {
-                    ki = new KEYBDINPUT
-                    {
-                        wScan = scanCode,
-                        dwFlags = eventFlags | KEYEVENTF.KEYUP,
-                        time = 0
-                    }
-                }
-            }
-        };
+
+        Span<INPUT> input = stackalloc INPUT[2];
+
+        input[0].type = INPUT.TYPE.KEYBOARD;
+        input[0].union.ki.wScan = scanCode;
+        input[0].union.ki.dwFlags = eventFlags;
+
+        input[1].type = INPUT.TYPE.KEYBOARD;
+        input[1].union.ki.wScan = scanCode;
+        input[1].union.ki.dwFlags = KEYEVENTF.KEYUP | eventFlags;
 
         return PInvoke.SendInput(input) == 2;
     }

@@ -3,6 +3,7 @@ using System.Collections.Specialized;
 using ActionRepeater.Core.Action;
 using ActionRepeater.Core.Input;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
@@ -10,6 +11,9 @@ namespace ActionRepeater.UI.Behaviors;
 
 public class ClearMenuBehavior
 {
+    private static ActionCollection? _actionCollection;
+    private static ActionCollection ActionCollection => _actionCollection ??= App.Current.Services.GetRequiredService<ActionCollection>();
+
     #region MenuItemList DP
 
     public static IList<MenuFlyoutItemBase>? GetMenuItemList(DependencyObject obj)
@@ -29,18 +33,17 @@ public class ClearMenuBehavior
 
     #endregion
 
-
     private static RelayCommand? _clearActionsCommand;
     private static IRelayCommand ClearActionsCommand => _clearActionsCommand
-        ??= new(ActionManager.ClearActions, static () => ActionManager.Actions.Count > 0);
+        ??= new(ActionCollection.ClearActions, static () => ActionCollection.Actions.Count > 0);
 
     private static RelayCommand? _clearCursorPathCommand;
     private static IRelayCommand ClearCursorPathCommand => _clearCursorPathCommand
-        ??= new(ActionManager.ClearCursorPath, static () => ActionManager.CursorPathStart is not null);
+        ??= new(ActionCollection.ClearCursorPath, static () => ActionCollection.CursorPathStart is not null);
 
     private static RelayCommand? _clearAllCommand;
     private static IRelayCommand ClearAllCommand => _clearAllCommand
-        ??= new(ActionManager.ClearAll, static () => ActionManager.Actions.Count > 0 || ActionManager.CursorPathStart is not null);
+        ??= new(ActionCollection.Clear, static () => ActionCollection.Actions.Count > 0 || ActionCollection.CursorPathStart is not null);
 
     private static bool _isSubscribedToColChanged = false;
 
@@ -68,19 +71,19 @@ public class ClearMenuBehavior
 
         if (!_isSubscribedToColChanged)
         {
-            ActionManager.ActionsCountChanged += ActionManager_ActionsCountChanged;
-            ActionManager.CursorPathStartChanged += ActionManager_CursorPathStartChanged;
+            ActionCollection.ActionsCountChanged += ActionService_ActionsCountChanged;
+            ActionCollection.CursorPathStartChanged += ActionService_CursorPathStartChanged;
             _isSubscribedToColChanged = true;
         }
     }
 
-    private static void ActionManager_ActionsCountChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    private static void ActionService_ActionsCountChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         ClearAllCommand.NotifyCanExecuteChanged();
         ClearActionsCommand.NotifyCanExecuteChanged();
     }
 
-    private static void ActionManager_CursorPathStartChanged(object? sender, MouseMovement? e)
+    private static void ActionService_CursorPathStartChanged(object? sender, MouseMovement? e)
     {
         ClearAllCommand.NotifyCanExecuteChanged();
         ClearCursorPathCommand.NotifyCanExecuteChanged();

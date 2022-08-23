@@ -126,7 +126,7 @@ internal sealed class InputActionJsonConverter : JsonConverter<InputAction>
         const int mouseButtonActionPropertyCount = 5;
 
         MouseButtonActionType actionType = default;
-        Input.InputSimulator.MouseButton button = default;
+        Input.MouseButton button = default;
         int posX = default;
         int posY = default;
         bool usePosition = default;
@@ -148,7 +148,7 @@ internal sealed class InputActionJsonConverter : JsonConverter<InputAction>
                         break;
 
                     case nameof(MouseButtonAction.Button):
-                        button = (Input.InputSimulator.MouseButton)reader.GetInt32();
+                        button = (Input.MouseButton)reader.GetInt32();
                         break;
 
                     case _posX:

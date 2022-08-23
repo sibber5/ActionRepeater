@@ -11,22 +11,29 @@ public class PathWindowService
 {
     public bool IsPathWindowOpen => _pathWindow is not null;
 
+    private readonly ActionCollection _actionCollection;
+
     private PathWindow? _pathWindow;
     private int _lastCursorPtsCount;
     private POINT? _lastAbsPt;
+
+    public PathWindowService(ActionCollection actionCollection)
+    {
+        _actionCollection = actionCollection;
+    }
 
     public void OpenPathWindow()
     {
         Debug.Assert(_pathWindow is null, "Path window is not null.");
 
-        if (ActionManager.CursorPathStart is null)
+        if (_actionCollection.CursorPathStart is null)
         {
             _pathWindow = new();
             _lastAbsPt = null;
         }
         else
         {
-            var absCursorPts = ActionManager.GetAbsoluteCursorPath().Select(p => (System.Drawing.Point)p.MovPoint).ToArray();
+            var absCursorPts = _actionCollection.GetAbsoluteCursorPath().Select(p => (System.Drawing.Point)p.MovPoint).ToArray();
             _lastAbsPt = absCursorPts[^1];
 
             _pathWindow = new(absCursorPts);
@@ -49,7 +56,7 @@ public class PathWindowService
         {
             Debug.WriteLine("Update Window Task Started.");
 
-            var cursorPath = ActionManager.CursorPath;
+            var cursorPath = _actionCollection.CursorPath;
 
             _lastCursorPtsCount = cursorPath.Count;
 
@@ -63,13 +70,13 @@ public class PathWindowService
 
                 if (cursorPath.Count == 0)
                 {
-                    _lastAbsPt = ActionManager.CursorPathStart?.MovPoint;
+                    _lastAbsPt = _actionCollection.CursorPathStart?.MovPoint;
                     _lastCursorPtsCount = cursorPath.Count;
                     _pathWindow.ClearPath();
                     continue;
                 }
 
-                _lastAbsPt ??= ActionManager.CursorPathStart!.MovPoint;
+                _lastAbsPt ??= _actionCollection.CursorPathStart!.MovPoint;
 
                 for (int i = _lastCursorPtsCount; i < cursorPath.Count; ++i)
                 {
