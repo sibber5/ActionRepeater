@@ -57,6 +57,10 @@ public sealed partial class MainWindow : Window
         _recorder = App.Current.Services.GetRequiredService<Recorder>();
 
         InitializeComponent();
+
+        // workaround because x:Bind-ing isnt working for some reason
+        _openMenuItem.Command = _viewModel.ImportActionsCommand;
+        _saveMenuItem.Command = _viewModel.ExportActionsCommand;
     }
 
     private unsafe void OnWindowMessageReceived(object? sender, WindowMessageEventArgs e)

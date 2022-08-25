@@ -230,7 +230,8 @@ public sealed class ActionCollection : ICollection<InputAction>
         _actionsExlKeyRepeat.RemoveAt(exlIdx);
 
         // merge adjacent wait actions
-        if (_actions[idx] is WaitAction wa && _actionsExlKeyRepeat[exlIdx] is WaitAction exlWa
+        if (idx < _actions.Count && exlIdx < _actionsExlKeyRepeat.Count
+            && _actions[idx] is WaitAction wa && _actionsExlKeyRepeat[exlIdx] is WaitAction exlWa
             && wa.Equals(exlWa))
         {
             _moddedExlActsIdxs.Remove(exlIdx);

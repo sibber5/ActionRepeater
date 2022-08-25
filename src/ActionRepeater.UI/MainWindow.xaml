@@ -20,11 +20,24 @@
                         SelectionChanged="NavigationView_SelectionChanged"
                         Loaded="NavigationView_Loaded">
 
+            <NavigationView.Resources>
+                <ResourceDictionary>
+                    <ResourceDictionary.ThemeDictionaries>
+                        <ResourceDictionary x:Key="Light">
+                            <SolidColorBrush x:Key="TopNavigationViewItemForegroundPointerOver" Color="Black" Opacity="0.6"/>
+                        </ResourceDictionary>
+                        <ResourceDictionary x:Key="Dark">
+                            <SolidColorBrush x:Key="TopNavigationViewItemForegroundPointerOver" Color="White" Opacity="0.8"/>
+                        </ResourceDictionary>
+                    </ResourceDictionary.ThemeDictionaries>
+                </ResourceDictionary>
+            </NavigationView.Resources>
+            
             <NavigationView.MenuItems>
                 <!-- space for the file dropdown button -->
-                <NavigationViewItem Width="53" />
+                <NavigationViewItem Width="35" IsEnabled="False"/>
                 <!-- binding the tag suddenly stopped working for some fucking reason, so now its hardcoded -->
-                <NavigationViewItem Tag="h" Content="Home" />
+                <NavigationViewItem Tag="h" Content="Home"/>
                 <NavigationViewItem Tag="o" Content="Options"/>
             </NavigationView.MenuItems>
 
@@ -32,40 +45,64 @@
 
         </NavigationView>
 
-        <DropDownButton Grid.Row="0"
-                        HorizontalAlignment="Left" VerticalAlignment="Top"
-                        Margin="-6,-6,0,0"
-                        Background="Transparent"
-                        BorderBrush="Transparent"
-                        Content="File">
-            <DropDownButton.Resources>
-                <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="Transparent"/>
-                <SolidColorBrush x:Key="ButtonBorderBrushPointerOver" Color="Transparent"/>
+        <MenuBar Grid.Row="0"
+                 HorizontalAlignment="Left" VerticalAlignment="Top"
+                 Margin="-8,-11,0,0"
+                 Background="Transparent"
+                 BorderBrush="Transparent">
 
-                <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="Transparent"/>
-                <SolidColorBrush x:Key="ButtonBorderBrushPressed" Color="Transparent"/>
-            </DropDownButton.Resources>
+            <MenuBar.Resources>
+                <ResourceDictionary>
+                    <ResourceDictionary.ThemeDictionaries>
+                        <ResourceDictionary x:Key="Light">
+                            <SolidColorBrush x:Key="MenuBarItemBackgroundPointerOver" Color="Transparent"/>
+                            <SolidColorBrush x:Key="MenuBarItemBorderBrushPointerOver" Color="Transparent"/>
+                            <SolidColorBrush x:Key="MenuBarItemBackgroundPressed" Color="Transparent"/>
+                            <SolidColorBrush x:Key="MenuBarItemBorderBrushPressed" Color="Transparent"/>
+                            <SolidColorBrush x:Key="MenuBarItemBackgroundSelected" Color="Transparent"/>
+                            <SolidColorBrush x:Key="MenuBarItemBorderBrushSelected" Color="Transparent"/>
 
-            <DropDownButton.Flyout>
-                <MenuFlyout x:Name="_fileMenuFlyout" Placement="Bottom">
-                    <MenuFlyoutItem Text="Open" Command="{x:Bind _viewModel.ImportActionsCommand}">
-                        <MenuFlyoutItem.Icon>
-                            <FontIcon Glyph="&#xE8E5;"/>
-                        </MenuFlyoutItem.Icon>
-                    </MenuFlyoutItem>
+                            <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="Black" Opacity="0.6"/>
+                        </ResourceDictionary>
+                        <ResourceDictionary x:Key="Dark">
+                            <SolidColorBrush x:Key="MenuBarItemBackgroundPointerOver" Color="Transparent"/>
+                            <SolidColorBrush x:Key="MenuBarItemBorderBrushPointerOver" Color="Transparent"/>
+                            <SolidColorBrush x:Key="MenuBarItemBackgroundPressed" Color="Transparent"/>
+                            <SolidColorBrush x:Key="MenuBarItemBorderBrushPressed" Color="Transparent"/>
+                            <SolidColorBrush x:Key="MenuBarItemBackgroundSelected" Color="Transparent"/>
+                            <SolidColorBrush x:Key="MenuBarItemBorderBrushSelected" Color="Transparent"/>
 
-                    <MenuFlyoutItem Text="Save" Command="{x:Bind _viewModel.ExportActionsCommand}">
-                        <MenuFlyoutItem.Icon>
-                            <FontIcon Glyph="&#xE792;"/>
-                        </MenuFlyoutItem.Icon>
-                    </MenuFlyoutItem>
+                            <SolidColorBrush x:Key="ButtonForegroundPointerOver" Color="White" Opacity="0.8"/>
+                        </ResourceDictionary>
+                    </ResourceDictionary.ThemeDictionaries>
+                </ResourceDictionary>
+            </MenuBar.Resources>
 
-                    <!-- TODO: <MenuFlyoutItem Text="Export to exe" Icon="Share"/> -->
-                </MenuFlyout>
-            </DropDownButton.Flyout>
-        </DropDownButton>
+            <MenuBarItem Title="File">
+                <MenuFlyoutItem x:Name="_openMenuItem" Text="Open">
+                    <MenuFlyoutItem.Icon>
+                        <FontIcon Glyph="&#xE8E5;"/>
+                    </MenuFlyoutItem.Icon>
+                    <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Modifiers="Control" Key="O"/>
+                    </MenuFlyoutItem.KeyboardAccelerators>
+                </MenuFlyoutItem>
 
-        <!-- 1p height line to cover some random fucking gray line in the app in light mode. -->
+                <MenuFlyoutItem x:Name="_saveMenuItem" Text="Save">
+                    <MenuFlyoutItem.Icon>
+                        <FontIcon Glyph="&#xE792;"/>
+                    </MenuFlyoutItem.Icon>
+                    <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Modifiers="Control" Key="S"/>
+                    </MenuFlyoutItem.KeyboardAccelerators>
+                </MenuFlyoutItem>
+
+                <!-- TODO: <MenuFlyoutItem Text="Export to exe" Icon="Share"/> -->
+            </MenuBarItem>
+
+        </MenuBar>
+
+        <!-- 1p height line to cover some random gray line in the app in light mode. -->
         <!-- i have no clue where it came from ive tried setting the background and border brush on everything in this view -->
         <Rectangle Grid.Row="0" Margin="0,33,0,0"
                    HorizontalAlignment="Stretch" VerticalAlignment="Top"

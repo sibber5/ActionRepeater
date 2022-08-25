@@ -55,17 +55,17 @@ public class ClearMenuBehavior
         // these items cant be cached
         items.Add(new MenuFlyoutItem()
         {
-            Text = "Clear Actions",
+            Text = "Clear actions",
             Command = ClearActionsCommand,
         });
         items.Add(new MenuFlyoutItem()
         {
-            Text = "Clear Cursor Path",
+            Text = "Clear cursor path",
             Command = ClearCursorPathCommand,
         });
         items.Add(new MenuFlyoutItem()
         {
-            Text = "Clear All",
+            Text = "Clear all",
             Command = ClearAllCommand,
         });
 

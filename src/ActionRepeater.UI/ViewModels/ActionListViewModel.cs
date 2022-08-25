@@ -143,17 +143,19 @@ public partial class ActionListViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(IsActionStored))]
     private async Task ReplaceAction()
     {
-        string? message = _actionCollection.TryReplace(!ShowKeyRepeatActions, SelectedActionIndex, CopiedAction!.Clone());
-        if (message is not null)
+        string? errorMsg = _actionCollection.TryReplace(!ShowKeyRepeatActions, SelectedActionIndex, CopiedAction!.Clone());
+        if (errorMsg is not null)
         {
-            await _contentDialogService.ShowErrorDialog("Failed to replace action", message);
+            await _contentDialogService.ShowErrorDialog("Failed to replace action", errorMsg);
         }
     }
 
     [RelayCommand]
     private async Task RemoveAction()
     {
-        if (_actionCollection.HasActionBeenModified(SelectedAction!))
+        if (SelectedAction is null) return;
+
+        if (_actionCollection.HasActionBeenModified(SelectedAction))
         {
             await _contentDialogService.ShowYesNoMessageDialog("Are you sure you want to remove this action?",
                 $"This action represents multiple hidden actions (because \"{nameof(ShowKeyRepeatActions)}\" is off).{Environment.NewLine}If you remove it the multiple actions it represents will be removed.",
@@ -162,10 +164,10 @@ public partial class ActionListViewModel : ObservableObject
             return;
         }
 
-        string? message = _actionCollection.TryRemove(SelectedAction!);
-        if (message is not null)
+        string? errorMsg = _actionCollection.TryRemove(SelectedAction);
+        if (errorMsg is not null)
         {
-            await _contentDialogService.ShowErrorDialog("Failed to remove action", message);
+            await _contentDialogService.ShowErrorDialog("Failed to remove action", errorMsg);
         }
     }
 }

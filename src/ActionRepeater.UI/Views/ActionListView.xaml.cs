@@ -20,6 +20,24 @@ public sealed partial class ActionListView : UserControl
         App.Current.Services.GetRequiredService<Recorder>().ActionAdded += (_, _) => ActionList.ScrollIntoView(_viewModel.FilteredActions[^1]);
 
         InitializeComponent();
+
+        _viewModel.PropertyChanged += ViewModel_PropertyChanged;
+    }
+
+    private void ViewModel_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(_viewModel.SelectedActionIndex))
+        {
+            if (_viewModel.SelectedActionIndex < 0)
+            {
+                _replaceMenuItem.KeyboardAccelerators[0].IsEnabled = false;
+                _pasteMenuItem.KeyboardAccelerators[0].IsEnabled = true;
+                return;
+            }
+
+            _replaceMenuItem.KeyboardAccelerators[0].IsEnabled = true;
+            _pasteMenuItem.KeyboardAccelerators[0].IsEnabled = false;
+        }
     }
 
     public void ScrollToSelectedItem() => ActionList.ScrollIntoView(ActionList.SelectedItem);
@@ -41,12 +59,18 @@ public sealed partial class ActionListView : UserControl
     {
         if (((FrameworkElement)e.OriginalSource).DataContext is not ActionViewModel actionVM)
         {
-            ActionList.SelectedIndex = -1;
             return;
         }
 
         if (!ReferenceEquals(ActionList.SelectedItem, actionVM)) ActionList.SelectedItem = actionVM;
 
         await _viewModel.EditSelectedAction();
+    }
+
+    private void ActionList_Tapped(object sender, TappedRoutedEventArgs e)
+    {
+        if (((FrameworkElement)e.OriginalSource).DataContext is ActionViewModel) return;
+
+        ActionList.SelectedIndex = -1;
     }
 }
