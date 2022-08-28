@@ -34,15 +34,6 @@ public class Options : INotifyPropertyChanged
         {
             if (_useCursorPosOnClicks == value) return;
 
-            // TODO: [High-Priority] add option to record the position instead of enabling using it in MouseButtonAction
-            //foreach (InputAction action in Input.ActionCollection.Actions)
-            //{
-            //    if (action is MouseButtonAction mbAction)
-            //    {
-            //        mbAction.UsePosition = value;
-            //    }
-            //}
-
             _useCursorPosOnClicks = value;
             OnPropertyChanged();
         }

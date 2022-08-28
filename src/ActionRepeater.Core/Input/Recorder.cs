@@ -7,6 +7,7 @@ using ActionRepeater.Win32.WindowsAndMessages.Utilities;
 
 namespace ActionRepeater.Core.Input;
 
+// TODO: switch to using System.Diagnostics.Stopwatch instead of Environment.TickCount
 public sealed class Recorder
 {
     public event EventHandler<bool>? IsRecordingChanged;
@@ -34,9 +35,8 @@ public sealed class Recorder
         _actionCollection = actionCollection;
 
         // this *could* cause a memory leak *if* the action collection should live longer than this recorder instance,
-        // *but* this will not happen with the current usage of these.
-        // if for some reason in the future that changed this class would implement IDisposable
-        // and unsubscribe from the event in Dispose.
+        // *but* this will not happen with the current usage of these, as both are registered as a singleton.
+        // if for some reason in the future that changed this class would implement IDisposable and unsubscribe from the event in Dispose.
         _actionCollection.ActionsCountChanged += (_, _) =>
         {
             if (_actionCollection.Actions.Count == 0)

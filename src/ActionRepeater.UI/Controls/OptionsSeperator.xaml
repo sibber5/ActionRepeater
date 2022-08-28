@@ -6,7 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Rectangle Margin="15,10,15,10"
+    <Rectangle Margin="12,10,12,10"
                    HorizontalAlignment="Stretch" VerticalAlignment="Top"
                    Height="2" Fill="{ThemeResource OptionsSeperatorThemeBrush}"/>
     
