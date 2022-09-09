@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using ActionRepeater.Core.Utilities;
@@ -16,6 +17,11 @@ public class SyncedObservableCollection<T, TSource> : ObservableCollectionEx<T>
     private readonly ObservableCollection<TSource?> _sourceCol;
     private readonly Func<TSource?, T> _createT;
 
+    private bool _dontSync;
+
+    private T? _lastRemovedItem;
+    private TSource? _lastRemovedSourceItem;
+
     /// <summary>
     /// Initializes a new instance of the class that is synchronized with <paramref name="sourceCol"/>.
     /// </summary>
@@ -31,6 +37,8 @@ public class SyncedObservableCollection<T, TSource> : ObservableCollectionEx<T>
 
     private void SourceCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
+        if (_dontSync) return;
+
         switch (e.Action)
         {
             case NotifyCollectionChangedAction.Add:
@@ -91,29 +99,52 @@ public class SyncedObservableCollection<T, TSource> : ObservableCollectionEx<T>
 
     protected override void InsertItem(int index, T item)
     {
-        throw new NotSupportedException();
+        if (EqualityComparer<T>.Default.Equals(item, _lastRemovedItem))
+        {
+            _dontSync = true;
+            _sourceCol.Insert(index, _lastRemovedSourceItem);
+            _dontSync = false;
+
+            base.InsertItem(index, item);
+
+            return;
+        }
+
+        throw new NotSupportedException("Cannot create source item.");
     }
 
     protected override void ClearItems()
     {
+        _dontSync = true;
         _sourceCol.Clear();
+        _dontSync = false;
+
         base.ClearItems();
     }
 
     protected override void RemoveItem(int index)
     {
+        _lastRemovedItem = this[index];
+        _lastRemovedSourceItem = _sourceCol[index];
+
+        _dontSync = true;
         _sourceCol.RemoveAt(index);
+        _dontSync = false;
+
         base.RemoveItem(index);
     }
 
     protected override void SetItem(int index, T item)
     {
-        throw new NotSupportedException();
+        throw new NotSupportedException("Cannot create source item.");
     }
 
     protected override void MoveItem(int oldIndex, int newIndex)
     {
+        _dontSync = true;
         _sourceCol.Move(oldIndex, newIndex);
+        _dontSync = false;
+
         base.MoveItem(oldIndex, newIndex);
     }
 }

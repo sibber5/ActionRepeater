@@ -53,6 +53,8 @@
                   ScrollViewer.VerticalScrollBarVisibility="Visible"
                   ItemsSource="{x:Bind _viewModel.FilteredActions, Mode=OneWay}"
                   SelectedIndex="{x:Bind _viewModel.SelectedActionIndex, Mode=TwoWay}"
+                  CanReorderItems="True"
+                  AllowDrop="True"
                   IsRightTapEnabled="True"
                   RightTapped="ActionList_RightTapped"
                   IsDoubleTapEnabled="True"
