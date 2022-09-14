@@ -84,7 +84,7 @@ public sealed class PathWindow : IDisposable
         GC.SuppressFinalize(this);
     }
 
-    private class PathForm : Form
+    private sealed class PathForm : Form
     {
         private Pen? _pen;
         private GraphicsPath? _path;

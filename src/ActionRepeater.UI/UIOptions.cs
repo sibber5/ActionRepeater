@@ -2,7 +2,7 @@
 
 namespace ActionRepeater.UI;
 
-public partial class UIOptions : ObservableObject
+public sealed partial class UIOptions : ObservableObject
 {
     /// <summary>
     /// For deserialization only. will be private once https://github.com/dotnet/runtime/issues/31511 is implemented.

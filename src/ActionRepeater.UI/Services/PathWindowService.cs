@@ -7,7 +7,7 @@ using PathWindows;
 
 namespace ActionRepeater.UI.Services;
 
-public class PathWindowService
+public sealed class PathWindowService
 {
     public bool IsPathWindowOpen => _pathWindow is not null;
 
@@ -28,12 +28,14 @@ public class PathWindowService
 
         if (_actionCollection.CursorPathStart is null)
         {
+            Debug.Assert(_actionCollection.CursorPath.Count == 0, $"{nameof(_actionCollection.CursorPath)} is not empty.");
+
             _pathWindow = new();
             _lastAbsPt = null;
         }
         else
         {
-            var absCursorPts = _actionCollection.GetAbsoluteCursorPath().Select(p => (System.Drawing.Point)p.MovPoint).ToArray();
+            var absCursorPts = _actionCollection.GetAbsoluteCursorPath().Select(p => (System.Drawing.Point)p.Delta).ToArray();
             _lastAbsPt = absCursorPts[^1];
 
             _pathWindow = new(absCursorPts);
@@ -70,17 +72,17 @@ public class PathWindowService
 
                 if (cursorPath.Count == 0)
                 {
-                    _lastAbsPt = _actionCollection.CursorPathStart?.MovPoint;
+                    _lastAbsPt = _actionCollection.CursorPathStart?.Delta;
                     _lastCursorPtsCount = cursorPath.Count;
                     _pathWindow.ClearPath();
                     continue;
                 }
 
-                _lastAbsPt ??= _actionCollection.CursorPathStart!.MovPoint;
+                _lastAbsPt ??= _actionCollection.CursorPathStart!.Delta;
 
                 for (int i = _lastCursorPtsCount; i < cursorPath.Count; ++i)
                 {
-                    var newPoint = Core.Action.MouseMovement.OffsetPointWithinScreens(_lastAbsPt.Value, cursorPath[i].MovPoint);
+                    var newPoint = Core.Action.MouseMovement.OffsetPointWithinScreens(_lastAbsPt.Value, cursorPath[i].Delta);
                     _pathWindow.AddLineToPath(_lastAbsPt.Value, newPoint);
                     _lastAbsPt = newPoint;
                 }

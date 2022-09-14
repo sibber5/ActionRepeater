@@ -9,7 +9,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ActionRepeater.UI.ViewModels;
 
-public partial class EditKeyActionViewModel : ObservableValidator
+public sealed partial class EditKeyActionViewModel : ObservableValidator
 {
     public KeyActionType Type
     {

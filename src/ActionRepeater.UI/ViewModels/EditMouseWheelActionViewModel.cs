@@ -3,7 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ActionRepeater.UI.ViewModels;
 
-public partial class EditMouseWheelActionViewModel : ObservableObject
+public sealed partial class EditMouseWheelActionViewModel : ObservableObject
 {
     [ObservableProperty]
     private bool _horizontalScrolling;

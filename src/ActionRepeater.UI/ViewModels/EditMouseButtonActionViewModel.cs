@@ -8,7 +8,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ActionRepeater.UI.ViewModels;
 
-public partial class EditMouseButtonActionViewModel : ObservableObject
+public sealed partial class EditMouseButtonActionViewModel : ObservableObject
 {
     public MouseButtonActionType Type
     {

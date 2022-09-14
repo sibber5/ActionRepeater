@@ -11,7 +11,7 @@ using Windows.Foundation;
 
 namespace ActionRepeater.UI.Services;
 
-public class ContentDialogService
+public sealed class ContentDialogService
 {
     // would have set it in the ctor but it must be set after MainWindow.Content has loaded.
     internal XamlRoot XamlRoot { get; set; } = null!;

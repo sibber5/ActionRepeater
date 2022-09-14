@@ -9,7 +9,7 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace ActionRepeater.UI.ViewModels;
 
-public partial class MainViewModel
+public sealed partial class MainViewModel
 {
     private readonly ContentDialogService _contentDialogService;
     private readonly ActionCollection _actionCollection;

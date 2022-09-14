@@ -9,7 +9,7 @@ using Microsoft.UI.Xaml.Controls;
 
 namespace ActionRepeater.UI.Behaviors;
 
-public class ClearMenuBehavior
+public sealed class ClearMenuBehavior
 {
     private static ActionCollection? _actionCollection;
     private static ActionCollection ActionCollection => _actionCollection ??= App.Current.Services.GetRequiredService<ActionCollection>();

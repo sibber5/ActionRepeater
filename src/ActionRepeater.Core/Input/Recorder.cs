@@ -4,12 +4,15 @@ using ActionRepeater.Core.Action;
 using ActionRepeater.Core.Utilities;
 using ActionRepeater.Win32.Input;
 using ActionRepeater.Win32.WindowsAndMessages.Utilities;
+using static System.Collections.Specialized.BitVector32;
 
 namespace ActionRepeater.Core.Input;
 
 // TODO: switch to using System.Diagnostics.Stopwatch instead of Environment.TickCount
 public sealed class Recorder
 {
+    private const int MinWaitDuration = 10; // in milliseconds
+
     public event EventHandler<bool>? IsRecordingChanged;
     public event EventHandler<InputAction>? ActionAdded;
 
@@ -83,8 +86,10 @@ public sealed class Recorder
         {
             if (_actionCollection.CursorPathStart is null)
             {
+                Debug.Assert(_actionCollection.CursorPath.Count == 0, $"{nameof(_actionCollection.CursorPath)} is not empty.");
+
                 _actionCollection.CursorPathStart = new(Win32.PInvoke.Helpers.GetCursorPos(), 0);
-                Debug.WriteLine($"set cursor start path pos to: {_actionCollection.CursorPathStart.MovPoint}");
+                Debug.WriteLine($"set cursor start path pos to: {_actionCollection.CursorPathStart.Delta}");
             }
             _lastMouseMoveTickCount = Environment.TickCount;
         }
@@ -314,33 +319,13 @@ public sealed class Recorder
 
         if (ticksSinceLastAction <= Options.Instance.MaxClickInterval)
         {
-            if (action is KeyAction curKeyAction
-                && curKeyAction.ActionType == KeyActionType.KeyUp
-                && GetLastAction() is KeyAction lastKeyAction
-                && lastKeyAction.ActionType == KeyActionType.KeyDown
-                && !lastKeyAction.IsAutoRepeat
-                && lastKeyAction.Key == curKeyAction.Key)
-            {
-                ReplaceLastAction(new KeyAction(KeyActionType.KeyPress, curKeyAction.Key));
+            AddClickAction(action);
 
-                _lastNewActionTickCount = curTickCount;
-                return;
-            }
-            else if (action is MouseButtonAction curMBAction
-                && curMBAction.ActionType == MouseButtonActionType.MouseButtonUp
-                && GetLastAction() is MouseButtonAction lastMBAction
-                && lastMBAction.ActionType == MouseButtonActionType.MouseButtonDown
-                && lastMBAction.Button == curMBAction.Button
-                && lastMBAction.Position == curMBAction.Position)
-            {
-                ReplaceLastAction(new MouseButtonAction(MouseButtonActionType.MouseButtonClick, curMBAction.Button, curMBAction.Position, curMBAction.UsePosition));
-
-                _lastNewActionTickCount = curTickCount;
-                return;
-            }
+            _lastNewActionTickCount = curTickCount;
+            return;
         }
 
-        if (ticksSinceLastAction > 10)
+        if (ticksSinceLastAction > MinWaitDuration)
         {
             _actionCollection.Add(new WaitAction(ticksSinceLastAction));
         }
@@ -350,5 +335,29 @@ public sealed class Recorder
         _lastNewActionTickCount = curTickCount;
 
         ActionAdded?.Invoke(this, action);
+    }
+
+    private void AddClickAction(InputAction currentActionToAdd)
+    {
+        if (currentActionToAdd is KeyAction curKeyAction
+            && curKeyAction.ActionType == KeyActionType.KeyUp
+            && GetLastAction() is KeyAction lastKeyAction
+            && lastKeyAction.ActionType == KeyActionType.KeyDown
+            && !lastKeyAction.IsAutoRepeat
+            && lastKeyAction.Key == curKeyAction.Key)
+        {
+            ReplaceLastAction(new KeyAction(KeyActionType.KeyPress, curKeyAction.Key));
+            return;
+        }
+
+        if (currentActionToAdd is MouseButtonAction curMBAction
+            && curMBAction.ActionType == MouseButtonActionType.MouseButtonUp
+            && GetLastAction() is MouseButtonAction lastMBAction
+            && lastMBAction.ActionType == MouseButtonActionType.MouseButtonDown
+            && lastMBAction.Button == curMBAction.Button
+            && lastMBAction.Position == curMBAction.Position)
+        {
+            ReplaceLastAction(new MouseButtonAction(MouseButtonActionType.MouseButtonClick, curMBAction.Button, curMBAction.Position, curMBAction.UsePosition));
+        }
     }
 }

@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace ActionRepeater.Core;
 
-public class Options : INotifyPropertyChanged
+public sealed class Options : INotifyPropertyChanged
 {
     /// <summary>
     /// For deserialization only. will be private once https://github.com/dotnet/runtime/issues/31511 is implemented.
@@ -13,7 +13,7 @@ public class Options : INotifyPropertyChanged
     public static Options Instance => _instance ??= new();
 
     public event PropertyChangedEventHandler? PropertyChanged;
-    protected void OnPropertyChanged([CallerMemberName] string propertyName = null!) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    private void OnPropertyChanged([CallerMemberName] string propertyName = null!) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
     private CursorMovementMode _cursorMovementMode = CursorMovementMode.None;
     public CursorMovementMode CursorMovementMode

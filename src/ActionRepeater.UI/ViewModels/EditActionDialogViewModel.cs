@@ -7,7 +7,7 @@ using Microsoft.UI.Xaml.Controls;
 
 namespace ActionRepeater.UI.ViewModels;
 
-public partial class EditActionDialogViewModel : ObservableObject
+public sealed partial class EditActionDialogViewModel : ObservableObject
 {
     public bool CanChangeAction { get; }
 

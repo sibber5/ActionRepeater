@@ -7,7 +7,10 @@ namespace ActionRepeater.Core.Action;
 
 public sealed class MouseMovement
 {
-    public POINT MovPoint { get; set; }
+    /// <summary>
+    /// The movement delta, in both <i>x</i> and <i>y</i> directions.
+    /// </summary>
+    public POINT Delta { get; set; }
 
     /// <summary>
     /// The actual measured delay duration.
@@ -20,9 +23,9 @@ public sealed class MouseMovement
     [JsonIgnore]
     public int DelayDuration => (int)(ActualDelay / 1.2);
 
-    public MouseMovement(POINT movPoint, int actualDelay)
+    public MouseMovement(POINT delta, int actualDelay)
     {
-        MovPoint = movPoint;
+        Delta = delta;
         ActualDelay = actualDelay;
     }
 

@@ -12,7 +12,7 @@ using Microsoft.UI.Dispatching;
 
 namespace ActionRepeater.UI.ViewModels;
 
-public partial class ActionListViewModel : ObservableObject
+public sealed partial class ActionListViewModel : ObservableObject
 {
     private readonly System.ComponentModel.PropertyChangedEventArgs _actionListHeaderChangedArgs = new(nameof(ActionListHeaderWithCount));
     public string ActionListHeaderWithCount => $"Actions ({FilteredActions.Count}):";

@@ -12,7 +12,7 @@ namespace ActionRepeater.UI.Utilities;
 /// </summary>
 /// <typeparam name="T">The type of elements in this collection.</typeparam>
 /// <typeparam name="TSource">The type of elements in the source collection.</typeparam>
-public class SyncedObservableCollection<T, TSource> : ObservableCollectionEx<T>
+public sealed class SyncedObservableCollection<T, TSource> : ObservableCollectionEx<T>
 {
     private readonly ObservableCollection<TSource?> _sourceCol;
     private readonly Func<TSource?, T> _createT;

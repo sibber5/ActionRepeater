@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace ActionRepeater.UI.ViewModels;
 
-public partial class ActionViewModel : ObservableObject
+public sealed partial class ActionViewModel : ObservableObject
 {
     public double GlyphSize { get; }
 

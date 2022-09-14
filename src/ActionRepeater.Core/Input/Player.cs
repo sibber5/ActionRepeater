@@ -36,9 +36,10 @@ public sealed class Player
 
     private IReadOnlyList<InputAction>? _actionsToPlay;
 
-    private Func<Task>? _playInputActionsAsync;
 
-    private Action<Task>? _cleanUp;
+    private readonly Func<Task> _playInputActionsAsync;
+
+    private readonly Action<Task> _cleanUp;
 
 
     private readonly ActionCollection _actionCollection;
@@ -46,6 +47,48 @@ public sealed class Player
     public Player(ActionCollection actionCollection)
     {
         _actionCollection = actionCollection;
+
+        _playInputActionsAsync = async () =>
+        {
+            for (int i = 0; i < _actionsToPlay!.Count; ++i)
+            {
+                if (_tokenSource!.IsCancellationRequested) return;
+
+                UpdateView?.Invoke(IsAutoRepeatAction(_actionsToPlay[i]) || (i > 0 && _actionsToPlay[i] is WaitAction && IsAutoRepeatAction(_actionsToPlay[i - 1])));
+
+                if (_actionsToPlay[i] is WaitAction w)
+                {
+                    try
+                    {
+                        await Task.Delay(w.Duration, _tokenSource.Token);
+                    }
+                    catch (TaskCanceledException)
+                    {
+                        Debug.WriteLine($"[{nameof(Player)}] Delay task was cancelled.");
+                        return;
+                    }
+                    continue;
+                }
+
+                _actionsToPlay[i].Play();
+            }
+
+            // this will deselect the last action item in the list view
+            UpdateView?.Invoke(false);
+
+            static bool IsAutoRepeatAction(InputAction a) => a is KeyAction keyAction && keyAction.IsAutoRepeat;
+        };
+
+        _cleanUp = task =>
+        {
+            Debug.WriteLine($"[{nameof(Player)}] Finished play task.");
+
+            IsPlaying = false;
+
+            _tokenSource!.Dispose();
+            _tokenSource = null;
+            Debug.WriteLine($"[{nameof(Player)}] Disposed token source.");
+        };
     }
 
     /// <returns>
@@ -55,6 +98,7 @@ public sealed class Player
     {
         if (_actionCollection.Actions.Count == 0 && _actionCollection.CursorPathStart is null)
         {
+            Debug.Assert(_actionCollection.CursorPath.Count == 0, $"{nameof(_actionCollection.CursorPath)} is not empty.");
             return false;
         }
 
@@ -84,48 +128,6 @@ public sealed class Player
 
         _actionsToPlay = actions;
 
-        _playInputActionsAsync ??= async () =>
-        {
-            for (int i = 0; i < _actionsToPlay.Count; ++i)
-            {
-                if (_tokenSource.IsCancellationRequested) return;
-
-                UpdateView?.Invoke(IsAutoRepeatAction(_actionsToPlay[i]) || (i > 0 && _actionsToPlay[i] is WaitAction && IsAutoRepeatAction(_actionsToPlay[i - 1])));
-
-                if (_actionsToPlay[i] is WaitAction w)
-                {
-                    try
-                    {
-                        await Task.Delay(w.Duration, _tokenSource.Token);
-                    }
-                    catch (TaskCanceledException)
-                    {
-                        Debug.WriteLine("[Player] Delay task was cancelled.");
-                        return;
-                    }
-                    continue;
-                }
-
-                _actionsToPlay[i].Play();
-            }
-
-            // this will deselect the last action item in the list view
-            UpdateView?.Invoke(false);
-
-            static bool IsAutoRepeatAction(InputAction a) => a is KeyAction keyAction && keyAction.IsAutoRepeat;
-        };
-
-        _cleanUp ??= task =>
-        {
-            Debug.WriteLine("[Player] Finished play task.");
-
-            IsPlaying = false;
-
-            _tokenSource!.Dispose();
-            _tokenSource = null;
-            Debug.WriteLine("[Player] Disposed token source.");
-        };
-
         var playInputActions = repeatCount == 1 ? _playInputActionsAsync : async () =>
         {
             if (repeatCount < 0) while (true)
@@ -153,6 +155,7 @@ public sealed class Player
         }
     }
 
+    // TODO: repeat based on repeatCount; maybe cache the tasks; use a high resolution waitable timer instead of Task.Delay.
     private Task PlayCursorMovement(IReadOnlyList<MouseMovement> path, bool isPathRelative)
     {
         if (isPathRelative)
@@ -162,14 +165,14 @@ public sealed class Player
                 if (_tokenSource!.IsCancellationRequested) return;
 
                 await Task.Delay(_actionCollection.CursorPathStart!.DelayDuration, _tokenSource!.Token).ContinueWith(task => { });
-                InputSimulator.MoveMouse(_actionCollection.CursorPathStart!.MovPoint, false, false);
+                InputSimulator.MoveMouse(_actionCollection.CursorPathStart!.Delta, false, false);
 
                 for (int i = 0; i < path.Count; ++i)
                 {
                     if (_tokenSource!.IsCancellationRequested) return;
 
                     await Task.Delay(path[i].DelayDuration, _tokenSource!.Token).ContinueWith(task => { });
-                    InputSimulator.MoveMouse(path[i].MovPoint, true);
+                    InputSimulator.MoveMouse(path[i].Delta, true);
                 }
             }, _tokenSource!.Token);
         }
@@ -181,7 +184,7 @@ public sealed class Player
                 if (_tokenSource!.IsCancellationRequested) return;
 
                 await Task.Delay(path[i].DelayDuration, _tokenSource!.Token).ContinueWith(task => { });
-                InputSimulator.MoveMouse(path[i].MovPoint, false, false);
+                InputSimulator.MoveMouse(path[i].Delta, false, false);
             }
         }, _tokenSource!.Token);
     }

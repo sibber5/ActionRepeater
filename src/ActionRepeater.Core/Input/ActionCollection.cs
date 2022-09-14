@@ -28,8 +28,8 @@ public sealed partial class ActionCollection : ICollection<InputAction>
 
     private MouseMovement? _cursorPathStart;
     /// <remarks>
-    /// If this is null then <see cref="CursorPath"/> is empty;
-    /// and if <see cref="CursorPath"/> is not empty then this is not null.
+    /// If this is null then <see cref="CursorPath"/> is empty;<br/>
+    /// If <see cref="CursorPath"/> is not empty then this is not null.
     /// </remarks>
     public MouseMovement? CursorPathStart
     {
@@ -91,7 +91,11 @@ public sealed partial class ActionCollection : ICollection<InputAction>
 
     public IReadOnlyList<MouseMovement> GetAbsoluteCursorPath()
     {
-        if (CursorPathStart is null) return Array.Empty<MouseMovement>();
+        if (CursorPathStart is null)
+        {
+            System.Diagnostics.Debug.Assert(CursorPath.Count == 0, $"{nameof(CursorPath)} is not empty.");
+            return Array.Empty<MouseMovement>();
+        }
 
         List<MouseMovement> absPath = new();
 
@@ -102,9 +106,9 @@ public sealed partial class ActionCollection : ICollection<InputAction>
             MouseMovement delta = CursorPath[i];
             MouseMovement lastAbs = absPath[^1];
 
-            Win32.POINT pt = MouseMovement.OffsetPointWithinScreens(lastAbs.MovPoint, delta.MovPoint);
+            Win32.POINT pt = MouseMovement.OffsetPointWithinScreens(lastAbs.Delta, delta.Delta);
 
-            if (pt == lastAbs.MovPoint)
+            if (pt == lastAbs.Delta)
             {
                 lastAbs.ActualDelay += delta.ActualDelay;
                 continue;

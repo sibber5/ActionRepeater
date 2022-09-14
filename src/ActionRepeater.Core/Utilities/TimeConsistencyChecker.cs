@@ -2,7 +2,7 @@
 
 namespace ActionRepeater.Core.Utilities;
 
-public class TimeConsistencyChecker
+public sealed class TimeConsistencyChecker
 {
     public int TickDeltasCount => _tickDeltasCount;
 

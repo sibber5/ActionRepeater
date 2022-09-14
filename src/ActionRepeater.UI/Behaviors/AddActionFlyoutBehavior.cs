@@ -9,7 +9,7 @@ using ActionType = ActionRepeater.UI.ViewModels.ActionType;
 
 namespace ActionRepeater.UI.Behaviors;
 
-public class AddActionMenuBehavior
+public sealed class AddActionMenuBehavior
 {
     private static ContentDialogService? _contentDialogService;
     private static ContentDialogService ContentDialogService => _contentDialogService ??= App.Current.Services.GetRequiredService<ContentDialogService>();

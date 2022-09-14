@@ -6,7 +6,7 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace ActionRepeater.UI.ViewModels;
 
-public partial class HomePageViewModel : ObservableObject
+public sealed partial class HomePageViewModel : ObservableObject
 {
     public int PlayRepeatCount
     {

@@ -5,7 +5,7 @@ using Microsoft.UI.Xaml.Controls;
 
 namespace ActionRepeater.UI.Factories;
 
-public class EditActionDialogViewModelFactory
+public sealed class EditActionDialogViewModelFactory
 {
     private readonly ActionCollection _actionCollection;
 

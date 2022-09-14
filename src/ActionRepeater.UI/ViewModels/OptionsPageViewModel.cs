@@ -7,7 +7,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ActionRepeater.UI.ViewModels;
 
-public class OptionsPageViewModel : ObservableObject
+public sealed class OptionsPageViewModel : ObservableObject
 {
     public int CursorMovementMode
     {
