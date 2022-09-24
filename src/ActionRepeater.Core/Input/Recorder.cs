@@ -4,7 +4,6 @@ using ActionRepeater.Core.Action;
 using ActionRepeater.Core.Utilities;
 using ActionRepeater.Win32.Input;
 using ActionRepeater.Win32.WindowsAndMessages.Utilities;
-using static System.Collections.Specialized.BitVector32;
 
 namespace ActionRepeater.Core.Input;
 
@@ -44,7 +43,7 @@ public sealed class Recorder
         {
             if (_actionCollection.Actions.Count == 0)
             {
-                Reset();
+                Restart();
             }
         };
     }
@@ -65,7 +64,7 @@ public sealed class Recorder
         ((ObservableCollectionEx<InputAction>)_actionCollection.Actions)[^1] = action;
     }
 
-    public void Reset()
+    public void Restart()
     {
         _lastNewActionTickCount = Environment.TickCount;
         _wheelMsgTCC.Reset();
@@ -78,7 +77,7 @@ public sealed class Recorder
             throw new InvalidOperationException($"Not currently registered for raw input. Call {nameof(Recorder)}.{nameof(Recorder.RegisterRawInput)}(IntPtr) to register.");
         }
 
-        Reset();
+        Restart();
 
         _shouldRecordMouseMovement = Options.Instance.CursorMovementMode != CursorMovementMode.None;
 
@@ -303,12 +302,6 @@ public sealed class Recorder
 
     private void AddAction(InputAction action)
     {
-        if (action is null)
-        {
-            //_lastNewActionTickCount = Environment.TickCount;
-            return;
-        }
-
         if (action is not MouseWheelAction)
         {
             _wheelMsgTCC.Reset();
@@ -319,10 +312,11 @@ public sealed class Recorder
 
         if (ticksSinceLastAction <= Options.Instance.MaxClickInterval)
         {
-            AddClickAction(action);
-
+            if (CheckAndReplaceWithClickAction(action))
+        {
             _lastNewActionTickCount = curTickCount;
             return;
+        }
         }
 
         if (ticksSinceLastAction > MinWaitDuration)
@@ -337,7 +331,8 @@ public sealed class Recorder
         ActionAdded?.Invoke(this, action);
     }
 
-    private void AddClickAction(InputAction currentActionToAdd)
+    /// <returns>true if a click action was added, otherwise false.</returns>
+    private bool CheckAndReplaceWithClickAction(InputAction currentActionToAdd)
     {
         if (currentActionToAdd is KeyAction curKeyAction
             && curKeyAction.ActionType == KeyActionType.KeyUp
@@ -347,7 +342,7 @@ public sealed class Recorder
             && lastKeyAction.Key == curKeyAction.Key)
         {
             ReplaceLastAction(new KeyAction(KeyActionType.KeyPress, curKeyAction.Key));
-            return;
+            return true;
         }
 
         if (currentActionToAdd is MouseButtonAction curMBAction
@@ -358,6 +353,9 @@ public sealed class Recorder
             && lastMBAction.Position == curMBAction.Position)
         {
             ReplaceLastAction(new MouseButtonAction(MouseButtonActionType.MouseButtonClick, curMBAction.Button, curMBAction.Position, curMBAction.UsePosition));
+            return true;
         }
+
+        return false;
     }
 }
