@@ -4,13 +4,14 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using ActionRepeater.Core.Action;
+using ActionRepeater.Win32.Synch.Utilities;
 
 namespace ActionRepeater.Core.Input;
 
 public sealed class Player
 {
     /// <summary>
-    /// Note: This is usually invoked from a thread pool thread.
+    /// Note: This is usually invoked from a different thread than the main thread.
     /// </summary>
     public event EventHandler<bool>? IsPlayingChanged;
 
@@ -37,18 +38,25 @@ public sealed class Player
     private IReadOnlyList<InputAction>? _actionsToPlay;
 
 
-    private readonly Func<Task> _playInputActionsAsync;
+    private readonly System.Action _playInputActions;
 
     private readonly Action<Task> _cleanUp;
 
 
     private readonly ActionCollection _actionCollection;
 
-    public Player(ActionCollection actionCollection)
-    {
-        _actionCollection = actionCollection;
+    private readonly HighResolutionWaiter _actionsWaiter;
+    private readonly HighResolutionWaiter _cursorMovementWaiter;
 
-        _playInputActionsAsync = async () =>
+    public Player(ActionCollection actionCollection, HighResolutionWaiter actionsWaiter, HighResolutionWaiter cursorMovementWaiter)
+    {
+        if (ReferenceEquals(actionsWaiter, cursorMovementWaiter)) throw new ArgumentException($"{nameof(actionsWaiter)} must be a different instance than {nameof(cursorMovementWaiter)}");
+
+        _actionCollection = actionCollection;
+        _actionsWaiter = actionsWaiter;
+        _cursorMovementWaiter = cursorMovementWaiter;
+
+        _playInputActions = () =>
         {
             for (int i = 0; i < _actionsToPlay!.Count; ++i)
             {
@@ -58,15 +66,7 @@ public sealed class Player
 
                 if (_actionsToPlay[i] is WaitAction w)
                 {
-                    try
-                    {
-                        await Task.Delay(w.Duration, _tokenSource.Token);
-                    }
-                    catch (TaskCanceledException)
-                    {
-                        Debug.WriteLine($"[{nameof(Player)}] Delay task was cancelled.");
-                        return;
-                    }
+                    _actionsWaiter.Wait((uint)w.Duration);
                     continue;
                 }
 
@@ -128,15 +128,15 @@ public sealed class Player
 
         _actionsToPlay = actions;
 
-        var playInputActions = repeatCount == 1 ? _playInputActionsAsync : async () =>
+        var playInputActions = repeatCount == 1 ? _playInputActions : () =>
         {
             if (repeatCount < 0) while (true)
             {
-                await _playInputActionsAsync();
+                _playInputActions();
             }
             else for (int i = 0; i < repeatCount; ++i)
             {
-                await _playInputActionsAsync();
+                _playInputActions();
             }
         };
 
@@ -158,35 +158,31 @@ public sealed class Player
     // TODO: repeat based on repeatCount; maybe cache the tasks; use a high resolution waitable timer instead of Task.Delay.
     private Task PlayCursorMovement(IReadOnlyList<MouseMovement> path, bool isPathRelative)
     {
-        if (isPathRelative)
-        {
-            return Task.Run(async () =>
+        return Task.Run(isPathRelative
+            ? () =>
             {
                 if (_tokenSource!.IsCancellationRequested) return;
 
-                await Task.Delay(_actionCollection.CursorPathStart!.DelayDuration, _tokenSource!.Token).ContinueWith(task => { });
                 InputSimulator.MoveMouse(_actionCollection.CursorPathStart!.Delta, false, false);
 
                 for (int i = 0; i < path.Count; ++i)
                 {
                     if (_tokenSource!.IsCancellationRequested) return;
 
-                    await Task.Delay(path[i].DelayDuration, _tokenSource!.Token).ContinueWith(task => { });
+                    _cursorMovementWaiter.Wait((uint)path[i].DelayDuration);
                     InputSimulator.MoveMouse(path[i].Delta, true);
                 }
-            }, _tokenSource!.Token);
-        }
-
-        return Task.Run(async () =>
-        {
-            for (int i = 0; i < path.Count; ++i)
-            {
-                if (_tokenSource!.IsCancellationRequested) return;
-
-                await Task.Delay(path[i].DelayDuration, _tokenSource!.Token).ContinueWith(task => { });
-                InputSimulator.MoveMouse(path[i].Delta, false, false);
             }
-        }, _tokenSource!.Token);
+            : () =>
+            {
+                for (int i = 0; i < path.Count; ++i)
+                {
+                    if (_tokenSource!.IsCancellationRequested) return;
+
+                    _cursorMovementWaiter.Wait((uint)path[i].DelayDuration);
+                    InputSimulator.MoveMouse(path[i].Delta, false, false);
+                }
+            }, _tokenSource!.Token);
     }
 
     public void Cancel()
@@ -195,6 +191,8 @@ public sealed class Player
 
         Debug.WriteLine($"[{nameof(Player)}] Cancelling play task...");
         _tokenSource!.Cancel();
+        _actionsWaiter.Cancel();
+        _cursorMovementWaiter.Cancel();
     }
 
     public void RefreshIsPlaying() => IsPlayingChanged?.Invoke(null, _isPlaying);

@@ -2,14 +2,16 @@
 
 public static class MACROS
 {
+    public const uint INFINITE = unchecked((uint)-1);
+
     // The following are defined in WinUser.h
 
-    public const uint KF_EXTENDED = 0x0100;
-    public const uint KF_DLGMODE = 0x0800;
-    public const uint KF_MENUMODE = 0x1000;
-    public const uint KF_ALTDOWN = 0x2000;
-    public const uint KF_REPEAT = 0x4000;
-    public const uint KF_UP = 0x8000;
+    public const uint KF_EXTENDED = 0x0100u;
+    public const uint KF_DLGMODE = 0x0800u;
+    public const uint KF_MENUMODE = 0x1000u;
+    public const uint KF_ALTDOWN = 0x2000u;
+    public const uint KF_REPEAT = 0x4000u;
+    public const uint KF_UP = 0x8000u;
 
     // The following are defined in minwindef.h
 

@@ -8,6 +8,7 @@ using ActionRepeater.UI.Services;
 using ActionRepeater.UI.Utilities;
 using ActionRepeater.UI.ViewModels;
 using ActionRepeater.Win32;
+using ActionRepeater.Win32.Synch.Utilities;
 using ActionRepeater.Win32.WindowsAndMessages;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
@@ -82,6 +83,8 @@ public partial class App : Application
     private static IServiceProvider ConfigureServices()
     {
         ServiceCollection services = new();
+
+        services.AddTransient<HighResolutionWaiter>();
 
         services.AddSingleton<ActionCollection>();
         services.AddSingleton<Recorder>();

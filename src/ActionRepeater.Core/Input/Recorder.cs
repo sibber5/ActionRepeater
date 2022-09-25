@@ -7,7 +7,6 @@ using ActionRepeater.Win32.WindowsAndMessages.Utilities;
 
 namespace ActionRepeater.Core.Input;
 
-// TODO: switch to using System.Diagnostics.Stopwatch instead of Environment.TickCount
 public sealed class Recorder
 {
     private const int MinWaitDuration = 10; // in milliseconds
@@ -26,8 +25,8 @@ public sealed class Recorder
 
     private bool _shouldRecordMouseMovement;
 
-    private int _lastMouseMoveTickCount;
-    private int _lastNewActionTickCount;
+    private readonly StopwatchSlim _mouseStopwatch = new();
+    private readonly StopwatchSlim _actionStopwatch = new();
     private readonly TimeConsistencyChecker _wheelMsgTCC = new();
 
     private readonly ActionCollection _actionCollection;
@@ -66,8 +65,8 @@ public sealed class Recorder
 
     public void Restart()
     {
-        _lastNewActionTickCount = Environment.TickCount;
         _wheelMsgTCC.Reset();
+        _actionStopwatch.Restart();
     }
 
     public void StartRecording()
@@ -90,7 +89,8 @@ public sealed class Recorder
                 _actionCollection.CursorPathStart = new(Win32.PInvoke.Helpers.GetCursorPos(), 0);
                 Debug.WriteLine($"set cursor start path pos to: {_actionCollection.CursorPathStart.Delta}");
             }
-            _lastMouseMoveTickCount = Environment.TickCount;
+
+            _mouseStopwatch.Restart();
         }
 
         IsRecording = true;
@@ -219,12 +219,9 @@ public sealed class Recorder
     {
         if (!_shouldRecordMouseMovement) return;
 
-        int curTickCount = Environment.TickCount;
-        int ticksSinceLastMov = curTickCount - _lastMouseMoveTickCount;
+        int timeSinceLastMov = (int)_mouseStopwatch.RestartAndGetElapsedMS();
 
-        _actionCollection.CursorPath.Add(new(new Win32.POINT(deltaX, deltaY), ticksSinceLastMov));
-
-        _lastMouseMoveTickCount = curTickCount;
+        _actionCollection.CursorPath.Add(new(new Win32.POINT(deltaX, deltaY), timeSinceLastMov));
     }
 
     private void OnMouseWheelMessage(RAWMOUSE.RawButtonData.RawButtonInfo buttonInfo)
@@ -307,26 +304,22 @@ public sealed class Recorder
             _wheelMsgTCC.Reset();
         }
 
-        int curTickCount = Environment.TickCount;
-        int ticksSinceLastAction = curTickCount - _lastNewActionTickCount;
+        int elapsedMS = (int)_actionStopwatch.RestartAndGetElapsedMS();
 
-        if (ticksSinceLastAction <= Options.Instance.MaxClickInterval)
+        if (elapsedMS <= Options.Instance.MaxClickInterval)
         {
             if (CheckAndReplaceWithClickAction(action))
-        {
-            _lastNewActionTickCount = curTickCount;
-            return;
-        }
+            {
+                return;
+            }
         }
 
-        if (ticksSinceLastAction > MinWaitDuration)
+        if (elapsedMS >= MinWaitDuration)
         {
-            _actionCollection.Add(new WaitAction(ticksSinceLastAction));
+            _actionCollection.Add(new WaitAction(elapsedMS));
         }
 
         _actionCollection.Add(action);
-
-        _lastNewActionTickCount = curTickCount;
 
         ActionAdded?.Invoke(this, action);
     }

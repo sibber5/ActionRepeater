@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using System.Text.Json.Serialization;
 using ActionRepeater.Core.Extentions;
 using ActionRepeater.Win32;
 
@@ -12,21 +11,12 @@ public sealed class MouseMovement
     /// </summary>
     public POINT Delta { get; set; }
 
-    /// <summary>
-    /// The actual measured delay duration.
-    /// </summary>
-    public int ActualDelay { get; set; }
+    public int DelayDuration { get; set; }
 
-    /// <summary>
-    /// The delay duration compensated for the system timer.
-    /// </summary>
-    [JsonIgnore]
-    public int DelayDuration => (int)(ActualDelay / 1.2);
-
-    public MouseMovement(POINT delta, int actualDelay)
+    public MouseMovement(POINT delta, int delayDuration)
     {
         Delta = delta;
-        ActualDelay = actualDelay;
+        DelayDuration = delayDuration;
     }
 
     public static POINT OffsetPointWithinScreens(POINT point, POINT offset)

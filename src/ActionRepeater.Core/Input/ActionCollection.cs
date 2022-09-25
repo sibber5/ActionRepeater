@@ -110,11 +110,11 @@ public sealed partial class ActionCollection : ICollection<InputAction>
 
             if (pt == lastAbs.Delta)
             {
-                lastAbs.ActualDelay += delta.ActualDelay;
+                lastAbs.DelayDuration += delta.DelayDuration;
                 continue;
             }
 
-            absPath.Add(new MouseMovement(pt, delta.ActualDelay));
+            absPath.Add(new MouseMovement(pt, delta.DelayDuration));
         }
 
         return absPath;
