@@ -64,6 +64,8 @@ public sealed partial class HomePageViewModel : ObservableObject
 
         _onIsPlayingChanged = () =>
         {
+            if (!_player.IsPlaying) _actionListViewModel.DeselectAction();
+
             IsPlayButtonChecked = _player.IsPlaying;
             ToggleRecordingCommand.NotifyCanExecuteChanged();
         };
@@ -111,7 +113,7 @@ public sealed partial class HomePageViewModel : ObservableObject
             _player.RefreshIsPlaying();
         }
     }
-    private bool CanPlayActions() => !_recorder.IsRecording && _actionCollection.Actions.Count > 0;
+    private bool CanPlayActions() => !_recorder.IsRecording && (_actionCollection.Actions.Count > 0 || _actionCollection.CursorPathStart is not null);
 
     [RelayCommand]
     private void ToggleCursorPathWindow()

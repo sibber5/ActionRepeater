@@ -113,6 +113,8 @@ public sealed partial class ActionListViewModel : ObservableObject
         App.Current.MainWindow.DispatcherQueue.TryEnqueue(_updateSelectedAction);
     }
 
+    public void DeselectAction() => SelectedActionIndex = -1;
+
     [RelayCommand]
     internal async Task EditSelectedAction()
     {

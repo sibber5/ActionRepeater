@@ -131,6 +131,8 @@ public partial class App : Application
 
     private async void MainWindow_Closed(object sender, WindowEventArgs args)
     {
+        if (Services.GetService<PathWindowService>() is { } pathWindowService && pathWindowService.IsPathWindowOpen) pathWindowService.ClosePathWindow();
+
         if (!_saveOnExit) return;
 
         await SaveOptions();

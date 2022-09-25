@@ -130,18 +130,18 @@ public sealed class Player
 
         var playInputActions = repeatCount == 1 ? _playInputActions : () =>
         {
-            if (repeatCount < 0) while (true)
+            if (repeatCount < 0) while (!_tokenSource.IsCancellationRequested)
             {
                 _playInputActions();
             }
-            else for (int i = 0; i < repeatCount; ++i)
+            else for (int i = 0; i < repeatCount && !_tokenSource.IsCancellationRequested; ++i)
             {
                 _playInputActions();
             }
         };
 
         IsPlaying = true;
-        Debug.WriteLine("[Player] Started play task.");
+        Debug.WriteLine($"[{nameof(Player)}] Started play task.");
 
         if (_actionCollection.CursorPathStart is not null && path?.Count > 0)
         {

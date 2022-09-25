@@ -43,6 +43,7 @@ public sealed class HighResolutionWaiter : IDisposable
         _isWaiting = false;
     }
 
+    /// <remarks>Calling <see cref="Cancel"/> when not waiting is a no-op.</remarks>
     public unsafe void Cancel()
     {
         if (!_isWaiting) return;
