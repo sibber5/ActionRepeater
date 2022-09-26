@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using ActionRepeater.Core.Action;
+using ActionRepeater.Core.Utilities;
 using ActionRepeater.Win32.Synch.Utilities;
 
 namespace ActionRepeater.Core.Input;
@@ -22,7 +24,7 @@ public sealed class Player
         private set
         {
             _isPlaying = value;
-            IsPlayingChanged?.Invoke(null, value);
+            IsPlayingChanged?.Invoke(this, value);
         }
     }
 
@@ -37,6 +39,11 @@ public sealed class Player
 
     private IReadOnlyList<InputAction>? _actionsToPlay;
 
+    private IReadOnlyList<MouseMovement>? _cursorPath;
+
+
+    private System.Action? _playCursorMovementRelative;
+    private System.Action? _playCursorMovementAbsolute;
 
     private readonly System.Action _playInputActions;
 
@@ -58,23 +65,22 @@ public sealed class Player
 
         _playInputActions = () =>
         {
-            for (int i = 0; i < _actionsToPlay!.Count; ++i)
+            ReadOnlySpan<InputAction> actionsSpan = ((ObservableCollectionEx<InputAction>)_actionsToPlay!).AsSpan();
+
+            for (int i = 0; i < actionsSpan.Length; ++i)
             {
                 if (_tokenSource!.IsCancellationRequested) return;
 
-                UpdateView?.Invoke(IsAutoRepeatAction(_actionsToPlay[i]) || (i > 0 && _actionsToPlay[i] is WaitAction && IsAutoRepeatAction(_actionsToPlay[i - 1])));
+                UpdateView?.Invoke(IsAutoRepeatAction(actionsSpan[i]) || (i > 0 && actionsSpan[i] is WaitAction && IsAutoRepeatAction(actionsSpan[i - 1])));
 
-                if (_actionsToPlay[i] is WaitAction w)
+                if (actionsSpan[i] is WaitAction w)
                 {
                     _actionsWaiter.Wait((uint)w.Duration);
                     continue;
                 }
 
-                _actionsToPlay[i].Play();
+                actionsSpan[i].Play();
             }
-
-            // this will deselect the last action item in the list view
-            UpdateView?.Invoke(false);
 
             static bool IsAutoRepeatAction(InputAction a) => a is KeyAction keyAction && keyAction.IsAutoRepeat;
         };
@@ -155,32 +161,38 @@ public sealed class Player
         }
     }
 
-    // TODO: repeat based on repeatCount; maybe cache the tasks; use a high resolution waitable timer instead of Task.Delay.
+    // TODO: repeat based on repeatCount
     private Task PlayCursorMovement(IReadOnlyList<MouseMovement> path, bool isPathRelative)
     {
+        _cursorPath = path;
+
         return Task.Run(isPathRelative
-            ? () =>
+            ? _playCursorMovementRelative ??= () =>
             {
                 if (_tokenSource!.IsCancellationRequested) return;
 
+                ReadOnlySpan<MouseMovement> cursorPathSpan = CollectionsMarshal.AsSpan((List<MouseMovement>)_cursorPath);
+
                 InputSimulator.MoveMouse(_actionCollection.CursorPathStart!.Delta, false, false);
 
-                for (int i = 0; i < path.Count; ++i)
+                foreach (MouseMovement mouseMovement in cursorPathSpan)
                 {
                     if (_tokenSource!.IsCancellationRequested) return;
 
-                    _cursorMovementWaiter.Wait((uint)path[i].DelayDuration);
-                    InputSimulator.MoveMouse(path[i].Delta, true);
+                    _cursorMovementWaiter.Wait((uint)mouseMovement.DelayDuration);
+                    InputSimulator.MoveMouse(mouseMovement.Delta, true);
                 }
             }
-            : () =>
+            : _playCursorMovementAbsolute ??= () =>
             {
-                for (int i = 0; i < path.Count; ++i)
+                ReadOnlySpan<MouseMovement> cursorPathSpan = CollectionsMarshal.AsSpan((List<MouseMovement>)_cursorPath);
+
+                foreach (MouseMovement mouseMovement in cursorPathSpan)
                 {
                     if (_tokenSource!.IsCancellationRequested) return;
 
-                    _cursorMovementWaiter.Wait((uint)path[i].DelayDuration);
-                    InputSimulator.MoveMouse(path[i].Delta, false, false);
+                    _cursorMovementWaiter.Wait((uint)mouseMovement.DelayDuration);
+                    InputSimulator.MoveMouse(mouseMovement.Delta, false, false);
                 }
             }, _tokenSource!.Token);
     }
@@ -195,5 +207,5 @@ public sealed class Player
         _cursorMovementWaiter.Cancel();
     }
 
-    public void RefreshIsPlaying() => IsPlayingChanged?.Invoke(null, _isPlaying);
+    public void RefreshIsPlaying() => IsPlayingChanged?.Invoke(this, _isPlaying);
 }

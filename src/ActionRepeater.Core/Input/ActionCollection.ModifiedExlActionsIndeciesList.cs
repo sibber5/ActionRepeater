@@ -2,8 +2,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using ActionRepeater.Core.Action;
 using ActionRepeater.Core.Extentions;
+using ActionRepeater.Core.Utilities;
 
 namespace ActionRepeater.Core.Input;
 
@@ -18,8 +20,8 @@ public sealed partial class ActionCollection
     {
         private readonly List<int> _indecies;
 
-        private readonly IReadOnlyList<InputAction> _actions;
-        private readonly IReadOnlyList<InputAction> _actionsExlKeyRepeat;
+        private readonly ObservableCollectionEx<InputAction> _actions;
+        private readonly ObservableCollectionEx<InputAction> _actionsExlKeyRepeat;
 
         public int Count => _indecies.Count;
 
@@ -27,7 +29,7 @@ public sealed partial class ActionCollection
 
         public int this[int index] { get => _indecies[index]; set => _indecies[index] = value; }
 
-        public ModifiedExlActionsIndeciesList(IReadOnlyList<InputAction> actions, IReadOnlyList<InputAction> actionsExlKeyRepeat)
+        public ModifiedExlActionsIndeciesList(ObservableCollectionEx<InputAction> actions, ObservableCollectionEx<InputAction> actionsExlKeyRepeat)
         {
             _indecies = new();
             _actions = actions;
@@ -65,7 +67,7 @@ public sealed partial class ActionCollection
         /// <returns>The index of <paramref name="action"/> in <see cref="ActionsExlKeyRepeat"/> <b>if</b> it is a modified action, otherwise -1.</returns>
         public int IndexOfModifiedAction(InputAction action)
         {
-            foreach (int idx in _indecies)
+            foreach (int idx in CollectionsMarshal.AsSpan(_indecies))
             {
                 if (_actionsExlKeyRepeat[idx] == action)
                 {
@@ -78,10 +80,10 @@ public sealed partial class ActionCollection
 
         public (int StartIndex, int Count) GetRangeTiedToModifiedActionIdx(int modifiedActionIndex)
         {
-            int startIdx = _actions.RefIndexOfReverse(_actionsExlKeyRepeat[modifiedActionIndex - 1]) + 1;
+            int startIdx = _actions.AsSpan().RefIndexOfReverse(_actionsExlKeyRepeat[modifiedActionIndex - 1]) + 1;
             if (startIdx == 0) throw new InvalidOperationException($"action {nameof(ActionCollection._actionsExlKeyRepeat)}[{modifiedActionIndex - 1}] doesnt exist in {nameof(ActionCollection._actions)}.");
 
-            int endIdx = _actions.RefIndexOfReverse(_actionsExlKeyRepeat[modifiedActionIndex + 1]);
+            int endIdx = _actions.AsSpan().RefIndexOfReverse(_actionsExlKeyRepeat[modifiedActionIndex + 1]);
             if (endIdx == -1) throw new InvalidOperationException($"action {nameof(ActionCollection._actionsExlKeyRepeat)}[{modifiedActionIndex + 1}] doesnt exist in {nameof(ActionCollection._actions)}.");
 
             int count = endIdx - startIdx;

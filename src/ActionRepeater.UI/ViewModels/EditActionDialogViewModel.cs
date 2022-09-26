@@ -94,7 +94,7 @@ public sealed partial class EditActionDialogViewModel : ObservableObject
 
                 if (ka.ActionType == KeyActionType.KeyDown)
                 {
-                    _actionsCollection.TryReplace(false, _actionsCollection.Actions.RefIndexOfReverse(action), new KeyAction(keyVM.Type, keyVM.Key));
+                    _actionsCollection.TryReplace(false, _actionsCollection.ActionsAsSpan.RefIndexOfReverse(action), new KeyAction(keyVM.Type, keyVM.Key));
                     break;
                 }
 
@@ -119,7 +119,7 @@ public sealed partial class EditActionDialogViewModel : ObservableObject
             case EditWaitActionViewModel waitVM:
                 if (_actionsCollection.HasActionBeenModified(action))
                 {
-                    _actionsCollection.TryReplace(true, _actionsCollection.ActionsExlKeyRepeat.RefIndexOfReverse(action), new WaitAction((int)(waitVM.DurationSecs * 1000)));
+                    _actionsCollection.TryReplace(true, _actionsCollection.ActionsExlKeyRepeatAsSpan.RefIndexOfReverse(action), new WaitAction((int)(waitVM.DurationSecs * 1000)));
                     break;
                 }
 

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
@@ -36,6 +37,21 @@ public static class ExtentionMethods
         for (int i = list.Count - 1; i > -1; i--)
         {
             if (ReferenceEquals(list[i], item))
+            {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    public static int RefIndexOfReverse<T>(this Span<T> span, T item) => ((ReadOnlySpan<T>)span).RefIndexOfReverse(item);
+
+    public static int RefIndexOfReverse<T>(this ReadOnlySpan<T> span, T item)
+    {
+        for (int i = span.Length - 1; i > -1; i--)
+        {
+            if (ReferenceEquals(span[i], item))
             {
                 return i;
             }

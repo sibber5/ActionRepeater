@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Runtime.InteropServices;
 
 namespace ActionRepeater.Core.Utilities;
 
@@ -108,6 +110,14 @@ public class ObservableCollectionEx<T> : ObservableCollection<T>
             OnCollectionChanged(EventArgsCache.ResetCollectionChanged);
         }
     }
+
+    /// <summary>
+    /// Gets a <see cref="Span{T}"/> view over the data in the collection. Items should not be added or removed from the <see cref="ObservableCollectionEx{T}"/> while the <see cref="Span{T}"/> is in use.
+    /// </summary>
+    /// <returns>
+    /// A <see cref="Span{T}"/> instance over the <see cref="ObservableCollectionEx{T}"/>.
+    /// </returns>
+    public Span<T> AsSpan() => CollectionsMarshal.AsSpan((List<T>)Items);
 
     protected override void OnPropertyChanged(PropertyChangedEventArgs e)
     {

@@ -55,10 +55,10 @@ public sealed partial class ActionViewModel : ObservableObject
     /// <returns>The <see cref="ActionViewModel"/> for the <paramref name="action"/>, that is currently bound to in the view.</returns>
     private static (ActionViewModel? actionsVM, ActionViewModel? actionsExlVM) GetActionViewModels(InputAction action)
     {
-        int actionsIndex = ActionCollection.Actions.RefIndexOfReverse(action);
+        int actionsIndex = ActionCollection.ActionsAsSpan.RefIndexOfReverse(action);
         ActionViewModel? actionVM = actionsIndex == -1 ? null : ActionListViewModel.ActionVMs[actionsIndex];
 
-        int actionsExlIndex = ActionCollection.ActionsExlKeyRepeat.RefIndexOfReverse(action);
+        int actionsExlIndex = ActionCollection.ActionsExlKeyRepeatAsSpan.RefIndexOfReverse(action);
         ActionViewModel? actionExlVM = actionsExlIndex == -1 ? null : ActionListViewModel.ActionsExlVMs[actionsExlIndex];
 
         return (actionVM, actionExlVM);

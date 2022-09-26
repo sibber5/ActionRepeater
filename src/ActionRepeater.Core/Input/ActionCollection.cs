@@ -48,6 +48,11 @@ public sealed partial class ActionCollection : ICollection<InputAction>
     public IReadOnlyList<InputAction> Actions => _actions;
     public IReadOnlyList<InputAction> ActionsExlKeyRepeat => _actionsExlKeyRepeat;
 
+    /// <summary>Warning: Should not add or remove items while the span is in use.</summary>
+    public ReadOnlySpan<InputAction> ActionsAsSpan => _actions.AsSpan();
+    /// <inheritdoc cref="ActionsAsSpan"/>
+    public ReadOnlySpan<InputAction> ActionsExlKeyRepeatAsSpan => _actionsExlKeyRepeat.AsSpan();
+
     private readonly ObservableCollectionEx<InputAction> _actions = new();
     private readonly ObservableCollectionEx<InputAction> _actionsExlKeyRepeat = new();
 
@@ -77,7 +82,7 @@ public sealed partial class ActionCollection : ICollection<InputAction>
             if (e.PropertyName!.Equals(nameof(Options.Instance.UseCursorPosOnClicks), StringComparison.Ordinal))
             {
                 bool newVal = Options.Instance.UseCursorPosOnClicks;
-                foreach (InputAction action in _actions)
+                foreach (InputAction action in _actions.AsSpan())
                 {
                     if (action is MouseButtonAction mbAction)
                     {
@@ -240,8 +245,8 @@ public sealed partial class ActionCollection : ICollection<InputAction>
 
         if (_moddedExlActsIdxs.IsActionTiedToModifiedAction(action)) return ActionTiedToModifiedActMsg;
 
-        int idx = _actions.RefIndexOfReverse(action);
-        int exlIdx = _actionsExlKeyRepeat.RefIndexOfReverse(action);
+        int idx = _actions.AsSpan().RefIndexOfReverse(action);
+        int exlIdx = _actionsExlKeyRepeat.AsSpan().RefIndexOfReverse(action);
 
         if (action is KeyAction keyAct && keyAct.ActionType == KeyActionType.KeyDown)
         {
@@ -323,7 +328,7 @@ public sealed partial class ActionCollection : ICollection<InputAction>
 
             _actionsExlKeyRepeat[index] = newAction;
 
-            replacedActionIdx = _actions.RefIndexOfReverse(actionToReplace);
+            replacedActionIdx = _actions.AsSpan().RefIndexOfReverse(actionToReplace);
             if (replacedActionIdx == -1) throw new NotImplementedException("selected item not available in Actions.");
             _actions[replacedActionIdx] = newAction;
 
@@ -348,7 +353,7 @@ public sealed partial class ActionCollection : ICollection<InputAction>
 
         _actions[index] = newAction;
 
-        replacedActionIdx = _actionsExlKeyRepeat.RefIndexOfReverse(actionToReplace);
+        replacedActionIdx = _actionsExlKeyRepeat.AsSpan().RefIndexOfReverse(actionToReplace);
         if (replacedActionIdx == -1) throw new NotImplementedException("selected item not available in ActionsExlKeyRepeat.");
         _actionsExlKeyRepeat[replacedActionIdx] = newAction;
 
@@ -408,8 +413,8 @@ public sealed partial class ActionCollection : ICollection<InputAction>
     /// </remarks>
     private void InsertKeyAutoRepeatActions(KeyAction keyDownAction, KeyAction keyUpAction)
     {
-        int keyDownActIdx = _actions.RefIndexOfReverse(keyDownAction);
-        int keyUpActIdxCountOffset = _actions.RefIndexOfReverse(keyUpAction) - _actions.Count; // use offset from end because the count will change
+        int keyDownActIdx = _actions.AsSpan().RefIndexOfReverse(keyDownAction);
+        int keyUpActIdxCountOffset = _actions.AsSpan().RefIndexOfReverse(keyUpAction) - _actions.Count; // use offset from end because the count will change
 
         int iterationsToSkip = 0; // to skip the key repeat actions we add (because we know what they are)
         bool keyDelayAdded = false;
@@ -466,7 +471,7 @@ public sealed partial class ActionCollection : ICollection<InputAction>
 
                     // create a modified wait action for _actionsExlKeyRepeat
                     // (see _modifiedFilteredActionsIdxs remarks for what a modified wait action is)
-                    int actionsExlWaitIdx = _actionsExlKeyRepeat.RefIndexOfReverse(waitAct);
+                    int actionsExlWaitIdx = _actionsExlKeyRepeat.AsSpan().RefIndexOfReverse(waitAct);
                     if (actionsExlWaitIdx != -1)
                     {
                         _actionsExlKeyRepeat[actionsExlWaitIdx] = new WaitAction(waitAct.Duration);
