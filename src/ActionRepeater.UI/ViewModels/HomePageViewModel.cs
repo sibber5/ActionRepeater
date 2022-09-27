@@ -27,10 +27,6 @@ public sealed partial class HomePageViewModel : ObservableObject
     private readonly Recorder _recorder;
     private readonly Player _player;
 
-    // These select the item in the list view that is currently being performed
-    private readonly Action<bool> _updateActionsView;
-    private readonly Action<bool> _updateActionsExlView;
-
     private readonly Microsoft.UI.Dispatching.DispatcherQueueHandler _onIsPlayingChanged;
 
     public HomePageViewModel(ActionListViewModel actionListVM, PathWindowService pathWindowService, ActionCollection actionCollection, Recorder recorder, Player player)
@@ -43,29 +39,10 @@ public sealed partial class HomePageViewModel : ObservableObject
         _recorder = recorder;
         _player = player;
 
-        _updateActionsView = (isAutoRepeat) =>
-        {
-            // assume Actions (including key auto repeat) are playing
-            System.Diagnostics.Debug.Assert(Core.Options.Instance.SendKeyAutoRepeat);
-
-            if (actionListVM.ShowKeyRepeatActions || !isAutoRepeat)
-            {
-                actionListVM.UpdateActionListIndex(false);
-            }
-        };
-
-        _updateActionsExlView = (isAutoRepeat) =>
-        {
-            // assume Actions *excluding* key auto repeat are playing
-            System.Diagnostics.Debug.Assert(!Core.Options.Instance.SendKeyAutoRepeat);
-
-            actionListVM.UpdateActionListIndex(true);
-        };
+        _player.OnActionPlayed = actionListVM.UpdateSelectedAction;
 
         _onIsPlayingChanged = () =>
         {
-            if (!_player.IsPlaying) _actionListViewModel.DeselectAction();
-
             IsPlayButtonChecked = _player.IsPlaying;
             ToggleRecordingCommand.NotifyCanExecuteChanged();
         };
@@ -105,9 +82,6 @@ public sealed partial class HomePageViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanPlayActions))]
     private void PlayActions()
     {
-        _actionListViewModel.CurrentSetActionIndex = -1;
-        _player.UpdateView = Core.Options.Instance.SendKeyAutoRepeat ? _updateActionsView : _updateActionsExlView;
-
         if (!_player.TryPlayActions())
         {
             _player.RefreshIsPlaying();

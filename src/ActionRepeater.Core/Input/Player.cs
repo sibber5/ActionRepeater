@@ -28,11 +28,7 @@ public sealed class Player
         }
     }
 
-    /// <summary>
-    /// void UpdateView(bool isAutoRepeat)
-    /// </summary>
-    public Action<bool>? UpdateView { get; set; }
-
+    public Action<InputAction?, int>? OnActionPlayed;
 
     private CancellationTokenSource? _tokenSource;
 
@@ -41,9 +37,13 @@ public sealed class Player
 
     private IReadOnlyList<MouseMovement>? _cursorPath;
 
+    private readonly Func<Task> _runAllActions;
+    private readonly Func<Task> _runInputActions;
+    private Func<Task>? _taskToRun;
 
     private System.Action? _playCursorMovementRelative;
     private System.Action? _playCursorMovementAbsolute;
+    private System.Action? _playCursorMovement;
 
     private readonly System.Action _playInputActions;
 
@@ -71,18 +71,20 @@ public sealed class Player
             {
                 if (_tokenSource!.IsCancellationRequested) return;
 
-                UpdateView?.Invoke(IsAutoRepeatAction(actionsSpan[i]) || (i > 0 && actionsSpan[i] is WaitAction && IsAutoRepeatAction(actionsSpan[i - 1])));
+                InputAction action = actionsSpan[i];
 
-                if (actionsSpan[i] is WaitableInputAction w)
+                OnActionPlayed?.Invoke(action, i);
+
+                if (action is WaitableInputAction w)
                 {
                     w.PlayWait(_actionsWaiter);
                     continue;
                 }
 
-                actionsSpan[i].Play();
+                action.Play();
             }
 
-            static bool IsAutoRepeatAction(InputAction a) => a is KeyAction keyAction && keyAction.IsAutoRepeat;
+            OnActionPlayed?.Invoke(null, default);
         };
 
         _cleanUp = task =>
@@ -95,6 +97,9 @@ public sealed class Player
             _tokenSource = null;
             Debug.WriteLine($"[{nameof(Player)}] Disposed token source.");
         };
+
+        _runAllActions = () => Task.WhenAll(Task.Run(_playInputActions, _tokenSource!.Token), Task.Run(_playCursorMovement!, _tokenSource!.Token));
+        _runInputActions = () => Task.Run(_playInputActions, _tokenSource!.Token);
     }
 
     /// <returns>
@@ -127,51 +132,51 @@ public sealed class Player
         return true;
     }
 
-    public void PlayActions(IReadOnlyList<InputAction> actions, IReadOnlyList<MouseMovement>? path, bool isPathRelative, int repeatCount = 1)
+    private void PlayActions(IReadOnlyList<InputAction> actions, IReadOnlyList<MouseMovement>? path, bool isPathRelative, int repeatCount = 1)
     {
         _tokenSource?.Dispose();
         _tokenSource = new CancellationTokenSource();
 
         _actionsToPlay = actions;
+        _cursorPath = path;
 
-        var playInputActions = repeatCount == 1 ? _playInputActions : () =>
-        {
-            if (repeatCount < 0) while (!_tokenSource.IsCancellationRequested)
-            {
-                _playInputActions();
-            }
-            else for (int i = 0; i < repeatCount && !_tokenSource.IsCancellationRequested; ++i)
-            {
-                _playInputActions();
-            }
-        };
+        SetCursorMovementFunction(isPathRelative);
+
+        _taskToRun = _actionCollection.CursorPathStart is not null && path?.Count > 0
+            ? _runAllActions
+            : _runInputActions;
 
         IsPlaying = true;
         Debug.WriteLine($"[{nameof(Player)}] Started play task.");
 
-        if (_actionCollection.CursorPathStart is not null && path?.Count > 0)
+        if (repeatCount == 1)
         {
-            Task.WhenAll(Task.Run(playInputActions, _tokenSource.Token), PlayCursorMovement(path, isPathRelative))
-                .ContinueWith(_cleanUp);
+            _taskToRun().ContinueWith(_cleanUp);
         }
         else
         {
-            Task.Run(playInputActions, _tokenSource.Token)
-                .ContinueWith(_cleanUp);
+            Task.Run(async () =>
+            {
+                if (repeatCount < 0) while (!_tokenSource.IsCancellationRequested)
+                {
+                    await _taskToRun();
+                }
+                else for (int i = 0; i < repeatCount && !_tokenSource.IsCancellationRequested; ++i)
+                {
+                    await _taskToRun();
+                }
+            }).ContinueWith(_cleanUp);
         }
     }
 
-    // TODO: repeat based on repeatCount
-    private Task PlayCursorMovement(IReadOnlyList<MouseMovement> path, bool isPathRelative)
+    private void SetCursorMovementFunction(bool isPathRelative)
     {
-        _cursorPath = path;
-
-        return Task.Run(isPathRelative
+        _playCursorMovement = isPathRelative
             ? _playCursorMovementRelative ??= () =>
             {
                 if (_tokenSource!.IsCancellationRequested) return;
 
-                ReadOnlySpan<MouseMovement> cursorPathSpan = CollectionsMarshal.AsSpan((List<MouseMovement>)_cursorPath);
+                ReadOnlySpan<MouseMovement> cursorPathSpan = CollectionsMarshal.AsSpan((List<MouseMovement>)_cursorPath!);
 
                 InputSimulator.MoveMouse(_actionCollection.CursorPathStart!.Delta, false, false);
 
@@ -185,7 +190,7 @@ public sealed class Player
             }
             : _playCursorMovementAbsolute ??= () =>
             {
-                ReadOnlySpan<MouseMovement> cursorPathSpan = CollectionsMarshal.AsSpan((List<MouseMovement>)_cursorPath);
+                ReadOnlySpan<MouseMovement> cursorPathSpan = CollectionsMarshal.AsSpan((List<MouseMovement>)_cursorPath!);
 
                 foreach (MouseMovement mouseMovement in cursorPathSpan)
                 {
@@ -194,7 +199,7 @@ public sealed class Player
                     _cursorMovementWaiter.Wait((uint)mouseMovement.DelayDuration);
                     InputSimulator.MoveMouse(mouseMovement.Delta, false, false);
                 }
-            }, _tokenSource!.Token);
+            };
     }
 
     public void Cancel()

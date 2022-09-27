@@ -127,7 +127,7 @@ public sealed class PathWindow : IDisposable
         {
             if (_path is null) return;
 
-            if (!_addLineMre.IsSet) _addLineMre.Wait();
+            _addLineMre.Wait();
 
             _path.AddLine(prevPoint, newPoint);
             Invalidate();

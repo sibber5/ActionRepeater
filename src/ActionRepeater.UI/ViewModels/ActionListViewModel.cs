@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using ActionRepeater.Core.Action;
+using ActionRepeater.Core.Extentions;
 using ActionRepeater.Core.Input;
 using ActionRepeater.UI.Services;
 using ActionRepeater.UI.Utilities;
@@ -26,14 +30,12 @@ public sealed partial class ActionListViewModel : ObservableObject
     public IReadOnlyList<ActionViewModel> FilteredActions => ShowKeyRepeatActions ? ActionVMs : ActionsExlVMs;
 
     public InputAction? SelectedAction => SelectedActionIndex == -1
-        ? null
-        : (ShowKeyRepeatActions ? _actionCollection.Actions[SelectedActionIndex] : _actionCollection.ActionsExlKeyRepeat[SelectedActionIndex]);
+                ? null
+                : (ShowKeyRepeatActions ? _actionCollection.Actions[SelectedActionIndex] : _actionCollection.ActionsExlKeyRepeat[SelectedActionIndex]);
 
     [NotifyCanExecuteChangedFor(nameof(StoreActionCommand))]
     [ObservableProperty]
     private int _selectedActionIndex = -1;
-
-    public int CurrentSetActionIndex { get; set; }
 
     private InputAction? _copiedAction;
     public InputAction? CopiedAction
@@ -51,7 +53,7 @@ public sealed partial class ActionListViewModel : ObservableObject
 
     public bool CanAddAction => !_recorder.IsRecording;
 
-    internal Action? ScrollToSelectedItem { get; set; }
+    internal Action ScrollToSelectedItem = null!;
 
     private readonly ContentDialogService _contentDialogService;
 
@@ -59,6 +61,10 @@ public sealed partial class ActionListViewModel : ObservableObject
 
     private readonly ActionCollection _actionCollection;
     private readonly Recorder _recorder;
+
+    private readonly ManualResetEventSlim _updateSelectedActionMre = new(true);
+    private bool _isSelectedActModifiedAct;
+    private int _selectedActionIndexToSet;
 
     public ActionListViewModel(ContentDialogService contentDialogService, ActionCollection actionCollection, Recorder recorder)
     {
@@ -68,8 +74,9 @@ public sealed partial class ActionListViewModel : ObservableObject
 
         _updateSelectedAction = () =>
         {
-            SelectedActionIndex = CurrentSetActionIndex;
-            ScrollToSelectedItem?.Invoke();
+            SelectedActionIndex = _selectedActionIndexToSet;
+            ScrollToSelectedItem();
+            _updateSelectedActionMre.Set();
         };
 
         Func<InputAction?, ActionViewModel> createVM = static (model) => new ActionViewModel(model!);
@@ -87,33 +94,40 @@ public sealed partial class ActionListViewModel : ObservableObject
         _recorder.IsRecordingChanged += (_, _) => OnPropertyChanged(nameof(CanAddAction));
     }
 
-    public void UpdateActionListIndex(bool skipAutoRepeat)
+    public void UpdateSelectedAction(InputAction? currentAction, int index)
     {
-        CurrentSetActionIndex++;
+        _updateSelectedActionMre.Wait();
 
-        if (skipAutoRepeat)
+        if (currentAction is null)
         {
-            var filteredActions = ShowKeyRepeatActions ? _actionCollection.Actions : _actionCollection.ActionsExlKeyRepeat;
-            for (int i = CurrentSetActionIndex; i < filteredActions.Count; i++)
-            {
-                if (IsAutoRepeatAction(filteredActions[i]) || (i > 0 && filteredActions[i] is WaitAction && IsAutoRepeatAction(filteredActions[i - 1])))
-                {
-                    continue;
-                }
-
-                CurrentSetActionIndex = i;
-                break;
-            }
-
-            static bool IsAutoRepeatAction(InputAction a) => a is KeyAction keyAction && keyAction.IsAutoRepeat;
+            SetSelectedActionIndex(-1);
+            return;
         }
 
-        if (CurrentSetActionIndex >= FilteredActions.Count) CurrentSetActionIndex = -1;
+        if (!ShowKeyRepeatActions) index = _actionCollection.ActionsExlKeyRepeatAsSpan.RefIndexOfReverse(currentAction);
 
-        App.Current.MainWindow.DispatcherQueue.TryEnqueue(_updateSelectedAction);
+        if (index != -1)
+        {
+            _isSelectedActModifiedAct = false;
+            SetSelectedActionIndex(index);
+            return;
+        }
+
+        Debug.Assert(!ShowKeyRepeatActions);
+
+        if (_isSelectedActModifiedAct) return;
+
+        _isSelectedActModifiedAct = true;
+        SetSelectedActionIndex(SelectedActionIndex + 1);
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        void SetSelectedActionIndex(int i)
+        {
+            _selectedActionIndexToSet = i;
+            _updateSelectedActionMre.Reset();
+            App.Current.MainWindow.DispatcherQueue.TryEnqueue(_updateSelectedAction);
+        }
     }
-
-    public void DeselectAction() => SelectedActionIndex = -1;
 
     [RelayCommand]
     internal async Task EditSelectedAction()
