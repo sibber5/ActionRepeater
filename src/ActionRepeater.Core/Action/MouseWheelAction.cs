@@ -1,10 +1,11 @@
 ﻿using System;
 using System.ComponentModel;
 using ActionRepeater.Core.Input;
+using ActionRepeater.Win32.Synch.Utilities;
 
 namespace ActionRepeater.Core.Action;
 
-public sealed class MouseWheelAction : InputAction, IEquatable<MouseWheelAction>
+public sealed class MouseWheelAction : WaitableInputAction, IEquatable<MouseWheelAction>
 {
     public override string Name => IsHorizontal ? "Horizontal Mouse Wheel" : "Mouse Wheel";
 
@@ -59,7 +60,7 @@ public sealed class MouseWheelAction : InputAction, IEquatable<MouseWheelAction>
         _duration = duration;
     }
 
-    public override void Play()
+    public override void PlayWait(HighResolutionWaiter waiter)
     {
         int absStepCount = Math.Abs(_stepCount);
 
@@ -69,13 +70,13 @@ public sealed class MouseWheelAction : InputAction, IEquatable<MouseWheelAction>
             return;
         }
 
-        int waitInterval = _duration / (absStepCount - 1);
+        uint waitInterval = (uint)(_duration / (absStepCount - 1));
         int step = Math.Sign(_stepCount);
 
         SendWheelEvent(step);
         for (int i = 1; i < absStepCount; ++i)
         {
-            System.Threading.Thread.Sleep(waitInterval);
+            waiter.Wait(waitInterval);
             SendWheelEvent(step);
         }
 

@@ -73,9 +73,9 @@ public sealed class Player
 
                 UpdateView?.Invoke(IsAutoRepeatAction(actionsSpan[i]) || (i > 0 && actionsSpan[i] is WaitAction && IsAutoRepeatAction(actionsSpan[i - 1])));
 
-                if (actionsSpan[i] is WaitAction w)
+                if (actionsSpan[i] is WaitableInputAction w)
                 {
-                    _actionsWaiter.Wait((uint)w.Duration);
+                    w.PlayWait(_actionsWaiter);
                     continue;
                 }
 

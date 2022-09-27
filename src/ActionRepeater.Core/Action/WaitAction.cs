@@ -1,8 +1,9 @@
 ﻿using System;
+using ActionRepeater.Win32.Synch.Utilities;
 
 namespace ActionRepeater.Core.Action;
 
-public sealed class WaitAction : InputAction, IEquatable<WaitAction>
+public sealed class WaitAction : WaitableInputAction, IEquatable<WaitAction>
 {
     public override string Name => "Wait";
 
@@ -29,7 +30,10 @@ public sealed class WaitAction : InputAction, IEquatable<WaitAction>
     /// <summary>Used only for deserialization.</summary>
     internal WaitAction() { }
 
-    public override void Play() => throw new NotImplementedException("Player should use it's own method to wait the specified amount.");
+    public override void PlayWait(HighResolutionWaiter waiter)
+    {
+        waiter.Wait((uint)Duration);
+    }
 
     /// <summary>
     /// Checks if the object's values are equal.<br/>
