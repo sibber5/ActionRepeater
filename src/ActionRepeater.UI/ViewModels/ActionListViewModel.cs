@@ -22,11 +22,33 @@ public sealed partial class ActionListViewModel : ObservableObject
     public string ActionListHeaderWithCount => $"Actions ({FilteredActions.Count}):";
 
     [NotifyPropertyChangedFor(nameof(FilteredActions))]
+    [NotifyPropertyChangedFor(nameof(CanReorderActions))]
     [ObservableProperty]
     private bool _showKeyRepeatActions;
 
-    internal SyncedObservableCollection<ActionViewModel, InputAction> ActionVMs { get; }
-    internal SyncedObservableCollection<ActionViewModel, InputAction> ActionsExlVMs { get; }
+    private readonly SyncedObservableCollection<ActionViewModel, InputAction> _actionVMs;
+    internal SyncedObservableCollection<ActionViewModel, InputAction> ActionVMs
+    {
+        get
+        {
+            // call getter of property in case action collection needed to be notified of a read.
+            // (e.g. when moving an action, on the next read it regenerates the unfiltered actions,
+            // because im too lazy to implement insert method - this works well enough)
+            _ = _actionCollection.Actions;
+            return _actionVMs;
+        }
+    }
+
+    private readonly SyncedObservableCollection<ActionViewModel, InputAction> _actionsExlVMs;
+    internal SyncedObservableCollection<ActionViewModel, InputAction> ActionsExlVMs
+    {
+        get
+        {
+            _ = _actionCollection.ActionsExlKeyRepeat;
+            return _actionsExlVMs;
+        }
+    }
+
     public IReadOnlyList<ActionViewModel> FilteredActions => ShowKeyRepeatActions ? ActionVMs : ActionsExlVMs;
 
     public InputAction? SelectedAction => SelectedActionIndex == -1
@@ -36,6 +58,8 @@ public sealed partial class ActionListViewModel : ObservableObject
     [NotifyCanExecuteChangedFor(nameof(StoreActionCommand))]
     [ObservableProperty]
     private int _selectedActionIndex = -1;
+
+    public bool CanReorderActions => !ShowKeyRepeatActions;
 
     private InputAction? _copiedAction;
     public InputAction? CopiedAction
@@ -81,8 +105,8 @@ public sealed partial class ActionListViewModel : ObservableObject
 
         Func<InputAction?, ActionViewModel> createVM = static (model) => new ActionViewModel(model!);
 
-        ActionVMs = new((ObservableCollection<InputAction?>)_actionCollection.Actions, createVM);
-        ActionsExlVMs = new((ObservableCollection<InputAction?>)_actionCollection.ActionsExlKeyRepeat, createVM);
+        _actionVMs = new((ObservableCollection<InputAction?>)_actionCollection.Actions, createVM);
+        _actionsExlVMs = new((ObservableCollection<InputAction?>)_actionCollection.ActionsExlKeyRepeat, createVM);
 
         ((System.ComponentModel.INotifyPropertyChanged)FilteredActions).PropertyChanged += (s, e) =>
         {

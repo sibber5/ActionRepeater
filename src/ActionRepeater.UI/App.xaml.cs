@@ -136,6 +136,9 @@ public partial class App : Application
         if (!_saveOnExit) return;
 
         await SaveOptions();
+
+        if (Services is IAsyncDisposable asyncDisposableServices) await asyncDisposableServices.DisposeAsync();
+        else if (Services is IDisposable disposableServices) disposableServices.Dispose();
     }
 
     private async void UIOptions_PropertyChanging(object? sender, System.ComponentModel.PropertyChangingEventArgs e)

@@ -32,10 +32,10 @@ public sealed class SyncedObservableCollection<T, TSource> : ObservableCollectio
         _sourceCol = sourceCol;
         _createT = createT;
 
-        _sourceCol.CollectionChanged += SourceCollectionChanged;
+        _sourceCol.CollectionChanged += OnSourceCollectionChanged;
     }
 
-    private void SourceCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    private void OnSourceCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         if (_dontSync) return;
 

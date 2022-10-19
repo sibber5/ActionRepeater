@@ -2,7 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
 using ActionRepeater.Core.Action;
 using ActionRepeater.Core.Extentions;
 using ActionRepeater.Core.Helpers;
@@ -10,6 +12,7 @@ using ActionRepeater.Core.Utilities;
 
 namespace ActionRepeater.Core.Input;
 
+// TODO: Refactor/Rewrite this shit (ActionCollection)
 public sealed partial class ActionCollection : ICollection<InputAction>
 {
     public const string ActionTiedToModifiedActMsg = "The specified action is tied to a modified action (an action that represents multiple actions, e.g. a wait action that represents key auto repeat actions).";
@@ -39,7 +42,7 @@ public sealed partial class ActionCollection : ICollection<InputAction>
             if (value == _cursorPathStart) return;
 
             _cursorPathStart = value;
-            CursorPathStartChanged?.Invoke(null, value);
+            CursorPathStartChanged?.Invoke(this, value);
         }
     }
     
@@ -53,16 +56,59 @@ public sealed partial class ActionCollection : ICollection<InputAction>
     /// <inheritdoc cref="ActionsAsSpan"/>
     public ReadOnlySpan<InputAction> ActionsExlKeyRepeatAsSpan => _actionsExlKeyRepeat.AsSpan();
 
-    private readonly ObservableCollectionEx<InputAction> _actions = new();
+    private ObservableCollectionEx<InputAction> _actions
+    {
+        get
+        {
+            if (_refillActions && !_isRefillingActions)
+            {
+                _isRefillingActions = true;
+
+                FillActionsFromFiltered();
+                FillFilteredActionList();
+
+                _refillActions = false;
+                Debug.WriteLine("refilled unfiltered actions");
+
+                _isRefillingActions = false;
+            }
+
+            return _actionsBackingField;
+        }
+    }
     private readonly ObservableCollectionEx<InputAction> _actionsExlKeyRepeat = new();
 
+    private readonly ObservableCollectionEx<InputAction> _actionsBackingField = new();
+    private bool _refillActions;
+    private bool _isRefillingActions; // used to prevent triggering refilling the actions from the getter while refilling the actions.
 
     private readonly ModifiedExlActionsIndeciesList _moddedExlActsIdxs;
 
 
+    private StopwatchSlim _actsExlNCCStopwatch = new();
+    private NotifyCollectionChangedAction _lastActionsExlNCCAction = (NotifyCollectionChangedAction)(-1);
+
     public ActionCollection()
     {
         _moddedExlActsIdxs = new(_actions, _actionsExlKeyRepeat);
+
+        _actionsExlKeyRepeat.CollectionChanged += (_, e) =>
+        {
+            var msSinceLastAction = _actsExlNCCStopwatch.RestartAndGetElapsedMS();
+
+            // if an item (action) was moved in the collection the ui will call remove then add, rather than call move.
+            // so this detects that too.
+            if ((_lastActionsExlNCCAction == NotifyCollectionChangedAction.Remove
+                && e.Action == NotifyCollectionChangedAction.Add
+                && msSinceLastAction < 100)
+                || e.Action == NotifyCollectionChangedAction.Move)
+            {
+                _refillActions = true;
+                Debug.WriteLine("refilling unfiltered actions on next get");
+            }
+
+            _lastActionsExlNCCAction = e.Action;
+        };
 
         ActionCollectionChanged += (s, e) =>
         {
@@ -98,7 +144,7 @@ public sealed partial class ActionCollection : ICollection<InputAction>
     {
         if (CursorPathStart is null)
         {
-            System.Diagnostics.Debug.Assert(CursorPath.Count == 0, $"{nameof(CursorPath)} is not empty.");
+            Debug.Assert(CursorPath.Count == 0, $"{nameof(CursorPath)} is not empty.");
             return Array.Empty<MouseMovement>();
         }
 
@@ -106,9 +152,8 @@ public sealed partial class ActionCollection : ICollection<InputAction>
 
         absPath.Add(CursorPathStart);
 
-        for (int i = 0; i < CursorPath.Count; ++i)
+        foreach (MouseMovement delta in CollectionsMarshal.AsSpan(CursorPath))
         {
-            MouseMovement delta = CursorPath[i];
             MouseMovement lastAbs = absPath[^1];
 
             Win32.POINT pt = MouseMovement.OffsetPointWithinScreens(lastAbs.Delta, delta.Delta);
@@ -158,13 +203,14 @@ public sealed partial class ActionCollection : ICollection<InputAction>
         _actionsExlKeyRepeat.Clear();
         _moddedExlActsIdxs.Clear();
 
-        for (int i = 0; i < _actions.Count; ++i)
+        var actionsSpan = _actions.AsSpan();
+        for (int i = 0; i < actionsSpan.Length; ++i)
         {
-            InputAction action = _actions[i];
+            InputAction action = actionsSpan[i];
 
-            if (action is WaitAction waitAction)
+            if (action is WaitAction waitAction && i > 0)
             {
-                AddOrUpdateWaitActionInExl(waitAction, _actions[i - 1]);
+                AddOrUpdateWaitActionInExl(waitAction, actionsSpan[i - 1]);
                 continue;
             }
 
@@ -175,6 +221,48 @@ public sealed partial class ActionCollection : ICollection<InputAction>
         }
 
         _actionsExlKeyRepeat.SuppressNotifications = false;
+    }
+
+    public void FillActionsFromFiltered()
+    {
+        _actions.SuppressNotifications = true;
+        _actions.Clear();
+
+        foreach (InputAction action in _actionsExlKeyRepeat.AsSpan())
+        {
+            if (action is WaitAction waitAction)
+            {
+                if (_actions.Count > 0 && _actions[^1] is WaitAction lastWaitAction)
+                {
+                    lastWaitAction.Duration += waitAction.Duration;
+                }
+                else
+                {
+                    _actions.Add(action);
+                }
+
+                continue;
+            }
+
+            _actions.Add(action);
+
+            // add auto repeat actions if necessary
+            if (action is KeyAction keyAction && keyAction.ActionType == KeyActionType.KeyUp)
+            {
+                KeyAction? lastKeyDownAct = (KeyAction?)_actions
+                    .LastOrDefault(x => x is KeyAction xAsKeyAct
+                                        && xAsKeyAct.ActionType == KeyActionType.KeyDown
+                                        && xAsKeyAct.Key == keyAction.Key
+                                        && !xAsKeyAct.IsAutoRepeat);
+
+                if (lastKeyDownAct is not null)
+                {
+                    InsertKeyAutoRepeatActions(lastKeyDownAct, keyAction);
+                }
+            }
+        }
+
+        _actions.SuppressNotifications = false;
     }
 
     // TODO: Implement ActionCollection.Insert
