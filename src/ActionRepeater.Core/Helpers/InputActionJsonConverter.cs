@@ -309,6 +309,9 @@ internal sealed class InputActionJsonConverter : JsonConverter<InputAction>
                 writer.WriteNumber(_typeDiscriminatorName, (int)TypeDiscriminator.WaitAction);
                 writer.WriteNumber(nameof(waitAction.Duration), waitAction.Duration);
                 break;
+
+            default:
+                throw new NotSupportedException($"{value.GetType()} not supported.");
         }
 
         writer.WriteEndObject();

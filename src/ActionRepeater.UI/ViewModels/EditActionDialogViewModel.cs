@@ -126,6 +126,9 @@ public sealed partial class EditActionDialogViewModel : ObservableObject
                 var wa = (WaitAction)action;
                 wa.Duration = (int)(waitVM.DurationSecs * 1000);
                 break;
+
+            default:
+                throw new System.NotSupportedException($"{CurrentEditActionViewModel?.GetType()} not supported.");
         }
     }
 
