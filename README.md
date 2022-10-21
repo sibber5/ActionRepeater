@@ -1,8 +1,23 @@
+<div align="center">
+
 # ActionRepeater
+
+<a href="https://github.com/cyberrex5/ActionRepeater/releases">
+<img src="https://img.shields.io/github/v/release/cyberrex5/ActionRepeater?include_prereleases"
+    alt="version" />
+</a>
+<a href="https://github.com/cyberrex5/ActionRepeater/blob/main/LICENSE">
+<img src="https://img.shields.io/github/license/cyberrex5/ActionRepeater?color=lightgrey"
+    alt="license" />
+</a>
+
+<br/>
 
 A windows app (WinUI 3) to record and/or simulate mouse and keyboard input.
 
-![](https://github.com/cyberrex5/ActionRepeater/blob/3c4b8e8dde3831279e6bbf17618fc93230b83e4e/screenshots/0.0.1-alpha_0.png?raw=true)
+![](https://github.com/cyberrex5/ActionRepeater/blob/4e93e87b990ef8dea6086a8d73526b03d70fe920/screenshots/0.2.0-alpha.png?raw=true)
+
+</div>
 
 ## Installation
 
