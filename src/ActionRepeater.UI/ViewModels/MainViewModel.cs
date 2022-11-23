@@ -36,7 +36,7 @@ public sealed partial class MainViewModel
 
         ActionData dat = new(_actionCollection.Actions, _actionCollection.CursorPathStart, _actionCollection.CursorPath);
 
-        await SerializationHelper.SerializeActionsAsync(dat, file.Path);
+        await SerializationHelper.SerializeAsync(dat, file.Path);
     }
     private bool CanExportActions() => _actionCollection.Actions.Count > 0;
 
@@ -49,7 +49,7 @@ public sealed partial class MainViewModel
         ActionData? data = null;
         try
         {
-            data = await SerializationHelper.DeserializeActionsAsync(file.Path);
+            data = await SerializationHelper.DeserializeAsync<ActionData?>(file.Path);
         }
         catch (Exception ex)
         {

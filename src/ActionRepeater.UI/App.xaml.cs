@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text.Json;
 using System.Threading.Tasks;
 using ActionRepeater.Core.Helpers;
 using ActionRepeater.Core.Input;
@@ -12,6 +13,7 @@ using ActionRepeater.Win32.Synch.Utilities;
 using ActionRepeater.Win32.WindowsAndMessages;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 
 namespace ActionRepeater.UI;
 
@@ -161,25 +163,56 @@ public partial class App : Application
             switch (UIOptions.Instance.OptionsFileLocation)
             {
                 case OptionsFileLocation.AppData:
-                    if (!Directory.Exists(AppDataOptionsDir)) break;
+                    {
+                        if (!Directory.Exists(AppDataOptionsDir)) break;
 
-                    await _contentDialogService.ShowYesNoMessageDialog(
-                        "Options file in AppData will be deleted",
-                        "Are you sure you want to change the options file location?",
-                        onYesClick: static () => Directory.Delete(AppDataOptionsDir, true),
-                        onNoClick: _optsFileLocReverter.Revert);
+                        ContentDialogResult dialogResult = await _contentDialogService.ShowYesNoMessageDialog(
+                            "Options file in AppData will be deleted",
+                            "Are you sure you want to change the options file location?");
+
+                        switch (dialogResult)
+                        {
+                            case ContentDialogResult.Primary:
+                                try
+                                {
+                                    Directory.Delete(AppDataOptionsDir, true);
+                                }
+                                catch (DirectoryNotFoundException) { }
+                                break;
+
+                            case ContentDialogResult.Secondary:
+                                _optsFileLocReverter.Revert();
+                                break;
+                        }
+                    }
                     break;
 
                 case OptionsFileLocation.AppFolder:
-                    string path = Path.Combine(AppFolderDir, OptionsFileName);
+                    {
+                        string path = Path.Combine(AppFolderDir, OptionsFileName);
 
-                    if (!File.Exists(path)) break;
+                        if (!File.Exists(path)) break;
 
-                    await _contentDialogService.ShowYesNoMessageDialog(
-                        "Options file in app folder will be deleted",
-                        "Are you sure you want to change the options file location?",
-                        onYesClick: static () => File.Delete(Path.Combine(AppFolderDir, OptionsFileName)),
-                        onNoClick: _optsFileLocReverter.Revert);
+                        ContentDialogResult dialogResult = await _contentDialogService.ShowYesNoMessageDialog(
+                            "Options file in app folder will be deleted",
+                            "Are you sure you want to change the options file location?");
+
+                        switch (dialogResult)
+                        {
+                            case ContentDialogResult.Primary:
+                                try
+                                {
+                                    File.Delete(path);
+                                }
+                                catch (DirectoryNotFoundException) { }
+                                // no need to catch FileNotFoundException because "If the file to be deleted does not exist, no exception is thrown."
+                                break;
+
+                            case ContentDialogResult.Secondary:
+                                _optsFileLocReverter.Revert();
+                                break;
+                        }
+                    }
                     break;
             }
         }
@@ -282,9 +315,15 @@ public partial class App : Application
     {
         try
         {
-            if (!File.Exists(path)) return false;
+            string json;
+            try
+            {
+                json = File.ReadAllText(path);
+            }
+            catch (DirectoryNotFoundException) { return false; }
+            catch (FileNotFoundException) { return false; }
 
-            AllOptions options = System.Text.Json.JsonSerializer.Deserialize<AllOptions>(File.ReadAllText(path));
+            AllOptions options = JsonSerializer.Deserialize<AllOptions>(json);
             Core.Options.Load(options.CoreOptions);
             UIOptions.Load(options.UIOptions);
 

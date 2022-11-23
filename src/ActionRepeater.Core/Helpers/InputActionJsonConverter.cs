@@ -5,6 +5,7 @@ using ActionRepeater.Core.Action;
 
 namespace ActionRepeater.Core.Helpers;
 
+// TODO: switch to using JsonDerivedTypeAttribute instead of this converter
 internal sealed class InputActionJsonConverter : JsonConverter<InputAction>
 {
     private const string _posX = "PositionX";

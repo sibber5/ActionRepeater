@@ -31,7 +31,7 @@ public static class SerializationHelper
     {
         await using FileStream createStream = File.Create(path);
 
-        await JsonSerializer.SerializeAsync(createStream, obj, _baseSerializerOptions);
+        await JsonSerializer.SerializeAsync(createStream, obj, obj is ActionData ? _actionDataSerializerOptions : _baseSerializerOptions);
     }
 
     /// <param name="path">The full path of the file, including its name and extention.</param>
@@ -39,22 +39,6 @@ public static class SerializationHelper
     {
         await using FileStream openStream = File.OpenRead(path);
 
-        return await JsonSerializer.DeserializeAsync<T>(openStream, _baseSerializerOptions);
-    }
-
-    /// <param name="path">The full path of the file, including its name and extention.</param>
-    public static async Task SerializeActionsAsync(ActionData obj, string path)
-    {
-        await using FileStream createStream = File.Create(path);
-
-        await JsonSerializer.SerializeAsync(createStream, obj, _actionDataSerializerOptions);
-    }
-
-    /// <param name="path">The full path of the file, including its name and extention.</param>
-    public static async Task<ActionData?> DeserializeActionsAsync(string path)
-    {
-        await using FileStream openStream = File.OpenRead(path);
-
-        return await JsonSerializer.DeserializeAsync<ActionData?>(openStream, _actionDataSerializerOptions);
+        return await JsonSerializer.DeserializeAsync<T>(openStream, typeof(T) == typeof(ActionData) ? _actionDataSerializerOptions : _baseSerializerOptions);
     }
 }

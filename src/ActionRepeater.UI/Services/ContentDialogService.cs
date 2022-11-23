@@ -50,6 +50,10 @@ public sealed class ContentDialogService
         }.ShowAsync();
     }
 
+    /// <remarks>
+    /// "Yes" is the primary button.<br/>
+    /// "No" is the secondary button.
+    /// </remarks>
     public IAsyncOperation<ContentDialogResult> ShowYesNoMessageDialog(string title, string? message = null, Action? onYesClick = null, Action? onNoClick = null)
     {
         return new ContentDialog()

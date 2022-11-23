@@ -18,8 +18,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ActionRepeater.UI", "src\Ac
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ActionRepeater.Core.Tests", "tests\ActionRepeater.Core.Tests\ActionRepeater.Core.Tests.csproj", "{79D9A580-FA56-410C-88CF-225237AACF7B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ActionRepeater.UI.Tests", "tests\ActionRepeater.UI.Tests\ActionRepeater.UI.Tests.csproj", "{C2C04285-989A-4681-9AB9-3EE50BD8CBEA}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -45,9 +43,6 @@ Global
 		{79D9A580-FA56-410C-88CF-225237AACF7B}.Debug|x64.ActiveCfg = Debug|x64
 		{79D9A580-FA56-410C-88CF-225237AACF7B}.Debug|x64.Build.0 = Debug|x64
 		{79D9A580-FA56-410C-88CF-225237AACF7B}.Release|x64.ActiveCfg = Release|x64
-		{C2C04285-989A-4681-9AB9-3EE50BD8CBEA}.Debug|x64.ActiveCfg = Debug|x64
-		{C2C04285-989A-4681-9AB9-3EE50BD8CBEA}.Debug|x64.Build.0 = Debug|x64
-		{C2C04285-989A-4681-9AB9-3EE50BD8CBEA}.Release|x64.ActiveCfg = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
