@@ -303,7 +303,7 @@ public partial class App : Application
             }
 
             AllOptions options = new(Core.Options.Instance, UIOptions.Instance);
-            await SerializationHelper.SerializeAsync(options, path);
+            await SerializationHelper.SerializeToFileAsync(options, path);
         }
         catch (Exception ex)
         {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Text.Json.Serialization;
 using ActionRepeater.Core.Input;
 using ActionRepeater.Win32.Synch.Utilities;
 
@@ -7,8 +8,9 @@ namespace ActionRepeater.Core.Action;
 
 public sealed class MouseWheelAction : WaitableInputAction, IEquatable<MouseWheelAction>
 {
+    [JsonIgnore]
     public override string Name => IsHorizontal ? "Horizontal Mouse Wheel" : "Mouse Wheel";
-
+    [JsonIgnore]
     public override string Description => IsHorizontal
         ? ActionDescriptionTemplates.HorizontalWheelSteps(StepCount, Duration)
         : ActionDescriptionTemplates.WheelSteps(StepCount, Duration);

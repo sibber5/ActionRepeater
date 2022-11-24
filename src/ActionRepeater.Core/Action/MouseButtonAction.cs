@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Text.Json.Serialization;
 using ActionRepeater.Core.Extentions;
 using ActionRepeater.Core.Input;
 using POINT = ActionRepeater.Win32.POINT;
@@ -21,8 +22,9 @@ public sealed class MouseButtonAction : InputAction, IEquatable<MouseButtonActio
         }
     }
 
+    [JsonIgnore]
     public override string Name => ActionType.ToString().AddSpacesBetweenWords();
-
+    [JsonIgnore]
     public override string Description => UsePosition ? ActionDescriptionTemplates.ButtonPoint(Button, Position) : ActionDescriptionTemplates.Button(Button);
 
     private MouseButton _button;

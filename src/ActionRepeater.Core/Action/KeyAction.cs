@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Text.Json.Serialization;
 using ActionRepeater.Core.Extentions;
 using ActionRepeater.Core.Input;
 using VirtualKey = ActionRepeater.Win32.Input.VirtualKey;
@@ -21,8 +22,9 @@ public sealed class KeyAction : InputAction, IEquatable<KeyAction>
         }
     }
 
+    [JsonIgnore]
     public override string Name => ActionType.ToString().AddSpacesBetweenWords();
-
+    [JsonIgnore]
     public override string Description => IsAutoRepeat ? ActionDescriptionTemplates.KeyAutoRepeat(Key) : ActionDescriptionTemplates.KeyFriendlyName(Key);
 
     private VirtualKey _key = VirtualKey.NO_KEY;

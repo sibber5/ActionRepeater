@@ -1,7 +1,12 @@
 ﻿using System;
+using System.Text.Json.Serialization;
 
 namespace ActionRepeater.Core.Action;
 
+[JsonDerivedType(typeof(KeyAction), nameof(KeyAction))]
+[JsonDerivedType(typeof(MouseButtonAction), nameof(MouseButtonAction))]
+[JsonDerivedType(typeof(MouseWheelAction), nameof(MouseWheelAction))]
+[JsonDerivedType(typeof(WaitAction), nameof(WaitAction))]
 public abstract class InputAction
 {
     public event EventHandler<string>? DescriptionChanged;

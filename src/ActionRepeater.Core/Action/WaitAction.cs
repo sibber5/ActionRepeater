@@ -1,12 +1,14 @@
 ﻿using System;
+using System.Text.Json.Serialization;
 using ActionRepeater.Win32.Synch.Utilities;
 
 namespace ActionRepeater.Core.Action;
 
 public sealed class WaitAction : WaitableInputAction, IEquatable<WaitAction>
 {
+    [JsonIgnore]
     public override string Name => "Wait";
-
+    [JsonIgnore]
     public override string Description => ActionDescriptionTemplates.Duration(Duration);
 
     private int _duration;

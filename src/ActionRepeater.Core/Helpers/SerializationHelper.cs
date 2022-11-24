@@ -21,13 +21,12 @@ public static class SerializationHelper
         {
             JsonSerializerOptions options = _baseSerializerOptions;
             options.IncludeFields = true;
-            options.Converters.Add(new InputActionJsonConverter());
             return options;
         }
     }
 
     /// <param name="path">The full path of the file, including its name and extention.</param>
-    public static async Task SerializeAsync<T>(T obj, string path)
+    public static async Task SerializeToFileAsync<T>(T obj, string path)
     {
         await using FileStream createStream = File.Create(path);
 
@@ -35,7 +34,7 @@ public static class SerializationHelper
     }
 
     /// <param name="path">The full path of the file, including its name and extention.</param>
-    public static async Task<T?> DeserializeAsync<T>(string path)
+    public static async Task<T?> DeserializeFromFileAsync<T>(string path)
     {
         await using FileStream openStream = File.OpenRead(path);
 
