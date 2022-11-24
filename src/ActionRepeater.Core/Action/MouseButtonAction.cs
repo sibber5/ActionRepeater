@@ -1,13 +1,12 @@
-﻿using System;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Text.Json.Serialization;
 using ActionRepeater.Core.Extentions;
 using ActionRepeater.Core.Input;
-using POINT = ActionRepeater.Win32.POINT;
+using ActionRepeater.Win32;
 
 namespace ActionRepeater.Core.Action;
 
-public sealed class MouseButtonAction : InputAction, IEquatable<MouseButtonAction>
+public sealed class MouseButtonAction : InputAction
 {
     private MouseButtonActionType _actionType;
     public MouseButtonActionType ActionType
@@ -90,21 +89,6 @@ public sealed class MouseButtonAction : InputAction, IEquatable<MouseButtonActio
             throw new Win32Exception(System.Runtime.InteropServices.Marshal.GetLastPInvokeError());
         }
     }
-
-    /// <summary>
-    /// Checks if the object's values are equal.<br/>
-    /// Use equality operators (== and !=) to check if the references are equal or not.
-    /// </summary>
-    public bool Equals(MouseButtonAction? other) => other is not null
-        && other.ActionType == ActionType
-        && other.Button == _button
-        && other.Position == _position
-        && other.UsePosition == _usePosition;
-
-    /// <inheritdoc cref="Equals(MouseButtonAction)"/>
-    public override bool Equals(object? obj) => Equals(obj as MouseButtonAction);
-
-    public override int GetHashCode() => HashCode.Combine(ActionType, _button, _position, _usePosition);
 }
 
 public enum MouseButtonActionType

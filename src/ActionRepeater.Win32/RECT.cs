@@ -1,4 +1,7 @@
-﻿namespace ActionRepeater.Win32;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
+
+namespace ActionRepeater.Win32;
 
 /// <summary>The RECT structure defines a rectangle by the coordinates of its upper-left and lower-right corners.</summary>
 /// <remarks>
@@ -6,7 +9,7 @@
 /// <para><see href="https://docs.microsoft.com/windows/win32/api//windef/ns-windef-rect#">Read more on docs.microsoft.com</see>.</para>
 /// </remarks>
 [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
-public struct RECT
+public struct RECT : IEquatable<RECT>
 {
 	/// <summary>Specifies the <i>x</i>-coordinate of the upper-left corner of the rectangle.</summary>
 	public int left;
@@ -38,4 +41,25 @@ public struct RECT
     {
 		return new RECT(r.Left, r.Top, r.Right, r.Bottom);
     }
+
+	public static bool operator ==(RECT a, RECT b) => a.Equals(b);
+	public static bool operator !=(RECT a, RECT b) => !a.Equals(b);
+
+	public bool Equals(RECT other)
+		=> left == other.left
+		&& top == other.top
+		&& right == other.right
+		&& bottom == other.bottom;
+
+    public override bool Equals([NotNullWhen(true)] object? obj)
+    {
+		if (obj is RECT rect)
+		{
+			return Equals(rect);
+		}
+
+		return false;
+    }
+
+    public override int GetHashCode() => HashCode.Combine(left, top, right, bottom);
 }

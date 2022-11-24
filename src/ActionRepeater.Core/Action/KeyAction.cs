@@ -1,13 +1,12 @@
-﻿using System;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Text.Json.Serialization;
 using ActionRepeater.Core.Extentions;
 using ActionRepeater.Core.Input;
-using VirtualKey = ActionRepeater.Win32.Input.VirtualKey;
+using ActionRepeater.Win32.Input;
 
 namespace ActionRepeater.Core.Action;
 
-public sealed class KeyAction : InputAction, IEquatable<KeyAction>
+public sealed class KeyAction : InputAction
 {
     private KeyActionType _actionType;
     public KeyActionType ActionType
@@ -65,20 +64,6 @@ public sealed class KeyAction : InputAction, IEquatable<KeyAction>
             throw new Win32Exception(System.Runtime.InteropServices.Marshal.GetLastPInvokeError());
         }
     }
-
-    /// <summary>
-    /// Checks if the object's values are equal.<br/>
-    /// Use equality operators (== and !=) to check if the references are equal or not.
-    /// </summary>
-    public bool Equals(KeyAction? other) => other is not null
-        && other.ActionType == ActionType
-        && other.Key == _key
-        && other.IsAutoRepeat == IsAutoRepeat;
-
-    /// <inheritdoc cref="Equals(KeyAction)"/>
-    public override bool Equals(object? obj) => Equals(obj as KeyAction);
-
-    public override int GetHashCode() => HashCode.Combine(ActionType, _key, IsAutoRepeat);
 }
 
 public enum KeyActionType

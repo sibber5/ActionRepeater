@@ -347,7 +347,7 @@ public sealed partial class ActionCollection : ICollection<InputAction>
         // merge adjacent wait actions
         if (idx < _actions.Count && exlIdx < _actionsExlKeyRepeat.Count
             && _actions[idx] is WaitAction wa && _actionsExlKeyRepeat[exlIdx] is WaitAction exlWa
-            && wa.Equals(exlWa))
+            && wa.Duration == exlWa.Duration)
         {
             _moddedExlActsIdxs.Remove(exlIdx);
 

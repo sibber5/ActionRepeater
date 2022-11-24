@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using static ActionRepeater.Win32.PInvoke;
 
 namespace ActionRepeater.Win32.Synch.Utilities;
@@ -19,7 +18,7 @@ public sealed class HighResolutionWaiter : IDisposable
         _timerHandle = CreateWaitableTimerEx(IntPtr.Zero, null, WaitableTimerFlags.HIGH_RESOLUTION, AccessRights.DELETE | AccessRights.SYNCHRONIZE | AccessRights.TIMER_MODIFY_STATE);
         if (_timerHandle == IntPtr.Zero)
         {
-            throw new Win32Exception(Marshal.GetLastPInvokeError());
+            throw new Win32Exception();
         }
     }
 
@@ -27,17 +26,19 @@ public sealed class HighResolutionWaiter : IDisposable
     {
         Debug.Assert(!_isWaiting);
 
+        if (milliseconds == 0) return;
+
         _isWaiting = true;
 
         long time = GetRelativeTime(milliseconds);
         if (!SetWaitableTimer(_timerHandle, &time, 0, null, null, false))
         {
-            throw new Win32Exception(Marshal.GetLastPInvokeError());
+            throw new Win32Exception();
         }
 
         if (WaitForSingleObject(_timerHandle, MACROS.INFINITE) != WaitResult.OBJECT_0)
         {
-            throw new Win32Exception(Marshal.GetLastPInvokeError());
+            throw new Win32Exception();
         }
 
         _isWaiting = false;
@@ -51,7 +52,7 @@ public sealed class HighResolutionWaiter : IDisposable
         long time = -1;
         if (!SetWaitableTimer(_timerHandle, &time, 0, null, null, false))
         {
-            throw new Win32Exception(Marshal.GetLastPInvokeError());
+            throw new Win32Exception();
         }
 
         _isWaiting = false;
@@ -60,7 +61,7 @@ public sealed class HighResolutionWaiter : IDisposable
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static long GetRelativeTime(uint milliseconds)
     {
-        // negative = relative time (positive = absolute)
+        // negative == relative time (positive == absolute)
         // we want 100 nanosecond intervals, so multiply by 1,000,000 to get nanoseconds
         // and divide by 100; == multiplying by 10,000
         return -(milliseconds * 10_000L);

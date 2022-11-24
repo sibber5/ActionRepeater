@@ -1,10 +1,9 @@
-﻿using System;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using ActionRepeater.Win32.Synch.Utilities;
 
 namespace ActionRepeater.Core.Action;
 
-public sealed class WaitAction : WaitableInputAction, IEquatable<WaitAction>
+public sealed class WaitAction : WaitableInputAction
 {
     [JsonIgnore]
     public override string Name => "Wait";
@@ -36,15 +35,4 @@ public sealed class WaitAction : WaitableInputAction, IEquatable<WaitAction>
     {
         waiter.Wait((uint)Duration);
     }
-
-    /// <summary>
-    /// Checks if the object's values are equal.<br/>
-    /// Use equality operators (== and !=) to check if the references are equal or not.
-    /// </summary>
-    public bool Equals(WaitAction? other) => other is not null && other.Duration == _duration;
-
-    /// <inheritdoc cref="Equals(WaitAction)"/>
-    public override bool Equals(object? obj) => Equals(obj as WaitAction);
-
-    public override int GetHashCode() => _duration.GetHashCode();
 }

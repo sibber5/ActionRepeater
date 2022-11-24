@@ -6,7 +6,7 @@ using ActionRepeater.Win32.Synch.Utilities;
 
 namespace ActionRepeater.Core.Action;
 
-public sealed class MouseWheelAction : WaitableInputAction, IEquatable<MouseWheelAction>
+public sealed class MouseWheelAction : WaitableInputAction
 {
     [JsonIgnore]
     public override string Name => IsHorizontal ? "Horizontal Mouse Wheel" : "Mouse Wheel";
@@ -91,18 +91,4 @@ public sealed class MouseWheelAction : WaitableInputAction, IEquatable<MouseWhee
             }
         }
     }
-
-    /// <summary>
-    /// Checks if the object's values are equal.<br/>
-    /// Use equality operators (== and !=) to check if the references are equal or not.
-    /// </summary>
-    public bool Equals(MouseWheelAction? other) => other is not null
-        && other.IsHorizontal == IsHorizontal
-        && other.StepCount == _stepCount
-        && other.Duration == _duration;
-
-    /// <inheritdoc cref="Equals(MouseWheelAction)"/>
-    public override bool Equals(object? obj) => Equals(obj as MouseWheelAction);
-
-    public override int GetHashCode() => HashCode.Combine(IsHorizontal, _stepCount, _duration);
 }

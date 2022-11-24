@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace ActionRepeater.Win32;
 
@@ -30,17 +31,18 @@ public struct POINT : IEquatable<POINT>
         return new POINT(p.X, p.Y);
     }
 
-    public static bool operator ==(POINT a, POINT b) => a.x == b.x && a.y == b.y;
-    public static bool operator !=(POINT a, POINT b) => a.x != b.x || a.y != b.y;
+    public static bool operator ==(POINT a, POINT b) => a.Equals(b);
+    public static bool operator !=(POINT a, POINT b) => !a.Equals(b);
 
     public bool Equals(POINT other) => x == other.x && y == other.y;
 
-    public override bool Equals(object? obj)
+    public override bool Equals([NotNullWhen(true)] object? obj)
     {
-        if (obj is POINT p)
+        if (obj is POINT point)
         {
-            return p.x == x && p.y == y;
+            return Equals(point);
         }
+
         return false;
     }
 

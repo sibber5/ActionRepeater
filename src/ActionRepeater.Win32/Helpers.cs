@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Runtime.InteropServices;
 using ActionRepeater.Win32.Input;
 
 namespace ActionRepeater.Win32;
@@ -67,7 +66,7 @@ public static partial class PInvoke
             POINT result;
             if (!PInvoke.GetCursorPos(&result))
             {
-                throw new Win32Exception(Marshal.GetLastPInvokeError());
+                throw new Win32Exception();
             }
             return result;
         }
