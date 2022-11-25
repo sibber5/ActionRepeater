@@ -10,8 +10,8 @@ public sealed partial class HomePageViewModel : ObservableObject
 {
     public int PlayRepeatCount
     {
-        get => Core.Options.Instance.PlayRepeatCount;
-        set => Core.Options.Instance.PlayRepeatCount = value;
+        get => Core.CoreOptions.Instance.PlayRepeatCount;
+        set => Core.CoreOptions.Instance.PlayRepeatCount = value;
     }
 
     [ObservableProperty]
@@ -47,7 +47,7 @@ public sealed partial class HomePageViewModel : ObservableObject
             ToggleRecordingCommand.NotifyCanExecuteChanged();
         };
 
-        Core.Options.Instance.PropertyChanged += (_, e) =>
+        Core.CoreOptions.Instance.PropertyChanged += (_, e) =>
         {
             if (e.PropertyName == nameof(PlayRepeatCount)) OnPropertyChanged(e);
         };

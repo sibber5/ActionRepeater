@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using ActionRepeater.Core.Helpers;
 using ActionRepeater.Core.Input;
@@ -302,8 +303,8 @@ public partial class App : Application
                     throw new InvalidOperationException($"{nameof(UIOptions.Instance.OptionsFileLocation)} contains an invalid value.");
             }
 
-            AllOptions options = new(Core.Options.Instance, UIOptions.Instance);
-            await SerializationHelper.SerializeToFileAsync(options, path);
+            AllOptions options = new(Core.CoreOptions.Instance, UIOptions.Instance);
+            await SerializationHelper.SerializeToFileAsync(options, path, AllOptionsJsonContext.Default.AllOptions);
         }
         catch (Exception ex)
         {
@@ -323,8 +324,8 @@ public partial class App : Application
             catch (DirectoryNotFoundException) { return false; }
             catch (FileNotFoundException) { return false; }
 
-            AllOptions options = JsonSerializer.Deserialize<AllOptions>(json);
-            Core.Options.Load(options.CoreOptions);
+            AllOptions options = JsonSerializer.Deserialize(json, AllOptionsJsonContext.Default.AllOptions);
+            Core.CoreOptions.Load(options.CoreOptions);
             UIOptions.Load(options.UIOptions);
 
             return true;
@@ -355,4 +356,8 @@ public partial class App : Application
     }
 }
 
-public record struct AllOptions(Core.Options CoreOptions, UIOptions UIOptions);
+public record struct AllOptions(Core.CoreOptions CoreOptions, UIOptions UIOptions);
+
+[JsonSerializable(typeof(AllOptions))]
+[JsonSourceGenerationOptions(GenerationMode = JsonSourceGenerationMode.Default, WriteIndented = true)]
+public partial class AllOptionsJsonContext : JsonSerializerContext { }

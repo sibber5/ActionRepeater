@@ -78,7 +78,7 @@ public sealed class Recorder
 
         Restart();
 
-        _shouldRecordMouseMovement = Options.Instance.CursorMovementMode != CursorMovementMode.None;
+        _shouldRecordMouseMovement = CoreOptions.Instance.CursorMovementMode != CursorMovementMode.None;
 
         if (_shouldRecordMouseMovement)
         {
@@ -267,7 +267,7 @@ public sealed class Recorder
 
         if (button == MouseButton.Left && ShouldRecordMouseClick?.Invoke() == true) return;
 
-        AddAction(new MouseButtonAction(type, button, Win32.PInvoke.Helpers.GetCursorPos(), Options.Instance.UseCursorPosOnClicks));
+        AddAction(new MouseButtonAction(type, button, Win32.PInvoke.Helpers.GetCursorPos(), CoreOptions.Instance.UseCursorPosOnClicks));
     }
 
     private void OnKeyboardMessage(VirtualKey key, RawInputKeyFlags keyFlags)
@@ -306,7 +306,7 @@ public sealed class Recorder
 
         int elapsedMS = (int)_actionStopwatch.RestartAndGetElapsedMS();
 
-        if (elapsedMS <= Options.Instance.MaxClickInterval)
+        if (elapsedMS <= CoreOptions.Instance.MaxClickInterval)
         {
             if (CheckAndReplaceWithClickAction(action))
             {

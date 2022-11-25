@@ -5,7 +5,13 @@
         <ImplicitUsings>disable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <Platforms>x64</Platforms>
+
+        <PublishTrimmed>true</PublishTrimmed>
     </PropertyGroup>
+
+    <ItemGroup>
+        <TrimmableAssembly Include="ActionRepeater.Core" />
+    </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\ActionRepeater.Win32\ActionRepeater.Win32.csproj" />

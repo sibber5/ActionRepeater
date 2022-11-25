@@ -119,15 +119,15 @@ public sealed class Player
             return false;
         }
 
-        var actions = Options.Instance.SendKeyAutoRepeat ? _actionCollection.Actions : _actionCollection.ActionsExlKeyRepeat;
-        var cursorPath = Options.Instance.CursorMovementMode switch
+        var actions = CoreOptions.Instance.SendKeyAutoRepeat ? _actionCollection.Actions : _actionCollection.ActionsExlKeyRepeat;
+        var cursorPath = CoreOptions.Instance.CursorMovementMode switch
         {
             CursorMovementMode.Absolute => _actionCollection.GetAbsoluteCursorPath(),
             CursorMovementMode.Relative => _actionCollection.CursorPath,
             _ => null
         };
 
-        PlayActions(actions, cursorPath, Options.Instance.CursorMovementMode == CursorMovementMode.Relative, Options.Instance.PlayRepeatCount);
+        PlayActions(actions, cursorPath, CoreOptions.Instance.CursorMovementMode == CursorMovementMode.Relative, CoreOptions.Instance.PlayRepeatCount);
 
         return true;
     }

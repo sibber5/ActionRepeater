@@ -24,8 +24,14 @@
 
         <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
         <Nullable>enable</Nullable>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>        
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+        <PublishTrimmed>true</PublishTrimmed>
     </PropertyGroup>
+
+    <ItemGroup>
+        <TrimmableAssembly Include="ActionRepeater" />
+    </ItemGroup>
 
     <ItemGroup>
         <Content Include="Assets\Icon.ico">

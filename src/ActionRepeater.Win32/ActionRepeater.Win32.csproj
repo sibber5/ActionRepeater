@@ -6,6 +6,12 @@
         <Nullable>enable</Nullable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <Platforms>x64</Platforms>
+
+        <PublishTrimmed>true</PublishTrimmed>
     </PropertyGroup>
 
+    <ItemGroup>
+        <TrimmableAssembly Include="ActionRepeater.Win32" />
+    </ItemGroup>
+    
 </Project>

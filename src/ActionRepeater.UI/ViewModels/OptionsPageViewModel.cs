@@ -11,26 +11,26 @@ public sealed class OptionsPageViewModel : ObservableObject
 {
     public int CursorMovementMode
     {
-        get => (int)Options.Instance.CursorMovementMode;
-        set => Options.Instance.CursorMovementMode = (CursorMovementMode)value;
+        get => (int)CoreOptions.Instance.CursorMovementMode;
+        set => CoreOptions.Instance.CursorMovementMode = (CursorMovementMode)value;
     }
 
     public bool UseCursorPosOnClicks
     {
-        get => Options.Instance.UseCursorPosOnClicks;
-        set => Options.Instance.UseCursorPosOnClicks = value;
+        get => CoreOptions.Instance.UseCursorPosOnClicks;
+        set => CoreOptions.Instance.UseCursorPosOnClicks = value;
     }
 
     public int MaxClickInterval
     {
-        get => Options.Instance.MaxClickInterval;
-        set => Options.Instance.MaxClickInterval = value;
+        get => CoreOptions.Instance.MaxClickInterval;
+        set => CoreOptions.Instance.MaxClickInterval = value;
     }
 
     public bool SendKeyAutoRepeat
     {
-        get => Options.Instance.SendKeyAutoRepeat;
-        set => Options.Instance.SendKeyAutoRepeat = value;
+        get => CoreOptions.Instance.SendKeyAutoRepeat;
+        set => CoreOptions.Instance.SendKeyAutoRepeat = value;
     }
 
     public int Theme
@@ -52,7 +52,7 @@ public sealed class OptionsPageViewModel : ObservableObject
     public OptionsPageViewModel()
     {
         System.ComponentModel.PropertyChangedEventHandler callPropChange = (s, e) => OnPropertyChanged(e);
-        Options.Instance.PropertyChanged += callPropChange;
+        CoreOptions.Instance.PropertyChanged += callPropChange;
         UIOptions.Instance.PropertyChanged += callPropChange;
     }
 }

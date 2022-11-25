@@ -123,11 +123,11 @@ public sealed partial class ActionCollection : ICollection<InputAction>
         // this *could* cause a memory leak *if* Options.Instance should live longer than this action collection instance,
         // *but* this will not happen with the current usage of these, as this is registered as a singleton.
         // if for some reason in the future that changed this class would implement IDisposable and unsubscribe from the event in Dispose.
-        Options.Instance.PropertyChanged += (s, e) =>
+        CoreOptions.Instance.PropertyChanged += (s, e) =>
         {
-            if (e.PropertyName!.Equals(nameof(Options.Instance.UseCursorPosOnClicks), StringComparison.Ordinal))
+            if (e.PropertyName!.Equals(nameof(CoreOptions.Instance.UseCursorPosOnClicks), StringComparison.Ordinal))
             {
-                bool newVal = Options.Instance.UseCursorPosOnClicks;
+                bool newVal = CoreOptions.Instance.UseCursorPosOnClicks;
                 foreach (InputAction action in _actions.AsSpan())
                 {
                     if (action is MouseButtonAction mbAction)
