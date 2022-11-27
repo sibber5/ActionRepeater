@@ -89,7 +89,7 @@ public sealed class ContentDialogService
     {
         if (_actionCollection.IsActionTiedToModifiedAction(actionToEdit))
         {
-            return ShowErrorDialog("This action is not editable.", (actionToEdit is KeyAction ka && ka.IsAutoRepeat)
+            return ShowErrorDialog("This action is not editable.", (actionToEdit is KeyAction { IsAutoRepeat: true })
                 ? "This is an auto repeat action, edit the original key down action if you want to change the key."
                 : ActionCollection.ActionTiedToModifiedActMsg);
         }

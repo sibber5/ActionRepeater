@@ -134,7 +134,7 @@ public partial class App : Application
 
     private async void MainWindow_Closed(object sender, WindowEventArgs args)
     {
-        if (Services.GetService<PathWindowService>() is { } pathWindowService && pathWindowService.IsPathWindowOpen) pathWindowService.ClosePathWindow();
+        if (Services.GetService<PathWindowService>() is { IsPathWindowOpen: true } pathWindowService) pathWindowService.ClosePathWindow();
 
         if (!_saveOnExit) return;
 
@@ -255,9 +255,11 @@ public partial class App : Application
                     break;
                 }
 
-                await _contentDialogService.ShowYesNoMessageDialog("Restart required to change theme", "Restart?",
-                    onYesClick: static async () =>
-                    {
+                ContentDialogResult dialogResult = await _contentDialogService.ShowYesNoMessageDialog("Restart required to change theme", "Restart?");
+
+                switch (dialogResult)
+                {
+                    case ContentDialogResult.Primary:
                         string path = Path.ChangeExtension(System.Reflection.Assembly.GetEntryAssembly()!.Location, ".exe");
 
                         await Current.SaveOptions();
@@ -267,8 +269,13 @@ public partial class App : Application
                         Application.Current.Exit();
 
                         //Microsoft.Windows.AppLifecycle.AppInstance.Restart($"--theme={(isDarkMode ? "light" : "dark")}"); // throws FileNotFoundException
-                    },
-                    onNoClick: revertThemeOption);
+                        break;
+
+                    case ContentDialogResult.Secondary:
+                        revertThemeOption();
+                        break;
+                }
+
                 break;
 
             case nameof(UIOptions.Instance.OptionsFileLocation):

@@ -13,6 +13,7 @@ using ActionRepeater.UI.Utilities;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
+using Microsoft.UI.Xaml.Controls;
 
 namespace ActionRepeater.UI.ViewModels;
 
@@ -197,9 +198,10 @@ public sealed partial class ActionListViewModel : ObservableObject
 
         if (_actionCollection.HasActionBeenModified(SelectedAction))
         {
-            await _contentDialogService.ShowYesNoMessageDialog("Are you sure you want to remove this action?",
-                $"This action represents multiple hidden actions (because \"{nameof(ShowKeyRepeatActions)}\" is off).{Environment.NewLine}If you remove it the multiple actions it represents will be removed.",
-                onYesClick: () => _actionCollection.TryRemove(SelectedAction!));
+            ContentDialogResult result = await _contentDialogService.ShowYesNoMessageDialog("Are you sure you want to remove this action?",
+                $"This action represents multiple hidden actions (because \"{nameof(ShowKeyRepeatActions)}\" is off).{Environment.NewLine}If you remove it the multiple actions it represents will be removed.");
+
+            if (result == ContentDialogResult.Primary) _actionCollection.TryRemove(SelectedAction!);
 
             return;
         }

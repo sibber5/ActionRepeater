@@ -214,7 +214,7 @@ public sealed partial class ActionCollection : ICollection<InputAction>
                 continue;
             }
 
-            if (!(action is KeyAction keyAction && keyAction.IsAutoRepeat))
+            if (!(action is KeyAction { IsAutoRepeat: true }))
             {
                 _actionsExlKeyRepeat.Add(action);
             }
@@ -247,7 +247,7 @@ public sealed partial class ActionCollection : ICollection<InputAction>
             _actions.Add(action);
 
             // add auto repeat actions if necessary
-            if (action is KeyAction keyAction && keyAction.ActionType == KeyActionType.KeyUp)
+            if (action is KeyAction { ActionType: KeyActionType.KeyUp } keyAction)
             {
                 KeyAction? lastKeyDownAct = (KeyAction?)_actions
                     .LastOrDefault(x => x is KeyAction xAsKeyAct
@@ -293,7 +293,7 @@ public sealed partial class ActionCollection : ICollection<InputAction>
             _actionsExlKeyRepeat.Add(item);
         }
 
-        if (addAutoRepeatIfActIsKeyUp && item is KeyAction keyAction && keyAction.ActionType == KeyActionType.KeyUp)
+        if (addAutoRepeatIfActIsKeyUp && item is KeyAction { ActionType: KeyActionType.KeyUp } keyAction)
         {
             KeyAction? lastKeyDownAct = (KeyAction?)_actions
                 .LastOrDefault(x => x is KeyAction xAsKeyAct
@@ -336,7 +336,7 @@ public sealed partial class ActionCollection : ICollection<InputAction>
         int idx = _actions.AsSpan().RefIndexOfReverse(action);
         int exlIdx = _actionsExlKeyRepeat.AsSpan().RefIndexOfReverse(action);
 
-        if (action is KeyAction keyAct && keyAct.ActionType == KeyActionType.KeyDown)
+        if (action is KeyAction { ActionType: KeyActionType.KeyDown })
         {
             UpdateKeyAutoRepeatActions(idx, null);
         }
@@ -427,9 +427,9 @@ public sealed partial class ActionCollection : ICollection<InputAction>
 
         if (_moddedExlActsIdxs.IsActionTiedToModifiedAction(actionToReplace)) return ActionTiedToModifiedActMsg;
 
-        if (actionToReplace is KeyAction keyAct && keyAct.ActionType == KeyActionType.KeyDown)
+        if (actionToReplace is KeyAction { ActionType: KeyActionType.KeyDown })
         {
-            if (newAction is KeyAction newKeyAct && newKeyAct.ActionType == KeyActionType.KeyDown)
+            if (newAction is KeyAction { ActionType: KeyActionType.KeyDown } newKeyAct)
             {
                 UpdateKeyAutoRepeatActions(index, newKeyAct.Key);
             }
@@ -541,7 +541,7 @@ public sealed partial class ActionCollection : ICollection<InputAction>
                     int insertIndex = i + 1;
                     for (int j = insertIndex; j < _actions.Count; j++)
                     {
-                        if (!(_actions[j] is KeyAction ka && ka.IsAutoRepeat))
+                        if (!(_actions[j] is KeyAction { IsAutoRepeat: true }))
                         {
                             insertIndex = j;
                             break;
@@ -591,12 +591,13 @@ public sealed partial class ActionCollection : ICollection<InputAction>
     /// <param name="keyDownIndex">Index (in <see cref="_actions"/>) of the key down action (not auto repeat).</param>
     public void UpdateKeyAutoRepeatActions(int keyDownIndex, Win32.Input.VirtualKey? newKey)
     {
+        KeyAction keyDownAction = (KeyAction)_actions[keyDownIndex];
         int startIdx = keyDownIndex + 1;
 
         int end = _actions.Count;
         for (int i = startIdx; i < _actions.Count; i++)
         {
-            if (_actions[i] is KeyAction ka && ka.ActionType == KeyActionType.KeyUp && ka.Key == ((KeyAction)_actions[keyDownIndex]).Key)
+            if (_actions[i] is KeyAction { ActionType: KeyActionType.KeyUp } ka && ka.Key == keyDownAction.Key)
             {
                 end = i;
                 break;
@@ -623,7 +624,7 @@ public sealed partial class ActionCollection : ICollection<InputAction>
         {
             bool removed = false;
 
-            if (_actions[curIndex] is KeyAction keyAct && keyAct.IsAutoRepeat)
+            if (_actions[curIndex] is KeyAction { IsAutoRepeat: true })
             {
                 _actions.RemoveAt(curIndex);
 
