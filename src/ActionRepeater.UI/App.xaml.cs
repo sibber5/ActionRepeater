@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
@@ -35,7 +36,6 @@ public partial class App : Application
 
     private readonly ContentDialogService _contentDialogService;
 
-    private bool _saveOptions;
     private bool _saveOnExit = true;
 
     private Exception? _loadingOptionsException;
@@ -43,9 +43,9 @@ public partial class App : Application
     private ObservablePropertyReverter<OptionsFileLocation>? _optsFileLocReverter;
 
     // used to check what UIOptions.Theme was changed from, when its changed
-    private bool _wasAppThemeSet = false;
+    private readonly bool _wasAppThemeSetOnStartup;
 
-    private bool _isRevertingTheme = false;
+    private bool _isRevertingTheme;
 
     /// <summary>
     /// Initializes the singleton application object.  This is the first line of authored code
@@ -64,18 +64,25 @@ public partial class App : Application
             TryLoadOptions(Path.Combine(AppFolderDir, OptionsFileName));
         }
 
-        _saveOptions = UIOptions.Instance.OptionsFileLocation != OptionsFileLocation.None;
+        string[] args = Environment.GetCommandLineArgs();
+        string? themeArg = args.FirstOrDefault(static x => x.StartsWith("--theme-"));
+        UIOptions.Instance.Theme = themeArg switch
+        {
+            "--theme-light" => Theme.Light,
+            "--theme-dark" => Theme.Dark,
+            _ => UIOptions.Instance.Theme,
+        };
 
         switch (UIOptions.Instance.Theme)
         {
             case Theme.Light:
                 App.Current.RequestedTheme = ApplicationTheme.Light;
-                _wasAppThemeSet = true;
+                _wasAppThemeSetOnStartup = true;
                 break;
 
             case Theme.Dark:
                 App.Current.RequestedTheme = ApplicationTheme.Dark;
-                _wasAppThemeSet = true;
+                _wasAppThemeSetOnStartup = true;
                 break;
         }
 
@@ -232,7 +239,7 @@ public partial class App : Application
                     Current.MainWindow.DispatcherQueue.TryEnqueue(static () =>
                     {
                         Theme previousTheme;
-                        if (Current._wasAppThemeSet)
+                        if (Current._wasAppThemeSetOnStartup)
                         {
                             previousTheme = UIOptions.Instance.Theme == Theme.Light ? Theme.Dark : Theme.Light;
                         }
@@ -246,15 +253,6 @@ public partial class App : Application
                     });
                 };
 
-                if (UIOptions.Instance.OptionsFileLocation == OptionsFileLocation.None)
-                {
-                    revertThemeOption();
-                    await _contentDialogService.ShowMessageDialog(
-                        "Saving is disabled",
-                        "Options saving must be enabled in order to change the theme. (the theme must be applied on startup)");
-                    break;
-                }
-
                 ContentDialogResult dialogResult = await _contentDialogService.ShowYesNoMessageDialog("Restart required to change theme", "Restart?");
 
                 switch (dialogResult)
@@ -262,13 +260,20 @@ public partial class App : Application
                     case ContentDialogResult.Primary:
                         string path = Path.ChangeExtension(System.Reflection.Assembly.GetEntryAssembly()!.Location, ".exe");
 
-                        await Current.SaveOptions();
-                        Current._saveOnExit = false;
+                        await SaveOptions();
+                        _saveOnExit = false;
 
-                        System.Diagnostics.Process.Start(path);
+                        if (UIOptions.Instance.Theme == Theme.WindowsSetting || UIOptions.Instance.OptionsFileLocation != OptionsFileLocation.None)
+                        {
+                            System.Diagnostics.Process.Start(path);
+                        }
+                        else
+                        {
+                            System.Diagnostics.Process.Start(path, UIOptions.Instance.Theme == Theme.Light ? "--theme-light" : "--theme-dark");
+                        }
                         Application.Current.Exit();
 
-                        //Microsoft.Windows.AppLifecycle.AppInstance.Restart($"--theme={(isDarkMode ? "light" : "dark")}"); // throws FileNotFoundException
+                        //Microsoft.Windows.AppLifecycle.AppInstance.Restart(UIOptions.Instance.Theme == Theme.Light ? "--theme-light" : "--theme-dark"); // throws FileNotFoundException
                         break;
 
                     case ContentDialogResult.Secondary:
@@ -277,17 +282,11 @@ public partial class App : Application
                 }
 
                 break;
-
-            case nameof(UIOptions.Instance.OptionsFileLocation):
-                _saveOptions = UIOptions.Instance.OptionsFileLocation != OptionsFileLocation.None;
-                break;
         }
     }
 
     private async Task SaveOptions()
     {
-        if (!_saveOptions) return;
-
         try
         {
             string path;

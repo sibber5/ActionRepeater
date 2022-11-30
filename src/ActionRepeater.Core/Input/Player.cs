@@ -132,17 +132,17 @@ public sealed class Player
         return true;
     }
 
-    private void PlayActions(IReadOnlyList<InputAction> actions, IReadOnlyList<MouseMovement>? path, bool isPathRelative, int repeatCount = 1)
+    private void PlayActions(IReadOnlyList<InputAction> actions, IReadOnlyList<MouseMovement>? cursorPath, bool isPathRelative, int repeatCount = 1)
     {
         _tokenSource?.Dispose();
         _tokenSource = new CancellationTokenSource();
 
         _actionsToPlay = actions;
-        _cursorPath = path;
+        _cursorPath = cursorPath;
 
         SetCursorMovementFunction(isPathRelative);
 
-        _taskToRun = _actionCollection.CursorPathStart is not null && path?.Count > 0
+        _taskToRun = _actionCollection.CursorPathStart is not null && cursorPath?.Count > 0
             ? _runAllActions
             : _runInputActions;
 
@@ -178,14 +178,14 @@ public sealed class Player
 
                 ReadOnlySpan<MouseMovement> cursorPathSpan = CollectionsMarshal.AsSpan((List<MouseMovement>)_cursorPath!);
 
-                InputSimulator.MoveMouse(_actionCollection.CursorPathStart!.Delta, false, false);
+                InputSimulator.MoveMouse(_actionCollection.CursorPathStart!.Delta, relativePos: false);
 
                 foreach (MouseMovement mouseMovement in cursorPathSpan)
                 {
                     if (_tokenSource!.IsCancellationRequested) return;
 
                     _cursorMovementWaiter.Wait((uint)mouseMovement.DelayDuration);
-                    InputSimulator.MoveMouse(mouseMovement.Delta, true);
+                    InputSimulator.MoveMouse(mouseMovement.Delta, relativePos: true);
                 }
             }
             : _playCursorMovementAbsolute ??= () =>
@@ -197,7 +197,7 @@ public sealed class Player
                     if (_tokenSource!.IsCancellationRequested) return;
 
                     _cursorMovementWaiter.Wait((uint)mouseMovement.DelayDuration);
-                    InputSimulator.MoveMouse(mouseMovement.Delta, false, false);
+                    InputSimulator.MoveMouse(mouseMovement.Delta, relativePos: false);
                 }
             };
     }

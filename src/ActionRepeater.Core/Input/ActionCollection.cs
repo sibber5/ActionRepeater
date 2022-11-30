@@ -30,6 +30,9 @@ public sealed partial class ActionCollection : ICollection<InputAction>
 
 
     private MouseMovement? _cursorPathStart;
+    /// <summary>
+    /// The absolute position of the cursor at which the path starts.
+    /// </summary>
     /// <remarks>
     /// If this is null then <see cref="CursorPath"/> is empty;<br/>
     /// If <see cref="CursorPath"/> is not empty then this is not null.
@@ -85,7 +88,7 @@ public sealed partial class ActionCollection : ICollection<InputAction>
     private readonly ModifiedExlActionsIndeciesList _moddedExlActsIdxs;
 
 
-    private StopwatchSlim _actsExlNCCStopwatch = new();
+    private readonly StopwatchSlim _actsExlNCCStopwatch = new();
     private NotifyCollectionChangedAction _lastActionsExlNCCAction = (NotifyCollectionChangedAction)(-1);
 
     public ActionCollection()

@@ -276,7 +276,7 @@ public static partial class PInvoke
 
     /// <summary>Retrieves the raw input from the specified device.</summary>
     /// <para>Type: <b>HRAWINPUT</b> A handle to the <a href="https://docs.microsoft.com/windows/desktop/api/winuser/ns-winuser-rawinput">RAWINPUT</a> structure. This comes from the <i>lParam</i> in <see cref="WindowMessage.INPUT"/>.</para>
-    /// <returns><typeparamref name="true"/> if successful, otherwise <typeparamref name="false"/>.</returns>
+    /// <returns><see langword="true"/> if successful, otherwise <see langword="false"/>.</returns>
     public static unsafe bool GetRawInputData(nint hRawInput, out RAWINPUT pData)
     {
         uint rawInputSize = (uint)RAWINPUT.SIZE;

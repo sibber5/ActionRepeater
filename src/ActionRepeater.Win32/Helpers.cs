@@ -20,7 +20,7 @@ public static partial class PInvoke
         /// <paramref name="data"/> may be any combination of <see cref="MOUSEINPUT.XBUTTON1"/> and <see cref="MOUSEINPUT.XBUTTON2"/>.
         /// </param>
         /// <returns>
-        /// <typeparamref name="true"/> if the input was successfully sent, otherwise <typeparamref name="false"/>.
+        /// <see langword="true"/> if the input was successfully sent, otherwise <see langword="false"/>.
         /// </returns>
         public static bool SendMouseEvent(MOUSEEVENTF eventFlags, uint data = 0, int dx = 0, int dy = 0)
         {
@@ -44,7 +44,7 @@ public static partial class PInvoke
         /// This can be a <see cref="ScanCode"/> (enum), or the value returned by <see cref="PInvoke.MapVirtualKey"/>.
         /// </param>
         /// <returns>
-        /// <typeparamref name="true"/> if the input was successfully sent, otherwise <typeparamref name="false"/>.
+        /// <see langword="true"/> if the input was successfully sent, otherwise <see langword="false"/>.
         /// </returns>
         public static bool SendKeyEvent(KEYEVENTF eventFlags, ushort scanCode)
         {

@@ -32,7 +32,7 @@ A windows app (WinUI 3) to record and/or simulate mouse and keyboard input.
  - Windows 10 v2004 (19041) or newer
  - [.NET Desktop Runtime 6.0.X](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
 
-Download the zip from [the latest release page](https://github.com/cyberrex5/ActionRepeater/releases/latest), extract it, and run `ActionRepeater.UI.exe`. (of course, you can put the folder wherever you want and make a shortcut)
+Download the zip from [the latest release page](https://github.com/cyberrex5/ActionRepeater/releases/latest), extract it, and run `ActionRepeater.exe`. (of course, you can put the folder wherever you want and make a shortcut)
 
 ## Development
 

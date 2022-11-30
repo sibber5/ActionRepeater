@@ -44,11 +44,11 @@ public static class InputSimulator
     /// Checks if <paramref name="key"/> is an extended key, and sets <paramref name="key"/> to the correct value for translation to scan code (if necessary).
     /// </summary>
     /// <param name="hasE1Prefix">
-    /// Set to <typeparamref name="true"/> if the key is an extended key that has to be prefixed with 0xE1, otherwise set to <typeparamref name="false"/>
+    /// Set to <see langword="true"/> if the key is an extended key that has to be prefixed with 0xE1, otherwise set to <see langword="false"/>
     /// which means - if the key is an extended key - that it has to be prefixed with 0xE0 (which <see cref="PInvoke.SendInput"/> will do autimatically if
     /// <see cref="KEYEVENTF.EXTENDEDKEY"/> is set).
     /// </param>
-    /// <returns><typeparamref name="true"/> if key is extended key, otherwise <typeparamref name="false"/>.</returns>
+    /// <returns><see langword="true"/> if key is extended key, otherwise <see langword="false"/>.</returns>
     private static bool IsExtendedKey(ref ushort key, out bool hasE1Prefix)
     {
         bool useExtendedKey;
@@ -77,20 +77,20 @@ public static class InputSimulator
     /// <summary>
     /// Moves the mouse cursor to the specified position.
     /// </summary>
-    /// <param name="relative">If <typeparamref name="true"/>, move the cursor relative to its current position (by adding <paramref name="newPos"/>'s x and y values to the cursor's).</param>
-    /// <param name="absolute">
-    /// <para><b>(Will be ignored if <paramref name="relative"/> is <typeparamref name="true"/>)</b> Use normalized absolute coordinates between <i>0</i> (<see cref="ushort.MinValue"/>) and <i>65,535</i> (<see cref="ushort.MaxValue"/>).</para>
+    /// <param name="relativePos">If <see langword="true"/>, move the cursor relative to its current position (by adding <paramref name="newPos"/>'s x and y values to the cursor's).</param>
+    /// <param name="absoluteCoords">
+    /// <para><b>(Will be ignored if <paramref name="relativePos"/> is <see langword="true"/>)</b> Use normalized absolute coordinates between <c>0</c> (<see cref="ushort.MinValue"/>) and <c>65,535</c> (<see cref="ushort.MaxValue"/>).</para>
     /// <para><see href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-mouseinput#remarks">Read more on docs.microsoft.com</see>.</para>
     /// </param>
     /// <returns>
-    /// <typeparamref name="true"/> if the input was successfully sent, otherwise <typeparamref name="false"/>.
+    /// <see langword="true"/> if the input was successfully sent, otherwise <see langword="false"/>.
     /// </returns>
-    public static bool MoveMouse(POINT newPos, bool relative = false, bool absolute = false)
+    public static bool MoveMouse(POINT newPos, bool relativePos = false, bool absoluteCoords = false)
     {
         MOUSEEVENTF flags = MOUSEEVENTF.MOVE;
-        if (!relative)
+        if (!relativePos)
         {
-            if (absolute)
+            if (absoluteCoords)
             {
                 flags = MOUSEEVENTF.MOVE | MOUSEEVENTF.ABSOLUTE | MOUSEEVENTF.VIRTUALDESK;
             }
@@ -120,7 +120,7 @@ public static class InputSimulator
     /// </param>
     /// <param name="horizontalWheelMovement"><b>Windows XP/2000</b>: This value is not supported.</param>
     /// <returns>
-    /// <typeparamref name="true"/> if the input was successfully sent, otherwise <typeparamref name="false"/>.
+    /// <see langword="true"/> if the input was successfully sent, otherwise <see langword="false"/>.
     /// </returns>
     public static bool MoveMouseWheel(int clickCount, bool horizontalWheelMovement = false)
     {
@@ -132,7 +132,7 @@ public static class InputSimulator
 
     /// <summary>Synthesizes a button down event.</summary>
     /// <returns>
-    /// <typeparamref name="true"/> if the input was successfully sent, otherwise <typeparamref name="false"/>.
+    /// <see langword="true"/> if the input was successfully sent, otherwise <see langword="false"/>.
     /// </returns>
     public static bool SendMouseButtonDown(MouseButton button)
     {
@@ -155,12 +155,12 @@ public static class InputSimulator
     /// Moves mouse to the specified position, then synthesizes a button down event.
     /// </summary>
     /// <param name="pos">
-    /// If <paramref name="relative"/> is <typeparamref name="false"/>, the position to move the mouse to.<br/>
-    /// If <paramref name="relative"/> is <typeparamref name="true"/>, the distance to move the mouse from it's current position.
+    /// If <paramref name="relative"/> is <see langword="false"/>, the position to move the mouse to.<br/>
+    /// If <paramref name="relative"/> is <see langword="true"/>, the distance to move the mouse from it's current position.
     /// </param>
-    /// <param name="relative">If <typeparamref name="true"/>, move the cursor relative to its current position (by adding <paramref name="pos"/>'s x and y values to the cursor's).</param>
+    /// <param name="relative">If <see langword="true"/>, move the cursor relative to its current position (by adding <paramref name="pos"/>'s x and y values to the cursor's).</param>
     /// <returns>
-    /// <typeparamref name="true"/> if the input was successfully sent, otherwise <typeparamref name="false"/>.
+    /// <see langword="true"/> if the input was successfully sent, otherwise <see langword="false"/>.
     /// </returns>
     public static bool SendMouseButtonDown(MouseButton button, POINT pos, bool relative = false)
     {
@@ -191,7 +191,7 @@ public static class InputSimulator
 
     /// <summary>Synthesizes a button up event.</summary>
     /// <returns>
-    /// <typeparamref name="true"/> if the input was successfully sent, otherwise <typeparamref name="false"/>.
+    /// <see langword="true"/> if the input was successfully sent, otherwise <see langword="false"/>.
     /// </returns>
     public static bool SendMouseButtonUp(MouseButton button)
     {
@@ -214,12 +214,12 @@ public static class InputSimulator
     /// Moves mouse to the specified position, then synthesizes a button up event.
     /// </summary>
     /// <param name="pos">
-    /// If <paramref name="relative"/> is <typeparamref name="false"/>, the position to move the mouse to.<br/>
-    /// If <paramref name="relative"/> is <typeparamref name="true"/>, the distance to move the mouse from it's current position.
+    /// If <paramref name="relative"/> is <see langword="false"/>, the position to move the mouse to.<br/>
+    /// If <paramref name="relative"/> is <see langword="true"/>, the distance to move the mouse from it's current position.
     /// </param>
-    /// <param name="relative">If <typeparamref name="true"/>, move the cursor relative to its current position (by adding <paramref name="pos"/>'s x and y values to the cursor's).</param>
+    /// <param name="relative">If <see langword="true"/>, move the cursor relative to its current position (by adding <paramref name="pos"/>'s x and y values to the cursor's).</param>
     /// <returns>
-    /// <typeparamref name="true"/> if the input was successfully sent, otherwise <typeparamref name="false"/>.
+    /// <see langword="true"/> if the input was successfully sent, otherwise <see langword="false"/>.
     /// </returns>
     public static bool SendMouseButtonUp(MouseButton button, POINT pos, bool relative = false)
     {
@@ -250,7 +250,7 @@ public static class InputSimulator
 
     /// <summary>Synthesizes a button down event followed by a button up event.</summary>
     /// <returns>
-    /// <typeparamref name="true"/> if the inputs were successfully sent, otherwise <typeparamref name="false"/>.
+    /// <see langword="true"/> if the inputs were successfully sent, otherwise <see langword="false"/>.
     /// </returns>
     public static bool SendMouseButtonClick(MouseButton button)
     {
@@ -280,12 +280,12 @@ public static class InputSimulator
     /// Moves mouse to the specified position, then synthesizes a button down event followed by a button up event.
     /// </summary>
     /// <param name="pos">
-    /// If <paramref name="relative"/> is <typeparamref name="false"/>, the position to move the mouse to.<br/>
-    /// If <paramref name="relative"/> is <typeparamref name="true"/>, the distance to move the mouse from it's current position.
+    /// If <paramref name="relative"/> is <see langword="false"/>, the position to move the mouse to.<br/>
+    /// If <paramref name="relative"/> is <see langword="true"/>, the distance to move the mouse from it's current position.
     /// </param>
-    /// <param name="relative">If <typeparamref name="true"/>, move the cursor relative to its current position (by adding <paramref name="pos"/>'s x and y values to the cursor's).</param>
+    /// <param name="relative">If <see langword="true"/>, move the cursor relative to its current position (by adding <paramref name="pos"/>'s x and y values to the cursor's).</param>
     /// <returns>
-    /// <typeparamref name="true"/> if the inputs were successfully sent, otherwise <typeparamref name="false"/>.
+    /// <see langword="true"/> if the inputs were successfully sent, otherwise <see langword="false"/>.
     /// </returns>
     public static bool SendMouseButtonClick(MouseButton button, POINT pos, bool relative = false)
     {
@@ -327,7 +327,7 @@ public static class InputSimulator
     /// <param name="key">The Virtual Key code of the key to send. (will be mapped to the scan code with the extended key flag if necessary)</param>
     /// <param name="forceExtendedKey">Force the extended key flag. should only be used when sending the enter key on the numpad.</param>
     /// <returns>
-    /// <typeparamref name="true"/> if the input was successfully sent, otherwise <typeparamref name="false"/>.
+    /// <see langword="true"/> if the input was successfully sent, otherwise <see langword="false"/>.
     /// </returns>
     public static bool SendKeyDown(VirtualKey key, bool forceExtendedKey = false)
     {
@@ -364,7 +364,7 @@ public static class InputSimulator
     /// <param name="key">The Virtual Key code of the key to send. (will be mapped to the scan code with the extended key flag if necessary)</param>
     /// <param name="forceExtendedKey">Force the extended key flag. should only be used when sending the enter key on the numpad.</param>
     /// <returns>
-    /// <typeparamref name="true"/> if the input was successfully sent, otherwise <typeparamref name="false"/>.
+    /// <see langword="true"/> if the input was successfully sent, otherwise <see langword="false"/>.
     /// </returns>
     public static bool SendKeyUp(VirtualKey key, bool forceExtendedKey = false)
     {
@@ -401,7 +401,7 @@ public static class InputSimulator
     /// <param name="key">The Virtual Key code of the key to send. (will be mapped to the scan code with the extended key flag if necessary)</param>
     /// <param name="forceExtendedKey">Force the extended key flag. should only be used when sending the enter key on the numpad.</param>
     /// <returns>
-    /// <typeparamref name="true"/> if the inputs were successfully sent, otherwise <typeparamref name="false"/>.
+    /// <see langword="true"/> if the inputs were successfully sent, otherwise <see langword="false"/>.
     /// </returns>
     public static bool SendKeyPress(VirtualKey key, bool forceExtendedKey = false)
     {

@@ -41,7 +41,7 @@ public sealed class TimeConsistencyChecker
     /// Updates the stored tick counts and returns whether the timing is consistent.
     /// </summary>
     /// <returns>
-    /// <typeparamref name="true"/> if consistent, otherwise <typeparamref name="false"/>.
+    /// <see langword="true"/> if consistent, otherwise <see langword="false"/>.
     /// </returns>
     public bool UpdateAndCheckIfConsistent()
     {
