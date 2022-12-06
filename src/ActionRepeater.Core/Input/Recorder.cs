@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 using ActionRepeater.Core.Action;
 using ActionRepeater.Core.Utilities;
 using ActionRepeater.Win32.Input;
@@ -180,7 +181,17 @@ public sealed class Recorder
 
                 if (data.rawButtonData.buttonInfo.usButtonFlags == 0) // move event
                 {
-                    OnMouseMove(data.lLastX, data.lLastY);
+                    if (!_shouldRecordMouseMovement) break;
+
+                    if (data.usFlags.HasFlag(RawMouseState.MOVE_ABSOLUTE))
+                    {
+                        //bool isVirtualDesktop = data.usFlags.HasFlag(RawMouseState.VIRTUAL_DESKTOP);
+                        throw new NotSupportedException($"Mouse movement mode not supported. ({data.usFlags})");
+                    }
+                    else
+                    {
+                        OnMouseMove(data.lLastX, data.lLastY);
+                    }
                 }
                 else // button/wheel event
                 {
@@ -217,10 +228,7 @@ public sealed class Recorder
 
     private void OnMouseMove(int deltaX, int deltaY)
     {
-        if (!_shouldRecordMouseMovement) return;
-
         int timeSinceLastMov = (int)_mouseStopwatch.RestartAndGetElapsedMS();
-
         _actionCollection.CursorPath.Add(new(new Win32.POINT(deltaX, deltaY), timeSinceLastMov));
     }
 

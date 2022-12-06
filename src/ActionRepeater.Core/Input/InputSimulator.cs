@@ -36,7 +36,7 @@ public static class InputSimulator
     /// </summary>
     private static readonly ushort[] _exKeysE1 = new[]
     {
-        (ushort)VirtualKey.PAUSE, // (BREAK/Ctrl+Esc) should map to scan code 70.
+        (ushort)VirtualKey.PAUSE, // (BREAK/Ctrl+Esc) should map to scan code 0x46 (70).
         (ushort)VirtualKey.SNAPSHOT,
     };
 
@@ -88,17 +88,15 @@ public static class InputSimulator
     public static bool MoveMouse(POINT newPos, bool relativePos = false, bool absoluteCoords = false)
     {
         MOUSEEVENTF flags = MOUSEEVENTF.MOVE;
+
         if (!relativePos)
         {
-            if (absoluteCoords)
+            flags |= MOUSEEVENTF.ABSOLUTE | MOUSEEVENTF.VIRTUALDESK;
+
+            if (!absoluteCoords)
             {
-                flags = MOUSEEVENTF.MOVE | MOUSEEVENTF.ABSOLUTE | MOUSEEVENTF.VIRTUALDESK;
-            }
-            else
-            {
-                POINT curPos = GetCursorPos();
-                newPos.x -= curPos.x;
-                newPos.y -= curPos.y;
+                POINT absolutePos = SystemInformation.GetAbsoluteCoordinateFromPosRelToPrimary(newPos);
+                newPos = absolutePos;
             }
         }
 
@@ -162,6 +160,9 @@ public static class InputSimulator
     /// <returns>
     /// <see langword="true"/> if the input was successfully sent, otherwise <see langword="false"/>.
     /// </returns>
+    /// <remarks>
+    /// if <paramref name="relative"/> is <see langword="false"/>, <paramref name="pos"/> specifies the position relative the the primary monitors top left corner (The primary monitor's top left corner is (0, 0)).
+    /// </remarks>
     public static bool SendMouseButtonDown(MouseButton button, POINT pos, bool relative = false)
     {
         (MOUSEEVENTF flags, uint data) = button switch
@@ -176,9 +177,10 @@ public static class InputSimulator
 
         if (!relative)
         {
-            POINT curPos = GetCursorPos();
-            pos.x -= curPos.x;
-            pos.y -= curPos.y;
+            flags |= MOUSEEVENTF.ABSOLUTE | MOUSEEVENTF.VIRTUALDESK;
+
+            POINT absolutePos = SystemInformation.GetAbsoluteCoordinateFromPosRelToPrimary(pos);
+            pos = absolutePos;
         }
 
         return SendMouseEvent(
@@ -221,6 +223,9 @@ public static class InputSimulator
     /// <returns>
     /// <see langword="true"/> if the input was successfully sent, otherwise <see langword="false"/>.
     /// </returns>
+    /// <remarks>
+    /// if <paramref name="relative"/> is <see langword="false"/>, <paramref name="pos"/> specifies the position relative the the primary monitors top left corner (The primary monitor's top left corner is (0, 0)).
+    /// </remarks>
     public static bool SendMouseButtonUp(MouseButton button, POINT pos, bool relative = false)
     {
         (MOUSEEVENTF flags, uint data) = button switch
@@ -235,9 +240,10 @@ public static class InputSimulator
 
         if (!relative)
         {
-            POINT curPos = GetCursorPos();
-            pos.x -= curPos.x;
-            pos.y -= curPos.y;
+            flags |= MOUSEEVENTF.ABSOLUTE | MOUSEEVENTF.VIRTUALDESK;
+
+            POINT absolutePos = SystemInformation.GetAbsoluteCoordinateFromPosRelToPrimary(pos);
+            pos = absolutePos;
         }
 
         return SendMouseEvent(
@@ -287,6 +293,9 @@ public static class InputSimulator
     /// <returns>
     /// <see langword="true"/> if the inputs were successfully sent, otherwise <see langword="false"/>.
     /// </returns>
+    /// <remarks>
+    /// if <paramref name="relative"/> is <see langword="false"/>, <paramref name="pos"/> specifies the position relative the the primary monitors top left corner (The primary monitor's top left corner is (0, 0)).
+    /// </remarks>
     public static bool SendMouseButtonClick(MouseButton button, POINT pos, bool relative = false)
     {
         (MOUSEEVENTF flags0, MOUSEEVENTF flags1, uint data) = button switch
@@ -301,9 +310,10 @@ public static class InputSimulator
 
         if (!relative)
         {
-            POINT curPos = GetCursorPos();
-            pos.x -= curPos.x;
-            pos.y -= curPos.y;
+            flags0 |= MOUSEEVENTF.ABSOLUTE | MOUSEEVENTF.VIRTUALDESK;
+            
+            POINT absolutePos = SystemInformation.GetAbsoluteCoordinateFromPosRelToPrimary(pos);
+            pos = absolutePos;
         }
 
         Span<INPUT> input = stackalloc INPUT[2];

@@ -7,6 +7,10 @@ namespace ActionRepeater.Win32;
 
 public static class SystemInformation
 {
+    public static Rectangle VirtualScreen { get; }
+
+    public static Rectangle PrimaryMonitorRect { get; }
+
     public static IReadOnlyList<Rectangle> MonitorRects { get; }
 
     /// <summary>
@@ -23,6 +27,14 @@ public static class SystemInformation
 
     static unsafe SystemInformation()
     {
+        int virtScreenWidth = PInvoke.GetSystemMetrics(SystemMetric.CXVIRTUALSCREEN);
+        int virtScreenHeight = PInvoke.GetSystemMetrics(SystemMetric.CYVIRTUALSCREEN);
+        VirtualScreen = new(default, new(virtScreenWidth, virtScreenHeight));
+
+        int primaryMonitorWidth = PInvoke.GetSystemMetrics(SystemMetric.CXSCREEN);
+        int primaryMonitorHeight = PInvoke.GetSystemMetrics(SystemMetric.CYSCREEN);
+        PrimaryMonitorRect = new(default, new(primaryMonitorWidth, primaryMonitorHeight));
+
         List<Rectangle> monitors = new();
         PInvoke.EnumDisplayMonitors(
             IntPtr.Zero,
@@ -60,5 +72,25 @@ public static class SystemInformation
         {
             return outMin + (In - inMin) * (outMax - outMin) / (inMax - inMin);
         }
+    }
+
+    public static POINT GetVirtScreenPosFromPosRelToPrimary(POINT posRelToPrimaryOrigin)
+    {
+        int x = posRelToPrimaryOrigin.x - PrimaryMonitorRect.Width + VirtualScreen.Width;
+        int y = posRelToPrimaryOrigin.y - PrimaryMonitorRect.Height + VirtualScreen.Height;
+        return new(x, y);
+    }
+
+    public static POINT GetAbsoluteCoordinateFromVirtScreenPoint(POINT virtScreenPoint)
+    {
+        int x = (int)MathF.Round(((float)virtScreenPoint.x / VirtualScreen.Width) * 65535);
+        int y = (int)MathF.Round(((float)virtScreenPoint.y / VirtualScreen.Height) * 65535);
+        return new(x, y);
+    }
+
+    public static POINT GetAbsoluteCoordinateFromPosRelToPrimary(POINT posRelToPrimaryOrigin)
+    {
+        POINT virtScreenPoint = GetVirtScreenPosFromPosRelToPrimary(posRelToPrimaryOrigin);
+        return GetAbsoluteCoordinateFromVirtScreenPoint(virtScreenPoint);
     }
 }

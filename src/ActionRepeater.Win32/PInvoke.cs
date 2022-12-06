@@ -367,6 +367,18 @@ public static partial class PInvoke
     [return: MarshalAs(UnmanagedType.Bool)]
     public static unsafe partial bool SystemParametersInfo(SystemParameter uiAction, uint uiParam, void* pvParam, SystemParameterUpdateAction fWinIni);
 
+    /// <summary>Retrieves the specified system metric or system configuration setting.</summary>
+    /// <param name="nIndex">Type: <b>int</b></param>
+    /// <returns>
+    /// <para>Type: <b>int</b> If the function succeeds, the return value is the requested system metric or configuration setting. If the function fails, the return value is 0. <a href="/windows/desktop/api/errhandlingapi/nf-errhandlingapi-getlasterror">GetLastError</a> does not provide extended error information.</para>
+    /// </returns>
+    /// <remarks>
+    /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-getsystemmetrics">Learn more about this API from docs.microsoft.com</see>.</para>
+    /// </remarks>
+    [LibraryImport("User32", SetLastError = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+    public static partial int GetSystemMetrics(SystemMetric nIndex);
+
     /// <summary>Creates or opens a waitable timer object and returns a handle to the object.</summary>
     /// <param name="lpTimerAttributes">
     /// <para>A pointer to a <a href="https://docs.microsoft.com/previous-versions/windows/desktop/legacy/aa379560(v=vs.85)">SECURITY_ATTRIBUTES</a> structure. If this parameter is <b>NULL</b>, the timer handle cannot be inherited by child processes. If <i>lpTimerAttributes</i> is <b>NULL</b>, the timer object gets a default security descriptor and the handle cannot be inherited. The ACLs in the default security descriptor for a timer come from the primary or impersonation token of the creator.</para>
