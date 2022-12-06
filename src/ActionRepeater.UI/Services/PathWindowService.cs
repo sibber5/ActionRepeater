@@ -35,7 +35,7 @@ public sealed class PathWindowService
         }
         else
         {
-            var absCursorPts = _actionCollection.GetAbsoluteCursorPath().Select(p => (System.Drawing.Point)p.Delta).ToArray();
+            var absCursorPts = _actionCollection.GetAbsoluteCursorPath().Select(p => (System.Drawing.Point)SystemInformation.GetVirtScreenPosFromPosRelToPrimary(p.Delta)).ToArray();
             _lastAbsPt = absCursorPts[^1];
 
             _pathWindow = new(absCursorPts);
@@ -82,9 +82,11 @@ public sealed class PathWindowService
 
                 for (int i = _lastCursorPtsCount; i < cursorPath.Count; ++i)
                 {
+                    var lastVirtPoint = SystemInformation.GetVirtScreenPosFromPosRelToPrimary(_lastAbsPt.Value);
                     var newPoint = Core.Action.MouseMovement.OffsetPointWithinScreens(_lastAbsPt.Value, cursorPath[i].Delta);
-                    _pathWindow.AddLineToPath(_lastAbsPt.Value, newPoint);
                     _lastAbsPt = newPoint;
+                    newPoint = SystemInformation.GetVirtScreenPosFromPosRelToPrimary(newPoint);
+                    _pathWindow.AddLineToPath(lastVirtPoint, newPoint);
                 }
 
                 _lastCursorPtsCount = cursorPath.Count;

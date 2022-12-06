@@ -95,10 +95,15 @@ public sealed class PathWindow : IDisposable
         {
             AutoScaleMode = AutoScaleMode.None;
             ClientSize = new Size(SystemInformation.VirtualScreen.Width, SystemInformation.VirtualScreen.Height);
+            StartPosition = FormStartPosition.Manual;
             TopMost = true;
             FormBorderStyle = FormBorderStyle.None;
             ShowInTaskbar = false;
             DoubleBuffered = true;
+
+            var startX = SystemInformation.PrimaryMonitorSize.Width - SystemInformation.VirtualScreen.Width;
+            var startY = SystemInformation.PrimaryMonitorSize.Height - SystemInformation.VirtualScreen.Height;
+            Location = new(startX, startY);
 
             TransparencyKey = Color.FromArgb(254, 254, 254);
             BackColor = TransparencyKey;
