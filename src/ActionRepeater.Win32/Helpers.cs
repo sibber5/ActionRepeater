@@ -63,15 +63,14 @@ public static partial class PInvoke
         /// <returns>The screen coordinates of the cursor.</returns>
         public static unsafe POINT GetCursorPos()
         {
-            POINT result;
-            if (!PInvoke.GetCursorPos(&result))
+            if (!PInvoke.GetCursorPos(out POINT result))
             {
                 throw new Win32Exception();
             }
+
             return result;
         }
 
-        [System.Runtime.Versioning.SupportedOSPlatform("windows6.0.6000")]
         public static unsafe void SetWindowImmersiveDarkMode(IntPtr hWnd, bool enabled)
         {
             const uint DWMWA_USE_IMMERSIVE_DARK_MODE = 20;

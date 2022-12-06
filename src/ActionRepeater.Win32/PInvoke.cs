@@ -4,7 +4,7 @@ using ActionRepeater.Win32.Graphics;
 using ActionRepeater.Win32.Input;
 using ActionRepeater.Win32.Synch;
 using ActionRepeater.Win32.WindowsAndMessages;
-using SupportedOSPlatformAttribute = System.Runtime.Versioning.SupportedOSPlatformAttribute;
+using System.Runtime.Versioning;
 
 #pragma warning disable CA1401 // P/Invokes should not be visible
 [assembly: SupportedOSPlatform("windows6.0.6000")]
@@ -14,15 +14,8 @@ namespace ActionRepeater.Win32;
 
 public static partial class PInvoke
 {
-    /// <inheritdoc cref="SendInput(uint, INPUT*, int)"/>
-    public static unsafe uint SendInput(Span<INPUT> pInputs)
-    {
-        fixed (INPUT* pInputsLocal = pInputs)
-        {
-            uint __result = SendInput((uint)pInputs.Length, pInputsLocal, INPUT.SIZE);
-            return __result;
-        }
-    }
+    /// <inheritdoc cref="SendInput(uint, Span{INPUT}, int)"/>
+    public static unsafe uint SendInput(Span<INPUT> pInputs) => SendInput((uint)pInputs.Length, pInputs, INPUT.SIZE);
 
     /// <summary>Synthesizes keystrokes, mouse motions, and button clicks.</summary>
     /// <param name="cInputs">
@@ -43,9 +36,9 @@ public static partial class PInvoke
     /// <remarks>
     /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-sendinput">Learn more about this API from docs.microsoft.com</see>.</para>
     /// </remarks>
-    [DllImport("User32", ExactSpelling = true, SetLastError = true)]
+    [LibraryImport("User32", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    public static extern unsafe uint SendInput(uint cInputs, INPUT* pInputs, int cbSize);
+    public static unsafe partial uint SendInput(uint cInputs, Span<INPUT> pInputs, int cbSize);
 
     /// <summary>Translates (maps) a virtual-key code into a scan code or character value, or translates a scan code into a virtual-key code.</summary>
     /// <param name="uCode">
@@ -58,19 +51,9 @@ public static partial class PInvoke
     /// <remarks>
     /// <para><see href="https://docs.microsoft.com/windows/win32/api/winuser/nf-winuser-mapvirtualkeyw">Learn more about this API from docs.microsoft.com</see>.</para>
     /// </remarks>
-    [DllImport("User32", ExactSpelling = true, EntryPoint = "MapVirtualKeyW")]
+    [LibraryImport("User32", EntryPoint = "MapVirtualKeyW")]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    public static extern uint MapVirtualKey(uint uCode, VirtualKeyMapType uMapType);
-
-    /// <inheritdoc cref="GetCursorPos(POINT*)"/>
-    public static unsafe bool GetCursorPos(out POINT lpPoint)
-    {
-        fixed (POINT* lpPointLocal = &lpPoint)
-        {
-            bool __result = GetCursorPos(lpPointLocal);
-            return __result;
-        }
-    }
+    public static partial uint MapVirtualKey(uint uCode, VirtualKeyMapType uMapType);
 
     /// <summary>Retrieves the position of the mouse cursor, in screen coordinates.</summary>
     /// <param name="lpPoint">
@@ -83,10 +66,10 @@ public static partial class PInvoke
     /// <remarks>
     /// <para><see href="https://docs.microsoft.com/windows/win32/api/winuser/nf-winuser-getcursorpos">Learn more about this API from docs.microsoft.com</see>.</para>
     /// </remarks>
-    [DllImport("User32", ExactSpelling = true, SetLastError = true)]
+    [LibraryImport("User32", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static extern unsafe bool GetCursorPos(POINT* lpPoint);
+    public static unsafe partial bool GetCursorPos(out POINT lpPoint);
 
     /// <summary>Returns the dots per inch (dpi) value for the associated window.</summary>
     /// <param name="hwnd">The window you want to get information about.</param>
@@ -94,10 +77,10 @@ public static partial class PInvoke
     /// <remarks>
     /// <para><see href="https://docs.microsoft.com/windows/win32/api/winuser/nf-winuser-getdpiforwindow">Learn more about this API from docs.microsoft.com</see>.</para>
     /// </remarks>
-    [DllImport("User32", ExactSpelling = true)]
+    [LibraryImport("User32")]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     [SupportedOSPlatform("windows10.0.14393")]
-    public static extern uint GetDpiForWindow(IntPtr hwnd);
+    public static partial uint GetDpiForWindow(IntPtr hwnd);
 
     /// <summary>Changes the size, position, and Z order of a child, pop-up, or top-level window. These windows are ordered according to their appearance on the screen. The topmost window receives the highest rank and is the first window in the Z order.</summary>
     /// <param name="hWnd">
@@ -130,19 +113,13 @@ public static partial class PInvoke
     /// <remarks>
     /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-setwindowpos">Learn more about this API from docs.microsoft.com</see>.</para>
     /// </remarks>
-    [DllImport("User32", ExactSpelling = true, SetLastError = true)]
+    [LibraryImport("User32", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, SetWindowPosFlags uFlags);
+    public static partial bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, SetWindowPosFlags uFlags);
 
     /// <inheritdoc cref="RegisterRawInputDevices"/>
-    public static unsafe bool RegisterRawInputDevices(Span<RAWINPUTDEVICE> pRawInputDevices)
-    {
-        fixed (RAWINPUTDEVICE* pRawInputDevicesLocal = pRawInputDevices)
-        {
-            return RegisterRawInputDevices(pRawInputDevicesLocal, (uint)pRawInputDevices.Length, (uint)RAWINPUTDEVICE.SIZE);
-        }
-    }
+    public static unsafe bool RegisterRawInputDevices(Span<RAWINPUTDEVICE> pRawInputDevices) => RegisterRawInputDevices(pRawInputDevices, (uint)pRawInputDevices.Length, (uint)RAWINPUTDEVICE.SIZE);
 
     /// <summary>Registers the devices that supply the raw input data.</summary>
     /// <param name="pRawInputDevices">
@@ -163,10 +140,10 @@ public static partial class PInvoke
     /// <remarks>
     /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-registerrawinputdevices">Learn more about this API from docs.microsoft.com</see>.</para>
     /// </remarks>
-    [DllImport("User32", ExactSpelling = true, SetLastError = true)]
+    [LibraryImport("User32", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static extern unsafe bool RegisterRawInputDevices(RAWINPUTDEVICE* pRawInputDevices, uint uiNumDevices, uint cbSize);
+    public static unsafe partial bool RegisterRawInputDevices(Span<RAWINPUTDEVICE> pRawInputDevices, uint uiNumDevices, uint cbSize);
 
     /// <summary>Calls the next handler in a window's subclass chain. The last handler in the subclass chain calls the original window procedure for the window.</summary>
     /// <param name="hWnd">
@@ -191,9 +168,9 @@ public static partial class PInvoke
     /// <remarks>
     /// <para><see href="https://docs.microsoft.com/windows/win32/api//commctrl/nf-commctrl-defsubclassproc">Learn more about this API from docs.microsoft.com</see>.</para>
     /// </remarks>
-    [DllImport("ComCtl32", ExactSpelling = true)]
+    [LibraryImport("ComCtl32")]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    public static extern nint DefSubclassProc(IntPtr hWnd, uint uMsg, nuint wParam, nint lParam);
+    public static partial nint DefSubclassProc(IntPtr hWnd, uint uMsg, nuint wParam, nint lParam);
 
     /// <summary>Installs or updates a window subclass callback.</summary>
     /// <param name="hWnd">
@@ -218,10 +195,10 @@ public static partial class PInvoke
     /// <remarks>
     /// <para><see href="https://docs.microsoft.com/windows/win32/api//commctrl/nf-commctrl-setwindowsubclass">Learn more about this API from docs.microsoft.com</see>.</para>
     /// </remarks>
-    [DllImport("ComCtl32", ExactSpelling = true)]
+    [LibraryImport("ComCtl32")]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    [return : MarshalAs(UnmanagedType.Bool)]
-    public static extern bool SetWindowSubclass(IntPtr hWnd, SUBCLASSPROC pfnSubclass, nuint uIdSubclass, nuint dwRefData);
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial bool SetWindowSubclass(IntPtr hWnd, SUBCLASSPROC pfnSubclass, nuint uIdSubclass, nuint dwRefData);
 
     /// <summary>Removes a subclass callback from a window.</summary>
     /// <param name="hWnd">
@@ -242,10 +219,10 @@ public static partial class PInvoke
     /// <remarks>
     /// <para><see href="https://docs.microsoft.com/windows/win32/api//commctrl/nf-commctrl-removewindowsubclass">Learn more about this API from docs.microsoft.com</see>.</para>
     /// </remarks>
-    [DllImport("ComCtl32", ExactSpelling = true)]
+    [LibraryImport("ComCtl32")]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static extern bool RemoveWindowSubclass(IntPtr hWnd, SUBCLASSPROC pfnSubclass, nuint uIdSubclass);
+    public static partial bool RemoveWindowSubclass(IntPtr hWnd, SUBCLASSPROC pfnSubclass, nuint uIdSubclass);
 
     /// <summary>Calls the default window procedure to provide default processing for any window messages that an application does not process.</summary>
     /// <param name="hWnd">
@@ -270,19 +247,20 @@ public static partial class PInvoke
     /// <remarks>
     /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-defwindowprocw">Learn more about this API from docs.microsoft.com</see>.</para>
     /// </remarks>
-    [DllImport("User32", ExactSpelling = true, EntryPoint = "DefWindowProcW")]
+    [LibraryImport("User32", EntryPoint = "DefWindowProcW")]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    public static extern nint DefWindowProc(IntPtr hWnd, uint Msg, nuint wParam, nint lParam);
+    public static partial nint DefWindowProc(IntPtr hWnd, uint Msg, nuint wParam, nint lParam);
 
     /// <summary>Retrieves the raw input from the specified device.</summary>
     /// <para>Type: <b>HRAWINPUT</b> A handle to the <a href="https://docs.microsoft.com/windows/desktop/api/winuser/ns-winuser-rawinput">RAWINPUT</a> structure. This comes from the <i>lParam</i> in <see cref="WindowMessage.INPUT"/>.</para>
     /// <returns><see langword="true"/> if successful, otherwise <see langword="false"/>.</returns>
     public static unsafe bool GetRawInputData(nint hRawInput, out RAWINPUT pData)
     {
+        const uint RID_INPUT = 0x10000003u;
         uint rawInputSize = (uint)RAWINPUT.SIZE;
         fixed (RAWINPUT* pDataPtr = &pData)
         {
-            return GetRawInputData(hRawInput, 0x10000003u, pDataPtr, &rawInputSize, (uint)RAWINPUTHEADER.SIZE) != unchecked((uint)-1);
+            return GetRawInputData(hRawInput, RID_INPUT, pDataPtr, &rawInputSize, (uint)RAWINPUTHEADER.SIZE) != unchecked((uint)-1);
         }
     }
 
@@ -319,9 +297,9 @@ public static partial class PInvoke
     /// <remarks>
     /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-getrawinputdata">Learn more about this API from docs.microsoft.com</see>.</para>
     /// </remarks>
-    [DllImport("User32", ExactSpelling = true)]
+    [LibraryImport("User32")]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    public static extern unsafe uint GetRawInputData(nint hRawInput, uint uiCommand, void* pData, uint* pcbSize, uint cbSizeHeader);
+    public static unsafe partial uint GetRawInputData(nint hRawInput, uint uiCommand, void* pData, uint* pcbSize, uint cbSizeHeader);
 
     /// <summary>The EnumDisplayMonitors function enumerates display monitors (including invisible pseudo-monitors associated with the mirroring drivers) that intersect a region formed by the intersection of a specified clipping rectangle and the visible region of a device context. EnumDisplayMonitors calls an application-defined MonitorEnumProc callback function once for each monitor that is enumerated. Note that GetSystemMetrics (SM_CMONITORS) counts only the display monitors.</summary>
     /// <param name="hdc">
@@ -340,9 +318,10 @@ public static partial class PInvoke
     /// <remarks>
     /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-enumdisplaymonitors">Learn more about this API from docs.microsoft.com</see>.</para>
     /// </remarks>
-    [DllImport("User32", ExactSpelling = true)]
+    [LibraryImport("User32")]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    public static extern unsafe bool EnumDisplayMonitors(IntPtr hdc, IntPtr lprcClip, MONITORENUMPROC lpfnEnum, nint dwData);
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static unsafe partial bool EnumDisplayMonitors(IntPtr hdc, IntPtr lprcClip, MONITORENUMPROC lpfnEnum, nint dwData);
 
     /// <summary>Sets the value of Desktop Window Manager (DWM) non-client rendering attributes for a window.</summary>
     /// <param name="hwnd">The handle to the window for which the attribute value is to be set.</param>
@@ -355,9 +334,9 @@ public static partial class PInvoke
     /// <remarks>
     /// <para><see href="https://docs.microsoft.com/windows/win32/api//dwmapi/nf-dwmapi-dwmsetwindowattribute">Learn more about this API from docs.microsoft.com</see>.</para>
     /// </remarks>
-    [DllImport("DwmApi", ExactSpelling = true)]
+    [LibraryImport("DwmApi")]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    public static extern unsafe int DwmSetWindowAttribute(IntPtr hwnd, uint dwAttribute, void* pvAttribute, uint cbAttribute);
+    public static unsafe partial int DwmSetWindowAttribute(IntPtr hwnd, uint dwAttribute, void* pvAttribute, uint cbAttribute);
 
     /// <summary>Retrieves or sets the value of one of the system-wide parameters.</summary>
     /// <param name="uiAction">
@@ -383,10 +362,10 @@ public static partial class PInvoke
     /// <remarks>
     /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-systemparametersinfow">Learn more about this API from docs.microsoft.com</see>.</para>
     /// </remarks>
-    [DllImport("User32", ExactSpelling = true, EntryPoint = "SystemParametersInfoW", SetLastError = true)]
+    [LibraryImport("User32", EntryPoint = "SystemParametersInfoW", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static extern unsafe bool SystemParametersInfo(SystemParameter uiAction, uint uiParam, void* pvParam, SystemParameterUpdateAction fWinIni);
+    public static unsafe partial bool SystemParametersInfo(SystemParameter uiAction, uint uiParam, void* pvParam, SystemParameterUpdateAction fWinIni);
 
     /// <summary>Creates or opens a waitable timer object and returns a handle to the object.</summary>
     /// <param name="lpTimerAttributes">
@@ -413,9 +392,9 @@ public static partial class PInvoke
     /// <remarks>
     /// <para><see href="https://docs.microsoft.com/windows/win32/api//synchapi/nf-synchapi-createwaitabletimerexw">Learn more about this API from docs.microsoft.com</see>.</para>
     /// </remarks>
-    [DllImport("Kernel32", ExactSpelling = true, EntryPoint = "CreateWaitableTimerExW", CharSet = CharSet.Unicode, SetLastError = true)]
+    [LibraryImport("Kernel32", EntryPoint = "CreateWaitableTimerExW", StringMarshalling = StringMarshalling.Utf16, SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    public static extern unsafe IntPtr CreateWaitableTimerEx(IntPtr lpTimerAttributes, string? lpTimerName, WaitableTimerFlags dwFlags, AccessRights dwDesiredAccess);
+    public static unsafe partial IntPtr CreateWaitableTimerEx(IntPtr lpTimerAttributes, string? lpTimerName, WaitableTimerFlags dwFlags, AccessRights dwDesiredAccess);
 
     /// <summary>Activates the specified waitable timer. When the due time arrives, the timer is signaled and the thread that set the timer calls the optional completion routine.</summary>
     /// <param name="hTimer">
@@ -443,10 +422,10 @@ public static partial class PInvoke
     /// <remarks>
     /// <para><see href="https://docs.microsoft.com/windows/win32/api//synchapi/nf-synchapi-setwaitabletimer">Learn more about this API from docs.microsoft.com</see>.</para>
     /// </remarks>
-    [DllImport("Kernel32", ExactSpelling = true, SetLastError = true)]
+    [LibraryImport("Kernel32", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static extern unsafe bool SetWaitableTimer(IntPtr hTimer, long* lpDueTime, int lPeriod, PTIMERAPCROUTINE? pfnCompletionRoutine, void* lpArgToCompletionRoutine, bool fResume);
+    public static unsafe partial bool SetWaitableTimer(IntPtr hTimer, long* lpDueTime, int lPeriod, PTIMERAPCROUTINE? pfnCompletionRoutine, void* lpArgToCompletionRoutine, [MarshalAs(UnmanagedType.Bool)] bool fResume);
 
     /// <summary>Waits until the specified object is in the signaled state or the time-out interval elapses.</summary>
     /// <param name="hHandle">
@@ -465,9 +444,9 @@ public static partial class PInvoke
     /// <remarks>
     /// <para><see href="https://docs.microsoft.com/windows/win32/api//synchapi/nf-synchapi-waitforsingleobject">Learn more about this API from docs.microsoft.com</see>.</para>
     /// </remarks>
-    [DllImport("Kernel32", ExactSpelling = true, SetLastError = true)]
+    [LibraryImport("Kernel32", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    public static extern WaitResult WaitForSingleObject(IntPtr hHandle, uint dwMilliseconds);
+    public static partial WaitResult WaitForSingleObject(IntPtr hHandle, uint dwMilliseconds);
 
     /// <summary>Closes an open object handle.</summary>
     /// <param name="hObject">A valid handle to an open object.</param>
@@ -477,8 +456,8 @@ public static partial class PInvoke
     /// <remarks>
     /// <para><see href="https://docs.microsoft.com/windows/win32/api//handleapi/nf-handleapi-closehandle">Learn more about this API from docs.microsoft.com</see>.</para>
     /// </remarks>
-    [DllImport("Kernel32", ExactSpelling = true, SetLastError = true)]
+    [LibraryImport("Kernel32", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static extern bool CloseHandle(IntPtr hObject);
+    public static partial bool CloseHandle(IntPtr hObject);
 }
