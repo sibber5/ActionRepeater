@@ -49,7 +49,7 @@ public sealed partial class HomePageViewModel : ObservableObject
 
         Core.CoreOptions.Instance.PropertyChanged += (_, e) =>
         {
-            if (e.PropertyName == nameof(PlayRepeatCount)) OnPropertyChanged(e);
+            if (e.PropertyName?.Equals(nameof(PlayRepeatCount), StringComparison.Ordinal) == true) OnPropertyChanged(e);
         };
 
         _player.IsPlayingChanged += (_, _) =>

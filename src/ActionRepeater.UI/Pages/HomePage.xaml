@@ -30,12 +30,12 @@
                 <ctrls:CmdBarToggleButton x:Name="_recordButton"
                                           Glyph="&#xEA3A;"
                                           Text="Record"
-                                          Command="{x:Bind _viewModel.ToggleRecordingCommand}"/>
+                                          Command="{x:Bind _vm.ToggleRecordingCommand}"/>
 
                 <ctrls:CmdBarToggleButton Glyph="&#xE768;"
                                           Text="Play"
-                                          IsChecked="{x:Bind _viewModel.IsPlayButtonChecked, Mode=OneWay}"
-                                          Command="{x:Bind _viewModel.PlayActionsCommand}"/>
+                                          IsChecked="{x:Bind _vm.IsPlayButtonChecked, Mode=OneWay}"
+                                          Command="{x:Bind _vm.PlayActionsCommand}"/>
 
                 <AppBarSeparator Margin="5,0,5,0" />
 
@@ -53,7 +53,7 @@
                                SpinButtonPlacementMode="Inline"
                                MinWidth="90"
                                ValidationMode="InvalidInputOverwritten"
-                               Value="{x:Bind _viewModel.PlayRepeatCount, Mode=TwoWay}"/>
+                               Value="{x:Bind _vm.PlayRepeatCount, Mode=TwoWay}"/>
                 </StackPanel>
 
                 <AppBarSeparator Margin="5,0,5,0" />
@@ -61,14 +61,14 @@
                 <ctrls:CmdBarToggleButton Glyph="&#xF128;"
                                           Text="Cursor Path"
                                           ButtonWidth="70"
-                                          Command="{x:Bind _viewModel.ToggleCursorPathWindowCommand}"/>
+                                          Command="{x:Bind _vm.ToggleCursorPathWindowCommand}"/>
 
                 <AppBarSeparator Margin="5,0,5,0" />
 
                 <DropDownButton Height="55"
                                 Background="Transparent"
                                 BorderBrush="Transparent"
-                                IsEnabled="{x:Bind _viewModel.CanAddAction, Mode=OneWay}">
+                                IsEnabled="{x:Bind _vm.CanAddAction, Mode=OneWay}">
                     <DropDownButton.Resources>
                         <ResourceDictionary>
                             <ResourceDictionary.ThemeDictionaries>

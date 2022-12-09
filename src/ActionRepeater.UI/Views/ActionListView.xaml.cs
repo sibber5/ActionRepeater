@@ -1,4 +1,5 @@
-﻿using ActionRepeater.Core.Extentions;
+﻿using System;
+using ActionRepeater.Core.Extentions;
 using ActionRepeater.Core.Input;
 using ActionRepeater.UI.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,25 +11,25 @@ namespace ActionRepeater.UI.Views;
 
 public sealed partial class ActionListView : UserControl
 {
-    private readonly ActionListViewModel _viewModel;
+    private readonly ActionListViewModel _vm;
 
     public ActionListView()
     {
-        _viewModel = App.Current.Services.GetRequiredService<ActionListViewModel>();
-        _viewModel.ScrollToSelectedItem = ScrollToSelectedItem;
+        _vm = App.Current.Services.GetRequiredService<ActionListViewModel>();
+        _vm.ScrollToSelectedItem = ScrollToSelectedItem;
 
-        App.Current.Services.GetRequiredService<Recorder>().ActionAdded += (_, _) => ActionList.ScrollIntoView(_viewModel.FilteredActions[^1]);
+        App.Current.Services.GetRequiredService<Recorder>().ActionAdded += (_, _) => ActionList.ScrollIntoView(_vm.FilteredActions[^1]);
 
         InitializeComponent();
 
-        _viewModel.PropertyChanged += ViewModel_PropertyChanged;
+        _vm.PropertyChanged += ViewModel_PropertyChanged;
     }
 
     private void ViewModel_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(_viewModel.SelectedActionIndex))
+        if (e.PropertyName?.Equals(nameof(_vm.SelectedActionIndex), StringComparison.Ordinal) == true)
         {
-            if (_viewModel.SelectedActionIndex < 0)
+            if (_vm.SelectedActionIndex < 0)
             {
                 _replaceMenuItem.KeyboardAccelerators[0].IsEnabled = false;
                 _pasteMenuItem.KeyboardAccelerators[0].IsEnabled = true;
@@ -46,7 +47,7 @@ public sealed partial class ActionListView : UserControl
     {
         if (((FrameworkElement)e.OriginalSource).DataContext is ActionViewModel actionItem)
         {
-            ActionList.SelectedIndex = _viewModel.FilteredActions.RefIndexOfReverse(actionItem);
+            ActionList.SelectedIndex = _vm.FilteredActions.RefIndexOfReverse(actionItem);
             ActionItemMenuFlyout.ShowAt(ActionList, e.GetPosition(ActionList));
             return;
         }
@@ -64,7 +65,7 @@ public sealed partial class ActionListView : UserControl
 
         if (!ReferenceEquals(ActionList.SelectedItem, actionVM)) ActionList.SelectedItem = actionVM;
 
-        await _viewModel.EditSelectedAction();
+        await _vm.EditSelectedAction();
     }
 
     private void ActionList_Tapped(object sender, TappedRoutedEventArgs e)

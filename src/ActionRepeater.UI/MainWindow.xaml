@@ -78,6 +78,8 @@
                 </ResourceDictionary>
             </MenuBar.Resources>
 
+            <!-- binding the commands doesnt work for some reason, so theyre set in the constructor -->
+            
             <MenuBarItem Title="File">
                 <MenuFlyoutItem x:Name="_openMenuItem" Text="Open">
                     <MenuFlyoutItem.Icon>

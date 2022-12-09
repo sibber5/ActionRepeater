@@ -7,13 +7,13 @@ namespace ActionRepeater.UI.Pages;
 
 public sealed partial class HomePage : Page
 {
-    private readonly HomePageViewModel _viewModel;
+    private readonly HomePageViewModel _vm;
 
     public HomePage()
     {
         NavigationCacheMode = NavigationCacheMode.Required;
 
-        _viewModel = App.Current.Services.GetRequiredService<HomePageViewModel>();
+        _vm = App.Current.Services.GetRequiredService<HomePageViewModel>();
 
         InitializeComponent();
 

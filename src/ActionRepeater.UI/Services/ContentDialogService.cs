@@ -18,14 +18,14 @@ public sealed class ContentDialogService
 
     private readonly ActionCollection _actionCollection;
 
-    private readonly EditActionDialogViewModelFactory _editActionDialogViewModelFactory;
+    private readonly EditActionViewModelFactory _editActionViewModelFactory;
 
-    public ContentDialogService(ActionCollection actionCollection, EditActionDialogViewModelFactory editActionDialogViewModelFactory)
+    public ContentDialogService(ActionCollection actionCollection, EditActionViewModelFactory editActionViewModelFactory)
     {
         System.Diagnostics.Debug.WriteLineIf(XamlRoot is null, "XamlRoot should be set.");
 
         _actionCollection = actionCollection;
-        _editActionDialogViewModelFactory = editActionDialogViewModelFactory;
+        _editActionViewModelFactory = editActionViewModelFactory;
     }
 
     public IAsyncOperation<ContentDialogResult> ShowErrorDialog(string title, string message)
@@ -77,7 +77,7 @@ public sealed class ContentDialogService
             SecondaryButtonText = "Cancel",
         };
 
-        EditActionDialogViewModel vm = _editActionDialogViewModelFactory.Create(actionType, dialog);
+        EditActionViewModel vm = _editActionViewModelFactory.Create(actionType, dialog);
 
         dialog.Content = new Views.EditActionView(isAddView: true) { ViewModel = vm };
         dialog.PrimaryButtonCommand = vm.AddActionCommand;
@@ -101,7 +101,7 @@ public sealed class ContentDialogService
             SecondaryButtonText = "Cancel",
         };
 
-        EditActionDialogViewModel vm = _editActionDialogViewModelFactory.Create(editActionViewModel, dialog);
+        EditActionViewModel vm = _editActionViewModelFactory.Create(editActionViewModel, dialog);
 
         dialog.Content = new Views.EditActionView() { ViewModel = vm };
         dialog.PrimaryButtonCommand = vm.UpdateActionCommand;

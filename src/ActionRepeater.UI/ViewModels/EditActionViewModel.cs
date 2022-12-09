@@ -7,7 +7,7 @@ using Microsoft.UI.Xaml.Controls;
 
 namespace ActionRepeater.UI.ViewModels;
 
-public sealed partial class EditActionDialogViewModel : ObservableObject
+public sealed partial class EditActionViewModel : ObservableObject
 {
     public bool CanChangeAction { get; }
 
@@ -41,7 +41,7 @@ public sealed partial class EditActionDialogViewModel : ObservableObject
 
     private readonly ActionCollection _actionsCollection;
 
-    public EditActionDialogViewModel(ActionType actionType, ContentDialog contentDialog, ActionCollection actionsCollection, bool canChangeAction = true)
+    public EditActionViewModel(ActionType actionType, ContentDialog contentDialog, ActionCollection actionsCollection, bool canChangeAction = true)
     {
         CanChangeAction = canChangeAction;
         SelectedAction = actionType;
@@ -52,7 +52,7 @@ public sealed partial class EditActionDialogViewModel : ObservableObject
         _actionsCollection = actionsCollection;
     }
 
-    public EditActionDialogViewModel(ObservableObject editActionViewModel, ContentDialog contentDialog, ActionCollection actionsCollection, bool canChangeAction = false)
+    public EditActionViewModel(ObservableObject editActionViewModel, ContentDialog contentDialog, ActionCollection actionsCollection, bool canChangeAction = false)
     {
         CanChangeAction = canChangeAction;
         SelectedAction = GetActionForViewModel(editActionViewModel);

@@ -5,18 +5,18 @@ using Microsoft.UI.Xaml.Controls;
 
 namespace ActionRepeater.UI.Factories;
 
-public sealed class EditActionDialogViewModelFactory
+public sealed class EditActionViewModelFactory
 {
     private readonly ActionCollection _actionCollection;
 
-    public EditActionDialogViewModelFactory(ActionCollection actionCollection)
+    public EditActionViewModelFactory(ActionCollection actionCollection)
     {
         _actionCollection = actionCollection;
     }
 
-    public EditActionDialogViewModel Create(ActionType actionType, ContentDialog contentDialog, bool canChangeAction = true)
+    public EditActionViewModel Create(ActionType actionType, ContentDialog contentDialog, bool canChangeAction = true)
         => new(actionType, contentDialog, _actionCollection, canChangeAction);
 
-    public EditActionDialogViewModel Create(ObservableObject editActionViewModel, ContentDialog contentDialog, bool canChangeAction = false)
+    public EditActionViewModel Create(ObservableObject editActionViewModel, ContentDialog contentDialog, bool canChangeAction = false)
         => new(editActionViewModel, contentDialog, _actionCollection, canChangeAction);
 }

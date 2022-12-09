@@ -108,7 +108,7 @@ public partial class App : Application
         services.AddSingleton<HomePageViewModel>();
         services.AddSingleton<OptionsPageViewModel>();
 
-        services.AddSingleton<EditActionDialogViewModelFactory>();
+        services.AddSingleton<EditActionViewModelFactory>();
 
         return services.BuildServiceProvider();
     }
@@ -153,7 +153,7 @@ public partial class App : Application
 
     private async void UIOptions_PropertyChanging(object? sender, System.ComponentModel.PropertyChangingEventArgs e)
     {
-        if (e.PropertyName == nameof(UIOptions.Instance.OptionsFileLocation))
+        if (e.PropertyName?.Equals(nameof(UIOptions.Instance.OptionsFileLocation), StringComparison.Ordinal) == true)
         {
             if (_optsFileLocReverter?.IsReverting == true) return;
 

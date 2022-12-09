@@ -22,7 +22,7 @@ public sealed partial class MainWindow : Window
 
     public IntPtr Handle { get; }
 
-    private readonly MainViewModel _viewModel;
+    private readonly MainViewModel _vm;
 
     public XamlRoot GridXamlRoot => _grid.XamlRoot;
 
@@ -53,14 +53,14 @@ public sealed partial class MainWindow : Window
             Win32.PInvoke.Helpers.SetWindowImmersiveDarkMode(Handle, true);
         }
 
-        _viewModel = App.Current.Services.GetRequiredService<MainViewModel>();
+        _vm = App.Current.Services.GetRequiredService<MainViewModel>();
         _recorder = App.Current.Services.GetRequiredService<Recorder>();
 
         InitializeComponent();
 
         // workaround because x:Bind-ing isnt working for some reason
-        _openMenuItem.Command = _viewModel.ImportActionsCommand;
-        _saveMenuItem.Command = _viewModel.ExportActionsCommand;
+        _openMenuItem.Command = _vm.ImportActionsCommand;
+        _saveMenuItem.Command = _vm.ExportActionsCommand;
     }
 
     private unsafe void OnWindowMessageReceived(object? sender, WindowMessageEventArgs e)

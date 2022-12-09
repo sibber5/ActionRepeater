@@ -16,7 +16,7 @@
         </Grid.RowDefinitions>
 
         <TextBlock x:Name="ActionListHeader"
-                   Text="{x:Bind _viewModel.ActionListHeaderWithCount, Mode=OneWay}"
+                   Text="{x:Bind _vm.ActionListHeaderWithCount, Mode=OneWay}"
                    Grid.Row="0"
                    Margin="3,0,0,1"
                    VerticalAlignment="Bottom"
@@ -34,7 +34,7 @@
         <ToggleSwitch x:Name="ShowAutoRepeatToggle"
                       OnContent=""
                       OffContent=""
-                      IsOn="{x:Bind _viewModel.ShowKeyRepeatActions, Mode=TwoWay}"
+                      IsOn="{x:Bind _vm.ShowKeyRepeatActions, Mode=TwoWay}"
                       Grid.Row="0"
                       VerticalAlignment="Bottom"
                       HorizontalAlignment="Right"
@@ -51,9 +51,9 @@
                   VerticalAlignment="Stretch"
                   Margin="0,5,0,0"
                   ScrollViewer.VerticalScrollBarVisibility="Visible"
-                  ItemsSource="{x:Bind _viewModel.FilteredActions, Mode=OneWay}"
-                  SelectedIndex="{x:Bind _viewModel.SelectedActionIndex, Mode=TwoWay}"
-                  CanReorderItems="{x:Bind _viewModel.CanReorderActions, Mode=OneWay}"
+                  ItemsSource="{x:Bind _vm.FilteredActions, Mode=OneWay}"
+                  SelectedIndex="{x:Bind _vm.SelectedActionIndex, Mode=TwoWay}"
+                  CanReorderItems="{x:Bind _vm.CanReorderActions, Mode=OneWay}"
                   AllowDrop="True"
                   IsRightTapEnabled="True"
                   RightTapped="ActionList_RightTapped"
@@ -110,21 +110,21 @@
 
             <ListView.Resources>
                 <MenuFlyout x:Name="ActionItemMenuFlyout">
-                    <MenuFlyoutItem Text="Edit" Command="{x:Bind _viewModel.EditSelectedActionCommand}" Icon="Edit"/>
+                    <MenuFlyoutItem Text="Edit" Command="{x:Bind _vm.EditSelectedActionCommand}" Icon="Edit"/>
                     
-                    <MenuFlyoutItem Text="Copy" Command="{x:Bind _viewModel.StoreActionCommand}" Icon="Copy">
+                    <MenuFlyoutItem Text="Copy" Command="{x:Bind _vm.StoreActionCommand}" Icon="Copy">
                         <MenuFlyoutItem.KeyboardAccelerators>
                             <KeyboardAccelerator Modifiers="Control" Key="C"/>
                         </MenuFlyoutItem.KeyboardAccelerators>
                     </MenuFlyoutItem>
                     
-                    <MenuFlyoutItem x:Name="_replaceMenuItem" Text="Paste (replace)" Command="{x:Bind _viewModel.ReplaceActionCommand}" Icon="Paste">
+                    <MenuFlyoutItem x:Name="_replaceMenuItem" Text="Paste (replace)" Command="{x:Bind _vm.ReplaceActionCommand}" Icon="Paste">
                         <MenuFlyoutItem.KeyboardAccelerators>
                             <KeyboardAccelerator Modifiers="Control" Key="V"/>
                         </MenuFlyoutItem.KeyboardAccelerators>
                     </MenuFlyoutItem>
                     
-                    <MenuFlyoutItem Text="Remove" Command="{x:Bind _viewModel.RemoveActionCommand}" Icon="Delete">
+                    <MenuFlyoutItem Text="Remove" Command="{x:Bind _vm.RemoveActionCommand}" Icon="Delete">
                         <MenuFlyoutItem.KeyboardAccelerators>
                             <KeyboardAccelerator Key="Delete"/>
                         </MenuFlyoutItem.KeyboardAccelerators>
@@ -141,10 +141,10 @@
                 </MenuFlyout>
                 
                 <MenuFlyout x:Name="ActionListMenuFlyout">
-                    <MenuFlyoutSubItem Text="Add" x:Name="_listFlyoutAdd" Icon="Add" IsEnabled="{x:Bind _viewModel.CanAddAction, Mode=OneWay}"
+                    <MenuFlyoutSubItem Text="Add" x:Name="_listFlyoutAdd" Icon="Add" IsEnabled="{x:Bind _vm.CanAddAction, Mode=OneWay}"
                                        behavs:AddActionMenuBehavior.MenuItemList="{x:Bind _listFlyoutAdd.Items}"/>
                     
-                    <MenuFlyoutItem x:Name="_pasteMenuItem" Text="Paste" Command="{x:Bind _viewModel.AddStoredActionCommand}"  Icon="Paste">
+                    <MenuFlyoutItem x:Name="_pasteMenuItem" Text="Paste" Command="{x:Bind _vm.AddStoredActionCommand}"  Icon="Paste">
                         <MenuFlyoutItem.KeyboardAccelerators>
                             <KeyboardAccelerator Modifiers="Control" Key="V"/>
                         </MenuFlyoutItem.KeyboardAccelerators>

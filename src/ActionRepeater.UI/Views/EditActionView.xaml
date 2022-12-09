@@ -4,10 +4,11 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:local="using:ActionRepeater.UI.Views"
-    xmlns:vms="using:ActionRepeater.UI.ViewModels"
     mc:Ignorable="d">
 
+    <!-- this view is used as the content of a ContentDialog when editing/adding an action. -->
+    <!-- its created by ContentDialogService, which creates the viewmodel using the factory and sets all the commands. -->
+    
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>

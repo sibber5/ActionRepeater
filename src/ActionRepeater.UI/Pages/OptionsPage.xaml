@@ -26,14 +26,14 @@
                 <ctrls:OptionItem.OptionContent>
                     <ComboBox HorizontalAlignment="Right"
                               Width="{StaticResource OptionControlWidth}"
-                              ItemsSource="{x:Bind _viewModel.CursorMovementCBItems}"
-                              SelectedIndex="{x:Bind _viewModel.CursorMovementMode, Mode=TwoWay}"/>
+                              ItemsSource="{x:Bind _vm.CursorMovementCBItems}"
+                              SelectedIndex="{x:Bind _vm.CursorMovementMode, Mode=TwoWay}"/>
                 </ctrls:OptionItem.OptionContent>
             </ctrls:OptionItem>
 
-            <ctrls:OptionItem Text="Set cursor position on clicks" IsEnabled="{x:Bind _viewModel.IsCursorMovementNone, Mode=OneWay}">
+            <ctrls:OptionItem Text="Set cursor position on clicks" IsEnabled="{x:Bind _vm.IsCursorMovementNone, Mode=OneWay}">
                 <ctrls:OptionItem.OptionContent>
-                    <ToggleSwitch IsOn="{x:Bind _viewModel.UseCursorPosOnClicks, Mode=TwoWay}" Margin="{StaticResource ToggleSwitchNegativeMargin}" Style="{StaticResource LeftSideTextToggleSwitch}"/>
+                    <ToggleSwitch IsOn="{x:Bind _vm.UseCursorPosOnClicks, Mode=TwoWay}" Margin="{StaticResource ToggleSwitchNegativeMargin}" Style="{StaticResource LeftSideTextToggleSwitch}"/>
                 </ctrls:OptionItem.OptionContent>
             </ctrls:OptionItem>
 
@@ -50,13 +50,13 @@
                                Maximum="9999"
                                SpinButtonPlacementMode="Inline"
                                ValidationMode="InvalidInputOverwritten"
-                               Value="{x:Bind _viewModel.MaxClickInterval, Mode=TwoWay}"/>
+                               Value="{x:Bind _vm.MaxClickInterval, Mode=TwoWay}"/>
                 </ctrls:OptionItem.OptionContent>
             </ctrls:OptionItem>
 
             <ctrls:OptionItem Text="Simulate keystroke auto-repeat">
                 <ctrls:OptionItem.OptionContent>
-                    <ToggleSwitch IsOn="{x:Bind _viewModel.SendKeyAutoRepeat, Mode=TwoWay}" Margin="{StaticResource ToggleSwitchNegativeMargin}" Style="{StaticResource LeftSideTextToggleSwitch}"/>
+                    <ToggleSwitch IsOn="{x:Bind _vm.SendKeyAutoRepeat, Mode=TwoWay}" Margin="{StaticResource ToggleSwitchNegativeMargin}" Style="{StaticResource LeftSideTextToggleSwitch}"/>
                 </ctrls:OptionItem.OptionContent>
             </ctrls:OptionItem>
 
@@ -66,8 +66,8 @@
                 <ctrls:OptionItem.OptionContent>
                     <ComboBox HorizontalAlignment="Right"
                               Width="{StaticResource OptionControlWidth}"
-                              ItemsSource="{x:Bind _viewModel.ThemeCBItems}"
-                              SelectedIndex="{x:Bind _viewModel.Theme, Mode=TwoWay}"/>
+                              ItemsSource="{x:Bind _vm.ThemeCBItems}"
+                              SelectedIndex="{x:Bind _vm.Theme, Mode=TwoWay}"/>
                 </ctrls:OptionItem.OptionContent>
             </ctrls:OptionItem>
 
@@ -77,7 +77,7 @@
                 <ctrls:OptionItem.OptionContent>
                     <ComboBox HorizontalAlignment="Right"
                               Width="{StaticResource OptionControlWidth}"
-                              SelectedIndex="{x:Bind _viewModel.OptionsFileLocation, Mode=TwoWay}">
+                              SelectedIndex="{x:Bind _vm.OptionsFileLocation, Mode=TwoWay}">
                         <x:String>Don't Save</x:String>
                         <x:String>AppData</x:String>
                         <x:String>App Folder</x:String>

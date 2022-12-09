@@ -7,13 +7,13 @@ namespace ActionRepeater.UI.Pages;
 
 public sealed partial class OptionsPage : Page
 {
-    private readonly OptionsPageViewModel _viewModel;
+    private readonly OptionsPageViewModel _vm;
 
     public OptionsPage()
     {
         NavigationCacheMode = NavigationCacheMode.Required;
 
-        _viewModel = App.Current.Services.GetRequiredService<OptionsPageViewModel>();
+        _vm = App.Current.Services.GetRequiredService<OptionsPageViewModel>();
 
         InitializeComponent();
 
