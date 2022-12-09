@@ -22,15 +22,27 @@ public sealed class HighResolutionWaiter : IDisposable
         }
     }
 
-    public unsafe void Wait(uint milliseconds)
+    public unsafe void Wait(long milliseconds)
+    {
+        if (milliseconds <= 0) return;
+
+        WaitCore(GetRelativeTimeMS(milliseconds));
+    }
+
+    public unsafe void WaitNS(long nanoseconds)
+    {
+        if (nanoseconds <= 0) return;
+
+        WaitCore(GetRelativeTimeNS(nanoseconds));
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private unsafe void WaitCore(long time)
     {
         Debug.Assert(!_isWaiting);
 
-        if (milliseconds == 0) return;
-
         _isWaiting = true;
 
-        long time = GetRelativeTime(milliseconds);
         if (!SetWaitableTimer(_timerHandle, &time, 0, null, null, false))
         {
             throw new Win32Exception();
@@ -59,13 +71,16 @@ public sealed class HighResolutionWaiter : IDisposable
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static long GetRelativeTime(uint milliseconds)
+    private static long GetRelativeTimeMS(long milliseconds)
     {
         // negative == relative time (positive == absolute)
         // we want 100 nanosecond intervals, so multiply by 1,000,000 to get nanoseconds
         // and divide by 100; == multiplying by 10,000
         return -(milliseconds * 10_000L);
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static long GetRelativeTimeNS(long nanoseconds) => unchecked(-(nanoseconds / 100L));
 
     private void DisposeCore()
     {

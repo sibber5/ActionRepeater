@@ -12,6 +12,6 @@ public sealed partial class EditWaitActionViewModel : ObservableObject
 
     public EditWaitActionViewModel(WaitAction waitAction)
     {
-        _durationSecs = waitAction.Duration / 1000.0;
+        _durationSecs = waitAction.DurationMS / 1000.0;
     }
 }

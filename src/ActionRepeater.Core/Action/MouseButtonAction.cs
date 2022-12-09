@@ -77,9 +77,10 @@ public sealed class MouseButtonAction : InputAction
     {
         bool success = ActionType switch
         {
-            MouseButtonActionType.MouseButtonDown  => _usePosition ? InputSimulator.SendMouseButtonDown(_button, _position)  : InputSimulator.SendMouseButtonDown(_button),
-            MouseButtonActionType.MouseButtonUp    => _usePosition ? InputSimulator.SendMouseButtonUp(_button, _position)    : InputSimulator.SendMouseButtonUp(_button),
-            MouseButtonActionType.MouseButtonClick => _usePosition ? InputSimulator.SendMouseButtonClick(_button, _position) : InputSimulator.SendMouseButtonClick(_button),
+            // dont set the position if there is a cursor path, because it messes with that for some reason
+            MouseButtonActionType.MouseButtonClick => _usePosition && CoreOptions.Instance.CursorMovementMode == CursorMovementMode.None ? InputSimulator.SendMouseButtonClick(_button, _position) : InputSimulator.SendMouseButtonClick(_button),
+            MouseButtonActionType.MouseButtonDown  => _usePosition && CoreOptions.Instance.CursorMovementMode == CursorMovementMode.None ? InputSimulator.SendMouseButtonDown(_button, _position)  : InputSimulator.SendMouseButtonDown(_button),
+            MouseButtonActionType.MouseButtonUp    => _usePosition && CoreOptions.Instance.CursorMovementMode == CursorMovementMode.None ? InputSimulator.SendMouseButtonUp(_button, _position)    : InputSimulator.SendMouseButtonUp(_button),
             _ => throw new InvalidEnumArgumentException("Invalid mouse button action.")
         };
 

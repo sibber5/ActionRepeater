@@ -27,6 +27,8 @@
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
         <PublishTrimmed>true</PublishTrimmed>
+        <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+
     </PropertyGroup>
 
     <ItemGroup>

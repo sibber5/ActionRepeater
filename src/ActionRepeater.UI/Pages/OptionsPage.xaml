@@ -25,13 +25,13 @@
             <ctrls:OptionItem Text="Cursor movement">
                 <ctrls:OptionItem.OptionContent>
                     <ComboBox HorizontalAlignment="Right"
-                          Width="{StaticResource OptionControlWidth}"
-                          ItemsSource="{x:Bind _viewModel.CursorMovementCBItems}"
-                          SelectedIndex="{x:Bind _viewModel.CursorMovementMode, Mode=TwoWay}"/>
+                              Width="{StaticResource OptionControlWidth}"
+                              ItemsSource="{x:Bind _viewModel.CursorMovementCBItems}"
+                              SelectedIndex="{x:Bind _viewModel.CursorMovementMode, Mode=TwoWay}"/>
                 </ctrls:OptionItem.OptionContent>
             </ctrls:OptionItem>
 
-            <ctrls:OptionItem Text="Set cursor position on clicks">
+            <ctrls:OptionItem Text="Set cursor position on clicks" IsEnabled="{x:Bind _viewModel.IsCursorMovementNone, Mode=OneWay}">
                 <ctrls:OptionItem.OptionContent>
                     <ToggleSwitch IsOn="{x:Bind _viewModel.UseCursorPosOnClicks, Mode=TwoWay}" Margin="{StaticResource ToggleSwitchNegativeMargin}" Style="{StaticResource LeftSideTextToggleSwitch}"/>
                 </ctrls:OptionItem.OptionContent>
@@ -40,17 +40,17 @@
             <ctrls:OptionsSeperator/>
 
             <ctrls:OptionItem Text="Max click interval (ms)"
-                          ToolTipService.ToolTip="The maximum time, in milliseconds, between pressing down a key/mouse button and releasing it for the action to be counted as a press/click (instead of button down and up actinos)">
+                              ToolTipService.ToolTip="The maximum time, in milliseconds, between pressing down a key/mouse button and releasing it for the action to be counted as a press/click (instead of button down and up actinos)">
                 <ctrls:OptionItem.OptionContent>
                     <NumberBox x:Name="_clickIntervalNumbox"
-                           MinWidth="{StaticResource OptionControlWidth}"
-                           SmallChange="10"
-                           LargeChange="100"
-                           Minimum="0"
-                           Maximum="9999"
-                           SpinButtonPlacementMode="Inline"
-                           ValidationMode="InvalidInputOverwritten"
-                           Value="{x:Bind _viewModel.MaxClickInterval, Mode=TwoWay}"/>
+                               MinWidth="{StaticResource OptionControlWidth}"
+                               SmallChange="10"
+                               LargeChange="100"
+                               Minimum="0"
+                               Maximum="9999"
+                               SpinButtonPlacementMode="Inline"
+                               ValidationMode="InvalidInputOverwritten"
+                               Value="{x:Bind _viewModel.MaxClickInterval, Mode=TwoWay}"/>
                 </ctrls:OptionItem.OptionContent>
             </ctrls:OptionItem>
 
@@ -65,9 +65,9 @@
             <ctrls:OptionItem Text="Theme">
                 <ctrls:OptionItem.OptionContent>
                     <ComboBox HorizontalAlignment="Right"
-                          Width="{StaticResource OptionControlWidth}"
-                          ItemsSource="{x:Bind _viewModel.ThemeCBItems}"
-                          SelectedIndex="{x:Bind _viewModel.Theme, Mode=TwoWay}"/>
+                              Width="{StaticResource OptionControlWidth}"
+                              ItemsSource="{x:Bind _viewModel.ThemeCBItems}"
+                              SelectedIndex="{x:Bind _viewModel.Theme, Mode=TwoWay}"/>
                 </ctrls:OptionItem.OptionContent>
             </ctrls:OptionItem>
 
@@ -76,8 +76,8 @@
             <ctrls:OptionItem Text="Options file location">
                 <ctrls:OptionItem.OptionContent>
                     <ComboBox HorizontalAlignment="Right"
-                          Width="{StaticResource OptionControlWidth}"
-                          SelectedIndex="{x:Bind _viewModel.OptionsFileLocation, Mode=TwoWay}">
+                              Width="{StaticResource OptionControlWidth}"
+                              SelectedIndex="{x:Bind _viewModel.OptionsFileLocation, Mode=TwoWay}">
                         <x:String>Don't Save</x:String>
                         <x:String>AppData</x:String>
                         <x:String>App Folder</x:String>

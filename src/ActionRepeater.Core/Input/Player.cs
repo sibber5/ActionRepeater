@@ -184,7 +184,7 @@ public sealed class Player
                 {
                     if (_tokenSource!.IsCancellationRequested) return;
 
-                    _cursorMovementWaiter.Wait((uint)mouseMovement.DelayDuration);
+                    _cursorMovementWaiter.WaitNS(mouseMovement.DelayDurationNS);
                     InputSimulator.MoveMouse(mouseMovement.Delta, relativePos: true);
                 }
             }
@@ -196,7 +196,7 @@ public sealed class Player
                 {
                     if (_tokenSource!.IsCancellationRequested) return;
 
-                    _cursorMovementWaiter.Wait((uint)mouseMovement.DelayDuration);
+                    _cursorMovementWaiter.WaitNS(mouseMovement.DelayDurationNS);
                     InputSimulator.MoveMouse(mouseMovement.Delta, relativePos: false);
                 }
             };

@@ -12,8 +12,8 @@ public sealed class MouseWheelAction : WaitableInputAction
     public override string Name => IsHorizontal ? "Horizontal Mouse Wheel" : "Mouse Wheel";
     [JsonIgnore]
     public override string Description => IsHorizontal
-        ? ActionDescriptionTemplates.HorizontalWheelSteps(StepCount, Duration)
-        : ActionDescriptionTemplates.WheelSteps(StepCount, Duration);
+        ? ActionDescriptionTemplates.HorizontalWheelSteps(StepCount, DurationMS)
+        : ActionDescriptionTemplates.WheelSteps(StepCount, DurationMS);
 
     private bool _isHorizontal;
     public bool IsHorizontal
@@ -41,38 +41,38 @@ public sealed class MouseWheelAction : WaitableInputAction
         }
     }
 
-    private int _duration;
-    public int Duration
+    private int _durationMS;
+    public int DurationMS
     {
-        get => _duration;
+        get => _durationMS;
         set
         {
-            if (_duration == value) return;
+            if (_durationMS == value) return;
 
-            _duration = value;
+            _durationMS = value;
             OnDescriptionChanged();
         }
     }
 
-    /// <param name="duration">The time it took/takes to scroll the wheel, in milliseconds/ticks.</param>
-    public MouseWheelAction(bool isHorizontal, int stepCount, int duration = 0)
+    /// <param name="durationMS">The time it took/takes to scroll the wheel, in milliseconds/ticks.</param>
+    public MouseWheelAction(bool isHorizontal, int stepCount, int durationMS = 0)
     {
         IsHorizontal = isHorizontal;
         _stepCount = stepCount;
-        _duration = duration;
+        _durationMS = durationMS;
     }
 
     public override void PlayWait(HighResolutionWaiter waiter)
     {
         int absStepCount = Math.Abs(_stepCount);
 
-        if (_duration == 0 || absStepCount == 1)
+        if (_durationMS == 0 || absStepCount == 1)
         {
             SendWheelEvent(_stepCount);
             return;
         }
 
-        uint waitInterval = (uint)(_duration / (absStepCount - 1));
+        uint waitInterval = (uint)(_durationMS / (absStepCount - 1));
         int step = Math.Sign(_stepCount);
 
         SendWheelEvent(step);

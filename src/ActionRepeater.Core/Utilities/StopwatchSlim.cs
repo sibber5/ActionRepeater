@@ -7,21 +7,28 @@ namespace ActionRepeater.Core.Utilities;
 public sealed class StopwatchSlim
 {
     private static readonly double _tickFrequencyMS = 1000.0 / Stopwatch.Frequency;
+    private static readonly double _tickFrequencyNS = 1_000_000_000.0 / Stopwatch.Frequency;
 
-    public long ElapsedMilliseconds
+    public long ElapsedMilliseconds => QPCTicksToMilliseconds(ElapsedTicks);
+
+    public long ElapsedNanoseconds => QPCTicksToNanoseconds(ElapsedTicks);
+
+    public long ElapsedTicks
     {
         get
         {
             if (_startTimestamp == null) throw new InvalidOperationException($"{nameof(StopwatchSlim)} was not started.");
 
-            if (_stopTimestamp == null) return QPCTicksToMilliseconds(Stopwatch.GetTimestamp() - _startTimestamp.Value);
+            if (_stopTimestamp == null) return Stopwatch.GetTimestamp() - _startTimestamp.Value;
 
-            return QPCTicksToMilliseconds(_stopTimestamp.Value - _startTimestamp.Value);
+            return _stopTimestamp.Value - _startTimestamp.Value;
         }
     }
 
-    private long? _startTimestamp = null;
-    private long? _stopTimestamp = null;
+    public bool IsRunning => _stopTimestamp == null && _startTimestamp != null;
+
+    private long? _startTimestamp;
+    private long? _stopTimestamp;
 
     public void Start()
     {
@@ -32,7 +39,7 @@ public sealed class StopwatchSlim
 
     public void Stop()
     {
-        if (_stopTimestamp != null || _startTimestamp == null) throw new InvalidOperationException($"{nameof(StopwatchSlim)} is not running.");
+        if (!IsRunning) throw new InvalidOperationException($"{nameof(StopwatchSlim)} is not running.");
 
         _stopTimestamp = Stopwatch.GetTimestamp();
     }
@@ -49,16 +56,20 @@ public sealed class StopwatchSlim
         _startTimestamp = Stopwatch.GetTimestamp();
     }
 
-    public long RestartAndGetElapsedMS()
+    public long RestartAndGetElapsedMS() => QPCTicksToMilliseconds(RestartAndGetElapsedTicks());
+
+    public long RestartAndGetElapsedNS() => QPCTicksToNanoseconds(RestartAndGetElapsedTicks());
+
+    public long RestartAndGetElapsedTicks()
     {
         long currentTimestamp = Stopwatch.GetTimestamp();
 
-        long elapsedMS = _startTimestamp == null ? 0 : QPCTicksToMilliseconds(currentTimestamp - _startTimestamp.Value);
+        long elapsedTicks = _startTimestamp == null ? 0 : currentTimestamp - _startTimestamp.Value;
 
         _stopTimestamp = null;
         _startTimestamp = currentTimestamp;
 
-        return elapsedMS;
+        return elapsedTicks;
     }
 
     /// <summary>
@@ -66,4 +77,10 @@ public sealed class StopwatchSlim
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static long QPCTicksToMilliseconds(long ticks) => unchecked((long)(ticks * _tickFrequencyMS));
+
+    /// <summary>
+    /// Converts QueryPerformanceCounter ticks to milliseconds.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static long QPCTicksToNanoseconds(long ticks) => unchecked((long)(ticks * _tickFrequencyNS));
 }

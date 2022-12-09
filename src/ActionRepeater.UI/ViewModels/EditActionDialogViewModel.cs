@@ -113,7 +113,7 @@ public sealed partial class EditActionDialogViewModel : ObservableObject
                 var mwa = (MouseWheelAction)action;
                 mwa.IsHorizontal = mwVM.HorizontalScrolling;
                 mwa.StepCount = mwVM.Steps;
-                mwa.Duration = (int)(mwVM.DurationSecs * 1000);
+                mwa.DurationMS = (int)(mwVM.DurationSecs * 1000);
                 break;
 
             case EditWaitActionViewModel waitVM:
@@ -124,7 +124,7 @@ public sealed partial class EditActionDialogViewModel : ObservableObject
                 }
 
                 var wa = (WaitAction)action;
-                wa.Duration = (int)(waitVM.DurationSecs * 1000);
+                wa.DurationMS = (int)(waitVM.DurationSecs * 1000);
                 break;
 
             default:

@@ -20,6 +20,6 @@ public sealed partial class EditMouseWheelActionViewModel : ObservableObject
     {
         _horizontalScrolling = mouseWheelAction.IsHorizontal;
         _steps = mouseWheelAction.StepCount;
-        _durationSecs = mouseWheelAction.Duration / 1000.0;
+        _durationSecs = mouseWheelAction.DurationMS / 1000.0;
     }
 }

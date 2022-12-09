@@ -11,12 +11,12 @@ public sealed class MouseMovement
     /// </summary>
     public POINT Delta { get; set; }
 
-    public int DelayDuration { get; set; }
+    public long DelayDurationNS { get; set; }
 
-    public MouseMovement(POINT delta, int delayDuration)
+    public MouseMovement(POINT delta, long delayNanoseconds)
     {
         Delta = delta;
-        DelayDuration = delayDuration;
+        DelayDurationNS = delayNanoseconds;
     }
 
     public static POINT OffsetPointWithinScreens(POINT point, POINT offset)

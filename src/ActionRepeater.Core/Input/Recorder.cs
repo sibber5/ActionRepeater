@@ -1,8 +1,9 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Diagnostics;
-using System.Linq;
 using ActionRepeater.Core.Action;
 using ActionRepeater.Core.Utilities;
+using ActionRepeater.Win32;
 using ActionRepeater.Win32.Input;
 using ActionRepeater.Win32.WindowsAndMessages.Utilities;
 
@@ -87,7 +88,7 @@ public sealed class Recorder
             {
                 Debug.Assert(_actionCollection.CursorPath.Count == 0, $"{nameof(_actionCollection.CursorPath)} is not empty.");
 
-                _actionCollection.CursorPathStart = new(Win32.PInvoke.Helpers.GetCursorPos(), 0);
+                _actionCollection.CursorPathStart = new(PInvoke.Helpers.GetCursorPos(), 0);
                 Debug.WriteLine($"set cursor start path pos to: {_actionCollection.CursorPathStart.Delta}");
             }
 
@@ -130,9 +131,9 @@ public sealed class Recorder
             }
         };
 
-        if (!Win32.PInvoke.RegisterRawInputDevices(rid))
+        if (!PInvoke.RegisterRawInputDevices(rid))
         {
-            throw new System.ComponentModel.Win32Exception(System.Runtime.InteropServices.Marshal.GetLastPInvokeError());
+            throw new Win32Exception(System.Runtime.InteropServices.Marshal.GetLastPInvokeError());
         }
 
         IsSubscribed = true;
@@ -158,9 +159,9 @@ public sealed class Recorder
             }
         };
 
-        if (!Win32.PInvoke.RegisterRawInputDevices(inputDevices))
+        if (!PInvoke.RegisterRawInputDevices(inputDevices))
         {
-            throw new System.ComponentModel.Win32Exception(System.Runtime.InteropServices.Marshal.GetLastPInvokeError());
+            throw new Win32Exception(System.Runtime.InteropServices.Marshal.GetLastPInvokeError());
         }
 
         IsSubscribed = false;
@@ -169,7 +170,7 @@ public sealed class Recorder
     public void OnInputMessage(WindowMessageEventArgs e)
     {
         var inputCode = unchecked(e.Message.wParam & 0xff);
-        if (!Win32.PInvoke.GetRawInputData(e.Message.lParam, out RAWINPUT inputData))
+        if (!PInvoke.GetRawInputData(e.Message.lParam, out RAWINPUT inputData))
         {
             Debug.WriteLine("ERROR RETRIEVING RAW INPUT");
         }
@@ -222,14 +223,14 @@ public sealed class Recorder
         if (inputCode == 0)
         {
             e.Handled = true;
-            e.Result = Win32.PInvoke.DefWindowProc(e.Message.hwnd, e.Message.message, e.Message.wParam, e.Message.lParam);
+            e.Result = PInvoke.DefWindowProc(e.Message.hwnd, e.Message.message, e.Message.wParam, e.Message.lParam);
         }
     }
 
     private void OnMouseMove(int deltaX, int deltaY)
     {
-        int timeSinceLastMov = (int)_mouseStopwatch.RestartAndGetElapsedMS();
-        _actionCollection.CursorPath.Add(new(new Win32.POINT(deltaX, deltaY), timeSinceLastMov));
+        long nsSinceLastMov = _mouseStopwatch.RestartAndGetElapsedNS();
+        _actionCollection.CursorPath.Add(new(new POINT(deltaX, deltaY), nsSinceLastMov));
     }
 
     private void OnMouseWheelMessage(RAWMOUSE.RawButtonData.RawButtonInfo buttonInfo)
@@ -243,7 +244,7 @@ public sealed class Recorder
             if ((wheelStepCount < 0) == (prevWheelStepCount < 0))
             {
                 lastMWAction.StepCount = prevWheelStepCount + wheelStepCount;
-                lastMWAction.Duration = _wheelMsgTCC.TickDeltasTotal;
+                lastMWAction.DurationMS = _wheelMsgTCC.TickDeltasTotal;
                 return;
             }
         }
@@ -275,7 +276,7 @@ public sealed class Recorder
 
         if (button == MouseButton.Left && ShouldRecordMouseClick?.Invoke() == true) return;
 
-        AddAction(new MouseButtonAction(type, button, Win32.PInvoke.Helpers.GetCursorPos(), CoreOptions.Instance.UseCursorPosOnClicks));
+        AddAction(new MouseButtonAction(type, button, PInvoke.Helpers.GetCursorPos(), CoreOptions.Instance.UseCursorPosOnClicks));
     }
 
     private void OnKeyboardMessage(VirtualKey key, RawInputKeyFlags keyFlags)

@@ -142,7 +142,7 @@ public sealed partial class ActionCollection : ICollection<InputAction>
         };
     }
 
-
+    // TODO: add warning when setting movement mode to absolute (windows "enhance pointer precision" will mess with the movement)
     public IReadOnlyList<MouseMovement> GetAbsoluteCursorPath()
     {
         if (CursorPathStart is null)
@@ -163,11 +163,11 @@ public sealed partial class ActionCollection : ICollection<InputAction>
 
             if (pt == lastAbs.Delta)
             {
-                lastAbs.DelayDuration += delta.DelayDuration;
+                lastAbs.DelayDurationNS += delta.DelayDurationNS;
                 continue;
             }
 
-            absPath.Add(new MouseMovement(pt, delta.DelayDuration));
+            absPath.Add(new MouseMovement(pt, delta.DelayDurationNS));
         }
 
         return absPath;
@@ -237,7 +237,7 @@ public sealed partial class ActionCollection : ICollection<InputAction>
             {
                 if (_actions.Count > 0 && _actions[^1] is WaitAction lastWaitAction)
                 {
-                    lastWaitAction.Duration += waitAction.Duration;
+                    lastWaitAction.DurationMS += waitAction.DurationMS;
                 }
                 else
                 {
@@ -277,7 +277,7 @@ public sealed partial class ActionCollection : ICollection<InputAction>
         {
             if (_actions.Count > 0 && _actions[^1] is WaitAction lastWaitAction)
             {
-                lastWaitAction.Duration += waitAction.Duration;
+                lastWaitAction.DurationMS += waitAction.DurationMS;
             }
             else
             {
@@ -350,7 +350,7 @@ public sealed partial class ActionCollection : ICollection<InputAction>
         // merge adjacent wait actions
         if (idx < _actions.Count && exlIdx < _actionsExlKeyRepeat.Count
             && _actions[idx] is WaitAction wa && _actionsExlKeyRepeat[exlIdx] is WaitAction exlWa
-            && wa.Duration == exlWa.Duration)
+            && wa.DurationMS == exlWa.DurationMS)
         {
             _moddedExlActsIdxs.Remove(exlIdx);
 
@@ -361,7 +361,7 @@ public sealed partial class ActionCollection : ICollection<InputAction>
                 && _actions[idx + 1] is WaitAction nextWa
                 && _actions[idx + 1] == _actionsExlKeyRepeat[exlIdx + 1])
             {
-                wa.Duration += nextWa.Duration;
+                wa.DurationMS += nextWa.DurationMS;
 
                 _actions.RemoveAt(idx + 1);
                 _actionsExlKeyRepeat.RemoveAt(exlIdx + 1);
@@ -372,7 +372,7 @@ public sealed partial class ActionCollection : ICollection<InputAction>
                 && _actions[idx - 1] is WaitAction prevWa
                 && _actions[idx - 1] == _actionsExlKeyRepeat[exlIdx - 1])
             {
-                prevWa.Duration += wa.Duration;
+                prevWa.DurationMS += wa.DurationMS;
 
                 _actions.RemoveAt(idx);
                 _actionsExlKeyRepeat.RemoveAt(exlIdx);
@@ -481,11 +481,11 @@ public sealed partial class ActionCollection : ICollection<InputAction>
             // (see _modifiedFilteredActionsIdxs remarks for what a modified wait action is)
             if (_moddedExlActsIdxs.HasActionBeenModified(actionsExlLastIdx))
             {
-                lastFilteredWaitAction.Duration += curWaitAction.Duration;
+                lastFilteredWaitAction.DurationMS += curWaitAction.DurationMS;
             }
             else if (!ReferenceEquals(prevUnfilteredAction, lastFilteredWaitAction))
             {
-                _actionsExlKeyRepeat[actionsExlLastIdx] = new WaitAction(lastFilteredWaitAction.Duration + curWaitAction.Duration);
+                _actionsExlKeyRepeat[actionsExlLastIdx] = new WaitAction(lastFilteredWaitAction.DurationMS + curWaitAction.DurationMS);
                 _moddedExlActsIdxs.Add(actionsExlLastIdx);
             }
         }
@@ -520,7 +520,7 @@ public sealed partial class ActionCollection : ICollection<InputAction>
 
             if (_actions[i] is not WaitAction waitAct) continue;
 
-            curWaitDuration += waitAct.Duration;
+            curWaitDuration += waitAct.DurationMS;
 
             if (!keyDelayAdded)
             {
@@ -557,19 +557,19 @@ public sealed partial class ActionCollection : ICollection<InputAction>
                 }
                 else if (curWaitDuration > milliseconds)
                 {
-                    int durationToKeyDelay = (int)Math.Round(milliseconds) - (curWaitDuration - waitAct.Duration);
-                    int durationLeft = waitAct.Duration - durationToKeyDelay;
+                    int durationToKeyDelay = (int)Math.Round(milliseconds) - (curWaitDuration - waitAct.DurationMS);
+                    int durationLeft = waitAct.DurationMS - durationToKeyDelay;
 
                     // create a modified wait action for _actionsExlKeyRepeat
                     // (see _modifiedFilteredActionsIdxs remarks for what a modified wait action is)
                     int actionsExlWaitIdx = _actionsExlKeyRepeat.AsSpan().RefIndexOfReverse(waitAct);
                     if (actionsExlWaitIdx != -1)
                     {
-                        _actionsExlKeyRepeat[actionsExlWaitIdx] = new WaitAction(waitAct.Duration);
+                        _actionsExlKeyRepeat[actionsExlWaitIdx] = new WaitAction(waitAct.DurationMS);
                         _moddedExlActsIdxs.Add(actionsExlWaitIdx);
                     }
 
-                    waitAct.Duration = durationToKeyDelay;
+                    waitAct.DurationMS = durationToKeyDelay;
                     _actions.Insert(i + 1, new KeyAction(KeyActionType.KeyDown, keyUpAction.Key, true));
                     _actions.Insert(i + 2, new WaitAction(durationLeft));
 
@@ -639,7 +639,7 @@ public sealed partial class ActionCollection : ICollection<InputAction>
             // merge adjacent wait actions
             if (_actions[curIndex] is WaitAction curWaitAct && _actions[curIndex - 1] is WaitAction prevWaitAct)
             {
-                prevWaitAct.Duration += curWaitAct.Duration;
+                prevWaitAct.DurationMS += curWaitAct.DurationMS;
                 _actions.RemoveAt(curIndex);
 
                 removed = true;

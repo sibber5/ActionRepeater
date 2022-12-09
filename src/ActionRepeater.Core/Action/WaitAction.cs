@@ -8,24 +8,24 @@ public sealed class WaitAction : WaitableInputAction
     [JsonIgnore]
     public override string Name => "Wait";
     [JsonIgnore]
-    public override string Description => ActionDescriptionTemplates.Duration(Duration);
+    public override string Description => ActionDescriptionTemplates.DurationMS(DurationMS);
 
-    private int _duration;
-    public int Duration
+    private int _durationMS;
+    public int DurationMS
     {
-        get => _duration;
+        get => _durationMS;
         set
         {
-            if (_duration == value) return;
+            if (_durationMS == value) return;
 
-            _duration = value;
+            _durationMS = value;
             OnDescriptionChanged();
         }
     }
 
-    public WaitAction(int duration)
+    public WaitAction(int durationMS)
     {
-        _duration = duration;
+        _durationMS = durationMS;
     }
 
     /// <summary>Used only for deserialization.</summary>
@@ -33,6 +33,6 @@ public sealed class WaitAction : WaitableInputAction
 
     public override void PlayWait(HighResolutionWaiter waiter)
     {
-        waiter.Wait((uint)Duration);
+        waiter.Wait((uint)DurationMS);
     }
 }

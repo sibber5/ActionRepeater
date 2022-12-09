@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using ActionRepeater.Core;
 using ActionRepeater.Core.Extentions;
@@ -14,6 +15,8 @@ public sealed class OptionsPageViewModel : ObservableObject
         get => (int)CoreOptions.Instance.CursorMovementMode;
         set => CoreOptions.Instance.CursorMovementMode = (CursorMovementMode)value;
     }
+
+    public bool IsCursorMovementNone => CoreOptions.Instance.CursorMovementMode == Core.CursorMovementMode.None;
 
     public bool UseCursorPosOnClicks
     {
@@ -49,9 +52,15 @@ public sealed class OptionsPageViewModel : ObservableObject
 
     public IEnumerable<string> ThemeCBItems => Enum.GetNames<Theme>().Select(x => x.AddSpacesBetweenWords());
 
+    private readonly PropertyChangedEventArgs _isCursorMovementModeNoneChangedArgs = new(nameof(IsCursorMovementNone));
+
     public OptionsPageViewModel()
     {
-        System.ComponentModel.PropertyChangedEventHandler callPropChange = (s, e) => OnPropertyChanged(e);
+        PropertyChangedEventHandler callPropChange = (s, e) =>
+        {
+            OnPropertyChanged(e);
+            if (e.PropertyName?.Equals(nameof(CursorMovementMode)) == true) OnPropertyChanged(_isCursorMovementModeNoneChangedArgs);
+        };
         CoreOptions.Instance.PropertyChanged += callPropChange;
         UIOptions.Instance.PropertyChanged += callPropChange;
     }
