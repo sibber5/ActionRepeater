@@ -26,6 +26,8 @@ public sealed class PathWindowService
     {
         Debug.Assert(_pathWindow is null, "Path window is not null.");
 
+        SystemInformation.RefreshMonitorSettings();
+
         if (_actionCollection.CursorPathStart is null)
         {
             Debug.Assert(_actionCollection.CursorPath.Count == 0, $"{nameof(_actionCollection.CursorPath)} is not empty.");

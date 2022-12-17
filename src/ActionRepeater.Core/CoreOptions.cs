@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using ActionRepeater.Win32;
 
 namespace ActionRepeater.Core;
 
@@ -21,6 +22,12 @@ public sealed class CoreOptions : INotifyPropertyChanged
         get => _cursorMovementMode;
         set
         {
+            if (value == CursorMovementMode.Absolute)
+            {
+                SystemInformation.RefreshMonitorSettings();
+                SystemInformation.RefreshMouseSettings();
+            }
+
             _cursorMovementMode = value;
             OnPropertyChanged();
         }

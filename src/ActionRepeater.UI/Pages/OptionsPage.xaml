@@ -5,6 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ctrls="using:ActionRepeater.UI.Controls"
+    xmlns:core="using:ActionRepeater.Core"
     mc:Ignorable="d"
     Background="{ThemeResource AppBackgroundThemeBrush}">
 
@@ -24,14 +25,23 @@
 
             <ctrls:OptionItem Text="Cursor movement">
                 <ctrls:OptionItem.OptionContent>
-                    <ComboBox HorizontalAlignment="Right"
+                    <StackPanel Orientation="Horizontal">
+                        <FontIcon Glyph="&#xE7BA;"
+                                  FontFamily="{StaticResource SymbolThemeFontFamily}"
+                                  Foreground="Orange"
+                                  Visibility="{x:Bind _vm.DisplayAccelerationWarning, Mode=OneWay}"
+                                  VerticalAlignment="Center"
+                                  Margin="0,0,5,0"
+                                  ToolTipService.Placement="Top" ToolTipService.ToolTip="Mouse acceleration is enabled.&#x0D;&#x0A;Using absolute movement will not apply acceleration, cursor movement may be different than what was actually recorded."/>
+                        <ComboBox HorizontalAlignment="Right"
                               Width="{StaticResource OptionControlWidth}"
                               ItemsSource="{x:Bind _vm.CursorMovementCBItems}"
                               SelectedIndex="{x:Bind _vm.CursorMovementMode, Mode=TwoWay}"/>
+                    </StackPanel>
                 </ctrls:OptionItem.OptionContent>
             </ctrls:OptionItem>
 
-            <ctrls:OptionItem Text="Set cursor position on clicks" IsEnabled="{x:Bind _vm.IsCursorMovementNone, Mode=OneWay}">
+            <ctrls:OptionItem Text="Set cursor position on clicks" IsEnabled="{x:Bind _vm.IsCursorMovementMode(core:CursorMovementMode.None), Mode=OneWay}">
                 <ctrls:OptionItem.OptionContent>
                     <ToggleSwitch IsOn="{x:Bind _vm.UseCursorPosOnClicks, Mode=TwoWay}" Margin="{StaticResource ToggleSwitchNegativeMargin}" Style="{StaticResource LeftSideTextToggleSwitch}"/>
                 </ctrls:OptionItem.OptionContent>

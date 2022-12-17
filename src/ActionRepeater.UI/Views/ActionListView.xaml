@@ -9,6 +9,9 @@
     mc:Ignorable="d">
 
     <Grid>
+        <Grid.Resources>
+            <ResourceDictionary Source="ms-appx:///Microsoft.UI.Xaml/DensityStyles/Compact.xaml" />
+        </Grid.Resources>
 
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>

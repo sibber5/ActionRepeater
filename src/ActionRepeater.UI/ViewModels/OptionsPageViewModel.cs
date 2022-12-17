@@ -16,7 +16,7 @@ public sealed class OptionsPageViewModel : ObservableObject
         set => CoreOptions.Instance.CursorMovementMode = (CursorMovementMode)value;
     }
 
-    public bool IsCursorMovementNone => CoreOptions.Instance.CursorMovementMode == Core.CursorMovementMode.None;
+    public bool DisplayAccelerationWarning => CoreOptions.Instance.CursorMovementMode == Core.CursorMovementMode.Absolute && Win32.SystemInformation.IsMouseAccelerationEnabled;
 
     public bool UseCursorPosOnClicks
     {
@@ -52,16 +52,24 @@ public sealed class OptionsPageViewModel : ObservableObject
 
     public IEnumerable<string> ThemeCBItems => Enum.GetNames<Theme>().Select(x => x.AddSpacesBetweenWords());
 
-    private readonly PropertyChangedEventArgs _isCursorMovementModeNoneChangedArgs = new(nameof(IsCursorMovementNone));
+
+    private readonly PropertyChangedEventArgs _isCursorMovementModeChangedArgs = new(nameof(IsCursorMovementMode));
+    private readonly PropertyChangedEventArgs _displayAccelerationWarningChangedArgs = new(nameof(DisplayAccelerationWarning));
 
     public OptionsPageViewModel()
     {
         PropertyChangedEventHandler callPropChange = (s, e) =>
         {
             OnPropertyChanged(e);
-            if (e.PropertyName?.Equals(nameof(CursorMovementMode)) == true) OnPropertyChanged(_isCursorMovementModeNoneChangedArgs);
+            if (e.PropertyName?.Equals(nameof(CursorMovementMode), StringComparison.Ordinal) == true)
+            {
+                OnPropertyChanged(_isCursorMovementModeChangedArgs);
+                OnPropertyChanged(_displayAccelerationWarningChangedArgs);
+            }
         };
         CoreOptions.Instance.PropertyChanged += callPropChange;
         UIOptions.Instance.PropertyChanged += callPropChange;
     }
+
+    public bool IsCursorMovementMode(CursorMovementMode mode) => CoreOptions.Instance.CursorMovementMode == mode;
 }

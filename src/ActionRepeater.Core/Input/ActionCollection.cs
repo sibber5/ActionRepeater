@@ -530,7 +530,7 @@ public sealed partial class ActionCollection : ICollection<InputAction>
                 continue;
             }
 
-            InsertAutoRepeatActionAfterXTime(Win32.SystemInformation.KeyRepeatInterval);
+            InsertAutoRepeatActionAfterXTime(Win32.SystemInformation.KeyRepeatIntervalMS);
 
             // Adds a key auto repeat action after the specified milliseonds.
             // e.g. if milliseconds == 500 (0.5s), and there was a wait action for 2 seconds (2000 ms)
