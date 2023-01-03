@@ -57,6 +57,7 @@
                   ItemsSource="{x:Bind _vm.FilteredActions, Mode=OneWay}"
                   SelectedIndex="{x:Bind _vm.SelectedActionIndex, Mode=TwoWay}"
                   CanReorderItems="{x:Bind _vm.CanReorderActions, Mode=OneWay}"
+                  SelectionMode="Extended"
                   AllowDrop="True"
                   IsRightTapEnabled="True"
                   RightTapped="ActionList_RightTapped"
@@ -112,22 +113,37 @@
             </ListView.ItemTemplate>
 
             <ListView.Resources>
-                <MenuFlyout x:Name="ActionItemMenuFlyout">
-                    <MenuFlyoutItem Text="Edit" Command="{x:Bind _vm.EditSelectedActionCommand}" Icon="Edit"/>
-                    
-                    <MenuFlyoutItem Text="Copy" Command="{x:Bind _vm.StoreActionCommand}" Icon="Copy">
+
+                <MenuFlyout x:Name="MultiItemMenuFlyout">
+                    <MenuFlyoutItem Text="Copy" Icon="Copy" Command="{x:Bind _vm.StoreMultipleActionsCommand}">
                         <MenuFlyoutItem.KeyboardAccelerators>
                             <KeyboardAccelerator Modifiers="Control" Key="C"/>
                         </MenuFlyoutItem.KeyboardAccelerators>
                     </MenuFlyoutItem>
-                    
-                    <MenuFlyoutItem x:Name="_replaceMenuItem" Text="Paste (replace)" Command="{x:Bind _vm.ReplaceActionCommand}" Icon="Paste">
+
+                    <MenuFlyoutItem Text="Remove" Icon="Delete" Command="{x:Bind _vm.RemoveMultipleActionsCommand}">
+                        <MenuFlyoutItem.KeyboardAccelerators>
+                            <KeyboardAccelerator Key="Delete"/>
+                        </MenuFlyoutItem.KeyboardAccelerators>
+                    </MenuFlyoutItem>
+                </MenuFlyout>
+
+                <MenuFlyout x:Name="SingleItemMenuFlyout">
+                    <MenuFlyoutItem Text="Edit" Icon="Edit" Command="{x:Bind _vm.EditSelectedActionCommand}"/>
+
+                    <MenuFlyoutItem Text="Copy" Icon="Copy" Command="{x:Bind _vm.StoreActionCommand}">
+                        <MenuFlyoutItem.KeyboardAccelerators>
+                            <KeyboardAccelerator Modifiers="Control" Key="C"/>
+                        </MenuFlyoutItem.KeyboardAccelerators>
+                    </MenuFlyoutItem>
+
+                    <MenuFlyoutItem x:Name="_replaceMenuItem" Text="Paste (replace)" Icon="Paste" Command="{x:Bind _vm.ReplaceActionCommand}">
                         <MenuFlyoutItem.KeyboardAccelerators>
                             <KeyboardAccelerator Modifiers="Control" Key="V"/>
                         </MenuFlyoutItem.KeyboardAccelerators>
                     </MenuFlyoutItem>
-                    
-                    <MenuFlyoutItem Text="Remove" Command="{x:Bind _vm.RemoveActionCommand}" Icon="Delete">
+
+                    <MenuFlyoutItem Text="Remove" Icon="Delete" Command="{x:Bind _vm.RemoveActionCommand}">
                         <MenuFlyoutItem.KeyboardAccelerators>
                             <KeyboardAccelerator Key="Delete"/>
                         </MenuFlyoutItem.KeyboardAccelerators>
@@ -135,19 +151,19 @@
                     
                     <MenuFlyoutSeparator />
                     
-                    <MenuFlyoutSubItem Text="Clear" x:Name="_itemFlyoutClear"
-                                       behavs:ClearMenuBehavior.MenuItemList="{x:Bind _itemFlyoutClear.Items}">
+                    <MenuFlyoutSubItem Text="Clear" x:Name="_singleItemFlyoutClear"
+                                       behavs:ClearMenuBehavior.MenuItemList="{x:Bind _singleItemFlyoutClear.Items}">
                         <MenuFlyoutSubItem.Icon>
                             <FontIcon Glyph="&#xE894;"/>
                         </MenuFlyoutSubItem.Icon>
                     </MenuFlyoutSubItem>
                 </MenuFlyout>
                 
-                <MenuFlyout x:Name="ActionListMenuFlyout">
+                <MenuFlyout x:Name="NoItemMenuFlyout">
                     <MenuFlyoutSubItem Text="Add" x:Name="_listFlyoutAdd" Icon="Add" IsEnabled="{x:Bind _vm.CanAddAction, Mode=OneWay}"
                                        behavs:AddActionMenuBehavior.MenuItemList="{x:Bind _listFlyoutAdd.Items}"/>
-                    
-                    <MenuFlyoutItem x:Name="_pasteMenuItem" Text="Paste" Command="{x:Bind _vm.AddStoredActionCommand}"  Icon="Paste">
+
+                    <MenuFlyoutItem x:Name="_pasteMenuItem" Text="Paste" Icon="Paste" Command="{x:Bind _vm.AddStoredActionsCommand}">
                         <MenuFlyoutItem.KeyboardAccelerators>
                             <KeyboardAccelerator Modifiers="Control" Key="V"/>
                         </MenuFlyoutItem.KeyboardAccelerators>
@@ -155,13 +171,14 @@
                     
                     <MenuFlyoutSeparator />
                     
-                    <MenuFlyoutSubItem Text="Clear" x:Name="_listFlyoutClear"
-                                       behavs:ClearMenuBehavior.MenuItemList="{x:Bind _listFlyoutClear.Items}">
+                    <MenuFlyoutSubItem Text="Clear" x:Name="_noItemFlyoutClear"
+                                       behavs:ClearMenuBehavior.MenuItemList="{x:Bind _noItemFlyoutClear.Items}">
                         <MenuFlyoutSubItem.Icon>
                             <FontIcon Glyph="&#xE894;"/>
                         </MenuFlyoutSubItem.Icon>
                     </MenuFlyoutSubItem>
                 </MenuFlyout>
+                
             </ListView.Resources>
 
         </ListView>

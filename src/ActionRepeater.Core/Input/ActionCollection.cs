@@ -85,6 +85,7 @@ public sealed partial class ActionCollection : ICollection<InputAction>
     private bool _refillActions;
     private bool _isRefillingActions; // used to prevent triggering refilling the actions from the getter while refilling the actions.
 
+    /// <inheritdoc cref="ModifiedExlActionsIndeciesList"/>
     private readonly ModifiedExlActionsIndeciesList _moddedExlActsIdxs;
 
 
@@ -314,7 +315,7 @@ public sealed partial class ActionCollection : ICollection<InputAction>
     public bool Remove(InputAction item) => TryRemove(item) is null;
 
     /// <returns>The message if removing failed, otherwise null.</returns>
-    public string? TryRemove(InputAction action)
+    public string? TryRemove(InputAction action, bool mergeWaitActions = true)
     {
         int exlIndex = _moddedExlActsIdxs.IndexOfModifiedAction(action);
         if (exlIndex != -1)
@@ -339,6 +340,8 @@ public sealed partial class ActionCollection : ICollection<InputAction>
         int idx = _actions.AsSpan().RefIndexOfReverse(action);
         int exlIdx = _actionsExlKeyRepeat.AsSpan().RefIndexOfReverse(action);
 
+        if (idx == -1 || exlIdx == -1) return "Action does not exist in collection.";
+
         if (action is KeyAction { ActionType: KeyActionType.KeyDown })
         {
             UpdateKeyAutoRepeatActions(idx, null);
@@ -348,7 +351,8 @@ public sealed partial class ActionCollection : ICollection<InputAction>
         _actionsExlKeyRepeat.RemoveAt(exlIdx);
 
         // merge adjacent wait actions
-        if (idx < _actions.Count && exlIdx < _actionsExlKeyRepeat.Count
+        if (mergeWaitActions
+            && idx < _actions.Count && exlIdx < _actionsExlKeyRepeat.Count
             && _actions[idx] is WaitAction wa && _actionsExlKeyRepeat[exlIdx] is WaitAction exlWa
             && wa.DurationMS == exlWa.DurationMS)
         {

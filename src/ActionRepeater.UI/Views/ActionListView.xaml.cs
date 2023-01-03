@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using ActionRepeater.Core.Extentions;
 using ActionRepeater.Core.Input;
 using ActionRepeater.UI.ViewModels;
@@ -13,6 +14,7 @@ public sealed partial class ActionListView : UserControl
 {
     private readonly ActionListViewModel _vm;
 
+    // TODO: add multi item select (for deleting and maybe moving)
     public ActionListView()
     {
         _vm = App.Current.Services.GetRequiredService<ActionListViewModel>();
@@ -29,15 +31,12 @@ public sealed partial class ActionListView : UserControl
     {
         if (e.PropertyName?.Equals(nameof(_vm.SelectedActionIndex), StringComparison.Ordinal) == true)
         {
-            if (_vm.SelectedActionIndex < 0)
-            {
-                _replaceMenuItem.KeyboardAccelerators[0].IsEnabled = false;
-                _pasteMenuItem.KeyboardAccelerators[0].IsEnabled = true;
-                return;
-            }
+            bool isAnyItemSelected = _vm.SelectedActionIndex >= 0;
 
-            _replaceMenuItem.KeyboardAccelerators[0].IsEnabled = true;
-            _pasteMenuItem.KeyboardAccelerators[0].IsEnabled = false;
+            _replaceMenuItem.KeyboardAccelerators[0].IsEnabled = isAnyItemSelected;
+            _pasteMenuItem.KeyboardAccelerators[0].IsEnabled = !isAnyItemSelected;
+
+            _vm.SelectedRanges = ActionList.SelectedRanges;
         }
     }
 
@@ -47,21 +46,31 @@ public sealed partial class ActionListView : UserControl
     {
         if (((FrameworkElement)e.OriginalSource).DataContext is ActionViewModel actionItem)
         {
-            ActionList.SelectedIndex = _vm.FilteredActions.RefIndexOfReverse(actionItem);
-            ActionItemMenuFlyout.ShowAt(ActionList, e.GetPosition(ActionList));
+            int rightClickedItemIdx = _vm.FilteredActions.RefIndexOfReverse(actionItem);
+            if (!ActionList.SelectedRanges.Any(x => rightClickedItemIdx >= x.FirstIndex && rightClickedItemIdx <= x.LastIndex))
+            {
+                ActionList.SelectedIndex = rightClickedItemIdx;
+                SingleItemMenuFlyout.ShowAt(ActionList, e.GetPosition(ActionList));
+                return;
+            }
+
+            if (AreMultipleItemsSelected())
+            {
+                MultiItemMenuFlyout.ShowAt(ActionList, e.GetPosition(ActionList));
+                return;
+            }
+
+            SingleItemMenuFlyout.ShowAt(ActionList, e.GetPosition(ActionList));
             return;
         }
 
         ActionList.SelectedIndex = -1;
-        ActionListMenuFlyout.ShowAt(ActionList, e.GetPosition(ActionList));
+        NoItemMenuFlyout.ShowAt(ActionList, e.GetPosition(ActionList));
     }
 
     private async void ActionList_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
     {
-        if (((FrameworkElement)e.OriginalSource).DataContext is not ActionViewModel actionVM)
-        {
-            return;
-        }
+        if (((FrameworkElement)e.OriginalSource).DataContext is not ActionViewModel actionVM) return;
 
         if (!ReferenceEquals(ActionList.SelectedItem, actionVM)) ActionList.SelectedItem = actionVM;
 
@@ -70,8 +79,14 @@ public sealed partial class ActionListView : UserControl
 
     private void ActionList_Tapped(object sender, TappedRoutedEventArgs e)
     {
-        if (((FrameworkElement)e.OriginalSource).DataContext is ActionViewModel) return;
+        if (((FrameworkElement)e.OriginalSource).DataContext is ActionViewModel)
+        {
+            _vm.SelectedRanges = ActionList.SelectedRanges;
+            return;
+        }
 
         ActionList.SelectedIndex = -1;
     }
+
+    private bool AreMultipleItemsSelected() => ActionList.SelectedRanges.Count > 1 || (ActionList.SelectedRanges.Count == 1 && ActionList.SelectedRanges[0].FirstIndex != ActionList.SelectedRanges[0].LastIndex);
 }

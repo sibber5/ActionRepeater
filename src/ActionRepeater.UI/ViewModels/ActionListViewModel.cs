@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using ActionRepeater.Core.Action;
 using ActionRepeater.Core.Extentions;
 using ActionRepeater.Core.Input;
+using ActionRepeater.Core.Utilities;
 using ActionRepeater.UI.Services;
 using ActionRepeater.UI.Utilities;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -19,7 +22,7 @@ namespace ActionRepeater.UI.ViewModels;
 
 public sealed partial class ActionListViewModel : ObservableObject
 {
-    private readonly System.ComponentModel.PropertyChangedEventArgs _actionListHeaderChangedArgs = new(nameof(ActionListHeaderWithCount));
+    private readonly PropertyChangedEventArgs _actionListHeaderChangedArgs = new(nameof(ActionListHeaderWithCount));
     public string ActionListHeaderWithCount => $"Actions ({FilteredActions.Count}):";
 
     [NotifyPropertyChangedFor(nameof(FilteredActions))]
@@ -60,21 +63,13 @@ public sealed partial class ActionListViewModel : ObservableObject
     [ObservableProperty]
     private int _selectedActionIndex = -1;
 
+    [NotifyCanExecuteChangedFor(nameof(StoreMultipleActionsCommand))]
+    [ObservableProperty]
+    private IReadOnlyList<Microsoft.UI.Xaml.Data.ItemIndexRange>? _selectedRanges;
+
     public bool CanReorderActions => !ShowKeyRepeatActions;
 
-    private InputAction? _copiedAction;
-    public InputAction? CopiedAction
-    {
-        get => _copiedAction;
-        set
-        {
-            if (_copiedAction == value) return;
-
-            _copiedAction = value;
-            AddStoredActionCommand.NotifyCanExecuteChanged();
-            ReplaceActionCommand.NotifyCanExecuteChanged();
-        }
-    }
+    private ObservableCollectionEx<InputAction> _copiedActions = new();
 
     public bool CanAddAction => !_recorder.IsRecording;
 
@@ -109,7 +104,7 @@ public sealed partial class ActionListViewModel : ObservableObject
         _actionVMs = new((ObservableCollection<InputAction?>)_actionCollection.Actions, createVM);
         _actionsExlVMs = new((ObservableCollection<InputAction?>)_actionCollection.ActionsExlKeyRepeat, createVM);
 
-        ((System.ComponentModel.INotifyPropertyChanged)FilteredActions).PropertyChanged += (s, e) =>
+        ((INotifyPropertyChanged)FilteredActions).PropertyChanged += (s, e) =>
         {
             if (nameof(FilteredActions.Count).Equals(e.PropertyName, StringComparison.Ordinal))
             {
@@ -117,6 +112,15 @@ public sealed partial class ActionListViewModel : ObservableObject
             }
         };
         _recorder.IsRecordingChanged += (_, _) => OnPropertyChanged(nameof(CanAddAction));
+
+        ((INotifyPropertyChanged)_copiedActions).PropertyChanged += (s, e) =>
+        {
+            if (nameof(_copiedActions.Count).Equals(e.PropertyName, StringComparison.Ordinal))
+            {
+                AddStoredActionsCommand.NotifyCanExecuteChanged();
+                ReplaceActionCommand.NotifyCanExecuteChanged();
+            }
+        };
     }
 
     public void UpdateSelectedAction(InputAction? currentAction, int index)
@@ -172,19 +176,54 @@ public sealed partial class ActionListViewModel : ObservableObject
     }
 
     private bool IsSelectedActionNotAutoRepeat() => SelectedAction is not KeyAction ka || !ka.IsAutoRepeat;
-
     [RelayCommand(CanExecute = nameof(IsSelectedActionNotAutoRepeat))]
-    private void StoreAction() => CopiedAction = SelectedAction;
+    private void StoreAction()
+    {
+        _copiedActions.Clear();
+        Debug.Assert(SelectedAction is not null);
+        _copiedActions.Add(SelectedAction!);
+    }
 
-    private bool IsActionStored() => CopiedAction is not null;
+    private bool CanStoreMultipleActions()
+    {
+        if (SelectedRanges is null) return false;
 
-    [RelayCommand(CanExecute = nameof(IsActionStored))]
-    private void AddStoredAction() => _actionCollection.Add(CopiedAction!.Clone());
+        if (SelectedRanges.Count != 1) return false;
 
-    [RelayCommand(CanExecute = nameof(IsActionStored))]
+        if (SelectedRanges[0].FirstIndex == SelectedRanges[0].LastIndex) return false;
+
+        if (!ShowKeyRepeatActions) return true;
+
+        var range = SelectedRanges[0];
+        for (int i = range.FirstIndex; i < range.LastIndex + 1; i++)
+        {
+            if (_actionCollection.ActionsExlKeyRepeatAsSpan[i] is KeyAction { IsAutoRepeat: true }) return false;
+        }
+
+        return true;
+    }
+    [RelayCommand(CanExecute = nameof(CanStoreMultipleActions))]
+    private void StoreMultipleActions()
+    {
+        _copiedActions.Clear();
+        _copiedActions.AddRange(GetSelectedActions());
+    }
+
+    private bool IsAnyActionStored() => _copiedActions.Count  > 0;
+    [RelayCommand(CanExecute = nameof(IsAnyActionStored))]
+    private void AddStoredActions()
+    {
+        foreach (InputAction action in _copiedActions)
+        {
+            _actionCollection.Add(action.Clone());
+        }
+    }
+
+    private bool IsSingleActionStored() => _copiedActions.Count == 1;
+    [RelayCommand(CanExecute = nameof(IsSingleActionStored))]
     private async Task ReplaceAction()
     {
-        string? errorMsg = _actionCollection.TryReplace(!ShowKeyRepeatActions, SelectedActionIndex, CopiedAction!.Clone());
+        string? errorMsg = _actionCollection.TryReplace(!ShowKeyRepeatActions, SelectedActionIndex, _copiedActions[0].Clone());
         if (errorMsg is not null)
         {
             await _contentDialogService.ShowErrorDialog("Failed to replace action", errorMsg);
@@ -199,7 +238,7 @@ public sealed partial class ActionListViewModel : ObservableObject
         if (_actionCollection.HasActionBeenModified(SelectedAction))
         {
             ContentDialogResult result = await _contentDialogService.ShowYesNoMessageDialog("Are you sure you want to remove this action?",
-                $"This action represents multiple hidden actions (because \"{nameof(ShowKeyRepeatActions)}\" is off).{Environment.NewLine}If you remove it the multiple actions it represents will be removed.");
+                $"This action represents multiple hidden actions (because \"{nameof(ShowKeyRepeatActions)}\" is off).{Environment.NewLine}If you remove it the multiple actions it represents will also be removed.");
 
             if (result == ContentDialogResult.Primary) _actionCollection.TryRemove(SelectedAction!);
 
@@ -210,6 +249,46 @@ public sealed partial class ActionListViewModel : ObservableObject
         if (errorMsg is not null)
         {
             await _contentDialogService.ShowErrorDialog("Failed to remove action", errorMsg);
+        }
+    }
+
+    [RelayCommand]
+    private async Task RemoveMultipleActions()
+    {
+        Debug.Assert(SelectedRanges is not null);
+        Debug.Assert(SelectedRanges.Count > 1 || (SelectedRanges.Count == 1 && SelectedRanges[0].FirstIndex != SelectedRanges[0].LastIndex));
+
+        var selectedActions = GetSelectedActions().ToArray();
+
+        if (selectedActions.Any(_actionCollection.HasActionBeenModified))
+        {
+            ContentDialogResult result = await _contentDialogService.ShowYesNoMessageDialog("Are you sure you want to remove these actions?",
+                $"One or more of the selected actions represents multiple hidden actions (because \"{nameof(ShowKeyRepeatActions)}\" is off).{Environment.NewLine}If you remove it the multiple actions it represents will also be removed.");
+
+            if (result != ContentDialogResult.Primary) return;
+        }
+
+        foreach (var action in selectedActions)
+        {
+            // TODO: wait actions could be merged by TryRemove, which means they dont exist anymore. implement TryRemoveRange or something
+            string? errorMsg = _actionCollection.TryRemove(action, mergeWaitActions: false);
+            if (errorMsg is not null)
+            {
+                await _contentDialogService.ShowErrorDialog("Failed to remove action", errorMsg);
+            }
+        }
+    }
+
+    private IEnumerable<InputAction> GetSelectedActions()
+    {
+        var actions = ShowKeyRepeatActions ? _actionCollection.Actions : _actionCollection.ActionsExlKeyRepeat;
+        for (int i = 0; i < SelectedRanges!.Count; i++)
+        {
+            var range = SelectedRanges![i];
+            for (int j = range.FirstIndex; j < range.LastIndex + 1; j++)
+            {
+                yield return actions[j];
+            }
         }
     }
 }
