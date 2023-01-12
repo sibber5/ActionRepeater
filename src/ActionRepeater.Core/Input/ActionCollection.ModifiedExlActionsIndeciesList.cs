@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using ActionRepeater.Core.Action;
@@ -36,17 +37,33 @@ public sealed partial class ActionCollection
             _actionsExlKeyRepeat = actionsExlKeyRepeat;
         }
 
-        public void Add(int item) => _indecies.Add(item);
+        public void Add(int item)
+        {
+            Debug.Assert(_actionsExlKeyRepeat[item] is WaitAction);
+            _indecies.Add(item);
+        }
 
-        public bool Remove(int item) => _indecies.Remove(item);
+        public bool Remove(int item)
+        {
+            Debug.Assert(_actionsExlKeyRepeat[item] is WaitAction);
+            return _indecies.Remove(item);
+        }
 
         public void Clear() => _indecies.Clear();
 
-        public int IndexOf(int item) => _indecies.IndexOf(item);
+        public int IndexOf(int item)
+        {
+            Debug.Assert(_actionsExlKeyRepeat[item] is WaitAction);
+            return _indecies.IndexOf(item);
+        }
 
         public void RemoveAt(int index) => _indecies.RemoveAt(index);
 
-        public bool Contains(int item) => _indecies.Contains(item);
+        public bool Contains(int item)
+        {
+            Debug.Assert(_actionsExlKeyRepeat[item] is WaitAction);
+            return _indecies.Contains(item);
+        }
 
         public IEnumerator<int> GetEnumerator() => _indecies.GetEnumerator();
 

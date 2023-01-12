@@ -48,7 +48,7 @@ public sealed partial class ActionCollection : ICollection<InputAction>
             CursorPathStartChanged?.Invoke(this, value);
         }
     }
-    
+
     public List<MouseMovement> CursorPath { get; } = new();
 
     public IReadOnlyList<InputAction> Actions => _actions;
@@ -322,7 +322,6 @@ public sealed partial class ActionCollection : ICollection<InputAction>
         {
             var (startIdx, count) = _moddedExlActsIdxs.GetRangeTiedToModifiedActionIdx(exlIndex);
 
-            // TODO: add ObservableCollectionEx.RemoveRange
             _actions.SuppressNotifications = true;
             for (int i = 0; i < count; i++)
             {
@@ -331,6 +330,7 @@ public sealed partial class ActionCollection : ICollection<InputAction>
             _actions.SuppressNotifications = false;
 
             _actionsExlKeyRepeat.RemoveAt(exlIndex);
+            _moddedExlActsIdxs.Remove(exlIndex);
 
             return null;
         }

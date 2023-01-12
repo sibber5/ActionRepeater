@@ -256,6 +256,14 @@ public sealed partial class ActionListViewModel : ObservableObject
     private async Task RemoveMultipleActions()
     {
         Debug.Assert(SelectedRanges is not null);
+
+        // in case this is called when there is only one action selected, e.g. when pressing the keyboard shortcut
+        if (SelectedRanges.Count == 1 && (SelectedRanges[0].FirstIndex == SelectedRanges[0].LastIndex))
+        {
+            await RemoveAction();
+            return;
+        }
+
         Debug.Assert(SelectedRanges.Count > 1 || (SelectedRanges.Count == 1 && SelectedRanges[0].FirstIndex != SelectedRanges[0].LastIndex));
 
         var selectedActions = GetSelectedActions().ToArray();
@@ -268,14 +276,21 @@ public sealed partial class ActionListViewModel : ObservableObject
             if (result != ContentDialogResult.Primary) return;
         }
 
-        foreach (var action in selectedActions)
+        string? errorMsg;
+        for (int i = 0; i < selectedActions.Length - 1; i++)
         {
-            // TODO: wait actions could be merged by TryRemove, which means they dont exist anymore. implement TryRemoveRange or something
-            string? errorMsg = _actionCollection.TryRemove(action, mergeWaitActions: false);
+            errorMsg = _actionCollection.TryRemove(selectedActions[i], mergeWaitActions: false);
             if (errorMsg is not null)
             {
                 await _contentDialogService.ShowErrorDialog("Failed to remove action", errorMsg);
             }
+        }
+
+        // work around to merge the actions, until ActionedCollection is refactored.
+        errorMsg = _actionCollection.TryRemove(selectedActions[^1], mergeWaitActions: true);
+        if (errorMsg is not null)
+        {
+            await _contentDialogService.ShowErrorDialog("Failed to remove action", errorMsg);
         }
     }
 
