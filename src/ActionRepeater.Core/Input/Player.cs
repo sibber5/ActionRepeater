@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -120,9 +121,9 @@ public sealed class Player
         }
 
         var actions = CoreOptions.Instance.SendKeyAutoRepeat ? _actionCollection.Actions : _actionCollection.ActionsExlKeyRepeat;
-        var cursorPath = CoreOptions.Instance.CursorMovementMode switch
+        IReadOnlyList<MouseMovement>? cursorPath = CoreOptions.Instance.CursorMovementMode switch
         {
-            CursorMovementMode.Absolute => _actionCollection.GetAbsoluteCursorPath(),
+            CursorMovementMode.Absolute => _actionCollection.GetAbsoluteCursorPath().ToArray(),
             CursorMovementMode.Relative => _actionCollection.CursorPath,
             _ => null
         };

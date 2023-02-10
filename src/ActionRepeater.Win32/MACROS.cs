@@ -15,15 +15,15 @@ public static class MACROS
 
     // The following are defined in minwindef.h
 
-    public unsafe static ushort LOWORD(nuint l) => unchecked((ushort)(((nint)l) & 0xffff));
-    public unsafe static ushort LOWORD(nint l) => unchecked((ushort)(l & 0xffff));
+    public static ushort LOWORD(nuint l) => unchecked((ushort)(((nint)l) & 0xffff));
+    public static ushort LOWORD(nint l) => unchecked((ushort)(l & 0xffff));
 
-    public unsafe static ushort HIWORD(nuint l) => unchecked((ushort)((((nint)l) >> 16) & 0xffff));
-    public unsafe static ushort HIWORD(nint l) => unchecked((ushort)((l >> 16) & 0xffff));
+    public static ushort HIWORD(nuint l) => unchecked((ushort)((((nint)l) >> 16) & 0xffff));
+    public static ushort HIWORD(nint l) => unchecked((ushort)((l >> 16) & 0xffff));
 
-    public unsafe static byte LOBYTE(nuint l) => unchecked((byte)(((nint)l) & 0xff));
-    public unsafe static byte LOBYTE(nint l) => unchecked((byte)(l & 0xff));
+    public static byte LOBYTE(nuint l) => unchecked((byte)(((nint)l) & 0xff));
+    public static byte LOBYTE(nint l) => unchecked((byte)(l & 0xff));
 
-    public unsafe static byte HIBYTE(nuint l) => unchecked((byte)((((nint)l) >> 8) & 0xff));
-    public unsafe static byte HIBYTE(nint l) => unchecked((byte)((l >> 8) & 0xff));
+    public static byte HIBYTE(nuint l) => unchecked((byte)((((nint)l) >> 8) & 0xff));
+    public static byte HIBYTE(nint l) => unchecked((byte)((l >> 8) & 0xff));
 }

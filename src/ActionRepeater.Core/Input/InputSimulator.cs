@@ -1,6 +1,7 @@
 ﻿using System;
 using ActionRepeater.Win32;
 using ActionRepeater.Win32.Input;
+using ActionRepeater.Win32.Utilities;
 using static ActionRepeater.Win32.PInvoke.Helpers;
 
 namespace ActionRepeater.Core.Input;
@@ -95,7 +96,7 @@ public static class InputSimulator
 
             if (!absoluteCoords)
             {
-                POINT absolutePos = SystemInformation.GetAbsoluteCoordinateFromPosRelToPrimary(newPos);
+                POINT absolutePos = ScreenCoordsConverter.GetAbsoluteCoordinateFromPosRelToPrimary(newPos);
                 newPos = absolutePos;
             }
         }
@@ -179,7 +180,7 @@ public static class InputSimulator
         {
             flags |= MOUSEEVENTF.ABSOLUTE | MOUSEEVENTF.VIRTUALDESK;
 
-            POINT absolutePos = SystemInformation.GetAbsoluteCoordinateFromPosRelToPrimary(pos);
+            POINT absolutePos = ScreenCoordsConverter.GetAbsoluteCoordinateFromPosRelToPrimary(pos);
             pos = absolutePos;
         }
 
@@ -242,7 +243,7 @@ public static class InputSimulator
         {
             flags |= MOUSEEVENTF.ABSOLUTE | MOUSEEVENTF.VIRTUALDESK;
 
-            POINT absolutePos = SystemInformation.GetAbsoluteCoordinateFromPosRelToPrimary(pos);
+            POINT absolutePos = ScreenCoordsConverter.GetAbsoluteCoordinateFromPosRelToPrimary(pos);
             pos = absolutePos;
         }
 
@@ -312,7 +313,7 @@ public static class InputSimulator
         {
             flags0 |= MOUSEEVENTF.ABSOLUTE | MOUSEEVENTF.VIRTUALDESK;
             
-            POINT absolutePos = SystemInformation.GetAbsoluteCoordinateFromPosRelToPrimary(pos);
+            POINT absolutePos = ScreenCoordsConverter.GetAbsoluteCoordinateFromPosRelToPrimary(pos);
             pos = absolutePos;
         }
 

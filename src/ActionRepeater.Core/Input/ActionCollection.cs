@@ -31,7 +31,8 @@ public sealed partial class ActionCollection : ICollection<InputAction>
 
     private MouseMovement? _cursorPathStart;
     /// <summary>
-    /// The absolute position of the cursor at which the path starts.
+    /// The absolute position of the cursor at which the path starts.<br/>
+    /// ((0,0) being the top-left corner of the primary monitor)
     /// </summary>
     /// <remarks>
     /// If this is null then <see cref="CursorPath"/> is empty;<br/>
@@ -143,8 +144,7 @@ public sealed partial class ActionCollection : ICollection<InputAction>
         };
     }
 
-    // TODO: add warning when setting movement mode to absolute (windows "enhance pointer precision" will mess with the movement)
-    public IReadOnlyList<MouseMovement> GetAbsoluteCursorPath()
+    public IEnumerable<MouseMovement> GetAbsoluteCursorPath()
     {
         if (CursorPathStart is null)
         {
@@ -152,26 +152,33 @@ public sealed partial class ActionCollection : ICollection<InputAction>
             return Array.Empty<MouseMovement>();
         }
 
-        List<MouseMovement> absPath = new();
+        return GetAbsoluteCursorPathCore();
 
-        absPath.Add(CursorPathStart);
-
-        foreach (MouseMovement delta in CollectionsMarshal.AsSpan(CursorPath))
+        IEnumerable<MouseMovement> GetAbsoluteCursorPathCore()
         {
-            MouseMovement lastAbs = absPath[^1];
+            MouseMovement lastAbs;
 
-            Win32.POINT pt = MouseMovement.OffsetPointWithinScreens(lastAbs.Delta, delta.Delta);
+            lastAbs = CursorPathStart;
+            yield return lastAbs;
 
-            if (pt == lastAbs.Delta)
+//#if DEBUG
+//            foreach (MouseMovement delta in CursorPath.ToList())
+//#else
+            foreach (MouseMovement delta in CursorPath)
+//#endif
             {
-                lastAbs.DelayDurationNS += delta.DelayDurationNS;
-                continue;
+                Win32.POINT pt = MouseMovement.OffsetPointWithinScreens(lastAbs.Delta, delta.Delta);
+
+                if (pt == lastAbs.Delta)
+                {
+                    lastAbs.DelayDurationNS += delta.DelayDurationNS;
+                    continue;
+                }
+
+                lastAbs = new MouseMovement(pt, delta.DelayDurationNS);
+                yield return lastAbs;
             }
-
-            absPath.Add(new MouseMovement(pt, delta.DelayDurationNS));
         }
-
-        return absPath;
     }
 
 
