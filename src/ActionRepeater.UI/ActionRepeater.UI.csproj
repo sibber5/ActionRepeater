@@ -28,7 +28,9 @@
 
         <PublishTrimmed>true</PublishTrimmed>
         <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
-
+        
+        <RunPostBuildEvent>Always</RunPostBuildEvent>
+        <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
     </PropertyGroup>
 
     <ItemGroup>
@@ -68,7 +70,6 @@
     <ItemGroup>
         <ProjectReference Include="..\ActionRepeater.Core\ActionRepeater.Core.csproj" />
         <ProjectReference Include="..\ActionRepeater.Win32\ActionRepeater.Win32.csproj" />
-        <ProjectReference Include="..\PathWindows\PathWindows.csproj" />
     </ItemGroup>
 
     <!-- 
@@ -166,4 +167,7 @@
             <Generator>MSBuild:Compile</Generator>
         </Page>
     </ItemGroup>
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+      <Exec Command="xcopy &quot;$(SolutionDir)src\PathWindows\bin\$(Platform)\$(Configuration)\PathWindows.dll&quot; &quot;$(OutDir)&quot; /v /k /r /y /f&#xD;&#xA;xcopy &quot;$(SolutionDir)src\PathWindows\bin\$(Platform)\$(Configuration)\PathWindows.pdb&quot; &quot;$(OutDir)&quot; /v /k /r /y /f" />
+    </Target>
 </Project>

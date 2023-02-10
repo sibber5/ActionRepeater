@@ -4,7 +4,7 @@ public static class MACROS
 {
     public const uint INFINITE = unchecked((uint)-1);
 
-    // The following are defined in WinUser.h
+    // WinUser.h
 
     public const uint KF_EXTENDED = 0x0100u;
     public const uint KF_DLGMODE = 0x0800u;
@@ -13,7 +13,12 @@ public static class MACROS
     public const uint KF_REPEAT = 0x4000u;
     public const uint KF_UP = 0x8000u;
 
-    // The following are defined in minwindef.h
+    // winerror.h
+
+    public static bool SUCCEEDED(HResult hr) => unchecked(((int)hr) >= 0);
+    public static bool FAILED(HResult hr) => unchecked(((int)hr) < 0);
+
+    // minwindef.h
 
     public static ushort LOWORD(nuint l) => unchecked((ushort)(((nint)l) & 0xffff));
     public static ushort LOWORD(nint l) => unchecked((ushort)(l & 0xffff));

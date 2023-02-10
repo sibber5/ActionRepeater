@@ -8,6 +8,8 @@
         <Platforms>x64</Platforms>
 
         <PublishTrimmed>true</PublishTrimmed>
+
+        <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
     </PropertyGroup>
 
     <ItemGroup>
