@@ -48,11 +48,12 @@ namespace PathWindows
         HWND m_hWnd;
 
         ID2D1Factory* m_pD2Factory;
+        IWICImagingFactory* m_pWICFactory;
+        ID2D1StrokeStyle* m_pStrokeStyle;
 
         ID2D1RenderTarget* m_pRenderTarget;
         ID2D1GdiInteropRenderTarget* m_pInteropTarget;
         ID2D1SolidColorBrush* m_pPathBrush;
-        ID2D1StrokeStyle* m_pStrokeStyle;
 
         std::vector<D2D1_POINT_2F> m_points;
 

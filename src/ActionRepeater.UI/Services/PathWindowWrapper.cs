@@ -27,30 +27,30 @@ public partial struct PathWindowWrapper : IDisposable
         DisposeDangerous(_pPathWindowWrapper);
         _pPathWindowWrapper = 0;
 
-        if (MACROS.FAILED(hr)) throw new Win32Exception();
+        VerifyHR(hr);
     }
 
     public void AddPoint(POINT point, bool render = true)
     {
-        if (MACROS.FAILED(AddPointToPath(_pPathWindowWrapper, point, render))) throw new Win32Exception();
+        VerifyHR(AddPointToPath(_pPathWindowWrapper, point, render));
     }
 
     public unsafe void AddPoints(Span<POINT> points)
     {
         fixed (POINT* pPoints = &System.Runtime.InteropServices.Marshalling.SpanMarshaller<POINT, POINT>.ManagedToUnmanagedIn.GetPinnableReference(points))
         {
-            if (MACROS.FAILED(AddPointsToPath(_pPathWindowWrapper, pPoints, points.Length))) throw new Win32Exception();
+            VerifyHR(AddPointsToPath(_pPathWindowWrapper, pPoints, points.Length));
         }
     }
 
     public void ClearPath()
     {
-        if (MACROS.FAILED(ClearPoints(_pPathWindowWrapper))) throw new Win32Exception();
+        VerifyHR(ClearPoints(_pPathWindowWrapper));
     }
 
     public void RenderPath()
     {
-        if (MACROS.FAILED(Render(_pPathWindowWrapper))) throw new Win32Exception();
+        VerifyHR(Render(_pPathWindowWrapper));
     }
 
     public void Dispose()
@@ -71,7 +71,7 @@ public partial struct PathWindowWrapper : IDisposable
             hr = CreatePathWindow(pPoints, points.Length, &ret);
         }
 
-        if (MACROS.FAILED(hr)) throw new Win32Exception();
+        VerifyHR(hr);
 
         return ret;
     }
@@ -80,27 +80,37 @@ public partial struct PathWindowWrapper : IDisposable
     {
         nint ret = 0;
 
-        if (MACROS.FAILED(CreatePathWindow(points: null, 0, &ret))) throw new Win32Exception();
+        VerifyHR(CreatePathWindow(points: null, 0, &ret));
 
         return ret;
     }
 
+    private static void VerifyHR(HResult hr)
+    {
+        if (MACROS.FAILED(hr))
+        {
+            int lastError = Marshal.GetLastPInvokeError();
+            throw new Win32Exception(lastError, $"HResult: {hr}");
+        }
+    }
+
     [LibraryImport(PathWindowsDll, SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
-    [UnmanagedCallConv(CallConvs = new Type[] { typeof(CallConvCdecl) })]
+    [UnmanagedCallConv(CallConvs = new[] { typeof(CallConvCdecl) })]
     private static unsafe partial HResult CreatePathWindow(POINT* points, int length, nint* ppWrapper);
 
     [LibraryImport(PathWindowsDll, SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
-    [UnmanagedCallConv(CallConvs = new Type[] { typeof(CallConvCdecl) })]
+    [UnmanagedCallConv(CallConvs = new[] { typeof(CallConvCdecl) })]
     private static partial HResult DestroyPathWindow(nint pWrapper);
 
-    [DllImport(PathWindowsDll, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    [LibraryImport(PathWindowsDll)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
-    private static extern void DisposeDangerous(nint pWrapper);
+    [UnmanagedCallConv(CallConvs = new[] { typeof(CallConvCdecl) })]
+    private static partial void DisposeDangerous(nint pWrapper);
 
     // LibraryImport requires disabling runtime marshalling, which disables ref and out params (among other things)
-    //[LibraryImport(PathWindowsDll)]
+    //[LibraryImport(PathWindowsDll, SetLastError = true)]
     //[UnmanagedCallConv(CallConvs = new Type[] { typeof(CallConvCdecl) })]
     [DllImport(PathWindowsDll, CallingConvention = CallingConvention.Cdecl, ExactSpelling = true, SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
@@ -108,16 +118,16 @@ public partial struct PathWindowWrapper : IDisposable
 
     [LibraryImport(PathWindowsDll, SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
-    [UnmanagedCallConv(CallConvs = new Type[] { typeof(CallConvCdecl) })]
+    [UnmanagedCallConv(CallConvs = new[] { typeof(CallConvCdecl) })]
     private static unsafe partial HResult AddPointsToPath(nint pWrapper, POINT* points, int length);
 
     [LibraryImport(PathWindowsDll, SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
-    [UnmanagedCallConv(CallConvs = new Type[] { typeof(CallConvCdecl) })]
+    [UnmanagedCallConv(CallConvs = new[] { typeof(CallConvCdecl) })]
     private static partial HResult ClearPoints(nint pWrapper);
 
     [LibraryImport(PathWindowsDll, SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.AssemblyDirectory)]
-    [UnmanagedCallConv(CallConvs = new Type[] { typeof(CallConvCdecl) })]
+    [UnmanagedCallConv(CallConvs = new[] { typeof(CallConvCdecl) })]
     private static partial HResult Render(nint pWrapper);
 }

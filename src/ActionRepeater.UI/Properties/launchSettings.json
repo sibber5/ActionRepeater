@@ -5,6 +5,10 @@
     },
     "ActionRepeater.UI (Unpackaged)": {
       "commandName": "Project",
+      "nativeDebugging": false
+    },
+    "ActionRepeater.UI (Unpackaged) - Native Debugging": {
+      "commandName": "Project",
       "nativeDebugging": true
     }
   }

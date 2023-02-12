@@ -1,6 +1,12 @@
 #include "pch.h"
 #include "PathWindow.h"
 
+//#define MEASURE_RENDER
+#ifdef MEASURE_RENDER
+#include <chrono>
+#include <string>
+#endif
+
 #define HR(rval) {\
                      hr = rval;\
                      if (FAILED(hr)) return hr;\
@@ -18,20 +24,21 @@ PathWindow::PathWindow() :
     m_hWnd(nullptr),
 
     m_pD2Factory(nullptr),
+    m_pWICFactory(nullptr),
+    m_pStrokeStyle(nullptr),
 
     m_pRenderTarget(nullptr),
     m_pInteropTarget(nullptr),
-    m_pPathBrush(nullptr),
-    m_pStrokeStyle(nullptr)
+    m_pPathBrush(nullptr)
 {}
 
 PathWindow::~PathWindow()
 {
     SafeRelease(&m_pD2Factory);
-    SafeRelease(&m_pRenderTarget);
-    SafeRelease(&m_pInteropTarget);
-    SafeRelease(&m_pPathBrush);
+    SafeRelease(&m_pWICFactory);
     SafeRelease(&m_pStrokeStyle);
+
+    DiscardDeviceResources();
 }
 
 HWND PathWindow::GetHandle()
@@ -140,6 +147,7 @@ HRESULT PathWindow::CreateDeviceIndependentResources()
     HRESULT hr = S_OK;
 
     HR(D2D1CreateFactory(D2D1_FACTORY_TYPE_SINGLE_THREADED, &m_pD2Factory));
+    HR(CoCreateInstance(CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&m_pWICFactory)));
     HR(m_pD2Factory->CreateStrokeStyle(D2D1::StrokeStyleProperties(D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE_FLAT, D2D1_CAP_STYLE_FLAT, D2D1_LINE_JOIN_ROUND), nullptr, 0, &m_pStrokeStyle));
 
     return hr;
@@ -151,37 +159,13 @@ HRESULT PathWindow::CreateDeviceResources()
 
     if (m_pRenderTarget) return hr;
 
-    ComPtr<ID3D11Device> pD3Device;
-    HR(D3D11CreateDevice(
-        nullptr,
-        D3D_DRIVER_TYPE_HARDWARE,
-        nullptr,
-        D3D11_CREATE_DEVICE_BGRA_SUPPORT,
-        nullptr, 0, // Highest available feature level
-        D3D11_SDK_VERSION,
-        &pD3Device,
-        nullptr,
-        nullptr
-    ));
-
-    D3D11_TEXTURE2D_DESC d3TextureDesc{};
-    d3TextureDesc.ArraySize = 1;
-    d3TextureDesc.BindFlags = D3D11_BIND_RENDER_TARGET;
-    d3TextureDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-    d3TextureDesc.MipLevels = 1;
-    d3TextureDesc.SampleDesc.Count = 1;
-    d3TextureDesc.MiscFlags = D3D11_RESOURCE_MISC_GDI_COMPATIBLE;
-
     RECT rc{};
     GetClientRect(m_hWnd, &rc);
-    d3TextureDesc.Width = rc.right - rc.left;
-    d3TextureDesc.Height = rc.bottom - rc.top;
+    auto width = rc.right - rc.left;
+    auto height = rc.bottom - rc.top;
 
-    ComPtr<ID3D11Texture2D> pTexture;
-    HR(pD3Device->CreateTexture2D(&d3TextureDesc, nullptr, pTexture.GetAddressOf()));
-
-    ComPtr<IDXGISurface> pSurface;
-    HR(pTexture.As(&pSurface));
+    ComPtr<IWICBitmap> pBitmap;
+    HR(m_pWICFactory->CreateBitmap(width, height, GUID_WICPixelFormat32bppPBGRA, WICBitmapCacheOnLoad, pBitmap.GetAddressOf()));
 
     D2D1_RENDER_TARGET_PROPERTIES renderTargetProps{};
     renderTargetProps.type = D2D1_RENDER_TARGET_TYPE_DEFAULT;
@@ -191,11 +175,11 @@ HRESULT PathWindow::CreateDeviceResources()
     renderTargetProps.usage = D2D1_RENDER_TARGET_USAGE_GDI_COMPATIBLE;
     renderTargetProps.minLevel = D2D1_FEATURE_LEVEL_DEFAULT;
 
-    HR(m_pD2Factory->CreateDxgiSurfaceRenderTarget(pSurface.Get(), renderTargetProps, &m_pRenderTarget));
-
-    HR(m_pRenderTarget->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Red, 0.7f), &m_pPathBrush));
+    HR(m_pD2Factory->CreateWicBitmapRenderTarget(pBitmap.Get(), renderTargetProps, &m_pRenderTarget));
 
     m_pRenderTarget->SetAntialiasMode(D2D1_ANTIALIAS_MODE_PER_PRIMITIVE);
+
+    HR(m_pRenderTarget->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Red, 0.7f), &m_pPathBrush));
 
     hr = m_pRenderTarget->QueryInterface(&m_pInteropTarget);
 
@@ -211,6 +195,10 @@ void PathWindow::DiscardDeviceResources()
 
 HRESULT PathWindow::Render()
 {
+#ifdef MEASURE_RENDER
+    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+#endif
+
     HRESULT hr = S_OK;
 
     HR(CreateDeviceResources());
@@ -223,6 +211,10 @@ HRESULT PathWindow::Render()
 
     if (m_points.size() > 1)
     {
+#ifdef MEASURE_RENDER
+        std::chrono::steady_clock::time_point beginRender = std::chrono::steady_clock::now();
+#endif
+
         ComPtr<ID2D1PathGeometry> pGeometry;
         HR(m_pD2Factory->CreatePathGeometry(pGeometry.GetAddressOf()));
 
@@ -243,9 +235,20 @@ HRESULT PathWindow::Render()
         //{
         //    m_pRenderTarget->DrawLine(m_points[i - 1], m_points[i], m_pPathBrush, 3.0f, m_pStrokeStyle);
         //}
+
+#ifdef MEASURE_RENDER
+        std::chrono::steady_clock::time_point endRender = std::chrono::steady_clock::now();
+        OutputDebugString(L"Geometry: ");
+        OutputDebugString(std::to_wstring(std::chrono::duration_cast<std::chrono::milliseconds>(endRender - beginRender).count()).c_str());
+        OutputDebugString(L"ms\n");
+#endif
     }
 
     {
+#ifdef MEASURE_RENDER
+        std::chrono::steady_clock::time_point beginDC = std::chrono::steady_clock::now();
+#endif
+
         HDC dc;
         HR(m_pInteropTarget->GetDC(D2D1_DC_INITIALIZE_MODE_COPY, &dc));
 
@@ -255,6 +258,13 @@ HRESULT PathWindow::Render()
         m_pInteropTarget->ReleaseDC(&r);
 
         if (FAILED(hr)) return hr;
+
+#ifdef MEASURE_RENDER
+        std::chrono::steady_clock::time_point endDC = std::chrono::steady_clock::now();
+        OutputDebugString(L"DC: ");
+        OutputDebugString(std::to_wstring(std::chrono::duration_cast<std::chrono::milliseconds>(endDC - beginDC).count()).c_str());
+        OutputDebugString(L"ms\n");
+#endif
     }
 
     hr = m_pRenderTarget->EndDraw();
@@ -263,6 +273,13 @@ HRESULT PathWindow::Render()
         DiscardDeviceResources();
         hr = S_OK;
     }
+
+#ifdef MEASURE_RENDER
+    std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+    OutputDebugString(L"All: ");
+    OutputDebugString(std::to_wstring(std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count()).c_str());
+    OutputDebugString(L"ms\n\n");
+#endif
 
     return hr;
 }
