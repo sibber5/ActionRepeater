@@ -168,6 +168,6 @@
         </Page>
     </ItemGroup>
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-      <Exec Command="xcopy &quot;$(SolutionDir)src\PathWindows\bin\$(Platform)\$(Configuration)\PathWindows.dll&quot; &quot;$(OutDir)&quot; /v /k /r /y /f&#xD;&#xA;xcopy &quot;$(SolutionDir)src\PathWindows\bin\$(Platform)\$(Configuration)\PathWindows.pdb&quot; &quot;$(OutDir)&quot; /v /k /r /y /f" />
+      <Exec Command="xcopy &quot;$(ProjectDir)..\PathWindows\bin\$(Platform)\$(Configuration)\PathWindows.dll&quot; &quot;$(OutDir)&quot; /v /k /r /y /f&#xD;&#xA;xcopy &quot;$(ProjectDir)..\PathWindows\bin\$(Platform)\$(Configuration)\PathWindows.pdb&quot; &quot;$(OutDir)&quot; /v /k /r /y /f" />
     </Target>
 </Project>
