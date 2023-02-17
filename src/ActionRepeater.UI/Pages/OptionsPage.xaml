@@ -15,39 +15,13 @@
                   VerticalScrollMode="Enabled"
                   VerticalScrollBarVisibility="Auto">
 
-        <StackPanel Orientation="Vertical" Margin="10" Spacing="5">
+        <StackPanel Orientation="Vertical" Margin="10,0,10,10" Spacing="5">
 
             <StackPanel.Resources>
                 <x:Double x:Key="OptionControlWidth">160</x:Double>
                 <!-- for some reason toggle switches have a margin on the left?? so this is to remove that. -->
                 <Thickness x:Key="ToggleSwitchNegativeMargin">0,0,-82,0</Thickness>
             </StackPanel.Resources>
-
-            <ctrls:OptionItem Text="Cursor movement">
-                <ctrls:OptionItem.OptionContent>
-                    <StackPanel Orientation="Horizontal">
-                        <FontIcon Glyph="&#xE7BA;"
-                                  FontFamily="{StaticResource SymbolThemeFontFamily}"
-                                  Foreground="Orange"
-                                  Visibility="{x:Bind _vm.DisplayAccelerationWarning, Mode=OneWay}"
-                                  VerticalAlignment="Center"
-                                  Margin="0,0,5,0"
-                                  ToolTipService.Placement="Top" ToolTipService.ToolTip="Mouse acceleration is enabled.&#x0D;&#x0A;Using absolute movement will not apply acceleration, cursor movement may be different than what was actually recorded."/>
-                        <ComboBox HorizontalAlignment="Right"
-                              Width="{StaticResource OptionControlWidth}"
-                              ItemsSource="{x:Bind _vm.CursorMovementCBItems}"
-                              SelectedIndex="{x:Bind _vm.CursorMovementMode, Mode=TwoWay}"/>
-                    </StackPanel>
-                </ctrls:OptionItem.OptionContent>
-            </ctrls:OptionItem>
-
-            <ctrls:OptionItem Text="Set cursor position on clicks" IsEnabled="{x:Bind _vm.IsCursorMovementMode(core:CursorMovementMode.None), Mode=OneWay}">
-                <ctrls:OptionItem.OptionContent>
-                    <ToggleSwitch IsOn="{x:Bind _vm.UseCursorPosOnClicks, Mode=TwoWay}" Margin="{StaticResource ToggleSwitchNegativeMargin}" Style="{StaticResource LeftSideTextToggleSwitch}"/>
-                </ctrls:OptionItem.OptionContent>
-            </ctrls:OptionItem>
-
-            <ctrls:OptionsSeperator/>
 
             <ctrls:OptionItem Text="Max click interval (ms)"
                               ToolTipService.ToolTip="The maximum time, in milliseconds, between pressing down a key/mouse button and releasing it for the action to be counted as a press/click (instead of button down and up actinos)">
@@ -67,6 +41,54 @@
             <ctrls:OptionItem Text="Simulate keystroke auto-repeat">
                 <ctrls:OptionItem.OptionContent>
                     <ToggleSwitch IsOn="{x:Bind _vm.SendKeyAutoRepeat, Mode=TwoWay}" Margin="{StaticResource ToggleSwitchNegativeMargin}" Style="{StaticResource LeftSideTextToggleSwitch}"/>
+                </ctrls:OptionItem.OptionContent>
+            </ctrls:OptionItem>
+
+            <ctrls:OptionsSeperator/>
+
+            <ctrls:OptionItem Text="Cursor movement">
+                <ctrls:OptionItem.OptionContent>
+                    <StackPanel Orientation="Horizontal">
+
+                        <TeachingTip x:Name="_mouseAccelerationWarningPopup"
+                                     Target="{x:Bind _mouseAccelerationWarningButton}"
+                                     Title="Mouse acceleration (enhance pointer precision) is enabled"
+                                     Subtitle="Using absolute movement will not apply acceleration, cursor movement may be different than what was actually recorded."/>
+
+                        <Button x:Name="_mouseAccelerationWarningButton"
+                                Visibility="{x:Bind _vm.DisplayAccelerationWarning, Mode=OneWay}"
+                                Click="MouseAccelerationWarning_Click"
+                                Margin="0,0,5,0"
+                                Background="Transparent"
+                                BorderBrush="Transparent"
+                                Style="{StaticResource DisabledButtonSettableBg}">
+                            <Button.Resources>
+                                <ResourceDictionary>
+                                    <ResourceDictionary.ThemeDictionaries>
+                                        <!-- setting a global theme resource doesnt work for some reason. nor does a static resource for this color.  -->
+                                        <ResourceDictionary x:Key="Light">
+                                            <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#fafafa"/>
+                                        </ResourceDictionary>
+                                    </ResourceDictionary.ThemeDictionaries>
+                                </ResourceDictionary>
+                            </Button.Resources>
+                            
+                            <FontIcon Glyph="&#xE7BA;"
+                                      FontFamily="{StaticResource SymbolThemeFontFamily}"
+                                      Foreground="Orange"/>
+                        </Button>
+                        
+                        <ComboBox HorizontalAlignment="Right"
+                              Width="{StaticResource OptionControlWidth}"
+                              ItemsSource="{x:Bind _vm.CursorMovementCBItems}"
+                              SelectedIndex="{x:Bind _vm.CursorMovementMode, Mode=TwoWay}"/>
+                    </StackPanel>
+                </ctrls:OptionItem.OptionContent>
+            </ctrls:OptionItem>
+
+            <ctrls:OptionItem Text="Set cursor position on clicks" IsEnabled="{x:Bind _vm.IsCursorMovementMode(core:CursorMovementMode.None), Mode=OneWay}">
+                <ctrls:OptionItem.OptionContent>
+                    <ToggleSwitch IsOn="{x:Bind _vm.UseCursorPosOnClicks, Mode=TwoWay}" Margin="{StaticResource ToggleSwitchNegativeMargin}" Style="{StaticResource LeftSideTextToggleSwitch}"/>
                 </ctrls:OptionItem.OptionContent>
             </ctrls:OptionItem>
 

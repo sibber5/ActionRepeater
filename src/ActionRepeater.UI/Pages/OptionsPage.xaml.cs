@@ -19,4 +19,9 @@ public sealed partial class OptionsPage : Page
 
         _clickIntervalNumbox.NumberFormatter = Helpers.NumberFormatterHelper.RoundToOneFormatter;
     }
+
+    private void MouseAccelerationWarning_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    {
+        _mouseAccelerationWarningPopup.IsOpen = true;
+    }
 }
