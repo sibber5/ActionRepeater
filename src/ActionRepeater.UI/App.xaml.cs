@@ -156,134 +156,141 @@ public partial class App : Application
 
     private async void UIOptions_PropertyChanging(object? sender, System.ComponentModel.PropertyChangingEventArgs e)
     {
-        if (nameof(UIOptions.Instance.OptionsFileLocation).Equals(e.PropertyName, StringComparison.Ordinal))
+        if (!nameof(UIOptions.Instance.OptionsFileLocation).Equals(e.PropertyName, StringComparison.Ordinal)) return;
+        
+        if (_optsFileLocReverter?.IsReverting == true) return;
+
+        if (_optsFileLocReverter is null)
         {
-            if (_optsFileLocReverter?.IsReverting == true) return;
+            _optsFileLocReverter = new(UIOptions.Instance.OptionsFileLocation,
+                static () => UIOptions.Instance.OptionsFileLocation,
+                static (val) => UIOptions.Instance.OptionsFileLocation = val);
+        }
+        else
+        {
+            _optsFileLocReverter.PreviousValue = UIOptions.Instance.OptionsFileLocation;
+        }
 
-            if (_optsFileLocReverter is null)
-            {
-                _optsFileLocReverter = new(UIOptions.Instance.OptionsFileLocation,
-                    static () => UIOptions.Instance.OptionsFileLocation,
-                    static (val) => UIOptions.Instance.OptionsFileLocation = val);
-            }
-            else
-            {
-                _optsFileLocReverter.PreviousValue = UIOptions.Instance.OptionsFileLocation;
-            }
+        switch (UIOptions.Instance.OptionsFileLocation)
+        {
+            case OptionsFileLocation.AppData:
+                {
+                    string dirPath = AppDataOptionsDir;
+                    string filePath = Path.Combine(dirPath, OptionsFileName);
 
-            switch (UIOptions.Instance.OptionsFileLocation)
-            {
-                case OptionsFileLocation.AppData:
+                    if (!File.Exists(filePath)) break;
+
+                    ContentDialogResult dialogResult = await _contentDialogService.ShowYesNoMessageDialog(
+                        "Options file in AppData will be deleted",
+                        "Are you sure you want to change the options file location?");
+
+                    switch (dialogResult)
                     {
-                        if (!Directory.Exists(AppDataOptionsDir)) break;
+                        case ContentDialogResult.Primary:
+                            try
+                            {
+                                File.Delete(filePath);
+                            }
+                            // no need to catch FileNotFoundException because "If the file to be deleted does not exist, no exception is thrown."
+                            catch (DirectoryNotFoundException) { }
 
-                        ContentDialogResult dialogResult = await _contentDialogService.ShowYesNoMessageDialog(
-                            "Options file in AppData will be deleted",
-                            "Are you sure you want to change the options file location?");
+                            try
+                            {
+                                Directory.Delete(dirPath);
+                            }
+                            catch (DirectoryNotFoundException) { }
+                            catch (IOException) { }
+                            break;
 
-                        switch (dialogResult)
-                        {
-                            case ContentDialogResult.Primary:
-                                try
-                                {
-                                    Directory.Delete(AppDataOptionsDir, true);
-                                }
-                                catch (DirectoryNotFoundException) { }
-                                break;
-
-                            case ContentDialogResult.Secondary:
-                                _optsFileLocReverter.Revert();
-                                break;
-                        }
+                        case ContentDialogResult.Secondary:
+                            _optsFileLocReverter.Revert();
+                            break;
                     }
-                    break;
+                }
+                break;
 
-                case OptionsFileLocation.AppFolder:
+            case OptionsFileLocation.AppFolder:
+                {
+                    string filePath = Path.Combine(AppContext.BaseDirectory, OptionsFileName);
+
+                    if (!File.Exists(filePath)) break;
+
+                    ContentDialogResult dialogResult = await _contentDialogService.ShowYesNoMessageDialog(
+                        "Options file in app folder will be deleted",
+                        "Are you sure you want to change the options file location?");
+
+                    switch (dialogResult)
                     {
-                        string path = Path.Combine(AppContext.BaseDirectory, OptionsFileName);
+                        case ContentDialogResult.Primary:
+                            try
+                            {
+                                File.Delete(filePath);
+                            }
+                            // no need to catch FileNotFoundException because "If the file to be deleted does not exist, no exception is thrown."
+                            catch (DirectoryNotFoundException) { }
+                            break;
 
-                        if (!File.Exists(path)) break;
-
-                        ContentDialogResult dialogResult = await _contentDialogService.ShowYesNoMessageDialog(
-                            "Options file in app folder will be deleted",
-                            "Are you sure you want to change the options file location?");
-
-                        switch (dialogResult)
-                        {
-                            case ContentDialogResult.Primary:
-                                try
-                                {
-                                    File.Delete(path);
-                                }
-                                catch (DirectoryNotFoundException) { }
-                                // no need to catch FileNotFoundException because "If the file to be deleted does not exist, no exception is thrown."
-                                break;
-
-                            case ContentDialogResult.Secondary:
-                                _optsFileLocReverter.Revert();
-                                break;
-                        }
+                        case ContentDialogResult.Secondary:
+                            _optsFileLocReverter.Revert();
+                            break;
                     }
-                    break;
-            }
+                }
+                break;
         }
     }
 
     private async void UIOptions_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
-        switch (e.PropertyName)
+        if (!nameof(UIOptions.Instance.Theme).Equals(e.PropertyName, StringComparison.Ordinal)) return;
+
+        if (_isRevertingTheme) return;
+
+        Action revertThemeOption = static () =>
         {
-            case nameof(UIOptions.Instance.Theme):
-                if (_isRevertingTheme) break;
-
-                Action revertThemeOption = static () =>
+            Current._isRevertingTheme = true;
+            Current.MainWindow.DispatcherQueue.TryEnqueue(static () =>
+            {
+                Theme previousTheme;
+                if (Current._wasAppThemeSetOnStartup)
                 {
-                    Current._isRevertingTheme = true;
-                    Current.MainWindow.DispatcherQueue.TryEnqueue(static () =>
-                    {
-                        Theme previousTheme;
-                        if (Current._wasAppThemeSetOnStartup)
-                        {
-                            previousTheme = UIOptions.Instance.Theme == Theme.Light ? Theme.Dark : Theme.Light;
-                        }
-                        else
-                        {
-                            previousTheme = Theme.WindowsSetting;
-                        }
-
-                        UIOptions.Instance.Theme = previousTheme;
-                        Current._isRevertingTheme = false;
-                    });
-                };
-
-                ContentDialogResult dialogResult = await _contentDialogService.ShowYesNoMessageDialog("Restart required to change theme", "Restart?");
-
-                switch (dialogResult)
+                    previousTheme = UIOptions.Instance.Theme == Theme.Light ? Theme.Dark : Theme.Light;
+                }
+                else
                 {
-                    case ContentDialogResult.Primary:
-                        string path = Path.ChangeExtension(System.Reflection.Assembly.GetEntryAssembly()!.Location, ".exe");
-
-                        await SaveOptions();
-                        _saveOnExit = false;
-
-                        if (UIOptions.Instance.Theme == Theme.WindowsSetting || UIOptions.Instance.OptionsFileLocation != OptionsFileLocation.None)
-                        {
-                            System.Diagnostics.Process.Start(path);
-                        }
-                        else
-                        {
-                            System.Diagnostics.Process.Start(path, UIOptions.Instance.Theme == Theme.Light ? "--theme=light" : "--theme=dark");
-                        }
-                        Application.Current.Exit();
-
-                        //Microsoft.Windows.AppLifecycle.AppInstance.Restart(UIOptions.Instance.Theme == Theme.Light ? "--theme=light" : "--theme=dark"); // throws FileNotFoundException
-                        break;
-
-                    case ContentDialogResult.Secondary:
-                        revertThemeOption();
-                        break;
+                    previousTheme = Theme.WindowsSetting;
                 }
 
+                UIOptions.Instance.Theme = previousTheme;
+                Current._isRevertingTheme = false;
+            });
+        };
+
+        ContentDialogResult dialogResult = await _contentDialogService.ShowYesNoMessageDialog("Restart required to change theme", "Restart?");
+
+        switch (dialogResult)
+        {
+            case ContentDialogResult.Primary:
+                string path = Path.ChangeExtension(System.Reflection.Assembly.GetEntryAssembly()!.Location, ".exe");
+
+                await SaveOptions();
+                _saveOnExit = false;
+
+                if (UIOptions.Instance.Theme == Theme.WindowsSetting || UIOptions.Instance.OptionsFileLocation != OptionsFileLocation.None)
+                {
+                    System.Diagnostics.Process.Start(path);
+                }
+                else
+                {
+                    System.Diagnostics.Process.Start(path, UIOptions.Instance.Theme == Theme.Light ? "--theme=light" : "--theme=dark");
+                }
+                Application.Current.Exit();
+
+                // throws FileNotFoundException
+                //Microsoft.Windows.AppLifecycle.AppInstance.Restart(UIOptions.Instance.Theme == Theme.Light ? "--theme=light" : "--theme=dark");
+                break;
+
+            case ContentDialogResult.Secondary:
+                revertThemeOption();
                 break;
         }
     }

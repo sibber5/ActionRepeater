@@ -16,6 +16,28 @@ public sealed class CoreOptions : INotifyPropertyChanged
     public event PropertyChangedEventHandler? PropertyChanged;
     private void OnPropertyChanged([CallerMemberName] string propertyName = null!) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
+    private int _maxClickInterval = 120;
+    public int MaxClickInterval
+    {
+        get => _maxClickInterval;
+        set
+        {
+            _maxClickInterval = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private bool _sendKeyAutoRepeat = true;
+    public bool SendKeyAutoRepeat
+    {
+        get => _sendKeyAutoRepeat;
+        set
+        {
+            _sendKeyAutoRepeat = value;
+            OnPropertyChanged();
+        }
+    }
+
     private CursorMovementMode _cursorMovementMode = CursorMovementMode.None;
     public CursorMovementMode CursorMovementMode
     {
@@ -42,28 +64,6 @@ public sealed class CoreOptions : INotifyPropertyChanged
             if (_useCursorPosOnClicks == value) return;
 
             _useCursorPosOnClicks = value;
-            OnPropertyChanged();
-        }
-    }
-
-    private int _maxClickInterval = 120;
-    public int MaxClickInterval
-    {
-        get => _maxClickInterval;
-        set
-        {
-            _maxClickInterval = value;
-            OnPropertyChanged();
-        }
-    }
-
-    private bool _sendKeyAutoRepeat = true;
-    public bool SendKeyAutoRepeat
-    {
-        get => _sendKeyAutoRepeat;
-        set
-        {
-            _sendKeyAutoRepeat = value;
             OnPropertyChanged();
         }
     }

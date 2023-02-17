@@ -11,11 +11,22 @@ public sealed partial class UIOptions : ObservableObject
     private static UIOptions? _instance;
     public static UIOptions Instance => _instance ??= new();
 
-    [ObservableProperty]
-    private Theme _theme = Theme.WindowsSetting;
+    // String.Text.Json source-gen doesnt seem to be able to detect source-genned properties,
+    // so we manually call SetProperty
 
-    [ObservableProperty]
+    private Theme _theme = Theme.WindowsSetting;
+    public Theme Theme
+    {
+        get => _theme;
+        set => SetProperty(ref _theme, value);
+    }
+
     private OptionsFileLocation _optionsFileLocation = OptionsFileLocation.None;
+    public OptionsFileLocation OptionsFileLocation
+    {
+        get => _optionsFileLocation;
+        set => SetProperty(ref _optionsFileLocation, value);
+    }
 
     public static void Load(UIOptions options)
     {
