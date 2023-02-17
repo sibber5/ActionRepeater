@@ -159,13 +159,13 @@ public sealed class Player
             Task.Run(async () =>
             {
                 if (repeatCount < 0) while (!_tokenSource.IsCancellationRequested)
-                {
-                    await _taskToRun();
-                }
+                    {
+                        await _taskToRun();
+                    }
                 else for (int i = 0; i < repeatCount && !_tokenSource.IsCancellationRequested; ++i)
-                {
-                    await _taskToRun();
-                }
+                    {
+                        await _taskToRun();
+                    }
             }).ContinueWith(_cleanUp);
         }
     }
@@ -189,18 +189,18 @@ public sealed class Player
                     InputSimulator.MoveMouse(mouseMovement.Delta, relativePos: true);
                 }
             }
-            : _playCursorMovementAbsolute ??= () =>
+        : _playCursorMovementAbsolute ??= () =>
+        {
+            ReadOnlySpan<MouseMovement> cursorPathSpan = CollectionsMarshal.AsSpan((List<MouseMovement>)_cursorPath!);
+
+            foreach (MouseMovement mouseMovement in cursorPathSpan)
             {
-                ReadOnlySpan<MouseMovement> cursorPathSpan = CollectionsMarshal.AsSpan((List<MouseMovement>)_cursorPath!);
+                if (_tokenSource!.IsCancellationRequested) return;
 
-                foreach (MouseMovement mouseMovement in cursorPathSpan)
-                {
-                    if (_tokenSource!.IsCancellationRequested) return;
-
-                    _cursorMovementWaiter.WaitNS(mouseMovement.DelayDurationNS);
-                    InputSimulator.MoveMouse(mouseMovement.Delta, relativePos: false);
-                }
-            };
+                _cursorMovementWaiter.WaitNS(mouseMovement.DelayDurationNS);
+                InputSimulator.MoveMouse(mouseMovement.Delta, relativePos: false);
+            }
+        };
     }
 
     public void Cancel()

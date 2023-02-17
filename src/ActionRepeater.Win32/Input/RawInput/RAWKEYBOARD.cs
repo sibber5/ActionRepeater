@@ -8,34 +8,34 @@
 [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
 public struct RAWKEYBOARD
 {
-	/// <summary>
-	/// <para>Type: <b>USHORT</b> Specifies the scan code (from Scan Code Set 1) associated with a key press. See Remarks.</para>
-	/// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/ns-winuser-rawkeyboard#members">Read more on docs.microsoft.com</see>.</para>
-	/// </summary>
-	public ushort MakeCode;
-	/// <summary>
-	/// <para>Type: <b>USHORT</b> Flags for scan code information.</para>
-	/// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/ns-winuser-rawkeyboard#members">Read more on docs.microsoft.com</see>.</para>
-	/// </summary>
-	public RawInputKeyFlags Flags;
-	/// <summary>
-	/// <para>Type: <b>USHORT</b> Reserved; must be zero.</para>
-	/// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/ns-winuser-rawkeyboard#members">Read more on docs.microsoft.com</see>.</para>
-	/// </summary>
-	public ushort Reserved;
-	/// <summary>
-	/// <para>Type: <b>USHORT</b> The corresponding [legacy virtual-key code](/windows/win32/inputdev/virtual-key-codes).</para>
-	/// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/ns-winuser-rawkeyboard#members">Read more on docs.microsoft.com</see>.</para>
-	/// </summary>
-	public VirtualKey VKey;
-	/// <summary>
-	/// <para>Type: <b>UINT</b> The corresponding [legacy keyboard window message](/windows/win32/inputdev/keyboard-input-notifications), for example [WM_KEYDOWN](/windows/win32/inputdev/wm-keydown), [WM_SYSKEYDOWN](/windows/win32/inputdev/wm-syskeydown), and so forth.</para>
-	/// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/ns-winuser-rawkeyboard#members">Read more on docs.microsoft.com</see>.</para>
-	/// </summary>
-	public uint Message;
-	/// <summary>
-	/// <para>Type: <b>ULONG</b> The device-specific additional information for the event.</para>
-	/// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/ns-winuser-rawkeyboard#members">Read more on docs.microsoft.com</see>.</para>
-	/// </summary>
-	public uint ExtraInformation;
+    /// <summary>
+    /// <para>Type: <b>USHORT</b> Specifies the scan code (from Scan Code Set 1) associated with a key press. See Remarks.</para>
+    /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/ns-winuser-rawkeyboard#members">Read more on docs.microsoft.com</see>.</para>
+    /// </summary>
+    public ushort MakeCode;
+    /// <summary>
+    /// <para>Type: <b>USHORT</b> Flags for scan code information.</para>
+    /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/ns-winuser-rawkeyboard#members">Read more on docs.microsoft.com</see>.</para>
+    /// </summary>
+    public RawInputKeyFlags Flags;
+    /// <summary>
+    /// <para>Type: <b>USHORT</b> Reserved; must be zero.</para>
+    /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/ns-winuser-rawkeyboard#members">Read more on docs.microsoft.com</see>.</para>
+    /// </summary>
+    public ushort Reserved;
+    /// <summary>
+    /// <para>Type: <b>USHORT</b> The corresponding [legacy virtual-key code](/windows/win32/inputdev/virtual-key-codes).</para>
+    /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/ns-winuser-rawkeyboard#members">Read more on docs.microsoft.com</see>.</para>
+    /// </summary>
+    public VirtualKey VKey;
+    /// <summary>
+    /// <para>Type: <b>UINT</b> The corresponding [legacy keyboard window message](/windows/win32/inputdev/keyboard-input-notifications), for example [WM_KEYDOWN](/windows/win32/inputdev/wm-keydown), [WM_SYSKEYDOWN](/windows/win32/inputdev/wm-syskeydown), and so forth.</para>
+    /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/ns-winuser-rawkeyboard#members">Read more on docs.microsoft.com</see>.</para>
+    /// </summary>
+    public uint Message;
+    /// <summary>
+    /// <para>Type: <b>ULONG</b> The device-specific additional information for the event.</para>
+    /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/ns-winuser-rawkeyboard#members">Read more on docs.microsoft.com</see>.</para>
+    /// </summary>
+    public uint ExtraInformation;
 }

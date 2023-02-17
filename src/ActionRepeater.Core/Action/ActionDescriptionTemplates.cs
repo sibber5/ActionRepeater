@@ -205,7 +205,7 @@ public static class ActionDescriptionTemplates
 
     public static string ButtonPoint(MouseButton b, POINT p) => $"{b} Button at ({p.x}, {p.y})";
 
-    public static string DurationMS(int ms) => $"{ms/1000.0:0.00} seconds";
+    public static string DurationMS(int ms) => $"{ms / 1000.0:0.00} seconds";
 
     public static string WheelSteps(int count) => count < 0 ? $"{-count} steps backward" : $"{count} steps forward";
 

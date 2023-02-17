@@ -209,7 +209,7 @@ public sealed partial class ActionListViewModel : ObservableObject
         _copiedActions.AddRange(GetSelectedActions());
     }
 
-    private bool IsAnyActionStored() => _copiedActions.Count  > 0;
+    private bool IsAnyActionStored() => _copiedActions.Count > 0;
     [RelayCommand(CanExecute = nameof(IsAnyActionStored))]
     private void AddStoredActions()
     {

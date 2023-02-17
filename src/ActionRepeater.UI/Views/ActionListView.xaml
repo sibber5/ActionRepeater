@@ -8,15 +8,10 @@
     xmlns:behavs="using:ActionRepeater.UI.Behaviors"
     mc:Ignorable="d">
 
-    <Grid>
+    <Grid RowDefinitions="Auto,*">
         <Grid.Resources>
             <ResourceDictionary Source="ms-appx:///Microsoft.UI.Xaml/DensityStyles/Compact.xaml" />
         </Grid.Resources>
-
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
 
         <TextBlock x:Name="ActionListHeader"
                    Text="{x:Bind _vm.ActionListHeaderWithCount, Mode=OneWay}"
@@ -81,13 +76,7 @@
 
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="vms:ActionViewModel">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="32"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-
+                    <Grid ColumnDefinitions="32,*,*">
                         <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}"
                                   Grid.Column="0"
                                   HorizontalAlignment="Center"

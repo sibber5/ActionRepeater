@@ -61,7 +61,7 @@ public sealed class OptionsPageViewModel : ObservableObject
         PropertyChangedEventHandler callPropChange = (s, e) =>
         {
             OnPropertyChanged(e);
-            if (e.PropertyName?.Equals(nameof(CursorMovementMode), StringComparison.Ordinal) == true)
+            if (nameof(CursorMovementMode).Equals(e.PropertyName, StringComparison.Ordinal))
             {
                 OnPropertyChanged(_isCursorMovementModeChangedArgs);
                 OnPropertyChanged(_displayAccelerationWarningChangedArgs);

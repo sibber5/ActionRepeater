@@ -29,7 +29,7 @@ public sealed partial class ActionListView : UserControl
 
     private void ViewModel_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
-        if (e.PropertyName?.Equals(nameof(_vm.SelectedActionIndex), StringComparison.Ordinal) == true)
+        if (nameof(_vm.SelectedActionIndex).Equals(e.PropertyName, StringComparison.Ordinal))
         {
             bool isAnyItemSelected = _vm.SelectedActionIndex >= 0;
 

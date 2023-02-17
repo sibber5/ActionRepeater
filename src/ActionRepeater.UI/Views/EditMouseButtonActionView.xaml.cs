@@ -11,7 +11,7 @@ public sealed partial class EditMouseButtonActionView : UserControl
     public EditMouseButtonActionView()
     {
         InitializeComponent();
-        
+
         SetNumberBoxesFormatters();
     }
 

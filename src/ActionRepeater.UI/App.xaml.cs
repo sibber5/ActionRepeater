@@ -27,7 +27,6 @@ public partial class App : Application
     public static new App Current => (App)Application.Current;
 
     public static string AppDataOptionsDir => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), nameof(ActionRepeater));
-    public static string AppFolderDir => Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly()!.Location)!;
     public static string OptionsFileName => "Options.json";
 
     public MainWindow MainWindow { get; private set; } = null!;
@@ -61,17 +60,21 @@ public partial class App : Application
 
         if (!TryLoadOptions(Path.Combine(AppDataOptionsDir, OptionsFileName)))
         {
-            TryLoadOptions(Path.Combine(AppFolderDir, OptionsFileName));
+            TryLoadOptions(Path.Combine(AppContext.BaseDirectory, OptionsFileName));
         }
 
         string[] args = Environment.GetCommandLineArgs();
-        string? themeArg = args.FirstOrDefault(static x => x.StartsWith("--theme-"));
-        UIOptions.Instance.Theme = themeArg switch
+        string? themeArg = args.FirstOrDefault(static x => x.StartsWith("--theme="));
+        if (themeArg is not null)
         {
-            "--theme-light" => Theme.Light,
-            "--theme-dark" => Theme.Dark,
-            _ => UIOptions.Instance.Theme,
-        };
+            var theme = themeArg.AsSpan(8);
+            UIOptions.Instance.Theme = theme switch
+            {
+                "light" => Theme.Light,
+                "dark" => Theme.Dark,
+                _ => throw new NotSupportedException(),
+            };
+        }
 
         switch (UIOptions.Instance.Theme)
         {
@@ -153,7 +156,7 @@ public partial class App : Application
 
     private async void UIOptions_PropertyChanging(object? sender, System.ComponentModel.PropertyChangingEventArgs e)
     {
-        if (e.PropertyName?.Equals(nameof(UIOptions.Instance.OptionsFileLocation), StringComparison.Ordinal) == true)
+        if (nameof(UIOptions.Instance.OptionsFileLocation).Equals(e.PropertyName, StringComparison.Ordinal))
         {
             if (_optsFileLocReverter?.IsReverting == true) return;
 
@@ -197,7 +200,7 @@ public partial class App : Application
 
                 case OptionsFileLocation.AppFolder:
                     {
-                        string path = Path.Combine(AppFolderDir, OptionsFileName);
+                        string path = Path.Combine(AppContext.BaseDirectory, OptionsFileName);
 
                         if (!File.Exists(path)) break;
 
@@ -269,11 +272,11 @@ public partial class App : Application
                         }
                         else
                         {
-                            System.Diagnostics.Process.Start(path, UIOptions.Instance.Theme == Theme.Light ? "--theme-light" : "--theme-dark");
+                            System.Diagnostics.Process.Start(path, UIOptions.Instance.Theme == Theme.Light ? "--theme=light" : "--theme=dark");
                         }
                         Application.Current.Exit();
 
-                        //Microsoft.Windows.AppLifecycle.AppInstance.Restart(UIOptions.Instance.Theme == Theme.Light ? "--theme-light" : "--theme-dark"); // throws FileNotFoundException
+                        //Microsoft.Windows.AppLifecycle.AppInstance.Restart(UIOptions.Instance.Theme == Theme.Light ? "--theme=light" : "--theme=dark"); // throws FileNotFoundException
                         break;
 
                     case ContentDialogResult.Secondary:
@@ -299,7 +302,7 @@ public partial class App : Application
                     break;
 
                 case OptionsFileLocation.AppFolder:
-                    path = Path.Combine(AppFolderDir, OptionsFileName);
+                    path = Path.Combine(AppContext.BaseDirectory, OptionsFileName);
                     break;
 
                 case OptionsFileLocation.None:

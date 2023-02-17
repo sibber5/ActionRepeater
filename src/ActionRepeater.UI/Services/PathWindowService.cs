@@ -107,7 +107,7 @@ public sealed partial class PathWindowService : IDisposable
 
                     _lastAbsPoint = newPoint;
                 }
-                 
+
                 //_pathWindowWrapper.AddPoint(GetVirtScreenPosFromPosRelToPrimary(Win32.PInvoke.Helpers.GetCursorPos()), render: false);
 
                 //sw.Restart();

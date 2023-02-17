@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.InteropServices;
 using ActionRepeater.Core.Action;
 using ActionRepeater.Core.Extentions;
 using ActionRepeater.Core.Helpers;
@@ -161,11 +160,7 @@ public sealed partial class ActionCollection : ICollection<InputAction>
             lastAbs = CursorPathStart;
             yield return lastAbs;
 
-//#if DEBUG
-//            foreach (MouseMovement delta in CursorPath.ToList())
-//#else
             foreach (MouseMovement delta in CursorPath)
-//#endif
             {
                 Win32.POINT pt = MouseMovement.OffsetPointWithinScreens(lastAbs.Delta, delta.Delta);
 

@@ -10,26 +10,26 @@ namespace ActionRepeater.Win32.Input;
 [StructLayout(LayoutKind.Sequential)]
 public struct RAWINPUT
 {
-	public static readonly int SIZE = Marshal.SizeOf<RAWINPUT>();
+    public static readonly int SIZE = Marshal.SizeOf<RAWINPUT>();
 
-	/// <summary>
-	/// <para>Type: <b><a href="https://docs.microsoft.com/windows/desktop/api/winuser/ns-winuser-rawinputheader">RAWINPUTHEADER</a></b> The raw input data.</para>
-	/// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/ns-winuser-rawinput#members">Read more on docs.microsoft.com</see>.</para>
-	/// </summary>
-	public RAWINPUTHEADER header;
-	/// <summary>
-	/// <see href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-rawinput#members">see docs.microsoft.com</see>
-	/// </summary>
-	public RAWINPUT.UNION data;
+    /// <summary>
+    /// <para>Type: <b><a href="https://docs.microsoft.com/windows/desktop/api/winuser/ns-winuser-rawinputheader">RAWINPUTHEADER</a></b> The raw input data.</para>
+    /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/ns-winuser-rawinput#members">Read more on docs.microsoft.com</see>.</para>
+    /// </summary>
+    public RAWINPUTHEADER header;
+    /// <summary>
+    /// <see href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-rawinput#members">see docs.microsoft.com</see>
+    /// </summary>
+    public RAWINPUT.UNION data;
 
-	[StructLayout(LayoutKind.Explicit)]
-	public struct UNION
-	{
-		[FieldOffset(0)]
-		public RAWMOUSE mouse;
-		[FieldOffset(0)]
-		public RAWKEYBOARD keyboard;
-		[FieldOffset(0)]
-		public RAWHID hid;
-	}
+    [StructLayout(LayoutKind.Explicit)]
+    public struct UNION
+    {
+        [FieldOffset(0)]
+        public RAWMOUSE mouse;
+        [FieldOffset(0)]
+        public RAWKEYBOARD keyboard;
+        [FieldOffset(0)]
+        public RAWHID hid;
+    }
 }

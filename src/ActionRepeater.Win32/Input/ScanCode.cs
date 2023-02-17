@@ -187,7 +187,7 @@ public enum ScanCode : ushort
     PRIOR = 73,
     /// <summary>Same as <see cref="PRIOR"/></summary>
     NUMPAD9 = 73,
-    
+
     SUBTRACT = 74,
 
     /// <summary>Same as <see cref="NUMPAD4"/></summary>

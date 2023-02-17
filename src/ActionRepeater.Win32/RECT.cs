@@ -11,54 +11,54 @@ namespace ActionRepeater.Win32;
 [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
 public struct RECT : IEquatable<RECT>
 {
-	/// <summary>Specifies the <i>x</i>-coordinate of the upper-left corner of the rectangle.</summary>
-	public int left;
-	/// <summary>Specifies the <i>y</i>-coordinate of the upper-left corner of the rectangle.</summary>
-	public int top;
-	/// <summary>Specifies the <i>x</i>-coordinate of the lower-right corner of the rectangle.</summary>
-	public int right;
-	/// <summary>Specifies the <i>y</i>-coordinate of the lower-right corner of the rectangle.</summary>
-	public int bottom;
+    /// <summary>Specifies the <i>x</i>-coordinate of the upper-left corner of the rectangle.</summary>
+    public int left;
+    /// <summary>Specifies the <i>y</i>-coordinate of the upper-left corner of the rectangle.</summary>
+    public int top;
+    /// <summary>Specifies the <i>x</i>-coordinate of the lower-right corner of the rectangle.</summary>
+    public int right;
+    /// <summary>Specifies the <i>y</i>-coordinate of the lower-right corner of the rectangle.</summary>
+    public int bottom;
 
-	/// <param name="left"><inheritdoc cref="left"/></param>
-	/// <param name="top"><inheritdoc cref="top"/></param>
-	/// <param name="right"><inheritdoc cref="right"/></param>
-	/// <param name="bottom"><inheritdoc cref="bottom"/></param>
-	public RECT(int left, int top, int right, int bottom)
+    /// <param name="left"><inheritdoc cref="left"/></param>
+    /// <param name="top"><inheritdoc cref="top"/></param>
+    /// <param name="right"><inheritdoc cref="right"/></param>
+    /// <param name="bottom"><inheritdoc cref="bottom"/></param>
+    public RECT(int left, int top, int right, int bottom)
     {
-		this.left = left;
-		this.top = top;
-		this.right = right;
-		this.bottom = bottom;
+        this.left = left;
+        this.top = top;
+        this.right = right;
+        this.bottom = bottom;
     }
 
-	public static implicit operator System.Drawing.Rectangle(RECT r)
+    public static implicit operator System.Drawing.Rectangle(RECT r)
     {
-		return new System.Drawing.Rectangle(r.left, r.top, r.right - r.left, r.bottom - r.top);
+        return new System.Drawing.Rectangle(r.left, r.top, r.right - r.left, r.bottom - r.top);
     }
 
-	public static implicit operator RECT(System.Drawing.Rectangle r)
+    public static implicit operator RECT(System.Drawing.Rectangle r)
     {
-		return new RECT(r.Left, r.Top, r.Right, r.Bottom);
+        return new RECT(r.Left, r.Top, r.Right, r.Bottom);
     }
 
-	public static bool operator ==(RECT a, RECT b) => a.Equals(b);
-	public static bool operator !=(RECT a, RECT b) => !a.Equals(b);
+    public static bool operator ==(RECT a, RECT b) => a.Equals(b);
+    public static bool operator !=(RECT a, RECT b) => !a.Equals(b);
 
-	public bool Equals(RECT other)
-		=> left == other.left
-		&& top == other.top
-		&& right == other.right
-		&& bottom == other.bottom;
+    public bool Equals(RECT other)
+        => left == other.left
+        && top == other.top
+        && right == other.right
+        && bottom == other.bottom;
 
     public override bool Equals([NotNullWhen(true)] object? obj)
     {
-		if (obj is RECT rect)
-		{
-			return Equals(rect);
-		}
+        if (obj is RECT rect)
+        {
+            return Equals(rect);
+        }
 
-		return false;
+        return false;
     }
 
     public override int GetHashCode() => HashCode.Combine(left, top, right, bottom);

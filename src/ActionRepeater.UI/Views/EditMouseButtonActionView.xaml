@@ -6,14 +6,8 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Grid MinWidth="{StaticResource EditActionViewWidth}">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="10"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="10"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+    <Grid MinWidth="{StaticResource EditActionViewWidth}"
+          RowDefinitions="Auto,10,Auto,10,Auto">
 
         <TextBlock Text="Type:"
                    Grid.Row="0"

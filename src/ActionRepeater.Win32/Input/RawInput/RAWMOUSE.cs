@@ -13,37 +13,37 @@ namespace ActionRepeater.Win32.Input;
 [StructLayout(LayoutKind.Sequential)]
 public struct RAWMOUSE
 {
-	/// <summary>
-	/// <para>Type: **USHORT** The mouse state.
-	/// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/ns-winuser-rawmouse#members">Read more on docs.microsoft.com</see>.</para>
-	/// </summary>
-	public RawMouseState usFlags;
+    /// <summary>
+    /// <para>Type: **USHORT** The mouse state.
+    /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/ns-winuser-rawmouse#members">Read more on docs.microsoft.com</see>.</para>
+    /// </summary>
+    public RawMouseState usFlags;
 
-	public RawButtonData rawButtonData;
+    public RawButtonData rawButtonData;
 
-	/// <summary>
-	/// <para>Type: **ULONG** The raw state of the mouse buttons. The Win32 subsystem does not use this member.</para>
-	/// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/ns-winuser-rawmouse#members">Read more on docs.microsoft.com</see>.</para>
-	/// </summary>
-	public uint ulRawButtons;
+    /// <summary>
+    /// <para>Type: **ULONG** The raw state of the mouse buttons. The Win32 subsystem does not use this member.</para>
+    /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/ns-winuser-rawmouse#members">Read more on docs.microsoft.com</see>.</para>
+    /// </summary>
+    public uint ulRawButtons;
 
-	/// <summary>
-	/// <para>Type: **LONG** The motion in the X direction. This is signed relative motion or absolute motion, depending on the value of <see cref="usFlags"/>.</para>
-	/// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/ns-winuser-rawmouse#members">Read more on docs.microsoft.com</see>.</para>
-	/// </summary>
-	public int lLastX;
+    /// <summary>
+    /// <para>Type: **LONG** The motion in the X direction. This is signed relative motion or absolute motion, depending on the value of <see cref="usFlags"/>.</para>
+    /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/ns-winuser-rawmouse#members">Read more on docs.microsoft.com</see>.</para>
+    /// </summary>
+    public int lLastX;
 
-	/// <summary>
-	/// <para>Type: **LONG** The motion in the Y direction. This is signed relative motion or absolute motion, depending on the value of <see cref="usFlags"/>.</para>
-	/// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/ns-winuser-rawmouse#members">Read more on docs.microsoft.com</see>.</para>
-	/// </summary>
-	public int lLastY;
+    /// <summary>
+    /// <para>Type: **LONG** The motion in the Y direction. This is signed relative motion or absolute motion, depending on the value of <see cref="usFlags"/>.</para>
+    /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/ns-winuser-rawmouse#members">Read more on docs.microsoft.com</see>.</para>
+    /// </summary>
+    public int lLastY;
 
-	/// <summary>
-	/// <para>Type: **ULONG** The device-specific additional information for the event.</para>
-	/// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/ns-winuser-rawmouse#members">Read more on docs.microsoft.com</see>.</para>
-	/// </summary>
-	public uint ulExtraInformation;
+    /// <summary>
+    /// <para>Type: **ULONG** The device-specific additional information for the event.</para>
+    /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/ns-winuser-rawmouse#members">Read more on docs.microsoft.com</see>.</para>
+    /// </summary>
+    public uint ulExtraInformation;
 
     [StructLayout(LayoutKind.Explicit)]
     public struct RawButtonData

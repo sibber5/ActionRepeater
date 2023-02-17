@@ -8,19 +8,19 @@
 [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
 public struct RAWHID
 {
-	/// <summary>
-	/// <para>Type: <b>DWORD</b> The size, in bytes, of each HID input in <b>bRawData</b>.</para>
-	/// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/ns-winuser-rawhid#members">Read more on docs.microsoft.com</see>.</para>
-	/// </summary>
-	public uint dwSizeHid;
-	/// <summary>
-	/// <para>Type: <b>DWORD</b> The number of HID inputs in <b>bRawData</b>.</para>
-	/// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/ns-winuser-rawhid#members">Read more on docs.microsoft.com</see>.</para>
-	/// </summary>
-	public uint dwCount;
-	/// <summary>
-	/// <para>Type: <b>BYTE[1]</b> The raw input data, as an array of bytes.</para>
-	/// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/ns-winuser-rawhid#members">Read more on docs.microsoft.com</see>.</para>
-	/// </summary>
-	public byte bRawData;
+    /// <summary>
+    /// <para>Type: <b>DWORD</b> The size, in bytes, of each HID input in <b>bRawData</b>.</para>
+    /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/ns-winuser-rawhid#members">Read more on docs.microsoft.com</see>.</para>
+    /// </summary>
+    public uint dwSizeHid;
+    /// <summary>
+    /// <para>Type: <b>DWORD</b> The number of HID inputs in <b>bRawData</b>.</para>
+    /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/ns-winuser-rawhid#members">Read more on docs.microsoft.com</see>.</para>
+    /// </summary>
+    public uint dwCount;
+    /// <summary>
+    /// <para>Type: <b>BYTE[1]</b> The raw input data, as an array of bytes.</para>
+    /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/ns-winuser-rawhid#members">Read more on docs.microsoft.com</see>.</para>
+    /// </summary>
+    public byte bRawData;
 }

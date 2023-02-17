@@ -7,7 +7,7 @@
     mc:Ignorable="d">
 
     <Rectangle Margin="12,10,12,10"
-                   HorizontalAlignment="Stretch" VerticalAlignment="Top"
-                   Height="2" Fill="{ThemeResource OptionsSeperatorThemeBrush}"/>
+               HorizontalAlignment="Stretch" VerticalAlignment="Top"
+               Height="2" Fill="{ThemeResource OptionsSeperatorThemeBrush}"/>
     
 </UserControl>

@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using ActionRepeater.Win32.Graphics;
 using ActionRepeater.Win32.Input;
 using ActionRepeater.Win32.Synch;
 using ActionRepeater.Win32.WindowsAndMessages;
-using System.Runtime.Versioning;
 
 #pragma warning disable CA1401 // P/Invokes should not be visible
 [assembly: SupportedOSPlatform("windows6.0.6000")]

@@ -6,7 +6,6 @@ using ActionRepeater.UI.Pages;
 using ActionRepeater.UI.ViewModels;
 using ActionRepeater.Win32.WindowsAndMessages;
 using ActionRepeater.Win32.WindowsAndMessages.Utilities;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI;
 using Microsoft.UI.Windowing;
@@ -44,13 +43,13 @@ public sealed partial class MainWindow : Window
     public MainWindow()
     {
         Handle = WinRT.Interop.WindowNative.GetWindowHandle(this);
-        
+
         Title = WindowTitle;
         App.SetWindowSize(Handle, StartupWidth, StartupHeight);
-        
+
         var windowId = Win32Interop.GetWindowIdFromWindow(Handle);
         _appWindow = AppWindow.GetFromWindowId(windowId);
-        _appWindow.SetIcon(Path.Combine(App.AppFolderDir, @"Assets\Icon.ico"));
+        _appWindow.SetIcon(Path.Combine(AppContext.BaseDirectory, @"Assets\Icon.ico"));
         if (AppWindowTitleBar.IsCustomizationSupported())
         {
             SetTitleBarColors();

@@ -10,13 +10,8 @@
     mc:Ignorable="d"
     Background="{ThemeResource AppBackgroundThemeBrush}">
 
-    <Grid>
+    <Grid RowDefinitions="Auto,*">
 
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-        
         <ScrollViewer Grid.Row="0"
                       Margin="0,0,0,-2"
                       ZoomMode="Disabled"

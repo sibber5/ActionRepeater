@@ -9,11 +9,7 @@
     <!-- this view is used as the content of a ContentDialog when editing/adding an action. -->
     <!-- its created by ContentDialogService, which creates the viewmodel using the factory and sets all the commands. -->
     
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+    <Grid RowDefinitions="Auto,*">
 
         <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,18">
             <TextBlock Text="{x:Bind _titleText, Mode=OneWay}" FontSize="16"

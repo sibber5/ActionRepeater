@@ -9,30 +9,30 @@ namespace ActionRepeater.Win32.Input;
 /// </remarks>
 public struct INPUT
 {
-	/// <summary>
-	/// The size, in bytes, of an <see cref="INPUT"/> struct.
-	/// </summary>
-	public static readonly int SIZE = Marshal.SizeOf<INPUT>();
+    /// <summary>
+    /// The size, in bytes, of an <see cref="INPUT"/> struct.
+    /// </summary>
+    public static readonly int SIZE = Marshal.SizeOf<INPUT>();
 
-	/// <summary>Type: <b>DWORD</b></summary>
-	public INPUT.TYPE type;
-	public INPUT.UNION union;
+    /// <summary>Type: <b>DWORD</b></summary>
+    public INPUT.TYPE type;
+    public INPUT.UNION union;
 
-	[StructLayout(LayoutKind.Explicit)]
-	public struct UNION
-	{
-		[FieldOffset(0)]
-		public MOUSEINPUT mi;
-		[FieldOffset(0)]
-		public KEYBDINPUT ki;
-		[FieldOffset(0)]
-		public HARDWAREINPUT hi;
-	}
-
-	public enum TYPE : uint
+    [StructLayout(LayoutKind.Explicit)]
+    public struct UNION
     {
-		MOUSE = 0u,
-		KEYBOARD = 1u,
-		HARDWARE = 2u,
-	}
+        [FieldOffset(0)]
+        public MOUSEINPUT mi;
+        [FieldOffset(0)]
+        public KEYBDINPUT ki;
+        [FieldOffset(0)]
+        public HARDWAREINPUT hi;
+    }
+
+    public enum TYPE : uint
+    {
+        MOUSE = 0u,
+        KEYBOARD = 1u,
+        HARDWARE = 2u,
+    }
 }
