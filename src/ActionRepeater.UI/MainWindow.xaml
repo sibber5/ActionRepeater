@@ -8,12 +8,8 @@
 
     <Grid x:Name="_grid" Margin="10">
 
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-
         <NavigationView x:Name="_navigationView"
-                        Margin="0,-15,0,0" Grid.Row="0"
+                        Margin="0,-18,0,0"
                         PaneDisplayMode="Top"
                         IsBackButtonVisible="Collapsed"
                         IsSettingsVisible="False"
@@ -35,21 +31,23 @@
             
             <NavigationView.MenuItems>
                 <!-- space for the file dropdown button -->
-                <NavigationViewItem Width="35" IsEnabled="False"/>
+                <NavigationViewItem x:Name="_navViewOffsetItem" Width="35" IsEnabled="False"/>
                 <!-- binding the tag suddenly stopped working for some fucking reason, so now its hardcoded -->
                 <NavigationViewItem Tag="h" Content="Home"/>
                 <NavigationViewItem Tag="o" Content="Options"/>
             </NavigationView.MenuItems>
 
-            <Frame x:Name="_contentFrame" Background="{ThemeResource AppBackgroundThemeBrush}" />
-
+            <Grid Padding="0,10,0,0" Background="{ThemeResource AppBackgroundThemeBrush}">
+                <Frame x:Name="_contentFrame" Background="{ThemeResource AppBackgroundThemeBrush}" />
+            </Grid>
+            
         </NavigationView>
 
-        <MenuBar Grid.Row="0"
+        <MenuBar x:Name="_fileButtonMenuBar"
                  HorizontalAlignment="Left" VerticalAlignment="Top"
-                 Margin="-8,-11,0,0"
+                 Margin="-8,-14,0,0"
                  Background="Transparent"
-                 BorderBrush="Transparent">
+                 BorderBrush="Red" BorderThickness="1">
 
             <MenuBar.Resources>
                 <ResourceDictionary>
@@ -106,9 +104,11 @@
 
         <!-- 1p height line to cover some random gray line in the app in light mode. -->
         <!-- i have no clue where it came from ive tried setting the background and border brush on everything in this view -->
-        <Rectangle Grid.Row="0" Margin="0,33,0,0"
-                   HorizontalAlignment="Stretch" VerticalAlignment="Top"
-                   Height="1" Fill="{ThemeResource AppBackgroundThemeBrush}"/>
+        <Rectangle x:Name="_rectangle" Margin="0,30,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="1" Fill="{ThemeResource AppBackgroundThemeBrush}"/>
+
+        <Grid x:Name="_titlebarGrid" Height="34" VerticalAlignment="Top" HorizontalAlignment="Stretch" Margin="-10,-10,-10,0" Visibility="Collapsed">
+            <Image VerticalAlignment="Top" HorizontalAlignment="Left" Margin="16,16,16,0" Width="18" Height="18" Source="Assets/Icon.ico"/>
+        </Grid>
 
     </Grid>
 

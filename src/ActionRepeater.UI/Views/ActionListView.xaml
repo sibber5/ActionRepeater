@@ -83,15 +83,16 @@
                 <DataTemplate x:DataType="vms:ActionViewModel">
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="36"/>
+                            <ColumnDefinition Width="32"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
                         <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}"
                                   Grid.Column="0"
-                                  HorizontalAlignment="Left"
+                                  HorizontalAlignment="Center"
                                   VerticalAlignment="Center"
+                                  Margin="-10,0,0,0"
                                   FontSize="{x:Bind GlyphSize, Mode=OneTime}"
                                   Glyph="{x:Bind Glyph, Mode=OneTime}"/>
                         
@@ -100,7 +101,8 @@
                                    TextWrapping="Wrap"
                                    Grid.Column="1"
                                    HorizontalAlignment="Left"
-                                   VerticalAlignment="Center"/>
+                                   VerticalAlignment="Center"
+                                   Margin="3,0,0,0"/>
                         
                         <TextBlock Text="{x:Bind Description, Mode=OneWay}"
                                    FontSize="14"

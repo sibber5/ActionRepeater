@@ -1,12 +1,15 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using ActionRepeater.Core.Input;
 using ActionRepeater.UI.Pages;
 using ActionRepeater.UI.ViewModels;
 using ActionRepeater.Win32.WindowsAndMessages;
 using ActionRepeater.Win32.WindowsAndMessages.Utilities;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
@@ -20,18 +23,23 @@ public sealed partial class MainWindow : Window
     private const int MinWidth = 356;
     private const int MinHeight = 206;
 
-    public IntPtr Handle { get; }
+    public const string HomeTag = "h";
+    public const string OptionsTag = "o";
 
-    private readonly MainViewModel _vm;
+    public IntPtr Handle { get; }
 
     public XamlRoot GridXamlRoot => _grid.XamlRoot;
 
-    public const string HomeTag = "h";
-    public const string OptionsTag = "o";
+    private readonly MainViewModel _vm;
 
     private readonly WindowMessageMonitor _msgMonitor;
 
     private readonly Recorder _recorder;
+
+    private readonly AppWindow _appWindow;
+
+    private readonly Thickness _titlebarOffset = new(33, 8, 0, 0);
+    private readonly Windows.Graphics.RectInt32[] _dragRects = new Windows.Graphics.RectInt32[2];
 
     public MainWindow()
     {
@@ -40,27 +48,102 @@ public sealed partial class MainWindow : Window
         Title = WindowTitle;
         App.SetWindowSize(Handle, StartupWidth, StartupHeight);
         
-        // set window icon
         var windowId = Win32Interop.GetWindowIdFromWindow(Handle);
-        var appWindow = Microsoft.UI.Windowing.AppWindow.GetFromWindowId(windowId);
-        appWindow.SetIcon(Path.Combine(App.AppFolderDir, @"Assets\Icon.ico"));
-
-        _msgMonitor = new(Handle);
-        _msgMonitor.WindowMessageReceived += OnWindowMessageReceived;
+        _appWindow = AppWindow.GetFromWindowId(windowId);
+        _appWindow.SetIcon(Path.Combine(App.AppFolderDir, @"Assets\Icon.ico"));
+        if (AppWindowTitleBar.IsCustomizationSupported())
+        {
+            SetTitleBarColors();
+            _appWindow.TitleBar.ExtendsContentIntoTitleBar = true;
+        }
 
         if (App.Current.RequestedTheme == ApplicationTheme.Dark)
         {
             Win32.PInvoke.Helpers.SetWindowImmersiveDarkMode(Handle, true);
         }
 
+        _msgMonitor = new(Handle);
+        _msgMonitor.WindowMessageReceived += OnWindowMessageReceived;
+
         _vm = App.Current.Services.GetRequiredService<MainViewModel>();
         _recorder = App.Current.Services.GetRequiredService<Recorder>();
 
         InitializeComponent();
 
-        // workaround because x:Bind-ing isnt working for some reason
+        if (AppWindowTitleBar.IsCustomizationSupported() && _appWindow.TitleBar.ExtendsContentIntoTitleBar)
+        {
+            _rectangle.Margin = _rectangle.Margin with { Top = _rectangle.Margin.Top + _titlebarOffset.Top };
+
+            var fileButtonMargin = _fileButtonMenuBar.Margin;
+            _fileButtonMenuBar.Margin = fileButtonMargin with { Left = fileButtonMargin.Left + _titlebarOffset.Left, Top = fileButtonMargin.Top + _titlebarOffset.Top };
+
+            _navigationView.Margin = _navigationView.Margin with { Top = _navigationView.Margin.Top + _titlebarOffset.Top };
+
+            _navViewOffsetItem.Width += _titlebarOffset.Left;
+
+            _titlebarGrid.Visibility = Visibility.Visible;
+
+            _titlebarGrid.SizeChanged += TitleBarGrid_SizeChanged;
+        }
+
+        // workaround because x:Bind-ing isnt working for some reason (it seems to bind after the window loses focus for the first time?)
         _openMenuItem.Command = _vm.ImportActionsCommand;
         _saveMenuItem.Command = _vm.ExportActionsCommand;
+    }
+
+    private void SetTitleBarColors()
+    {
+        Debug.Assert(AppWindowTitleBar.IsCustomizationSupported());
+
+        var titlebar = _appWindow.TitleBar;
+        var bg = App.Current.RequestedTheme == ApplicationTheme.Dark ? Windows.UI.Color.FromArgb(255, 0, 0, 0) : Windows.UI.Color.FromArgb(255, 255, 255, 255);
+        var hoverBG = App.Current.RequestedTheme == ApplicationTheme.Dark ? Windows.UI.Color.FromArgb(255, 25, 25, 25) : Windows.UI.Color.FromArgb(255, 230, 230, 230);
+        var pressBG = App.Current.RequestedTheme == ApplicationTheme.Dark ? Windows.UI.Color.FromArgb(255, 51, 51, 51) : Windows.UI.Color.FromArgb(255, 204, 204, 204);
+        var fg = App.Current.RequestedTheme == ApplicationTheme.Dark ? Windows.UI.Color.FromArgb(255, 255, 255, 255) : Windows.UI.Color.FromArgb(255, 0, 0, 0);
+        var inavtiveFG = App.Current.RequestedTheme == ApplicationTheme.Dark ? Windows.UI.Color.FromArgb(255, 102, 102, 102) : Windows.UI.Color.FromArgb(255, 153, 153, 153);
+
+        titlebar.BackgroundColor = bg;
+        titlebar.ButtonBackgroundColor = bg;
+        titlebar.InactiveBackgroundColor = bg;
+        titlebar.ButtonInactiveBackgroundColor = bg;
+        titlebar.ButtonHoverBackgroundColor = hoverBG;
+        titlebar.ButtonPressedBackgroundColor = pressBG;
+        titlebar.ButtonForegroundColor = fg;
+        titlebar.ButtonHoverForegroundColor = fg;
+        titlebar.ButtonInactiveForegroundColor = inavtiveFG;
+        titlebar.ButtonPressedForegroundColor = fg;
+    }
+
+    private void UpdateDragRegion()
+    {
+        Debug.Assert(AppWindowTitleBar.IsCustomizationSupported() && _appWindow.TitleBar.ExtendsContentIntoTitleBar);
+
+        var item = (FrameworkElement)_navigationView.MenuItems[^1];
+
+        var gridMargin = Math.Abs(_titlebarGrid.TransformToVisual(_grid).TransformPoint(default).X);
+
+        var dragRegionOffset = item.TransformToVisual(_grid).TransformPoint(new(0, 0)).X + item.ActualWidth + gridMargin;
+        var windowWidth = _grid.ActualWidth + gridMargin * 2;
+
+        var scalingFactor = App.GetWindowScalingFactor(Handle);
+
+        _dragRects[0] = new()
+        {
+            X = (int)(dragRegionOffset * scalingFactor),
+            Y = 0,
+            Height = (int)(_titlebarGrid.ActualHeight * scalingFactor),
+            Width = (int)((windowWidth - dragRegionOffset) * scalingFactor)
+        };
+
+        _dragRects[1] = new()
+        {
+            X = 0,
+            Y = 0,
+            Height = (int)(12 * scalingFactor),
+            Width = (int)(dragRegionOffset * scalingFactor)
+        };
+
+        _appWindow.TitleBar.SetDragRectangles(_dragRects);
     }
 
     private unsafe void OnWindowMessageReceived(object? sender, WindowMessageEventArgs e)
@@ -102,6 +185,14 @@ public sealed partial class MainWindow : Window
             case OptionsTag:
                 _contentFrame.Navigate(typeof(OptionsPage), null, navInfo);
                 break;
+        }
+    }
+
+    private void TitleBarGrid_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        if (_appWindow.TitleBar.ExtendsContentIntoTitleBar)
+        {
+            UpdateDragRegion();
         }
     }
 }
