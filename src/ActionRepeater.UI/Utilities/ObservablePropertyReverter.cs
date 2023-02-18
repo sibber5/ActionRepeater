@@ -5,6 +5,9 @@ using Microsoft.UI.Dispatching;
 
 namespace ActionRepeater.UI.Utilities;
 
+/// <summary>
+/// Reverts an observale property after a property changing event.
+/// </summary>
 public sealed class ObservablePropertyReverter<T>
 {
     public T PreviousValue { get; set; }
@@ -14,7 +17,7 @@ public sealed class ObservablePropertyReverter<T>
     private readonly Func<T> _getProperty;
     private readonly Action<T> _setProperty;
 
-    private Func<Task>? _revertFunc;
+    private Action? _revertFunc;
     private DispatcherQueueHandler? _revertDispatched;
 
     public ObservablePropertyReverter(T previousValue, Func<T> getProperty, Action<T> setProperty)
@@ -26,10 +29,11 @@ public sealed class ObservablePropertyReverter<T>
 
     public void Revert()
     {
-        _revertFunc ??= async () =>
+        _revertFunc ??= () =>
         {
             var comparer = EqualityComparer<T>.Default;
-            while (comparer.Equals(_getProperty(), PreviousValue)) await Task.Delay(5);
+            while (comparer.Equals(_getProperty(), PreviousValue)) { }
+
             App.Current.MainWindow.DispatcherQueue.TryEnqueue(_revertDispatched ??= () =>
             {
                 IsReverting = true;

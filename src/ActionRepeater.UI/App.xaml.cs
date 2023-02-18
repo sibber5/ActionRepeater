@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -15,7 +16,6 @@ using ActionRepeater.Win32.Synch.Utilities;
 using ActionRepeater.Win32.WindowsAndMessages;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
 
 namespace ActionRepeater.UI;
 
@@ -41,10 +41,7 @@ public partial class App : Application
 
     private ObservablePropertyReverter<OptionsFileLocation>? _optsFileLocReverter;
 
-    // used to check what UIOptions.Theme was changed from, when its changed
-    private readonly bool _wasAppThemeSetOnStartup;
-
-    private bool _isRevertingTheme;
+    private ObservablePropertyReverter<Theme>? _themeOptionReverter;
 
     /// <summary>
     /// Initializes the singleton application object.  This is the first line of authored code
@@ -80,17 +77,14 @@ public partial class App : Application
         {
             case Theme.Light:
                 App.Current.RequestedTheme = ApplicationTheme.Light;
-                _wasAppThemeSetOnStartup = true;
                 break;
 
             case Theme.Dark:
                 App.Current.RequestedTheme = ApplicationTheme.Dark;
-                _wasAppThemeSetOnStartup = true;
                 break;
         }
 
         UIOptions.Instance.PropertyChanging += UIOptions_PropertyChanging;
-        UIOptions.Instance.PropertyChanged += UIOptions_PropertyChanged;
     }
 
     private static IServiceProvider ConfigureServices()
@@ -154,145 +148,120 @@ public partial class App : Application
         else if (Services is IDisposable disposableServices) disposableServices.Dispose();
     }
 
-    private async void UIOptions_PropertyChanging(object? sender, System.ComponentModel.PropertyChangingEventArgs e)
+    private void UIOptions_PropertyChanging(object? sender, System.ComponentModel.PropertyChangingEventArgs e)
     {
-        if (!nameof(UIOptions.Instance.OptionsFileLocation).Equals(e.PropertyName, StringComparison.Ordinal)) return;
-        
-        if (_optsFileLocReverter?.IsReverting == true) return;
-
-        if (_optsFileLocReverter is null)
+        if (nameof(UIOptions.Instance.OptionsFileLocation).Equals(e.PropertyName, StringComparison.Ordinal))
         {
-            _optsFileLocReverter = new(UIOptions.Instance.OptionsFileLocation,
-                static () => UIOptions.Instance.OptionsFileLocation,
-                static (val) => UIOptions.Instance.OptionsFileLocation = val);
+            if (_optsFileLocReverter?.IsReverting == true) return;
+            if (_optsFileLocReverter is null)
+            {
+                _optsFileLocReverter = new(UIOptions.Instance.OptionsFileLocation,
+                                           static () => UIOptions.Instance.OptionsFileLocation,
+                                           static (val) => UIOptions.Instance.OptionsFileLocation = val);
+            }
+            else
+            {
+                _optsFileLocReverter.PreviousValue = UIOptions.Instance.OptionsFileLocation;
+            }
+
+            switch (UIOptions.Instance.OptionsFileLocation)
+            {
+                case OptionsFileLocation.AppData:
+                    DeleteAppDataOptionsFile();
+                    break;
+
+                case OptionsFileLocation.AppFolder:
+                    DeleteAppFolderOptionsFile();
+                    break;
+            }
+        }
+        else if (nameof(UIOptions.Instance.Theme).Equals(e.PropertyName, StringComparison.Ordinal))
+        {
+            if (_themeOptionReverter?.IsReverting == true) return;
+            if (_themeOptionReverter is null)
+            {
+                _themeOptionReverter = new(UIOptions.Instance.Theme,
+                                           static () => UIOptions.Instance.Theme,
+                                           static (val) => UIOptions.Instance.Theme = val);
+            }
+            else
+            {
+                _themeOptionReverter.PreviousValue = UIOptions.Instance.Theme;
+            }
+
+            _ = _contentDialogService.ShowYesNoMessageDialog(
+                "Restart required to change theme",
+                "Restart?",
+                onYesClick: RestartAndChangeTheme,
+                onNoClick: _themeOptionReverter.Revert);
+        }
+    }
+    private void DeleteAppDataOptionsFile()
+    {
+        if (!File.Exists(Path.Combine(AppDataOptionsDir, OptionsFileName))) return;
+
+        _ = _contentDialogService.ShowYesNoMessageDialog(
+            "Options file in AppData will be deleted",
+            "Are you sure you want to change the options file location?",
+            onYesClick: static () =>
+            {
+                try
+                {
+                    File.Delete(Path.Combine(AppDataOptionsDir, OptionsFileName));
+                }
+                // no need to catch FileNotFoundException because "If the file to be deleted does not exist, no exception is thrown."
+                catch (DirectoryNotFoundException) { }
+
+                try
+                {
+                    Directory.Delete(AppDataOptionsDir);
+                }
+                catch (DirectoryNotFoundException) { }
+                catch (IOException) { }
+            },
+            onNoClick: _optsFileLocReverter!.Revert);
+    }
+    private void DeleteAppFolderOptionsFile()
+    {
+        if (!File.Exists(Path.Combine(AppContext.BaseDirectory, OptionsFileName))) return;
+
+        _ = _contentDialogService.ShowYesNoMessageDialog(
+            "Options file in app folder will be deleted",
+            "Are you sure you want to change the options file location?",
+            onYesClick: static () =>
+            {
+                try
+                {
+                    File.Delete(Path.Combine(AppContext.BaseDirectory, OptionsFileName));
+                }
+                // no need to catch FileNotFoundException because "If the file to be deleted does not exist, no exception is thrown."
+                catch (DirectoryNotFoundException) { }
+            },
+            onNoClick: _optsFileLocReverter!.Revert);
+    }
+
+    // Intentional async void, because the message dialog requires void return type and app will close anyway, so it doesnt matter.
+    private async void RestartAndChangeTheme()
+    {
+        while (UIOptions.Instance.Theme == _themeOptionReverter!.PreviousValue) { }
+
+        string path = Path.ChangeExtension(System.Reflection.Assembly.GetEntryAssembly()!.Location, ".exe");
+
+        await SaveOptions();
+        _saveOnExit = false;
+
+        if (UIOptions.Instance.Theme == Theme.WindowsSetting || UIOptions.Instance.OptionsFileLocation != OptionsFileLocation.None)
+        {
+            Process.Start(path);
         }
         else
         {
-            _optsFileLocReverter.PreviousValue = UIOptions.Instance.OptionsFileLocation;
+            Process.Start(path, UIOptions.Instance.Theme == Theme.Light ? "--theme=light" : "--theme=dark");
         }
+        Application.Current.Exit();
 
-        switch (UIOptions.Instance.OptionsFileLocation)
-        {
-            case OptionsFileLocation.AppData:
-                {
-                    string dirPath = AppDataOptionsDir;
-                    string filePath = Path.Combine(dirPath, OptionsFileName);
-
-                    if (!File.Exists(filePath)) break;
-
-                    ContentDialogResult dialogResult = await _contentDialogService.ShowYesNoMessageDialog(
-                        "Options file in AppData will be deleted",
-                        "Are you sure you want to change the options file location?");
-
-                    switch (dialogResult)
-                    {
-                        case ContentDialogResult.Primary:
-                            try
-                            {
-                                File.Delete(filePath);
-                            }
-                            // no need to catch FileNotFoundException because "If the file to be deleted does not exist, no exception is thrown."
-                            catch (DirectoryNotFoundException) { }
-
-                            try
-                            {
-                                Directory.Delete(dirPath);
-                            }
-                            catch (DirectoryNotFoundException) { }
-                            catch (IOException) { }
-                            break;
-
-                        case ContentDialogResult.Secondary:
-                            _optsFileLocReverter.Revert();
-                            break;
-                    }
-                }
-                break;
-
-            case OptionsFileLocation.AppFolder:
-                {
-                    string filePath = Path.Combine(AppContext.BaseDirectory, OptionsFileName);
-
-                    if (!File.Exists(filePath)) break;
-
-                    ContentDialogResult dialogResult = await _contentDialogService.ShowYesNoMessageDialog(
-                        "Options file in app folder will be deleted",
-                        "Are you sure you want to change the options file location?");
-
-                    switch (dialogResult)
-                    {
-                        case ContentDialogResult.Primary:
-                            try
-                            {
-                                File.Delete(filePath);
-                            }
-                            // no need to catch FileNotFoundException because "If the file to be deleted does not exist, no exception is thrown."
-                            catch (DirectoryNotFoundException) { }
-                            break;
-
-                        case ContentDialogResult.Secondary:
-                            _optsFileLocReverter.Revert();
-                            break;
-                    }
-                }
-                break;
-        }
-    }
-
-    private async void UIOptions_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
-    {
-        if (!nameof(UIOptions.Instance.Theme).Equals(e.PropertyName, StringComparison.Ordinal)) return;
-
-        if (_isRevertingTheme) return;
-
-        Action revertThemeOption = static () =>
-        {
-            Current._isRevertingTheme = true;
-            Current.MainWindow.DispatcherQueue.TryEnqueue(static () =>
-            {
-                Theme previousTheme;
-                if (Current._wasAppThemeSetOnStartup)
-                {
-                    previousTheme = UIOptions.Instance.Theme == Theme.Light ? Theme.Dark : Theme.Light;
-                }
-                else
-                {
-                    previousTheme = Theme.WindowsSetting;
-                }
-
-                UIOptions.Instance.Theme = previousTheme;
-                Current._isRevertingTheme = false;
-            });
-        };
-
-        ContentDialogResult dialogResult = await _contentDialogService.ShowYesNoMessageDialog("Restart required to change theme", "Restart?");
-
-        switch (dialogResult)
-        {
-            case ContentDialogResult.Primary:
-                string path = Path.ChangeExtension(System.Reflection.Assembly.GetEntryAssembly()!.Location, ".exe");
-
-                await SaveOptions();
-                _saveOnExit = false;
-
-                if (UIOptions.Instance.Theme == Theme.WindowsSetting || UIOptions.Instance.OptionsFileLocation != OptionsFileLocation.None)
-                {
-                    System.Diagnostics.Process.Start(path);
-                }
-                else
-                {
-                    System.Diagnostics.Process.Start(path, UIOptions.Instance.Theme == Theme.Light ? "--theme=light" : "--theme=dark");
-                }
-                Application.Current.Exit();
-
-                // throws FileNotFoundException
-                //Microsoft.Windows.AppLifecycle.AppInstance.Restart(UIOptions.Instance.Theme == Theme.Light ? "--theme=light" : "--theme=dark");
-                break;
-
-            case ContentDialogResult.Secondary:
-                revertThemeOption();
-                break;
-        }
+        // throws FileNotFoundException
+        //Microsoft.Windows.AppLifecycle.AppInstance.Restart(UIOptions.Instance.Theme == Theme.Light ? "--theme=light" : "--theme=dark");
     }
 
     private async Task SaveOptions()
