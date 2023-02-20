@@ -6,7 +6,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Grid x:Name="_grid" Margin="10">
+    <Grid x:Name="_grid" Margin="10" Loaded="Grid_Loaded">
 
         <NavigationView x:Name="_navigationView"
                         Margin="0,-18,0,0"

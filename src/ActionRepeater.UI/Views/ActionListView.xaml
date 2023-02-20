@@ -5,7 +5,6 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vms="using:ActionRepeater.UI.ViewModels"
-    xmlns:behavs="using:ActionRepeater.UI.Behaviors"
     mc:Ignorable="d">
 
     <Grid RowDefinitions="Auto,*">
@@ -74,35 +73,6 @@
                 </Style>
             </ListView.Style>
 
-            <ListView.ItemTemplate>
-                <DataTemplate x:DataType="vms:ActionViewModel">
-                    <Grid ColumnDefinitions="32,*,*">
-                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}"
-                                  Grid.Column="0"
-                                  HorizontalAlignment="Center"
-                                  VerticalAlignment="Center"
-                                  Margin="-10,0,0,0"
-                                  FontSize="{x:Bind GlyphSize, Mode=OneTime}"
-                                  Glyph="{x:Bind Glyph, Mode=OneTime}"/>
-                        
-                        <TextBlock Text="{x:Bind Name, Mode=OneWay}"
-                                   FontSize="14"
-                                   TextWrapping="Wrap"
-                                   Grid.Column="1"
-                                   HorizontalAlignment="Left"
-                                   VerticalAlignment="Center"
-                                   Margin="3,0,0,0"/>
-                        
-                        <TextBlock Text="{x:Bind Description, Mode=OneWay}"
-                                   FontSize="14"
-                                   TextWrapping="Wrap"
-                                   Grid.Column="2"
-                                   HorizontalAlignment="Left"
-                                   VerticalAlignment="Center"/>
-                    </Grid>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-
             <ListView.Resources>
 
                 <MenuFlyout x:Name="MultiItemMenuFlyout">
@@ -142,17 +112,19 @@
                     
                     <MenuFlyoutSeparator />
                     
-                    <MenuFlyoutSubItem Text="Clear" x:Name="_singleItemFlyoutClear"
-                                       behavs:ClearMenuBehavior.MenuItemList="{x:Bind _singleItemFlyoutClear.Items}">
+                    <MenuFlyoutSubItem Text="Clear" x:Name="_singleItemFlyoutClear">
                         <MenuFlyoutSubItem.Icon>
                             <FontIcon Glyph="&#xE894;"/>
                         </MenuFlyoutSubItem.Icon>
+
+                        <MenuFlyoutItem Text="Clear actions" Command="{x:Bind _vm.ClearActionsCommand}"/>
+                        <MenuFlyoutItem Text="Clear cursor path" Command="{x:Bind _vm.ClearCursorPathCommand}"/>
+                        <MenuFlyoutItem Text="Clear all" Command="{x:Bind _vm.ClearAllCommand}"/>
                     </MenuFlyoutSubItem>
                 </MenuFlyout>
                 
                 <MenuFlyout x:Name="NoItemMenuFlyout">
-                    <MenuFlyoutSubItem Text="Add" x:Name="_listFlyoutAdd" Icon="Add" IsEnabled="{x:Bind _vm.CanAddAction, Mode=OneWay}"
-                                       behavs:AddActionMenuBehavior.MenuItemList="{x:Bind _listFlyoutAdd.Items}"/>
+                    <MenuFlyoutSubItem Text="Add" x:Name="_listFlyoutAdd" Icon="Add" IsEnabled="{x:Bind _vm.CanAddAction, Mode=OneWay}"/>
 
                     <MenuFlyoutItem x:Name="_pasteMenuItem" Text="Paste" Icon="Paste" Command="{x:Bind _vm.AddStoredActionsCommand}">
                         <MenuFlyoutItem.KeyboardAccelerators>
@@ -162,15 +134,47 @@
                     
                     <MenuFlyoutSeparator />
                     
-                    <MenuFlyoutSubItem Text="Clear" x:Name="_noItemFlyoutClear"
-                                       behavs:ClearMenuBehavior.MenuItemList="{x:Bind _noItemFlyoutClear.Items}">
+                    <MenuFlyoutSubItem Text="Clear" x:Name="_noItemFlyoutClear">
                         <MenuFlyoutSubItem.Icon>
                             <FontIcon Glyph="&#xE894;"/>
                         </MenuFlyoutSubItem.Icon>
+
+                        <MenuFlyoutItem Text="Clear actions" Command="{x:Bind _vm.ClearActionsCommand}"/>
+                        <MenuFlyoutItem Text="Clear cursor path" Command="{x:Bind _vm.ClearCursorPathCommand}"/>
+                        <MenuFlyoutItem Text="Clear all" Command="{x:Bind _vm.ClearAllCommand}"/>
                     </MenuFlyoutSubItem>
                 </MenuFlyout>
                 
             </ListView.Resources>
+
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="vms:ActionViewModel">
+                    <Grid ColumnDefinitions="32,*,*">
+                        <FontIcon FontFamily="{StaticResource SymbolThemeFontFamily}"
+                                  Grid.Column="0"
+                                  HorizontalAlignment="Center"
+                                  VerticalAlignment="Center"
+                                  Margin="-10,0,0,0"
+                                  FontSize="{x:Bind GlyphSize, Mode=OneTime}"
+                                  Glyph="{x:Bind Glyph, Mode=OneTime}"/>
+
+                        <TextBlock Text="{x:Bind Name, Mode=OneWay}"
+                                   FontSize="14"
+                                   TextWrapping="Wrap"
+                                   Grid.Column="1"
+                                   HorizontalAlignment="Left"
+                                   VerticalAlignment="Center"
+                                   Margin="3,0,0,0"/>
+
+                        <TextBlock Text="{x:Bind Description, Mode=OneWay}"
+                                   FontSize="14"
+                                   TextWrapping="Wrap"
+                                   Grid.Column="2"
+                                   HorizontalAlignment="Left"
+                                   VerticalAlignment="Center"/>
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
 
         </ListView>
 

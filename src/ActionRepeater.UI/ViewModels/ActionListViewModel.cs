@@ -15,7 +15,6 @@ using ActionRepeater.UI.Services;
 using ActionRepeater.UI.Utilities;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml.Controls;
 
 namespace ActionRepeater.UI.ViewModels;
@@ -31,7 +30,7 @@ public sealed partial class ActionListViewModel : ObservableObject
     private bool _showKeyRepeatActions;
 
     private readonly SyncedObservableCollection<ActionViewModel, InputAction> _actionVMs;
-    internal SyncedObservableCollection<ActionViewModel, InputAction> ActionVMs
+    public SyncedObservableCollection<ActionViewModel, InputAction> ActionVMs
     {
         get
         {
@@ -44,7 +43,7 @@ public sealed partial class ActionListViewModel : ObservableObject
     }
 
     private readonly SyncedObservableCollection<ActionViewModel, InputAction> _actionsExlVMs;
-    internal SyncedObservableCollection<ActionViewModel, InputAction> ActionsExlVMs
+    public SyncedObservableCollection<ActionViewModel, InputAction> ActionsExlVMs
     {
         get
         {
@@ -73,38 +72,41 @@ public sealed partial class ActionListViewModel : ObservableObject
 
     public bool CanAddAction => !_recorder.IsRecording;
 
-    internal Action ScrollToSelectedItem = null!;
-
     private readonly ContentDialogService _contentDialogService;
 
-    private readonly DispatcherQueueHandler _updateSelectedAction;
+    private readonly Action _updateSelectedAction;
 
     private readonly ActionCollection _actionCollection;
     private readonly Recorder _recorder;
+
+    private readonly IDispatcher _dispatcher;
 
     private readonly ManualResetEventSlim _updateSelectedActionMre = new(true);
     private bool _isSelectedActModifiedAct;
     private int _selectedActionIndexToSet;
 
-    public ActionListViewModel(ContentDialogService contentDialogService, ActionCollection actionCollection, Recorder recorder)
+    internal Action _scrollToSelectedItem = null!;
+
+    public ActionListViewModel(ContentDialogService contentDialogService, ActionCollection actionCollection, Recorder recorder, IDispatcher dispatcher)
     {
         _contentDialogService = contentDialogService;
         _actionCollection = actionCollection;
         _recorder = recorder;
+        _dispatcher = dispatcher;
 
         _updateSelectedAction = () =>
         {
             SelectedActionIndex = _selectedActionIndexToSet;
-            ScrollToSelectedItem();
+            _scrollToSelectedItem();
             _updateSelectedActionMre.Set();
         };
 
-        Func<InputAction?, ActionViewModel> createVM = static (model) => new ActionViewModel(model!);
+        Func<InputAction?, ActionViewModel> createVM = (model) => new ActionViewModel(model!, this, _actionCollection);
 
         _actionVMs = new((ObservableCollection<InputAction?>)_actionCollection.Actions, createVM);
         _actionsExlVMs = new((ObservableCollection<InputAction?>)_actionCollection.ActionsExlKeyRepeat, createVM);
 
-        ((INotifyPropertyChanged)FilteredActions).PropertyChanged += (s, e) =>
+        ((INotifyPropertyChanged)FilteredActions).PropertyChanged += (_, e) =>
         {
             if (nameof(FilteredActions.Count).Equals(e.PropertyName, StringComparison.Ordinal))
             {
@@ -113,7 +115,7 @@ public sealed partial class ActionListViewModel : ObservableObject
         };
         _recorder.IsRecordingChanged += (_, _) => OnPropertyChanged(nameof(CanAddAction));
 
-        ((INotifyPropertyChanged)_copiedActions).PropertyChanged += (s, e) =>
+        ((INotifyPropertyChanged)_copiedActions).PropertyChanged += (_, e) =>
         {
             if (nameof(_copiedActions.Count).Equals(e.PropertyName, StringComparison.Ordinal))
             {
@@ -154,10 +156,11 @@ public sealed partial class ActionListViewModel : ObservableObject
         {
             _selectedActionIndexToSet = i;
             _updateSelectedActionMre.Reset();
-            App.Current.MainWindow.DispatcherQueue.TryEnqueue(_updateSelectedAction);
+            _dispatcher.Enqueue(_updateSelectedAction);
         }
     }
 
+    // internal because its called from code behind (on item double tap). (there is not command for double tap, only an event)
     [RelayCommand]
     internal async Task EditSelectedAction()
     {
@@ -306,4 +309,16 @@ public sealed partial class ActionListViewModel : ObservableObject
             }
         }
     }
+
+    [RelayCommand(CanExecute = nameof(CanClearActions))]
+    private void ClearActions() => _actionCollection.ClearActions();
+    private bool CanClearActions() => _actionCollection.Actions.Count > 0;
+
+    [RelayCommand(CanExecute = nameof(CanClearCursorPath))]
+    private void ClearCursorPath() => _actionCollection.ClearCursorPath();
+    private bool CanClearCursorPath() => _actionCollection.CursorPathStart is not null;
+
+    [RelayCommand(CanExecute = nameof(CanClearAll))]
+    private void ClearAll() => _actionCollection.Clear();
+    private bool CanClearAll() => CanClearActions() || CanClearCursorPath();
 }

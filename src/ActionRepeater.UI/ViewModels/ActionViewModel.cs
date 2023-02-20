@@ -2,7 +2,6 @@
 using ActionRepeater.Core.Extentions;
 using ActionRepeater.Core.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace ActionRepeater.UI.ViewModels;
 
@@ -18,14 +17,15 @@ public sealed partial class ActionViewModel : ObservableObject
     [ObservableProperty]
     private string _description;
 
-    private static ActionListViewModel? _actionListViewModel;
-    private static ActionListViewModel ActionListViewModel => _actionListViewModel ??= App.Current.Services.GetRequiredService<ActionListViewModel>();
+    private static ActionListViewModel _actionListViewModel = null!;
 
-    private static ActionCollection? _actionCollection;
-    private static ActionCollection ActionCollection => _actionCollection ??= App.Current.Services.GetRequiredService<ActionCollection>();
+    private static ActionCollection _actionCollection = null!;
 
-    public ActionViewModel(InputAction inputAction)
+    public ActionViewModel(InputAction inputAction, ActionListViewModel actionListViewModel, ActionCollection actionCollection)
     {
+        _actionListViewModel ??= actionListViewModel;
+        _actionCollection ??= actionCollection;
+
         var (glyph, size) = GetIconForAction(inputAction);
         Glyph = glyph;
         _name = inputAction.Name;
@@ -55,11 +55,11 @@ public sealed partial class ActionViewModel : ObservableObject
     /// <returns>The <see cref="ActionViewModel"/> for the <paramref name="action"/>, that is currently bound to in the view.</returns>
     private static (ActionViewModel? actionsVM, ActionViewModel? actionsExlVM) GetActionViewModels(InputAction action)
     {
-        int actionsIndex = ActionCollection.ActionsAsSpan.RefIndexOfReverse(action);
-        ActionViewModel? actionVM = actionsIndex == -1 ? null : ActionListViewModel.ActionVMs[actionsIndex];
+        int actionsIndex = _actionCollection.ActionsAsSpan.RefIndexOfReverse(action);
+        ActionViewModel? actionVM = actionsIndex == -1 ? null : _actionListViewModel.ActionVMs[actionsIndex];
 
-        int actionsExlIndex = ActionCollection.ActionsExlKeyRepeatAsSpan.RefIndexOfReverse(action);
-        ActionViewModel? actionExlVM = actionsExlIndex == -1 ? null : ActionListViewModel.ActionsExlVMs[actionsExlIndex];
+        int actionsExlIndex = _actionCollection.ActionsExlKeyRepeatAsSpan.RefIndexOfReverse(action);
+        ActionViewModel? actionExlVM = actionsExlIndex == -1 ? null : _actionListViewModel.ActionsExlVMs[actionsExlIndex];
 
         return (actionVM, actionExlVM);
     }

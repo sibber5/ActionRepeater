@@ -32,10 +32,12 @@ public sealed class Recorder
     private readonly TimeConsistencyChecker _wheelMsgTCC = new();
 
     private readonly ActionCollection _actionCollection;
+    private readonly Func<nint> _getWindowHandle;
 
-    public Recorder(ActionCollection actionCollection)
+    public Recorder(ActionCollection actionCollection, Func<nint> getWindowHandle)
     {
         _actionCollection = actionCollection;
+        _getWindowHandle = getWindowHandle;
 
         // this *could* cause a memory leak *if* the action collection should live longer than this recorder instance,
         // *but* this will not happen with the current usage of these, as both are registered as a singleton.
@@ -75,7 +77,7 @@ public sealed class Recorder
     {
         if (!IsSubscribed)
         {
-            throw new InvalidOperationException($"Not currently registered for raw input. Call {nameof(Recorder)}.{nameof(Recorder.RegisterRawInput)}(IntPtr) to register.");
+            throw new InvalidOperationException($"Not currently registered for raw input. Call {nameof(Recorder)}.{nameof(Recorder.RegisterRawInput)}() to register.");
         }
 
         Restart();
@@ -111,8 +113,9 @@ public sealed class Recorder
         IsRecordingChanged?.Invoke(this, false);
     }
 
-    public void RegisterRawInput(IntPtr targetWindowHandle)
+    public void RegisterRawInput()
     {
+        nint targetWindowHandle = _getWindowHandle();
         var rid = new RAWINPUTDEVICE[]
         {
             new()

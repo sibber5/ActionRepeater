@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.UI.Dispatching;
+using ActionRepeater.UI.Services;
 
 namespace ActionRepeater.UI.Utilities;
 
@@ -17,14 +17,18 @@ public sealed class ObservablePropertyReverter<T>
     private readonly Func<T> _getProperty;
     private readonly Action<T> _setProperty;
 
-    private Action? _revertFunc;
-    private DispatcherQueueHandler? _revertDispatched;
+    private readonly IDispatcher _dispatcher;
 
-    public ObservablePropertyReverter(T previousValue, Func<T> getProperty, Action<T> setProperty)
+    private Action? _revertFunc;
+    private Action? _revertDispatched;
+
+    public ObservablePropertyReverter(T previousValue, Func<T> getProperty, Action<T> setProperty, IDispatcher dispatcher)
     {
         PreviousValue = previousValue;
         _getProperty = getProperty;
         _setProperty = setProperty;
+
+        _dispatcher = dispatcher;
     }
 
     public void Revert()
@@ -34,7 +38,7 @@ public sealed class ObservablePropertyReverter<T>
             var comparer = EqualityComparer<T>.Default;
             while (comparer.Equals(_getProperty(), PreviousValue)) { }
 
-            App.Current.MainWindow.DispatcherQueue.TryEnqueue(_revertDispatched ??= () =>
+            _dispatcher.Enqueue(_revertDispatched ??= () =>
             {
                 IsReverting = true;
                 _setProperty(PreviousValue);

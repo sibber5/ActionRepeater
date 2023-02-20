@@ -1,9 +1,9 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using ActionRepeater.Core.Extentions;
 using ActionRepeater.Core.Input;
 using ActionRepeater.UI.ViewModels;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
@@ -12,17 +12,22 @@ namespace ActionRepeater.UI.Views;
 
 public sealed partial class ActionListView : UserControl
 {
-    private readonly ActionListViewModel _vm;
+    private ActionListViewModel? _vm;
+    
+    public ActionListView() { }
 
-    // TODO: add multi item select (for deleting and maybe moving)
-    public ActionListView()
+    public void Initialize(ActionListViewModel vm, Recorder recorder, AddActionMenuItems addActionMenuItems)
     {
-        _vm = App.Current.Services.GetRequiredService<ActionListViewModel>();
-        _vm.ScrollToSelectedItem = ScrollToSelectedItem;
+        if (_vm is not null) throw new UnreachableException($"{nameof(ActionListView)} has already been initialized.");
 
-        App.Current.Services.GetRequiredService<Recorder>().ActionAdded += (_, _) => ActionList.ScrollIntoView(_vm.FilteredActions[^1]);
+        _vm = vm;
+        _vm._scrollToSelectedItem = ScrollToSelectedItem;
+
+        recorder.ActionAdded += (_, _) => ActionList.ScrollIntoView(_vm.FilteredActions[^1]);
 
         InitializeComponent();
+
+        addActionMenuItems.AddTo(_listFlyoutAdd.Items);
 
         _vm.PropertyChanged += ViewModel_PropertyChanged;
     }
@@ -31,7 +36,7 @@ public sealed partial class ActionListView : UserControl
     {
         if (nameof(_vm.SelectedActionIndex).Equals(e.PropertyName, StringComparison.Ordinal))
         {
-            bool isAnyItemSelected = _vm.SelectedActionIndex >= 0;
+            bool isAnyItemSelected = _vm!.SelectedActionIndex >= 0;
 
             _replaceMenuItem.KeyboardAccelerators[0].IsEnabled = isAnyItemSelected;
             _pasteMenuItem.KeyboardAccelerators[0].IsEnabled = !isAnyItemSelected;
@@ -46,7 +51,7 @@ public sealed partial class ActionListView : UserControl
     {
         if (((FrameworkElement)e.OriginalSource).DataContext is ActionViewModel actionItem)
         {
-            int rightClickedItemIdx = _vm.FilteredActions.RefIndexOfReverse(actionItem);
+            int rightClickedItemIdx = _vm!.FilteredActions.RefIndexOfReverse(actionItem);
             if (!ActionList.SelectedRanges.Any(x => rightClickedItemIdx >= x.FirstIndex && rightClickedItemIdx <= x.LastIndex))
             {
                 ActionList.SelectedIndex = rightClickedItemIdx;
@@ -74,14 +79,14 @@ public sealed partial class ActionListView : UserControl
 
         if (!ReferenceEquals(ActionList.SelectedItem, actionVM)) ActionList.SelectedItem = actionVM;
 
-        await _vm.EditSelectedAction();
+        await _vm!.EditSelectedAction();
     }
 
     private void ActionList_Tapped(object sender, TappedRoutedEventArgs e)
     {
         if (((FrameworkElement)e.OriginalSource).DataContext is ActionViewModel)
         {
-            _vm.SelectedRanges = ActionList.SelectedRanges;
+            _vm!.SelectedRanges = ActionList.SelectedRanges;
             return;
         }
 

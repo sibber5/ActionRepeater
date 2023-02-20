@@ -19,25 +19,21 @@ public sealed partial class HomePageViewModel : ObservableObject
 
     public bool CanAddAction => !_recorder.IsRecording;
 
-    private readonly ActionListViewModel _actionListViewModel;
-
     private readonly PathWindowService _pathWindowService;
 
     private readonly ActionCollection _actionCollection;
     private readonly Recorder _recorder;
     private readonly Player _player;
 
-    private readonly Microsoft.UI.Dispatching.DispatcherQueueHandler _onIsPlayingChanged;
+    private readonly Action _onIsPlayingChanged;
 
-    public HomePageViewModel(ActionListViewModel actionListVM, PathWindowService pathWindowService, ActionCollection actionCollection, Recorder recorder, Player player)
+    public HomePageViewModel(PathWindowService pathWindowService, ActionCollection actionCollection, ActionListViewModel actionListVM, Player player, Recorder recorder, IDispatcher dispatcher)
     {
-        _actionListViewModel = actionListVM;
-
         _pathWindowService = pathWindowService;
 
         _actionCollection = actionCollection;
-        _recorder = recorder;
         _player = player;
+        _recorder = recorder;
 
         _player.OnActionPlayed = actionListVM.UpdateSelectedAction;
 
@@ -54,7 +50,7 @@ public sealed partial class HomePageViewModel : ObservableObject
 
         _player.IsPlayingChanged += (_, _) =>
         {
-            App.Current.MainWindow.DispatcherQueue.TryEnqueue(_onIsPlayingChanged);
+            dispatcher.Enqueue(_onIsPlayingChanged);
         };
         _recorder.IsRecordingChanged += (_, _) =>
         {
@@ -73,7 +69,7 @@ public sealed partial class HomePageViewModel : ObservableObject
             return;
         }
 
-        if (!_recorder.IsSubscribed) _recorder.RegisterRawInput(App.Current.MainWindow.Handle);
+        if (!_recorder.IsSubscribed) _recorder.RegisterRawInput();
 
         _recorder.StartRecording();
     }

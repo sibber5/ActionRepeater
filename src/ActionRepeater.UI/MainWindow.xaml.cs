@@ -3,10 +3,10 @@ using System.Diagnostics;
 using System.IO;
 using ActionRepeater.Core.Input;
 using ActionRepeater.UI.Pages;
+using ActionRepeater.UI.Services;
 using ActionRepeater.UI.ViewModels;
 using ActionRepeater.Win32.WindowsAndMessages;
 using ActionRepeater.Win32.WindowsAndMessages.Utilities;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
@@ -25,24 +25,28 @@ public sealed partial class MainWindow : Window
     public const string HomeTag = "h";
     public const string OptionsTag = "o";
 
-    public IntPtr Handle { get; }
-
-    public XamlRoot GridXamlRoot => _grid.XamlRoot;
+    public nint Handle { get; }
 
     private readonly MainViewModel _vm;
 
-    private readonly WindowMessageMonitor _msgMonitor;
-
     private readonly Recorder _recorder;
+    private readonly HomePageParameter _homePageParameter;
+    private readonly OptionsPageParameter _optionsPageParameter;
+    private readonly WindowProperties _windowProperties;
+
+    private readonly WindowMessageMonitor _msgMonitor;
 
     private readonly AppWindow _appWindow;
 
     private readonly Thickness _titlebarOffset = new(33, 8, 0, 0);
     private readonly Windows.Graphics.RectInt32[] _dragRects = new Windows.Graphics.RectInt32[2];
 
-    public MainWindow()
+    public MainWindow(MainViewModel vm, Recorder recorder, HomePageParameter homePageParameter, OptionsPageParameter optionsPageParameter, WindowProperties windowProperties)
     {
         Handle = WinRT.Interop.WindowNative.GetWindowHandle(this);
+
+        windowProperties.Handle = Handle;
+        windowProperties.DispatcherQueue = DispatcherQueue;
 
         Title = WindowTitle;
         App.SetWindowSize(Handle, StartupWidth, StartupHeight);
@@ -64,8 +68,12 @@ public sealed partial class MainWindow : Window
         _msgMonitor = new(Handle);
         _msgMonitor.WindowMessageReceived += OnWindowMessageReceived;
 
-        _vm = App.Current.Services.GetRequiredService<MainViewModel>();
-        _recorder = App.Current.Services.GetRequiredService<Recorder>();
+        _vm = vm;
+
+        _recorder = recorder;
+        _homePageParameter = homePageParameter;
+        _optionsPageParameter = optionsPageParameter;
+        _windowProperties = windowProperties;
 
         InitializeComponent();
 
@@ -88,6 +96,11 @@ public sealed partial class MainWindow : Window
         // workaround because x:Bind-ing isnt working for some reason (it seems to bind after the window loses focus for the first time?)
         _openMenuItem.Command = _vm.ImportActionsCommand;
         _saveMenuItem.Command = _vm.ExportActionsCommand;
+    }
+
+    private void Grid_Loaded(object sender, RoutedEventArgs e)
+    {
+        _windowProperties.XamlRoot = _grid.XamlRoot;
     }
 
     private void SetTitleBarColors()
@@ -178,11 +191,11 @@ public sealed partial class MainWindow : Window
         switch (tag)
         {
             case HomeTag:
-                _contentFrame.Navigate(typeof(HomePage), null, navInfo);
+                _contentFrame.Navigate(typeof(HomePage), _homePageParameter, navInfo);
                 break;
 
             case OptionsTag:
-                _contentFrame.Navigate(typeof(OptionsPage), null, navInfo);
+                _contentFrame.Navigate(typeof(OptionsPage), _optionsPageParameter, navInfo);
                 break;
         }
     }

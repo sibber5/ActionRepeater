@@ -1,5 +1,6 @@
-﻿using ActionRepeater.UI.ViewModels;
-using Microsoft.Extensions.DependencyInjection;
+﻿using ActionRepeater.Core.Input;
+using ActionRepeater.UI.ViewModels;
+using ActionRepeater.UI.Views;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 
@@ -7,18 +8,31 @@ namespace ActionRepeater.UI.Pages;
 
 public sealed partial class HomePage : Page
 {
-    private readonly HomePageViewModel _vm;
+    private HomePageViewModel? _vm;
 
     public HomePage()
     {
         NavigationCacheMode = NavigationCacheMode.Required;
+    }
 
-        _vm = App.Current.Services.GetRequiredService<HomePageViewModel>();
+    protected override void OnNavigatedTo(NavigationEventArgs e)
+    {
+        if (_vm is null)
+        {
+            (HomePageViewModel vm, AddActionMenuItems addActionMenuItems, Recorder recorder, ActionListViewModel actionListVM) = (HomePageParameter)e.Parameter;
 
-        InitializeComponent();
+            _vm = vm;
 
-        _repeatActionsNumBox.NumberFormatter = Helpers.NumberFormatterHelper.RoundToOneFormatter;
+            InitializeComponent();
+            _actionList.Initialize(actionListVM, recorder, addActionMenuItems);
 
-        App.Current.Services.GetRequiredService<Core.Input.Recorder>().ShouldRecordMouseClick ??= () => _recordButton.IsPointerOver;
+            addActionMenuItems.AddTo(_actionsMenuFlyout.Items);
+
+            _repeatActionsNumBox.NumberFormatter = Helpers.NumberFormatterHelper.RoundToOneFormatter;
+
+            recorder.ShouldRecordMouseClick ??= () => _recordButton.IsPointerOver;
+        }
+
+        base.OnNavigatedTo(e);
     }
 }

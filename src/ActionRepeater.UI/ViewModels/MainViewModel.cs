@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using ActionRepeater.Core.Extentions;
 using ActionRepeater.Core.Helpers;
 using ActionRepeater.Core.Input;
-using ActionRepeater.UI.Helpers;
 using ActionRepeater.UI.Services;
 using CommunityToolkit.Mvvm.Input;
 
@@ -13,12 +12,21 @@ public sealed partial class MainViewModel
 {
     private readonly ContentDialogService _contentDialogService;
     private readonly ActionCollection _actionCollection;
+    private readonly IFilePicker _filePicker;
 
-    public MainViewModel(ContentDialogService contentDialogService, ActionCollection actionCollection)
+    private readonly (string typeName, string[] typeExtensions)[] _saveFileTypes = new[]
+    {
+        ("ActionRepeater Actions", new[] { ".ara" }),
+        ("JSON", new[] { ".json" })
+    };
+
+    private readonly string[] _loadFileTypes = new[] { ".ara" };
+
+    public MainViewModel(ContentDialogService contentDialogService, ActionCollection actionCollection, IFilePicker filePicker)
     {
         _contentDialogService = contentDialogService;
         _actionCollection = actionCollection;
-
+        _filePicker = filePicker;
         _actionCollection.ActionsCountChanged += (_, _) => ExportActionsCommand.NotifyCanExecuteChanged();
     }
 
@@ -31,8 +39,7 @@ public sealed partial class MainViewModel
             return;
         }
 
-        var file = await FilePickerHelper.PickSaveFileAsync();
-        if (file is null) return;
+        var file = await _filePicker.PickSaveFileAsync(_saveFileTypes);
 
         ActionData dat = new(_actionCollection.Actions, _actionCollection.CursorPathStart, _actionCollection.CursorPath);
 
@@ -43,8 +50,7 @@ public sealed partial class MainViewModel
     [RelayCommand]
     private async Task ImportActions()
     {
-        var file = await FilePickerHelper.PickSingleFileAsync();
-        if (file is null) return;
+        var file = await _filePicker.PickSingleFileAsync(_loadFileTypes);
 
         ActionData? data = null;
         try

@@ -8,9 +8,11 @@ using System.Threading.Tasks;
 using ActionRepeater.Core.Helpers;
 using ActionRepeater.Core.Input;
 using ActionRepeater.UI.Factories;
+using ActionRepeater.UI.Pages;
 using ActionRepeater.UI.Services;
 using ActionRepeater.UI.Utilities;
 using ActionRepeater.UI.ViewModels;
+using ActionRepeater.UI.Views;
 using ActionRepeater.Win32;
 using ActionRepeater.Win32.Synch.Utilities;
 using ActionRepeater.Win32.WindowsAndMessages;
@@ -24,16 +26,17 @@ namespace ActionRepeater.UI;
 /// </summary>
 public partial class App : Application
 {
-    public static new App Current => (App)Application.Current;
-
     public static string AppDataOptionsDir => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), nameof(ActionRepeater));
     public static string OptionsFileName => "Options.json";
 
-    public MainWindow MainWindow { get; private set; } = null!;
-
     public IServiceProvider Services { get; }
 
+    private static new App Current => (App)Application.Current;
+
+    private MainWindow _mainWindow = null!;
+
     private readonly ContentDialogService _contentDialogService;
+    private readonly IDispatcher _dispatcher;
 
     private bool _saveOnExit = true;
 
@@ -52,6 +55,7 @@ public partial class App : Application
         Services = ConfigureServices();
 
         _contentDialogService = Services.GetRequiredService<ContentDialogService>();
+        _dispatcher = Services.GetRequiredService<IDispatcher>();
 
         InitializeComponent();
 
@@ -94,11 +98,18 @@ public partial class App : Application
         services.AddTransient<HighResolutionWaiter>();
 
         services.AddSingleton<ActionCollection>();
-        services.AddSingleton<Recorder>();
+        services.AddSingleton<Recorder>((s) =>
+        {
+            var windowProps = s.GetRequiredService<WindowProperties>();
+            return new(s.GetRequiredService<ActionCollection>(), () => windowProps.Handle);
+        });
         services.AddSingleton<Player>();
 
         services.AddSingleton<PathWindowService>();
         services.AddSingleton<ContentDialogService>();
+
+        services.AddSingleton<IFilePicker, FilePicker>();
+        services.AddSingleton<IDispatcher, WinUIDispatcher>();
 
         services.AddSingleton<MainViewModel>();
         services.AddSingleton<ActionListViewModel>();
@@ -106,6 +117,13 @@ public partial class App : Application
         services.AddSingleton<OptionsPageViewModel>();
 
         services.AddSingleton<EditActionViewModelFactory>();
+
+        services.AddSingleton<AddActionMenuItems>();
+        services.AddSingleton<HomePageParameter>();
+        services.AddSingleton<OptionsPageParameter>();
+        services.AddSingleton<MainWindow>();
+
+        services.AddSingleton<WindowProperties>();
 
         return services.BuildServiceProvider();
     }
@@ -117,23 +135,19 @@ public partial class App : Application
     /// <param name="args">Details about the launch request and process.</param>
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
-        MainWindow = new();
+        _mainWindow = Services.GetRequiredService<MainWindow>();
 
-        // XamlRoot has to be set after Content has loaded
-        ((FrameworkElement)MainWindow.Content).Loaded += static async (_, _) =>
+        ((FrameworkElement)_mainWindow.Content).Loaded += static async (_, _) =>
         {
-            Current._contentDialogService.XamlRoot = App.Current.MainWindow.GridXamlRoot;
-            System.Diagnostics.Debug.WriteLine("XamlRoot set.");
-
             if (Current._loadingOptionsException is not null)
             {
                 await Current._contentDialogService.ShowErrorDialog("Could not load options", Current._loadingOptionsException.Message);
             }
         };
 
-        MainWindow.Closed += MainWindow_Closed;
+        _mainWindow.Closed += MainWindow_Closed;
 
-        MainWindow.Activate();
+        _mainWindow.Activate();
     }
 
     private async void MainWindow_Closed(object sender, WindowEventArgs args)
@@ -157,7 +171,8 @@ public partial class App : Application
             {
                 _optsFileLocReverter = new(UIOptions.Instance.OptionsFileLocation,
                                            static () => UIOptions.Instance.OptionsFileLocation,
-                                           static (val) => UIOptions.Instance.OptionsFileLocation = val);
+                                           static (val) => UIOptions.Instance.OptionsFileLocation = val,
+                                           _dispatcher);
             }
             else
             {
@@ -182,7 +197,8 @@ public partial class App : Application
             {
                 _themeOptionReverter = new(UIOptions.Instance.Theme,
                                            static () => UIOptions.Instance.Theme,
-                                           static (val) => UIOptions.Instance.Theme = val);
+                                           static (val) => UIOptions.Instance.Theme = val,
+                                           _dispatcher);
             }
             else
             {
