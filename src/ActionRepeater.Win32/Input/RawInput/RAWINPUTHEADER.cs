@@ -26,7 +26,7 @@ public struct RAWINPUTHEADER
     /// <para>Type: <b>HANDLE</b> A handle to the device generating the raw input data.</para>
     /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/ns-winuser-rawinputheader#members">Read more on docs.microsoft.com</see>.</para>
     /// </summary>
-    public IntPtr hDevice;
+    public nint hDevice;
     /// <summary>
     /// <para>Type: <b>WPARAM</b> The value passed in the <i>wParam</i> parameter of the <see cref="WindowsAndMessages.WindowMessage.INPUT"/> message.</para>
     /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/ns-winuser-rawinputheader#members">Read more on docs.microsoft.com</see>.</para>

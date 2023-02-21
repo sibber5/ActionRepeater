@@ -8,15 +8,15 @@ namespace ActionRepeater.Win32.Synch.Utilities;
 
 public sealed class HighResolutionWaiter : IDisposable
 {
-    private IntPtr _timerHandle;
+    private nint _timerHandle;
     private bool _isWaiting;
 
     private bool _disposed;
 
     public HighResolutionWaiter()
     {
-        _timerHandle = CreateWaitableTimerEx(IntPtr.Zero, null, WaitableTimerFlags.HIGH_RESOLUTION, AccessRights.DELETE | AccessRights.SYNCHRONIZE | AccessRights.TIMER_MODIFY_STATE);
-        if (_timerHandle == IntPtr.Zero)
+        _timerHandle = CreateWaitableTimerEx(nint.Zero, null, WaitableTimerFlags.HIGH_RESOLUTION, AccessRights.DELETE | AccessRights.SYNCHRONIZE | AccessRights.TIMER_MODIFY_STATE);
+        if (_timerHandle == nint.Zero)
         {
             throw new Win32Exception();
         }
@@ -87,7 +87,7 @@ public sealed class HighResolutionWaiter : IDisposable
         if (_disposed) return;
 
         CloseHandle(_timerHandle);
-        _timerHandle = IntPtr.Zero;
+        _timerHandle = nint.Zero;
 
         _disposed = true;
     }

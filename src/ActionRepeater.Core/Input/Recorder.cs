@@ -151,14 +151,14 @@ public sealed class Recorder
                 usUsagePage = UsagePage.GenericDesktopControl,
                 usUsage = UsageId.Mouse,
                 dwFlags = RawInputFlags.REMOVE,
-                hwndTarget = IntPtr.Zero // hwndTarget must be IntPtr.Zero when RawInputFlags.REMOVE is set
+                hwndTarget = nint.Zero // hwndTarget must be nint.Zero when RawInputFlags.REMOVE is set
             },
             new()
             {
                 usUsagePage = UsagePage.GenericDesktopControl,
                 usUsage = UsageId.Keyboard,
                 dwFlags = RawInputFlags.REMOVE,
-                hwndTarget = IntPtr.Zero
+                hwndTarget = nint.Zero
             }
         };
 

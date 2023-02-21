@@ -341,13 +341,13 @@ public partial class App : Application
     /// <summary>
     /// Win32 uses pixels and WinUI 3 uses effective pixels, so this method returns the dpi scale factor.
     /// </summary>
-    public static float GetWindowScalingFactor(IntPtr hwnd)
+    public static float GetWindowScalingFactor(nint hwnd)
     {
         uint dpi = PInvoke.GetDpiForWindow(hwnd);
         return dpi / 96f;
     }
 
-    public static void SetWindowSize(IntPtr hwnd, int width, int height)
+    public static void SetWindowSize(nint hwnd, int width, int height)
     {
         float scalingFactor = GetWindowScalingFactor(hwnd);
         width = (int)(width * scalingFactor);

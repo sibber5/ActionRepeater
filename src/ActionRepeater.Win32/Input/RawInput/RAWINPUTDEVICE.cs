@@ -5,7 +5,7 @@ namespace ActionRepeater.Win32.Input;
 /// <summary>Defines information for the raw input devices.</summary>
 /// <remarks>
 /// <para>If <see cref="RawInputFlags.NOLEGACY"/> is set for a mouse or a keyboard, the system does not generate any legacy message for that device for the application. For example, if the mouse TLC is set with <see cref="RawInputFlags.NOLEGACY"/>, <see cref="WindowsAndMessages.WindowMessage.LBUTTONDOWN"/> and <a href="https://docs.microsoft.com/windows/win32/inputdev/mouse-input-notifications">related legacy mouse messages</a> are not generated. Likewise, if the keyboard TLC is set with <see cref="RawInputFlags.NOLEGACY"/>, <see cref="WindowsAndMessages.WindowMessage.KEYDOWN"/> and <a href="https://docs.microsoft.com/windows/win32/inputdev/keyboard-input-notifications">related legacy keyboard messages</a> are not generated.</para>
-/// <para>If <see cref="RawInputFlags.REMOVE"/> is set and the <paramref name="hwndTarget"/> member is not set to <b>NULL</b> (<see cref="IntPtr.Zero"/>), then <see href="https://docs.microsoft.com/windows/win32/api/winuser/nf-winuser-registerrawinputdevices">RegisterRawInputDevices</see> function will fail.</para>
+/// <para>If <see cref="RawInputFlags.REMOVE"/> is set and the <paramref name="hwndTarget"/> member is not set to <b>NULL</b> (<see cref="nint.Zero"/>), then <see href="https://docs.microsoft.com/windows/win32/api/winuser/nf-winuser-registerrawinputdevices">RegisterRawInputDevices</see> function will fail.</para>
 /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/ns-winuser-rawinputdevice#">Read more on docs.microsoft.com</see>.</para>
 /// </remarks>
 public struct RAWINPUTDEVICE
@@ -28,8 +28,8 @@ public struct RAWINPUTDEVICE
     /// </summary>
     public RawInputFlags dwFlags;
     /// <summary>
-    /// <para>Type: <b>HWND</b> A handle to the target window. If <b>NULL</b> (<see cref="IntPtr.Zero"/>) it follows the keyboard focus.</para>
+    /// <para>Type: <b>HWND</b> A handle to the target window. If <b>NULL</b> (<see cref="nint.Zero"/>) it follows the keyboard focus.</para>
     /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/ns-winuser-rawinputdevice#members">Read more on docs.microsoft.com</see>.</para>
     /// </summary>
-    public IntPtr hwndTarget;
+    public nint hwndTarget;
 }

@@ -80,7 +80,7 @@ public static partial class PInvoke
     [LibraryImport("User32")]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     [SupportedOSPlatform("windows10.0.14393")]
-    public static partial uint GetDpiForWindow(IntPtr hwnd);
+    public static partial uint GetDpiForWindow(nint hwnd);
 
     /// <summary>Changes the size, position, and Z order of a child, pop-up, or top-level window. These windows are ordered according to their appearance on the screen. The topmost window receives the highest rank and is the first window in the Z order.</summary>
     /// <param name="hWnd">
@@ -116,7 +116,7 @@ public static partial class PInvoke
     [LibraryImport("User32", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, SetWindowPosFlags uFlags);
+    public static partial bool SetWindowPos(nint hWnd, nint hWndInsertAfter, int X, int Y, int cx, int cy, SetWindowPosFlags uFlags);
 
     /// <inheritdoc cref="RegisterRawInputDevices"/>
     public static unsafe bool RegisterRawInputDevices(Span<RAWINPUTDEVICE> pRawInputDevices) => RegisterRawInputDevices(pRawInputDevices, (uint)pRawInputDevices.Length, (uint)RAWINPUTDEVICE.SIZE);
@@ -170,7 +170,7 @@ public static partial class PInvoke
     /// </remarks>
     [LibraryImport("ComCtl32")]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    public static partial nint DefSubclassProc(IntPtr hWnd, uint uMsg, nuint wParam, nint lParam);
+    public static partial nint DefSubclassProc(nint hWnd, uint uMsg, nuint wParam, nint lParam);
 
     /// <summary>Installs or updates a window subclass callback.</summary>
     /// <param name="hWnd">
@@ -198,7 +198,7 @@ public static partial class PInvoke
     [LibraryImport("ComCtl32")]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool SetWindowSubclass(IntPtr hWnd, SUBCLASSPROC pfnSubclass, nuint uIdSubclass, nuint dwRefData);
+    public static partial bool SetWindowSubclass(nint hWnd, SUBCLASSPROC pfnSubclass, nuint uIdSubclass, nuint dwRefData);
 
     /// <summary>Removes a subclass callback from a window.</summary>
     /// <param name="hWnd">
@@ -222,7 +222,7 @@ public static partial class PInvoke
     [LibraryImport("ComCtl32")]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool RemoveWindowSubclass(IntPtr hWnd, SUBCLASSPROC pfnSubclass, nuint uIdSubclass);
+    public static partial bool RemoveWindowSubclass(nint hWnd, SUBCLASSPROC pfnSubclass, nuint uIdSubclass);
 
     /// <summary>Calls the default window procedure to provide default processing for any window messages that an application does not process.</summary>
     /// <param name="hWnd">
@@ -249,7 +249,7 @@ public static partial class PInvoke
     /// </remarks>
     [LibraryImport("User32", EntryPoint = "DefWindowProcW")]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    public static partial nint DefWindowProc(IntPtr hWnd, uint Msg, nuint wParam, nint lParam);
+    public static partial nint DefWindowProc(nint hWnd, uint Msg, nuint wParam, nint lParam);
 
     /// <summary>Retrieves the raw input from the specified device.</summary>
     /// <para>Type: <b>HRAWINPUT</b> A handle to the <a href="https://docs.microsoft.com/windows/desktop/api/winuser/ns-winuser-rawinput">RAWINPUT</a> structure. This comes from the <i>lParam</i> in <see cref="WindowMessage.INPUT"/>.</para>
@@ -321,7 +321,7 @@ public static partial class PInvoke
     [LibraryImport("User32")]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static unsafe partial bool EnumDisplayMonitors(IntPtr hdc, IntPtr lprcClip, MONITORENUMPROC lpfnEnum, nint dwData);
+    public static unsafe partial bool EnumDisplayMonitors(nint hdc, nint lprcClip, MONITORENUMPROC lpfnEnum, nint dwData);
 
     /// <summary>Sets the value of Desktop Window Manager (DWM) non-client rendering attributes for a window.</summary>
     /// <param name="hwnd">The handle to the window for which the attribute value is to be set.</param>
@@ -336,7 +336,7 @@ public static partial class PInvoke
     /// </remarks>
     [LibraryImport("DwmApi")]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    public static unsafe partial int DwmSetWindowAttribute(IntPtr hwnd, uint dwAttribute, void* pvAttribute, uint cbAttribute);
+    public static unsafe partial int DwmSetWindowAttribute(nint hwnd, uint dwAttribute, void* pvAttribute, uint cbAttribute);
 
     /// <summary>Retrieves or sets the value of one of the system-wide parameters.</summary>
     /// <param name="uiAction">
@@ -406,7 +406,7 @@ public static partial class PInvoke
     /// </remarks>
     [LibraryImport("Kernel32", EntryPoint = "CreateWaitableTimerExW", StringMarshalling = StringMarshalling.Utf16, SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    public static unsafe partial IntPtr CreateWaitableTimerEx(IntPtr lpTimerAttributes, string? lpTimerName, WaitableTimerFlags dwFlags, AccessRights dwDesiredAccess);
+    public static unsafe partial nint CreateWaitableTimerEx(nint lpTimerAttributes, string? lpTimerName, WaitableTimerFlags dwFlags, AccessRights dwDesiredAccess);
 
     /// <summary>Activates the specified waitable timer. When the due time arrives, the timer is signaled and the thread that set the timer calls the optional completion routine.</summary>
     /// <param name="hTimer">
@@ -437,7 +437,7 @@ public static partial class PInvoke
     [LibraryImport("Kernel32", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static unsafe partial bool SetWaitableTimer(IntPtr hTimer, long* lpDueTime, int lPeriod, PTIMERAPCROUTINE? pfnCompletionRoutine, void* lpArgToCompletionRoutine, [MarshalAs(UnmanagedType.Bool)] bool fResume);
+    public static unsafe partial bool SetWaitableTimer(nint hTimer, long* lpDueTime, int lPeriod, PTIMERAPCROUTINE? pfnCompletionRoutine, void* lpArgToCompletionRoutine, [MarshalAs(UnmanagedType.Bool)] bool fResume);
 
     /// <summary>Waits until the specified object is in the signaled state or the time-out interval elapses.</summary>
     /// <param name="hHandle">
@@ -458,7 +458,7 @@ public static partial class PInvoke
     /// </remarks>
     [LibraryImport("Kernel32", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    public static partial WaitResult WaitForSingleObject(IntPtr hHandle, uint dwMilliseconds);
+    public static partial WaitResult WaitForSingleObject(nint hHandle, uint dwMilliseconds);
 
     /// <summary>Closes an open object handle.</summary>
     /// <param name="hObject">A valid handle to an open object.</param>
@@ -471,5 +471,5 @@ public static partial class PInvoke
     [LibraryImport("Kernel32", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool CloseHandle(IntPtr hObject);
+    public static partial bool CloseHandle(nint hObject);
 }

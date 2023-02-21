@@ -36,7 +36,7 @@ public enum RawInputFlags : uint
     /// </summary>
     CAPTUREMOUSE = 0x00000200u,
     /// <summary>
-    /// If set, the application-defined keyboard device hotkeys are not handled. However, the system hotkeys; for example, ALT+TAB and CTRL+ALT+DEL, are still handled. By default, all keyboard hotkeys are handled. <see cref="NOHOTKEYS"/> can be specified even if <see cref="NOLEGACY"/> is not specified and <paramref name="hwndTarget"/> is <see cref="IntPtr.Zero"/>.
+    /// If set, the application-defined keyboard device hotkeys are not handled. However, the system hotkeys; for example, ALT+TAB and CTRL+ALT+DEL, are still handled. By default, all keyboard hotkeys are handled. <see cref="NOHOTKEYS"/> can be specified even if <see cref="NOLEGACY"/> is not specified and <paramref name="hwndTarget"/> is <see cref="nint.Zero"/>.
     /// </summary>
     NOHOTKEYS = 0x00000200u,
     /// <summary>

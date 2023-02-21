@@ -30,7 +30,7 @@ namespace ActionRepeater.Win32.WindowsAndMessages.Utilities;
 /// </summary>
 public sealed class WindowMessageMonitor : IDisposable
 {
-    private readonly IntPtr _hwnd = IntPtr.Zero;
+    private readonly nint _hwnd = nint.Zero;
     private SUBCLASSPROC? callback;
     private readonly object _lockObject = new();
 
@@ -38,7 +38,7 @@ public sealed class WindowMessageMonitor : IDisposable
     /// Initialize a new instance of the <see cref="WindowMessageMonitor"/> class.
     /// </summary>
     /// <param name="hwnd">The window handle to listen to messages for</param>
-    public WindowMessageMonitor(IntPtr hwnd)
+    public WindowMessageMonitor(nint hwnd)
     {
         _hwnd = hwnd;
     }
@@ -73,7 +73,7 @@ public sealed class WindowMessageMonitor : IDisposable
         }
     }
 
-    private nint NewWindowProc(IntPtr hWnd, uint uMsg, nuint wParam, nint lParam, nuint uIdSubclass, nuint dwRefData)
+    private nint NewWindowProc(nint hWnd, uint uMsg, nuint wParam, nint lParam, nuint uIdSubclass, nuint dwRefData)
     {
         if (_windowMessageReceived is not null)
         {

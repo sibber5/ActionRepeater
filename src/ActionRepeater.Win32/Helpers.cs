@@ -71,7 +71,7 @@ public static partial class PInvoke
             return result;
         }
 
-        public static unsafe void SetWindowImmersiveDarkMode(IntPtr hWnd, bool enabled)
+        public static unsafe void SetWindowImmersiveDarkMode(nint hWnd, bool enabled)
         {
             const uint DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
             int isEnabled = enabled ? 1 : 0;

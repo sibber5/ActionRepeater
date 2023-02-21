@@ -30,7 +30,7 @@ namespace ActionRepeater.Win32.WindowsAndMessages.Utilities;
 /// </summary>
 public sealed class WindowMessageEventArgs : EventArgs
 {
-    internal WindowMessageEventArgs(IntPtr hwnd, uint messageId, nuint wParam, nint lParam)
+    internal WindowMessageEventArgs(nint hwnd, uint messageId, nuint wParam, nint lParam)
     {
         Message = new MSG()
         {

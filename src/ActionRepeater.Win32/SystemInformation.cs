@@ -46,8 +46,8 @@ public static class SystemInformation
 
         List<Rectangle> monitors = new();
         PInvoke.EnumDisplayMonitors(
-            IntPtr.Zero,
-            IntPtr.Zero,
+            nint.Zero,
+            nint.Zero,
             (hMonitor, hdcm, pRect, lParam) =>
             {
                 var rect = Marshal.PtrToStructure<RECT>(pRect);
