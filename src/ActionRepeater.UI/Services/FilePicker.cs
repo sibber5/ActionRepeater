@@ -14,7 +14,7 @@ public sealed class FilePicker : IFilePicker
         _windowProperties = windowProperties;
     }
 
-    public async Task<FileInfo> PickSaveFileAsync(params (string typeName, string[] typeExtensions)[] fileTypeChoices)
+    public async Task<FileInfo?> PickSaveFileAsync(params (string typeName, string[] typeExtensions)[] fileTypeChoices)
     {
         FileSavePicker savePicker = new()
         {
@@ -29,11 +29,11 @@ public sealed class FilePicker : IFilePicker
             savePicker.FileTypeChoices.Add(typeName, typeExtensions);
         }
 
-        StorageFile file = await savePicker.PickSaveFileAsync();
-        return new(file.Name, file.Path);
+        StorageFile? file = await savePicker.PickSaveFileAsync();
+        return file is null ? null : new(file.Name, file.Path);
     }
 
-    public async Task<FileInfo> PickSingleFileAsync(params string[] fileTypeFilter)
+    public async Task<FileInfo?> PickSingleFileAsync(params string[] fileTypeFilter)
     {
         FileOpenPicker openPicker = new();
 
@@ -45,7 +45,7 @@ public sealed class FilePicker : IFilePicker
             openPicker.FileTypeFilter.Add(extension);
         }
 
-        StorageFile file = await openPicker.PickSingleFileAsync();
-        return new(file.Name, file.Path);
+        StorageFile? file = await openPicker.PickSingleFileAsync();
+        return file is null ? null : new(file.Name, file.Path);
     }
 }

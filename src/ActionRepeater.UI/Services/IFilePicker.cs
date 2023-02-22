@@ -4,7 +4,7 @@ namespace ActionRepeater.UI.Services;
 
 public interface IFilePicker
 {
-    Task<FileInfo> PickSaveFileAsync(params (string typeName, string[] typeExtensions)[] fileTypeChoices);
+    Task<FileInfo?> PickSaveFileAsync(params (string typeName, string[] typeExtensions)[] fileTypeChoices);
 
-    Task<FileInfo> PickSingleFileAsync(params string[] fileTypeFilter);
+    Task<FileInfo?> PickSingleFileAsync(params string[] fileTypeFilter);
 }

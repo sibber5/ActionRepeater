@@ -40,6 +40,7 @@ public sealed partial class MainViewModel
         }
 
         var file = await _filePicker.PickSaveFileAsync(_saveFileTypes);
+        if (file is null) return;
 
         ActionData dat = new(_actionCollection.Actions, _actionCollection.CursorPathStart, _actionCollection.CursorPath);
 
@@ -51,6 +52,7 @@ public sealed partial class MainViewModel
     private async Task ImportActions()
     {
         var file = await _filePicker.PickSingleFileAsync(_loadFileTypes);
+        if (file is null) return;
 
         ActionData? data = null;
         try
