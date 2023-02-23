@@ -238,7 +238,7 @@ public sealed partial class ActionListViewModel : ObservableObject
     {
         if (SelectedAction is null) return;
 
-        if (_actionCollection.HasActionBeenModified(SelectedAction))
+        if (_actionCollection.IsAggregateAction(SelectedAction))
         {
             ContentDialogResult result = await _contentDialogService.ShowYesNoMessageDialog("Are you sure you want to remove this action?",
                 $"This action represents multiple hidden actions (because \"{nameof(ShowKeyRepeatActions)}\" is off).{Environment.NewLine}If you remove it the multiple actions it represents will also be removed.");
@@ -271,7 +271,7 @@ public sealed partial class ActionListViewModel : ObservableObject
 
         var selectedActions = GetSelectedActions().ToArray();
 
-        if (selectedActions.Any(_actionCollection.HasActionBeenModified))
+        if (selectedActions.Any(_actionCollection.IsAggregateAction))
         {
             ContentDialogResult result = await _contentDialogService.ShowYesNoMessageDialog("Are you sure you want to remove these actions?",
                 $"One or more of the selected actions represents multiple hidden actions (because \"{nameof(ShowKeyRepeatActions)}\" is off).{Environment.NewLine}If you remove it the multiple actions it represents will also be removed.");

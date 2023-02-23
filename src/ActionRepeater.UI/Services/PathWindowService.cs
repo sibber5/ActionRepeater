@@ -62,7 +62,7 @@ public sealed partial class PathWindowService : IDisposable
         _pathWindowWrapper.CloseWindow();
     }
 
-    // TODO: Fix cursor path being "delayed" while path window is open
+    // TODO: Fix cursor path being inaccurate while path window is open
     private void RunUpdatePathWindowTask()
     {
         _updatePathWindowTask ??= async ValueTask () =>

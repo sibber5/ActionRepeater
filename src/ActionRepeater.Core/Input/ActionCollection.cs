@@ -14,19 +14,16 @@ namespace ActionRepeater.Core.Input;
 // TODO: Refactor/Rewrite this shit (ActionCollection)
 public sealed partial class ActionCollection : ICollection<InputAction>
 {
-    public const string ActionTiedToModifiedActMsg = "The specified action is tied to a modified action (an action that represents multiple actions, e.g. a wait action that represents key auto repeat actions).";
+    public const string ActionTiedToAggregateActionMsg = "The specified action is an aggregate action (an action that represents multiple actions, e.g. a wait action that represents key auto repeat actions).";
 
     // TODO: refactor cursor path stuff to a seperate class
     public event EventHandler<MouseMovement?>? CursorPathStartChanged;
-
     public event NotifyCollectionChangedEventHandler? ActionsCountChanged;
-
     public event NotifyCollectionChangedEventHandler? ActionCollectionChanged
     {
         add => _actions.CollectionChanged += value;
         remove => _actions.CollectionChanged -= value;
     }
-
 
     private MouseMovement? _cursorPathStart;
     /// <summary>
@@ -48,7 +45,6 @@ public sealed partial class ActionCollection : ICollection<InputAction>
             CursorPathStartChanged?.Invoke(this, value);
         }
     }
-
     public List<MouseMovement> CursorPath { get; } = new();
 
     public IReadOnlyList<InputAction> Actions => _actions;
@@ -85,16 +81,15 @@ public sealed partial class ActionCollection : ICollection<InputAction>
     private bool _refillActions;
     private bool _isRefillingActions; // used to prevent triggering refilling the actions from the getter while refilling the actions.
 
-    /// <inheritdoc cref="ModifiedExlActionsIndeciesList"/>
-    private readonly ModifiedExlActionsIndeciesList _moddedExlActsIdxs;
-
+    /// <inheritdoc cref="AggregateActionList"/>
+    private readonly AggregateActionList _aggregateActions;
 
     private readonly StopwatchSlim _actsExlNCCStopwatch = new();
     private NotifyCollectionChangedAction _lastActionsExlNCCAction = (NotifyCollectionChangedAction)(-1);
 
     public ActionCollection()
     {
-        _moddedExlActsIdxs = new(_actions, _actionsExlKeyRepeat);
+        _aggregateActions = new(_actions, _actionsExlKeyRepeat);
 
         _actionsExlKeyRepeat.CollectionChanged += (_, e) =>
         {
@@ -176,7 +171,6 @@ public sealed partial class ActionCollection : ICollection<InputAction>
         }
     }
 
-
     public void LoadActionData(ActionData data)
     {
         Clear();
@@ -207,7 +201,7 @@ public sealed partial class ActionCollection : ICollection<InputAction>
     {
         _actionsExlKeyRepeat.SuppressNotifications = true;
         _actionsExlKeyRepeat.Clear();
-        _moddedExlActsIdxs.Clear();
+        _aggregateActions.Clear();
 
         var actionsSpan = _actions.AsSpan();
         for (int i = 0; i < actionsSpan.Length; ++i)
@@ -271,7 +265,6 @@ public sealed partial class ActionCollection : ICollection<InputAction>
         _actions.SuppressNotifications = false;
     }
 
-    // TODO: Implement ActionCollection.Insert
     public void Add(InputAction item) => Add(item, false);
 
     public void Add(InputAction item, bool addAutoRepeatIfActIsKeyUp)
@@ -319,30 +312,30 @@ public sealed partial class ActionCollection : ICollection<InputAction>
     /// <returns>The message if removing failed, otherwise null.</returns>
     public string? TryRemove(InputAction action, bool mergeWaitActions = true)
     {
-        int exlIndex = _moddedExlActsIdxs.IndexOfModifiedAction(action);
-        if (exlIndex != -1)
+        int exlIndex = _actionsExlKeyRepeat.AsSpan().RefIndexOfReverse(action);
+
+        if (_aggregateActions.Contains(action))
         {
-            var (startIdx, count) = _moddedExlActsIdxs.GetRangeTiedToModifiedActionIdx(exlIndex);
+            var (startIndex, length) = _aggregateActions.GetRangeTiedToAggregateAction(exlIndex);
 
             _actions.SuppressNotifications = true;
-            for (int i = 0; i < count; i++)
+            for (int i = 0; i < length; i++)
             {
-                _actions.RemoveAt(startIdx);
+                _actions.RemoveAt(startIndex);
             }
             _actions.SuppressNotifications = false;
 
             _actionsExlKeyRepeat.RemoveAt(exlIndex);
-            _moddedExlActsIdxs.Remove(exlIndex);
+            _aggregateActions.Remove(action);
 
             return null;
         }
 
-        if (_moddedExlActsIdxs.IsActionTiedToModifiedAction(action)) return ActionTiedToModifiedActMsg;
+        if (_aggregateActions.IsActionTiedToAggregateAction(action)) return ActionTiedToAggregateActionMsg;
 
         int idx = _actions.AsSpan().RefIndexOfReverse(action);
-        int exlIdx = _actionsExlKeyRepeat.AsSpan().RefIndexOfReverse(action);
 
-        if (idx == -1 || exlIdx == -1) return "Action does not exist in collection.";
+        if (idx == -1 || exlIndex == -1) return "Action does not exist in collection.";
 
         if (action is KeyAction { ActionType: KeyActionType.KeyDown })
         {
@@ -350,38 +343,38 @@ public sealed partial class ActionCollection : ICollection<InputAction>
         }
 
         _actions.RemoveAt(idx);
-        _actionsExlKeyRepeat.RemoveAt(exlIdx);
+        _actionsExlKeyRepeat.RemoveAt(exlIndex);
 
         // merge adjacent wait actions
         if (mergeWaitActions
-            && idx < _actions.Count && exlIdx < _actionsExlKeyRepeat.Count
-            && _actions[idx] is WaitAction wa && _actionsExlKeyRepeat[exlIdx] is WaitAction exlWa
+            && idx < _actions.Count && exlIndex < _actionsExlKeyRepeat.Count
+            && _actions[idx] is WaitAction wa && _actionsExlKeyRepeat[exlIndex] is WaitAction exlWa
             && wa.DurationMS == exlWa.DurationMS)
         {
-            _moddedExlActsIdxs.Remove(exlIdx);
+            _aggregateActions.Remove(action);
 
-            if (!ReferenceEquals(wa, exlWa)) _actionsExlKeyRepeat[exlIdx] = wa;
+            if (!ReferenceEquals(wa, exlWa)) _actionsExlKeyRepeat[exlIndex] = wa;
 
             // merge current and next wait action if possible
-            if (idx + 1 < _actions.Count && exlIdx + 1 < _actionsExlKeyRepeat.Count
+            if (idx + 1 < _actions.Count && exlIndex + 1 < _actionsExlKeyRepeat.Count
                 && _actions[idx + 1] is WaitAction nextWa
-                && _actions[idx + 1] == _actionsExlKeyRepeat[exlIdx + 1])
+                && _actions[idx + 1] == _actionsExlKeyRepeat[exlIndex + 1])
             {
                 wa.DurationMS += nextWa.DurationMS;
 
                 _actions.RemoveAt(idx + 1);
-                _actionsExlKeyRepeat.RemoveAt(exlIdx + 1);
+                _actionsExlKeyRepeat.RemoveAt(exlIndex + 1);
             }
 
             // merge current and previous wait action if possible
-            if (idx > 0 && exlIdx > 0
+            if (idx > 0 && exlIndex > 0
                 && _actions[idx - 1] is WaitAction prevWa
-                && _actions[idx - 1] == _actionsExlKeyRepeat[exlIdx - 1])
+                && _actions[idx - 1] == _actionsExlKeyRepeat[exlIndex - 1])
             {
                 prevWa.DurationMS += wa.DurationMS;
 
                 _actions.RemoveAt(idx);
-                _actionsExlKeyRepeat.RemoveAt(exlIdx);
+                _actionsExlKeyRepeat.RemoveAt(exlIndex);
             }
         }
 
@@ -398,15 +391,15 @@ public sealed partial class ActionCollection : ICollection<InputAction>
 
         if (isFilteredList)
         {
-            if (_moddedExlActsIdxs.HasActionBeenModified(index))
+            if (_aggregateActions.Contains(_actionsExlKeyRepeat[index]))
             {
-                if (newAction is not WaitAction) throw new NotSupportedException("modified action is not WaitAction.");
+                if (newAction is not WaitAction) throw new NotImplementedException("aggregate action is not WaitAction.");
 
-                var (startIdx, count) = _moddedExlActsIdxs.GetRangeTiedToModifiedActionIdx(index);
+                var (startIdx, length) = _aggregateActions.GetRangeTiedToAggregateAction(index);
 
                 // TODO: add ObservableCollectionEx.RemoveRange
                 _actions.SuppressNotifications = true;
-                for (int i = 0; i < count; i++)
+                for (int i = 0; i < length; i++)
                 {
                     _actions.RemoveAt(startIdx);
                 }
@@ -434,7 +427,7 @@ public sealed partial class ActionCollection : ICollection<InputAction>
 
         actionToReplace = _actions[index];
 
-        if (_moddedExlActsIdxs.IsActionTiedToModifiedAction(actionToReplace)) return ActionTiedToModifiedActMsg;
+        if (_aggregateActions.IsActionTiedToAggregateAction(actionToReplace)) return ActionTiedToAggregateActionMsg;
 
         if (actionToReplace is KeyAction { ActionType: KeyActionType.KeyDown })
         {
@@ -468,7 +461,7 @@ public sealed partial class ActionCollection : ICollection<InputAction>
     {
         _actions.Clear();
         _actionsExlKeyRepeat.Clear();
-        _moddedExlActsIdxs.Clear();
+        _aggregateActions.Clear();
     }
 
     public void Clear()
@@ -483,16 +476,17 @@ public sealed partial class ActionCollection : ICollection<InputAction>
         int actionsExlLastIdx = _actionsExlKeyRepeat.Count - 1;
         if (_actionsExlKeyRepeat.Count > 0 && _actionsExlKeyRepeat[actionsExlLastIdx] is WaitAction lastFilteredWaitAction)
         {
-            // if there is a modified wait action for _actionsExlKeyRepeat, update it. otherwise create one.
-            // (see _modifiedFilteredActionsIdxs remarks for what a modified wait action is)
-            if (_moddedExlActsIdxs.HasActionBeenModified(actionsExlLastIdx))
+            // if there is an aggregate wait action for _actionsExlKeyRepeat, update it. otherwise create one.
+            // (see _aggregateActions remarks for what an aggregate wait action is)
+            if (_aggregateActions.Contains(lastFilteredWaitAction))
             {
                 lastFilteredWaitAction.DurationMS += curWaitAction.DurationMS;
             }
             else if (!ReferenceEquals(prevUnfilteredAction, lastFilteredWaitAction))
             {
-                _actionsExlKeyRepeat[actionsExlLastIdx] = new WaitAction(lastFilteredWaitAction.DurationMS + curWaitAction.DurationMS);
-                _moddedExlActsIdxs.Add(actionsExlLastIdx);
+                WaitAction aggregateWaitAction = new(lastFilteredWaitAction.DurationMS + curWaitAction.DurationMS);
+                _actionsExlKeyRepeat[actionsExlLastIdx] = aggregateWaitAction;
+                _aggregateActions.Add(aggregateWaitAction);
             }
         }
         else
@@ -571,8 +565,9 @@ public sealed partial class ActionCollection : ICollection<InputAction>
                     int actionsExlWaitIdx = _actionsExlKeyRepeat.AsSpan().RefIndexOfReverse(waitAct);
                     if (actionsExlWaitIdx != -1)
                     {
-                        _actionsExlKeyRepeat[actionsExlWaitIdx] = new WaitAction(waitAct.DurationMS);
-                        _moddedExlActsIdxs.Add(actionsExlWaitIdx);
+                        WaitAction aggregateWaitAction = new(waitAct.DurationMS);
+                        _actionsExlKeyRepeat[actionsExlWaitIdx] = aggregateWaitAction;
+                        _aggregateActions.Add(aggregateWaitAction);
                     }
 
                     waitAct.DurationMS = durationToKeyDelay;
@@ -660,9 +655,9 @@ public sealed partial class ActionCollection : ICollection<InputAction>
     }
 
 
-    public bool HasActionBeenModified(InputAction action) => _moddedExlActsIdxs.HasActionBeenModified(action);
+    public bool IsAggregateAction(InputAction action) => _aggregateActions.Contains(action);
 
-    public bool IsActionTiedToModifiedAction(InputAction action) => _moddedExlActsIdxs.IsActionTiedToModifiedAction(action);
+    public bool IsActionTiedToAggregateAction(InputAction action) => _aggregateActions.IsActionTiedToAggregateAction(action);
 
     bool ICollection<InputAction>.IsReadOnly => false;
 

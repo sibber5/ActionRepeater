@@ -7,7 +7,7 @@ namespace ActionRepeater.Core.Action;
 [JsonDerivedType(typeof(MouseButtonAction), nameof(MouseButtonAction))]
 [JsonDerivedType(typeof(MouseWheelAction), nameof(MouseWheelAction))]
 [JsonDerivedType(typeof(WaitAction), nameof(WaitAction))]
-public abstract class InputAction
+public abstract class InputAction : IEquatable<InputAction>
 {
     public event EventHandler<string>? DescriptionChanged;
     protected void OnDescriptionChanged() => DescriptionChanged?.Invoke(this, Description);
@@ -21,4 +21,6 @@ public abstract class InputAction
     public virtual InputAction Clone() => (InputAction)MemberwiseClone();
 
     public abstract void Play();
+
+    public bool Equals(InputAction? other) => this == other;
 }

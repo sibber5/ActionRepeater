@@ -73,11 +73,11 @@ public sealed class ContentDialogService
 
     public IAsyncOperation<ContentDialogResult> ShowEditActionDialog(ObservableObject editActionViewModel, InputAction actionToEdit)
     {
-        if (_actionCollection.IsActionTiedToModifiedAction(actionToEdit))
+        if (_actionCollection.IsActionTiedToAggregateAction(actionToEdit))
         {
             return ShowErrorDialog("This action is not editable.", (actionToEdit is KeyAction { IsAutoRepeat: true })
                 ? "This is an auto repeat action, edit the original key down action if you want to change the key."
-                : ActionCollection.ActionTiedToModifiedActMsg);
+                : ActionCollection.ActionTiedToAggregateActionMsg);
         }
 
         ContentDialog dialog = new()
