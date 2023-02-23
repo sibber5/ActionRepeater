@@ -39,9 +39,9 @@ Download the zip from [the latest release page](https://github.com/cyberrex5/Act
 ### Development Requirements
 
  - [Visual Studio](https://visualstudio.microsoft.com/downloads/) with .NET desktop development workload
- - [.NET 6.0.X SDK](https://dotnet.microsoft.com/en-us/download/dotnet/6.0) (should come with the visual studio .NET workload)
+ - [.NET 7.0.X SDK](https://dotnet.microsoft.com/en-us/download/dotnet/7.0) (should come with the visual studio .NET workload)
  - [Windows SDK 10.0.19041.0](https://developer.microsoft.com/en-us/windows/downloads/sdk-archive/) (should come with the visual studio .NET workload)
- - [Windows App SDK 1.1](https://docs.microsoft.com/en-us/windows/apps/windows-app-sdk/downloads)
+ - [Windows App SDK 1.2](https://docs.microsoft.com/en-us/windows/apps/windows-app-sdk/downloads)
 
 ### Building/Compiling
 
