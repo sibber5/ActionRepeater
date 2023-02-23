@@ -55,31 +55,11 @@ public sealed partial class ActionCollection : ICollection<InputAction>
     /// <inheritdoc cref="ActionsAsSpan"/>
     public ReadOnlySpan<InputAction> ActionsExlKeyRepeatAsSpan => _actionsExlKeyRepeat.AsSpan();
 
-    private ObservableCollectionEx<InputAction> _actions
-    {
-        get
-        {
-            if (_refillActions && !_isRefillingActions)
-            {
-                _isRefillingActions = true;
-
-                FillActionsFromFiltered();
-                FillFilteredActionList();
-
-                _refillActions = false;
-                Debug.WriteLine("refilled unfiltered actions");
-
-                _isRefillingActions = false;
-            }
-
-            return _actionsBackingField;
-        }
-    }
+    private readonly ObservableCollectionEx<InputAction> _actions = new();
     private readonly ObservableCollectionEx<InputAction> _actionsExlKeyRepeat = new();
 
-    private readonly ObservableCollectionEx<InputAction> _actionsBackingField = new();
     private bool _refillActions;
-    private bool _isRefillingActions; // used to prevent triggering refilling the actions from the getter while refilling the actions.
+    private bool _refillFilteredActions;
 
     /// <inheritdoc cref="AggregateActionList"/>
     private readonly AggregateActionList _aggregateActions;
@@ -103,10 +83,27 @@ public sealed partial class ActionCollection : ICollection<InputAction>
                 || e.Action == NotifyCollectionChangedAction.Move)
             {
                 _refillActions = true;
-                Debug.WriteLine("refilling unfiltered actions on next get");
+                _refillFilteredActions = true;
+
+                Debug.WriteLine("detected action move");
             }
 
             _lastActionsExlNCCAction = e.Action;
+        };
+
+        _actionsExlKeyRepeat.AfterCollectionChanged += (_, _) =>
+        {
+            if (_refillActions)
+            {
+                FillActionsFromFiltered();
+                _refillActions = false;
+            }
+
+            if (_refillFilteredActions)
+            {
+                FillFilteredActionList();
+                _refillFilteredActions = false;
+            }
         };
 
         ActionCollectionChanged += (s, e) =>

@@ -29,28 +29,9 @@ public sealed partial class ActionListViewModel : ObservableObject
     [ObservableProperty]
     private bool _showKeyRepeatActions;
 
-    private readonly SyncedObservableCollection<ActionViewModel, InputAction> _actionVMs;
-    public SyncedObservableCollection<ActionViewModel, InputAction> ActionVMs
-    {
-        get
-        {
-            // call getter of property in case action collection needed to be notified of a read.
-            // (e.g. when moving an action, on the next read it regenerates the unfiltered actions,
-            // because im too lazy to implement insert method - this works well enough)
-            _ = _actionCollection.Actions;
-            return _actionVMs;
-        }
-    }
+    public SyncedObservableCollection<ActionViewModel, InputAction> ActionVMs { get; }
 
-    private readonly SyncedObservableCollection<ActionViewModel, InputAction> _actionsExlVMs;
-    public SyncedObservableCollection<ActionViewModel, InputAction> ActionsExlVMs
-    {
-        get
-        {
-            _ = _actionCollection.ActionsExlKeyRepeat;
-            return _actionsExlVMs;
-        }
-    }
+    public SyncedObservableCollection<ActionViewModel, InputAction> ActionsExlVMs { get; }
 
     public IReadOnlyList<ActionViewModel> FilteredActions => ShowKeyRepeatActions ? ActionVMs : ActionsExlVMs;
 
@@ -103,8 +84,8 @@ public sealed partial class ActionListViewModel : ObservableObject
 
         Func<InputAction?, ActionViewModel> createVM = (model) => new ActionViewModel(model!, this, _actionCollection);
 
-        _actionVMs = new((ObservableCollection<InputAction?>)_actionCollection.Actions, createVM);
-        _actionsExlVMs = new((ObservableCollection<InputAction?>)_actionCollection.ActionsExlKeyRepeat, createVM);
+        ActionVMs = new((ObservableCollection<InputAction?>)_actionCollection.Actions, createVM);
+        ActionsExlVMs = new((ObservableCollection<InputAction?>)_actionCollection.ActionsExlKeyRepeat, createVM);
 
         ((INotifyPropertyChanged)FilteredActions).PropertyChanged += (_, e) =>
         {

@@ -14,30 +14,30 @@ namespace ActionRepeater.UI.Utilities;
 /// <typeparam name="TSource">The type of elements in the source collection.</typeparam>
 public sealed class SyncedObservableCollection<T, TSource> : ObservableCollectionEx<T>
 {
-    private readonly ObservableCollection<TSource?> _sourceCol;
+    private readonly ObservableCollection<TSource?> _sourceCollection;
     private readonly Func<TSource?, T> _createT;
 
-    private bool _dontSync;
+    private bool _sync = true;
 
     private T? _lastRemovedItem;
     private TSource? _lastRemovedSourceItem;
 
     /// <summary>
-    /// Initializes a new instance of the class that is synchronized with <paramref name="sourceCol"/>.
+    /// Initializes a new instance of the class that is synchronized with <paramref name="sourceCollection"/>.
     /// </summary>
-    /// <param name="sourceCol">The collection that this class would be synchronized with.</param>
+    /// <param name="sourceCollection">The collection that this class would be synchronized with.</param>
     /// <param name="createT">A function that creates a <typeparamref name="T"/> instance, optionally using a <typeparamref name="TSource"/> instance.</param>
-    public SyncedObservableCollection(ObservableCollection<TSource?> sourceCol, Func<TSource?, T> createT)
+    public SyncedObservableCollection(ObservableCollection<TSource?> sourceCollection, Func<TSource?, T> createT)
     {
-        _sourceCol = sourceCol;
+        _sourceCollection = sourceCollection;
         _createT = createT;
 
-        _sourceCol.CollectionChanged += OnSourceCollectionChanged;
+        _sourceCollection.CollectionChanged += OnSourceCollectionChanged;
     }
 
     private void OnSourceCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
-        if (_dontSync) return;
+        if (!_sync) return;
 
         switch (e.Action)
         {
@@ -73,7 +73,7 @@ public sealed class SyncedObservableCollection<T, TSource> : ObservableCollectio
                 break;
 
             case NotifyCollectionChangedAction.Reset:
-                if (_sourceCol.Count == 0)
+                if (_sourceCollection.Count == 0)
                 {
                     base.ClearItems();
                     break;
@@ -82,9 +82,9 @@ public sealed class SyncedObservableCollection<T, TSource> : ObservableCollectio
                 CheckReentrancy();
 
                 Items.Clear();
-                for (int i = 0; i < _sourceCol.Count; i++)
+                for (int i = 0; i < _sourceCollection.Count; i++)
                 {
-                    Items.Add(_createT(_sourceCol[i]));
+                    Items.Add(_createT(_sourceCollection[i]));
                 }
 
                 OnPropertyChanged(EventArgsCache.CountPropertyChanged);
@@ -101,12 +101,15 @@ public sealed class SyncedObservableCollection<T, TSource> : ObservableCollectio
     {
         if (EqualityComparer<T>.Default.Equals(item, _lastRemovedItem))
         {
-            _dontSync = true;
-            _sourceCol.Insert(index, _lastRemovedSourceItem);
-            _dontSync = false;
+            _sync = false;
+            _sourceCollection.Insert(index, _lastRemovedSourceItem);
+            _sync = true;
 
             base.InsertItem(index, item);
 
+            // In case the source collection was changed while _sync was false
+            // (e.g. after inserting to it in an ObservableCollectionEx.AfterCollectionChanged event handler)
+            if (_sourceCollection.Count != Count) OnSourceCollectionChanged(_sourceCollection, EventArgsCache.ResetCollectionChanged);
             return;
         }
 
@@ -115,23 +118,29 @@ public sealed class SyncedObservableCollection<T, TSource> : ObservableCollectio
 
     protected override void ClearItems()
     {
-        _dontSync = true;
-        _sourceCol.Clear();
-        _dontSync = false;
+        _sync = false;
+        _sourceCollection.Clear();
+        _sync = true;
 
         base.ClearItems();
+
+        // In case the source collection was changed while _sync was false
+        if (_sourceCollection.Count != Count) OnSourceCollectionChanged(_sourceCollection, EventArgsCache.ResetCollectionChanged);
     }
 
     protected override void RemoveItem(int index)
     {
         _lastRemovedItem = this[index];
-        _lastRemovedSourceItem = _sourceCol[index];
+        _lastRemovedSourceItem = _sourceCollection[index];
 
-        _dontSync = true;
-        _sourceCol.RemoveAt(index);
-        _dontSync = false;
+        _sync = false;
+        _sourceCollection.RemoveAt(index);
+        _sync = true;
 
         base.RemoveItem(index);
+
+        // In case the source collection was changed while _sync was false
+        if (_sourceCollection.Count != Count) OnSourceCollectionChanged(_sourceCollection, EventArgsCache.ResetCollectionChanged);
     }
 
     protected override void SetItem(int index, T item)
@@ -141,10 +150,13 @@ public sealed class SyncedObservableCollection<T, TSource> : ObservableCollectio
 
     protected override void MoveItem(int oldIndex, int newIndex)
     {
-        _dontSync = true;
-        _sourceCol.Move(oldIndex, newIndex);
-        _dontSync = false;
+        _sync = false;
+        _sourceCollection.Move(oldIndex, newIndex);
+        _sync = true;
 
         base.MoveItem(oldIndex, newIndex);
+
+        // In case the source collection was changed while _sync was false
+        if (_sourceCollection.Count != Count) OnSourceCollectionChanged(_sourceCollection, EventArgsCache.ResetCollectionChanged);
     }
 }

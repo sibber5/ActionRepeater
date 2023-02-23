@@ -16,6 +16,8 @@ public class ObservableCollectionEx<T> : ObservableCollection<T>
         public static readonly NotifyCollectionChangedEventArgs ResetCollectionChanged = new(NotifyCollectionChangedAction.Reset);
     }
 
+    public event EventHandler<NotifyCollectionChangedEventArgs>? AfterCollectionChanged;
+
     private bool _propertyChangedSuppressed;
 
     private bool _suppressPropertyChanged;
@@ -139,5 +141,7 @@ public class ObservableCollectionEx<T> : ObservableCollection<T>
         }
 
         base.OnCollectionChanged(e);
+
+        AfterCollectionChanged?.Invoke(this, e);
     }
 }
