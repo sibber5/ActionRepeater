@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace ActionRepeater.Core.Utilities;
 
@@ -16,7 +17,8 @@ public class ObservableCollectionEx<T> : ObservableCollection<T>
         public static readonly NotifyCollectionChangedEventArgs ResetCollectionChanged = new(NotifyCollectionChangedAction.Reset);
     }
 
-    public event EventHandler<NotifyCollectionChangedEventArgs>? AfterCollectionChanged;
+    /// <summary>Used to run tasks that modify the collection after the CollectionChanged event.</summary>
+    internal readonly ManualResetEventSlim _collectionChangedEvent = new(true);
 
     private bool _propertyChangedSuppressed;
 
@@ -47,7 +49,10 @@ public class ObservableCollectionEx<T> : ObservableCollection<T>
             _suppressCollectionChanged = value;
             if (!value && _collectionChangedSuppressed)
             {
+                _collectionChangedEvent.Reset();
                 base.OnCollectionChanged(EventArgsCache.ResetCollectionChanged);
+                _collectionChangedEvent.Set();
+
                 _collectionChangedSuppressed = false;
             }
         }
@@ -134,6 +139,8 @@ public class ObservableCollectionEx<T> : ObservableCollection<T>
 
     protected override void OnCollectionChanged(NotifyCollectionChangedEventArgs e)
     {
+        _collectionChangedEvent.Reset();
+
         if (SuppressCollectionChanged)
         {
             _collectionChangedSuppressed = true;
@@ -142,6 +149,6 @@ public class ObservableCollectionEx<T> : ObservableCollection<T>
 
         base.OnCollectionChanged(e);
 
-        AfterCollectionChanged?.Invoke(this, e);
+        _collectionChangedEvent.Set();
     }
 }

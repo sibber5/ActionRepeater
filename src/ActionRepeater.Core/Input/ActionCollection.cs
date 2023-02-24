@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using ActionRepeater.Core.Action;
 using ActionRepeater.Core.Extentions;
 using ActionRepeater.Core.Helpers;
@@ -60,6 +62,8 @@ public sealed partial class ActionCollection : ICollection<InputAction>
 
     private bool _refillActions;
     private bool _refillFilteredActions;
+    private bool _isRefillingActions;
+    private (int Removed, int Added) _movedActionIndecies;
 
     /// <inheritdoc cref="AggregateActionList"/>
     private readonly AggregateActionList _aggregateActions;
@@ -67,44 +71,16 @@ public sealed partial class ActionCollection : ICollection<InputAction>
     private readonly StopwatchSlim _actsExlNCCStopwatch = new();
     private NotifyCollectionChangedAction _lastActionsExlNCCAction = (NotifyCollectionChangedAction)(-1);
 
+    private readonly SynchronizationContext? _mainSyncContext;
+    private SendOrPostCallback? _refillActionsPostCallback;
+    private Action<object?>? _refillActionsTaskCallback;
+
     public ActionCollection()
     {
+        _mainSyncContext = SynchronizationContext.Current;
         _aggregateActions = new(_actions, _actionsExlKeyRepeat);
 
-        _actionsExlKeyRepeat.CollectionChanged += (_, e) =>
-        {
-            var msSinceLastAction = _actsExlNCCStopwatch.RestartAndGetElapsedMS();
-
-            // if an item (action) was moved in the collection the ui will call remove then add, rather than call move.
-            // so this detects that too.
-            if ((_lastActionsExlNCCAction == NotifyCollectionChangedAction.Remove
-                && e.Action == NotifyCollectionChangedAction.Add
-                && msSinceLastAction < 100)
-                || e.Action == NotifyCollectionChangedAction.Move)
-            {
-                _refillActions = true;
-                _refillFilteredActions = true;
-
-                Debug.WriteLine("detected action move");
-            }
-
-            _lastActionsExlNCCAction = e.Action;
-        };
-
-        _actionsExlKeyRepeat.AfterCollectionChanged += (_, _) =>
-        {
-            if (_refillActions)
-            {
-                FillActionsFromFiltered();
-                _refillActions = false;
-            }
-
-            if (_refillFilteredActions)
-            {
-                FillFilteredActionList();
-                _refillFilteredActions = false;
-            }
-        };
+        _actionsExlKeyRepeat.CollectionChanged += ActionsExlKeyRepeat_CollectionChanged;
 
         ActionCollectionChanged += (s, e) =>
         {
@@ -119,20 +95,7 @@ public sealed partial class ActionCollection : ICollection<InputAction>
         // this *could* cause a memory leak *if* Options.Instance should live longer than this action collection instance,
         // *but* this will not happen with the current usage of these, as this is registered as a singleton.
         // if for some reason in the future that changed this class would implement IDisposable and unsubscribe from the event in Dispose.
-        CoreOptions.Instance.PropertyChanged += (s, e) =>
-        {
-            if (e.PropertyName!.Equals(nameof(CoreOptions.Instance.UseCursorPosOnClicks), StringComparison.Ordinal))
-            {
-                bool newVal = CoreOptions.Instance.UseCursorPosOnClicks;
-                foreach (InputAction action in _actions.AsSpan())
-                {
-                    if (action is MouseButtonAction mbAction)
-                    {
-                        mbAction.UsePosition = newVal;
-                    }
-                }
-            }
-        };
+        CoreOptions.Instance.PropertyChanged += CoreOptions_PropertyChanged;
     }
 
     public IEnumerable<MouseMovement> GetAbsoluteCursorPath()
@@ -166,6 +129,96 @@ public sealed partial class ActionCollection : ICollection<InputAction>
                 yield return lastAbs;
             }
         }
+    }
+
+    private void CoreOptions_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (nameof(CoreOptions.Instance.UseCursorPosOnClicks).Equals(e.PropertyName, StringComparison.Ordinal))
+        {
+            bool newVal = CoreOptions.Instance.UseCursorPosOnClicks;
+            foreach (InputAction action in _actions.AsSpan())
+            {
+                if (action is MouseButtonAction mbAction)
+                {
+                    mbAction.UsePosition = newVal;
+                }
+            }
+        }
+    }
+
+    private void ActionsExlKeyRepeat_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        if (_isRefillingActions) return;
+
+        var msSinceLastAction = _actsExlNCCStopwatch.RestartAndGetElapsedMS();
+
+        // if an item (action) was moved in the collection the ui will call remove then add, rather than call move.
+        // so this detects that too.
+        if (_lastActionsExlNCCAction == NotifyCollectionChangedAction.Remove
+            && e.Action == NotifyCollectionChangedAction.Add
+            && msSinceLastAction < 100)
+        {
+            _lastActionsExlNCCAction = (NotifyCollectionChangedAction)(-1);
+            _movedActionIndecies.Added = e.NewStartingIndex;
+
+            _refillFilteredActions = true;
+            _refillActions = true;
+        }
+        else if (e.Action == NotifyCollectionChangedAction.Move)
+        {
+            _movedActionIndecies = (e.OldStartingIndex, e.NewStartingIndex);
+
+            _refillFilteredActions = true;
+            _refillActions = true;
+        }
+
+        if (_refillFilteredActions || _refillActions)
+        {
+            Debug.WriteLine("detected action move");
+
+            Task.Factory.StartNew(_refillActionsTaskCallback ??= static (state) =>
+            {
+                ActionCollection o = (ActionCollection)state!;
+
+                o._actionsExlKeyRepeat._collectionChangedEvent.Wait();
+
+                o._refillActionsPostCallback ??= static (state) =>
+                {
+                    ActionCollection o = (ActionCollection)state!;
+
+                    if (o._isRefillingActions) return;
+                    o._isRefillingActions = true;
+
+                    if (o._refillActions) o._actions.Clear();
+
+                    if (o._refillFilteredActions)
+                    {
+                        var (removedIdx, addedIdx) = o._movedActionIndecies;
+                        var addedAction = o._actionsExlKeyRepeat[addedIdx];
+
+                        o.MergeAdjacentActionsInExl(removedIdx);
+                        addedIdx = o._actionsExlKeyRepeat.AsSpan().RefIndexOfReverse(addedAction);
+                        if (addedIdx != -1) o.MergeAdjacentActionsInExl(addedIdx);
+
+                        o._refillFilteredActions = false;
+                    }
+
+                    if (o._refillActions)
+                    {
+                        o.FillActionsFromFiltered();
+                        o._refillActions = false;
+                    }
+
+                    o._isRefillingActions = false;
+                };
+
+                if (o._mainSyncContext is null) o._refillActionsPostCallback(state);
+                else o._mainSyncContext.Post(o._refillActionsPostCallback, state);
+            }, this, CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
+        }
+
+        _lastActionsExlNCCAction = e.Action;
+        if (_lastActionsExlNCCAction == NotifyCollectionChangedAction.Remove) _movedActionIndecies.Removed = e.OldStartingIndex;
     }
 
     public void LoadActionData(ActionData data)
@@ -260,6 +313,77 @@ public sealed partial class ActionCollection : ICollection<InputAction>
         }
 
         _actions.SuppressNotifications = false;
+    }
+
+    private void MergeAdjacentActionsInExl(int exlIndex)
+    {
+        MergeCore(exlIndex);
+        if (exlIndex > 0) MergeCore(exlIndex - 1);
+
+        void MergeCore(int exlIndex)
+        {
+            if (exlIndex + 1 >= _actionsExlKeyRepeat.Count) return;
+
+            InputAction action = _actionsExlKeyRepeat[exlIndex];
+            int actionsIndex = _actions.AsSpan().RefIndexOfReverse(action);
+            switch (action)
+            {
+                case WaitAction waitAction:
+                    if (_actionsExlKeyRepeat[exlIndex + 1] is not WaitAction nextWaitAction) break;
+                    if (_actions.Count > 0)
+                    {
+                        if (_aggregateActions.Contains(waitAction)) throw new NotImplementedException();
+                        if (_aggregateActions.Contains(nextWaitAction)) throw new NotImplementedException();
+                    }
+
+                    {
+                        WaitAction newAction = new(waitAction.DurationMS + nextWaitAction.DurationMS);
+
+                        _actionsExlKeyRepeat[exlIndex] = newAction;
+                        _actionsExlKeyRepeat.RemoveAt(exlIndex + 1);
+
+                        if (actionsIndex != -1) _actions[actionsIndex] = newAction;
+                        _actions.Remove(nextWaitAction);
+                    }
+                    break;
+
+                case MouseButtonAction mbAction:
+                    if (_actionsExlKeyRepeat[exlIndex + 1] is not MouseButtonAction nextMBAction) break;
+
+                    if (mbAction.ActionType == MouseButtonActionType.MouseButtonDown
+                        && nextMBAction.ActionType == MouseButtonActionType.MouseButtonUp
+                        && mbAction.Button == nextMBAction.Button
+                        && mbAction.Position == nextMBAction.Position)
+                    {
+                        MouseButtonAction newAction = new(MouseButtonActionType.MouseButtonClick, mbAction.Button, mbAction.Position, mbAction.UsePosition);
+
+                        _actionsExlKeyRepeat[exlIndex] = newAction;
+                        _actionsExlKeyRepeat.RemoveAt(exlIndex + 1);
+
+                        if (actionsIndex != -1) _actions[actionsIndex] = newAction;
+                        _actions.Remove(nextMBAction);
+                    }
+                    break;
+
+                case KeyAction keyAction:
+                    if (_actionsExlKeyRepeat[exlIndex + 1] is not KeyAction nextKeyAction) break;
+
+                    if (keyAction.ActionType == KeyActionType.KeyDown
+                        && nextKeyAction.ActionType == KeyActionType.KeyUp
+                        && keyAction.Key == nextKeyAction.Key)
+                    {
+                        Debug.Assert(!keyAction.IsAutoRepeat);
+                        KeyAction newAction = new(KeyActionType.KeyPress, keyAction.Key);
+
+                        _actionsExlKeyRepeat[exlIndex] = newAction;
+                        _actionsExlKeyRepeat.RemoveAt(exlIndex + 1);
+
+                        if (actionsIndex != -1) _actions[actionsIndex] = newAction;
+                        _actions.Remove(nextKeyAction);
+                    }
+                    break;
+            }
+        }
     }
 
     public void Add(InputAction item) => Add(item, false);

@@ -1,4 +1,5 @@
-﻿using ActionRepeater.Core.Action;
+﻿using System.Diagnostics;
+using ActionRepeater.Core.Action;
 using ActionRepeater.Core.Extentions;
 using ActionRepeater.Core.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -55,11 +56,29 @@ public sealed partial class ActionViewModel : ObservableObject
     /// <returns>The <see cref="ActionViewModel"/> for the <paramref name="action"/>, that is currently bound to in the view.</returns>
     private static (ActionViewModel? actionsVM, ActionViewModel? actionsExlVM) GetActionViewModels(InputAction action)
     {
-        int actionsIndex = _actionCollection.ActionsAsSpan.RefIndexOfReverse(action);
-        ActionViewModel? actionVM = actionsIndex == -1 ? null : _actionListViewModel.ActionVMs[actionsIndex];
+        ActionViewModel? actionVM;
+        int index = _actionCollection.ActionsAsSpan.RefIndexOfReverse(action);
+        if (index >= 0 && index < _actionListViewModel.ActionVMs.Count)
+        {
+            actionVM = _actionListViewModel.ActionVMs[index];
+        }
+        else
+        {
+            actionVM = null;
+            Debug.WriteLineIf(index != -1, $"{nameof(ActionViewModel)} not found at index {index}.");
+        }
 
-        int actionsExlIndex = _actionCollection.ActionsExlKeyRepeatAsSpan.RefIndexOfReverse(action);
-        ActionViewModel? actionExlVM = actionsExlIndex == -1 ? null : _actionListViewModel.ActionsExlVMs[actionsExlIndex];
+        ActionViewModel? actionExlVM;
+        index = _actionCollection.ActionsExlKeyRepeatAsSpan.RefIndexOfReverse(action);
+        if (index >= 0 && index < _actionListViewModel.ActionsExlVMs.Count)
+        {
+            actionExlVM = _actionListViewModel.ActionsExlVMs[index];
+        }
+        else
+        {
+            actionExlVM = null;
+            Debug.WriteLineIf(index != -1, $"{nameof(ActionViewModel)} not found at index {index}.");
+        }
 
         return (actionVM, actionExlVM);
     }

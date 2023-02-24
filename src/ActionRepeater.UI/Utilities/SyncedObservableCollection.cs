@@ -107,9 +107,6 @@ public sealed class SyncedObservableCollection<T, TSource> : ObservableCollectio
 
             base.InsertItem(index, item);
 
-            // In case the source collection was changed while _sync was false
-            // (e.g. after inserting to it in an ObservableCollectionEx.AfterCollectionChanged event handler)
-            if (_sourceCollection.Count != Count) OnSourceCollectionChanged(_sourceCollection, EventArgsCache.ResetCollectionChanged);
             return;
         }
 
@@ -123,9 +120,6 @@ public sealed class SyncedObservableCollection<T, TSource> : ObservableCollectio
         _sync = true;
 
         base.ClearItems();
-
-        // In case the source collection was changed while _sync was false
-        if (_sourceCollection.Count != Count) OnSourceCollectionChanged(_sourceCollection, EventArgsCache.ResetCollectionChanged);
     }
 
     protected override void RemoveItem(int index)
@@ -138,9 +132,6 @@ public sealed class SyncedObservableCollection<T, TSource> : ObservableCollectio
         _sync = true;
 
         base.RemoveItem(index);
-
-        // In case the source collection was changed while _sync was false
-        if (_sourceCollection.Count != Count) OnSourceCollectionChanged(_sourceCollection, EventArgsCache.ResetCollectionChanged);
     }
 
     protected override void SetItem(int index, T item)
@@ -155,8 +146,5 @@ public sealed class SyncedObservableCollection<T, TSource> : ObservableCollectio
         _sync = true;
 
         base.MoveItem(oldIndex, newIndex);
-
-        // In case the source collection was changed while _sync was false
-        if (_sourceCollection.Count != Count) OnSourceCollectionChanged(_sourceCollection, EventArgsCache.ResetCollectionChanged);
     }
 }
