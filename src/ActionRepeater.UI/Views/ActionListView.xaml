@@ -48,7 +48,7 @@
                   VerticalAlignment="Stretch"
                   Margin="0,5,0,0"
                   ScrollViewer.VerticalScrollBarVisibility="Visible"
-                  ItemsSource="{x:Bind _vm.FilteredActions, Mode=OneWay}"
+                  ItemsSource="{x:Bind _vm.ViewedActions, Mode=OneWay}"
                   SelectedIndex="{x:Bind _vm.SelectedActionIndex, Mode=TwoWay}"
                   CanReorderItems="{x:Bind _vm.CanReorderActions, Mode=OneWay}"
                   SelectionMode="Extended"

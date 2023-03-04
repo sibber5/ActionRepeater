@@ -23,7 +23,7 @@ public sealed partial class ActionListView : UserControl
         _vm = vm;
         _vm._scrollToSelectedItem = ScrollToSelectedItem;
 
-        recorder.ActionAdded += (_, _) => ActionList.ScrollIntoView(_vm.FilteredActions[^1]);
+        recorder.ActionAdded += (_, _) => ActionList.ScrollIntoView(_vm.ViewedActions[^1]);
 
         InitializeComponent();
 
@@ -51,7 +51,7 @@ public sealed partial class ActionListView : UserControl
     {
         if (((FrameworkElement)e.OriginalSource).DataContext is ActionViewModel actionItem)
         {
-            int rightClickedItemIdx = _vm!.FilteredActions.RefIndexOfReverse(actionItem);
+            int rightClickedItemIdx = _vm!.ViewedActions.RefIndexOfReverse(actionItem);
             if (!ActionList.SelectedRanges.Any(x => rightClickedItemIdx >= x.FirstIndex && rightClickedItemIdx <= x.LastIndex))
             {
                 ActionList.SelectedIndex = rightClickedItemIdx;

@@ -41,26 +41,26 @@ public sealed partial class ActionViewModel : ObservableObject
     // also avoids potential memory leaks, in case the action for this view model lives longer than the vm.
     private static void InputAction_NameChanged(object? sender, string newName)
     {
-        var (actionVM, actionExlVM) = GetActionViewModels((InputAction)sender!);
+        var (actionVM, filteredActionVM) = GetActionViewModels((InputAction)sender!);
         if (actionVM is not null) actionVM.Name = newName;
-        if (actionExlVM is not null) actionExlVM.Name = newName;
+        if (filteredActionVM is not null) filteredActionVM.Name = newName;
     }
 
     private static void InputAction_DescriptionChanged(object? sender, string newDescription)
     {
-        var (actionVM, actionExlVM) = GetActionViewModels((InputAction)sender!);
+        var (actionVM, filteredActionVM) = GetActionViewModels((InputAction)sender!);
         if (actionVM is not null) actionVM.Description = newDescription;
-        if (actionExlVM is not null) actionExlVM.Description = newDescription;
+        if (filteredActionVM is not null) filteredActionVM.Description = newDescription;
     }
 
     /// <returns>The <see cref="ActionViewModel"/> for the <paramref name="action"/>, that is currently bound to in the view.</returns>
-    private static (ActionViewModel? actionsVM, ActionViewModel? actionsExlVM) GetActionViewModels(InputAction action)
+    private static (ActionViewModel? actionsVM, ActionViewModel? filteredActionVM) GetActionViewModels(InputAction action)
     {
         ActionViewModel? actionVM;
         int index = _actionCollection.ActionsAsSpan.RefIndexOfReverse(action);
-        if (index >= 0 && index < _actionListViewModel.ActionVMs.Count)
+        if (index >= 0 && index < _actionListViewModel.ActionsVMs.Count)
         {
-            actionVM = _actionListViewModel.ActionVMs[index];
+            actionVM = _actionListViewModel.ActionsVMs[index];
         }
         else
         {
@@ -68,19 +68,19 @@ public sealed partial class ActionViewModel : ObservableObject
             Debug.WriteLineIf(index != -1, $"{nameof(ActionViewModel)} not found at index {index}.");
         }
 
-        ActionViewModel? actionExlVM;
-        index = _actionCollection.ActionsExlKeyRepeatAsSpan.RefIndexOfReverse(action);
-        if (index >= 0 && index < _actionListViewModel.ActionsExlVMs.Count)
+        ActionViewModel? filteredActionVM;
+        index = _actionCollection.FilteredActionsAsSpan.RefIndexOfReverse(action);
+        if (index >= 0 && index < _actionListViewModel.FilteredActionsVMs.Count)
         {
-            actionExlVM = _actionListViewModel.ActionsExlVMs[index];
+            filteredActionVM = _actionListViewModel.FilteredActionsVMs[index];
         }
         else
         {
-            actionExlVM = null;
+            filteredActionVM = null;
             Debug.WriteLineIf(index != -1, $"{nameof(ActionViewModel)} not found at index {index}.");
         }
 
-        return (actionVM, actionExlVM);
+        return (actionVM, filteredActionVM);
     }
 
     public static (string? glyph, double size) GetIconForAction(InputAction a) => a switch

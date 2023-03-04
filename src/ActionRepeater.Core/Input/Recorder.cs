@@ -60,9 +60,9 @@ public sealed class Recorder
     private void ReplaceLastAction(InputAction action)
     {
         // the caller of this func always checks if the action list is not empty
-        if (_actionCollection.Actions[^1] == _actionCollection.ActionsExlKeyRepeat[^1])
+        if (_actionCollection.Actions[^1] == _actionCollection.FilteredActions[^1])
         {
-            ((ObservableCollectionEx<InputAction>)_actionCollection.ActionsExlKeyRepeat)[^1] = action;
+            ((ObservableCollectionEx<InputAction>)_actionCollection.FilteredActions)[^1] = action;
         }
         ((ObservableCollectionEx<InputAction>)_actionCollection.Actions)[^1] = action;
     }

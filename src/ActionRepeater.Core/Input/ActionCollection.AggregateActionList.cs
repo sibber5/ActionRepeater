@@ -10,7 +10,7 @@ namespace ActionRepeater.Core.Input;
 
 public sealed partial class ActionCollection
 {
-    /// <summary>Contains the aggregate actions in ActionsExlKeyRepeat.</summary>
+    /// <summary>Contains the aggregate actions in <see cref="FilteredActions"/>.</summary>
     /// <remarks>
     /// An aggregate action is usually a <see cref="WaitAction"/> with extended duration which would be 
     /// in place of the auto repeat actions in <see cref="ActionCollection._actions"/>.
@@ -20,12 +20,12 @@ public sealed partial class ActionCollection
         private readonly List<InputAction> _aggregateActions = new();
 
         private readonly ObservableCollectionEx<InputAction> _actions;
-        private readonly ObservableCollectionEx<InputAction> _actionsExlKeyRepeat;
+        private readonly ObservableCollectionEx<InputAction> _filteredActions;
 
-        public AggregateActionList(ObservableCollectionEx<InputAction> actions, ObservableCollectionEx<InputAction> actionsExlKeyRepeat)
+        public AggregateActionList(ObservableCollectionEx<InputAction> actions, ObservableCollectionEx<InputAction> filteredActions)
         {
             _actions = actions;
-            _actionsExlKeyRepeat = actionsExlKeyRepeat;
+            _filteredActions = filteredActions;
         }
 
         public InputAction this[int index] { get => _aggregateActions[index]; set => _aggregateActions[index] = value; }
@@ -58,18 +58,18 @@ public sealed partial class ActionCollection
         /// WARNING: Items should not be added or removed from the action list (<c>_actions</c>) while the range is in use.
         /// </summary>
         public (int StartIndex, int Length) GetRangeTiedToAggregateAction(InputAction aggregateAction)
-            => GetRangeTiedToAggregateAction(_actionsExlKeyRepeat.AsSpan().RefIndexOfReverse(aggregateAction));
+            => GetRangeTiedToAggregateAction(_filteredActions.AsSpan().RefIndexOfReverse(aggregateAction));
 
         /// <inheritdoc cref="GetRangeTiedToAggregateAction(InputAction)"/>
-        public (int StartIndex, int Length) GetRangeTiedToAggregateAction(int exlActionsIndex)
+        public (int StartIndex, int Length) GetRangeTiedToAggregateAction(int filteredActionIndex)
         {
-            Debug.Assert(_aggregateActions.Contains(_actionsExlKeyRepeat[exlActionsIndex]));
+            Debug.Assert(_aggregateActions.Contains(_filteredActions[filteredActionIndex]));
 
-            int startIdx = _actions.AsSpan().RefIndexOfReverse(_actionsExlKeyRepeat[exlActionsIndex - 1]) + 1;
-            if (startIdx == 0) throw new InvalidOperationException($"action {nameof(ActionCollection._actionsExlKeyRepeat)}[{exlActionsIndex - 1}] doesnt exist in {nameof(ActionCollection._actions)}.");
+            int startIdx = _actions.AsSpan().RefIndexOfReverse(_filteredActions[filteredActionIndex - 1]) + 1;
+            if (startIdx == 0) throw new InvalidOperationException($"action {nameof(ActionCollection._filteredActions)}[{filteredActionIndex - 1}] doesnt exist in {nameof(ActionCollection._actions)}.");
 
-            int endIdx = _actions.AsSpan().RefIndexOfReverse(_actionsExlKeyRepeat[exlActionsIndex + 1]);
-            if (endIdx == -1) throw new InvalidOperationException($"action {nameof(ActionCollection._actionsExlKeyRepeat)}[{exlActionsIndex + 1}] doesnt exist in {nameof(ActionCollection._actions)}.");
+            int endIdx = _actions.AsSpan().RefIndexOfReverse(_filteredActions[filteredActionIndex + 1]);
+            if (endIdx == -1) throw new InvalidOperationException($"action {nameof(ActionCollection._filteredActions)}[{filteredActionIndex + 1}] doesnt exist in {nameof(ActionCollection._actions)}.");
 
             int length = endIdx - startIdx;
 

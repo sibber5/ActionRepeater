@@ -119,7 +119,7 @@ public sealed partial class EditActionViewModel : ObservableObject
             case EditWaitActionViewModel waitVM:
                 if (_actionsCollection.IsAggregateAction(action))
                 {
-                    _actionsCollection.TryReplace(true, _actionsCollection.ActionsExlKeyRepeatAsSpan.RefIndexOfReverse(action), new WaitAction((int)(waitVM.DurationSecs * 1000)));
+                    _actionsCollection.TryReplace(true, _actionsCollection.FilteredActionsAsSpan.RefIndexOfReverse(action), new WaitAction((int)(waitVM.DurationSecs * 1000)));
                     break;
                 }
 

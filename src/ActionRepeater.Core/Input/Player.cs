@@ -120,7 +120,7 @@ public sealed class Player
             return false;
         }
 
-        var actions = CoreOptions.Instance.SendKeyAutoRepeat ? _actionCollection.Actions : _actionCollection.ActionsExlKeyRepeat;
+        var actions = CoreOptions.Instance.SendKeyAutoRepeat ? _actionCollection.Actions : _actionCollection.FilteredActions;
         IReadOnlyList<MouseMovement>? cursorPath = CoreOptions.Instance.CursorMovementMode switch
         {
             CursorMovementMode.Absolute => _actionCollection.GetAbsoluteCursorPath().ToList(),

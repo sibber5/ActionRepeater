@@ -22,22 +22,22 @@ namespace ActionRepeater.UI.ViewModels;
 public sealed partial class ActionListViewModel : ObservableObject
 {
     private readonly PropertyChangedEventArgs _actionListHeaderChangedArgs = new(nameof(ActionListHeaderWithCount));
-    public string ActionListHeaderWithCount => $"Actions ({FilteredActions.Count}):";
+    public string ActionListHeaderWithCount => $"Actions ({ViewedActions.Count}):";
 
-    [NotifyPropertyChangedFor(nameof(FilteredActions))]
+    [NotifyPropertyChangedFor(nameof(ViewedActions))]
     [NotifyPropertyChangedFor(nameof(CanReorderActions))]
     [ObservableProperty]
     private bool _showKeyRepeatActions;
 
-    public SyncedObservableCollection<ActionViewModel, InputAction> ActionVMs { get; }
+    public SyncedObservableCollection<ActionViewModel, InputAction> ActionsVMs { get; }
 
-    public SyncedObservableCollection<ActionViewModel, InputAction> ActionsExlVMs { get; }
+    public SyncedObservableCollection<ActionViewModel, InputAction> FilteredActionsVMs { get; }
 
-    public IReadOnlyList<ActionViewModel> FilteredActions => ShowKeyRepeatActions ? ActionVMs : ActionsExlVMs;
+    public IReadOnlyList<ActionViewModel> ViewedActions => ShowKeyRepeatActions ? ActionsVMs : FilteredActionsVMs;
 
     public InputAction? SelectedAction => SelectedActionIndex == -1
                 ? null
-                : (ShowKeyRepeatActions ? _actionCollection.Actions[SelectedActionIndex] : _actionCollection.ActionsExlKeyRepeat[SelectedActionIndex]);
+                : (ShowKeyRepeatActions ? _actionCollection.Actions[SelectedActionIndex] : _actionCollection.FilteredActions[SelectedActionIndex]);
 
     [NotifyCanExecuteChangedFor(nameof(StoreActionCommand))]
     [ObservableProperty]
@@ -84,12 +84,12 @@ public sealed partial class ActionListViewModel : ObservableObject
 
         Func<InputAction?, ActionViewModel> createVM = (model) => new ActionViewModel(model!, this, _actionCollection);
 
-        ActionVMs = new((ObservableCollection<InputAction?>)_actionCollection.Actions, createVM);
-        ActionsExlVMs = new((ObservableCollection<InputAction?>)_actionCollection.ActionsExlKeyRepeat, createVM);
+        ActionsVMs = new((ObservableCollection<InputAction?>)_actionCollection.Actions, createVM);
+        FilteredActionsVMs = new((ObservableCollection<InputAction?>)_actionCollection.FilteredActions, createVM);
 
-        ((INotifyPropertyChanged)FilteredActions).PropertyChanged += (_, e) =>
+        ((INotifyPropertyChanged)ViewedActions).PropertyChanged += (_, e) =>
         {
-            if (nameof(FilteredActions.Count).Equals(e.PropertyName, StringComparison.Ordinal))
+            if (nameof(ViewedActions.Count).Equals(e.PropertyName, StringComparison.Ordinal))
             {
                 OnPropertyChanged(_actionListHeaderChangedArgs);
             }
@@ -116,7 +116,7 @@ public sealed partial class ActionListViewModel : ObservableObject
             return;
         }
 
-        if (!ShowKeyRepeatActions) index = _actionCollection.ActionsExlKeyRepeatAsSpan.RefIndexOfReverse(currentAction);
+        if (!ShowKeyRepeatActions) index = _actionCollection.FilteredActionsAsSpan.RefIndexOfReverse(currentAction);
 
         if (index != -1)
         {
@@ -181,7 +181,7 @@ public sealed partial class ActionListViewModel : ObservableObject
         var range = SelectedRanges[0];
         for (int i = range.FirstIndex; i < range.LastIndex + 1; i++)
         {
-            if (_actionCollection.ActionsExlKeyRepeatAsSpan[i] is KeyAction { IsAutoRepeat: true }) return false;
+            if (_actionCollection.FilteredActionsAsSpan[i] is KeyAction { IsAutoRepeat: true }) return false;
         }
 
         return true;
@@ -280,7 +280,7 @@ public sealed partial class ActionListViewModel : ObservableObject
 
     private IEnumerable<InputAction> GetSelectedActions()
     {
-        var actions = ShowKeyRepeatActions ? _actionCollection.Actions : _actionCollection.ActionsExlKeyRepeat;
+        var actions = ShowKeyRepeatActions ? _actionCollection.Actions : _actionCollection.FilteredActions;
         for (int i = 0; i < SelectedRanges!.Count; i++)
         {
             var range = SelectedRanges![i];

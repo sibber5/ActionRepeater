@@ -223,7 +223,7 @@ HRESULT PathWindow::Render()
 
         pSink->BeginFigure(D2D1::Point2F(static_cast<float>(m_points[0].x), static_cast<float>(m_points[0].y)), D2D1_FIGURE_BEGIN_HOLLOW);
 
-        pSink->AddLines(&m_points[1], m_points.size() - 1);
+        pSink->AddLines(&m_points[1], static_cast<UINT32>(m_points.size() - 1));
 
         pSink->EndFigure(D2D1_FIGURE_END_OPEN);
 
