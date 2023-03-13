@@ -10,7 +10,7 @@ namespace ActionRepeater.UI.ViewModels;
 
 public sealed partial class MainViewModel
 {
-    private readonly ContentDialogService _contentDialogService;
+    private readonly IDialogService _dialogService;
     private readonly ActionCollection _actionCollection;
     private readonly IFilePicker _filePicker;
 
@@ -22,9 +22,9 @@ public sealed partial class MainViewModel
 
     private readonly string[] _loadFileTypes = new[] { ".ara" };
 
-    public MainViewModel(ContentDialogService contentDialogService, ActionCollection actionCollection, IFilePicker filePicker)
+    public MainViewModel(IDialogService dialogService, ActionCollection actionCollection, IFilePicker filePicker)
     {
-        _contentDialogService = contentDialogService;
+        _dialogService = dialogService;
         _actionCollection = actionCollection;
         _filePicker = filePicker;
         _actionCollection.ActionsCountChanged += (_, _) => ExportActionsCommand.NotifyCanExecuteChanged();
@@ -35,7 +35,7 @@ public sealed partial class MainViewModel
     {
         if (_actionCollection.Actions.Count == 0)
         {
-            await _contentDialogService.ShowMessageDialog("Actions list is empty.");
+            await _dialogService.ShowMessageDialog("Actions list is empty.");
             return;
         }
 
@@ -61,13 +61,13 @@ public sealed partial class MainViewModel
         }
         catch (Exception ex)
         {
-            await _contentDialogService.ShowErrorDialog($"{file.Name} couldn't be loaded", ex.Message);
+            await _dialogService.ShowErrorDialog($"{file.Name} couldn't be loaded", ex.Message);
             return;
         }
 
         if (data is null || (data.Actions.IsNullOrEmpty() && data.CursorPathRelative is null))
         {
-            await _contentDialogService.ShowErrorDialog("Actions empty", $"{nameof(ActionData)} is null");
+            await _dialogService.ShowErrorDialog("Actions empty", $"{nameof(ActionData)} is null");
             return;
         }
 

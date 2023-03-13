@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using ActionRepeater.Core.Action;
 using ActionRepeater.Core.Input;
 using ActionRepeater.UI.Factories;
@@ -6,11 +7,10 @@ using ActionRepeater.UI.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Xaml.Controls;
-using Windows.Foundation;
 
 namespace ActionRepeater.UI.Services;
 
-public sealed class ContentDialogService
+public sealed class ContentDialogService : IDialogService
 {
     private readonly WindowProperties _windowProperties;
     private readonly ActionCollection _actionCollection;
@@ -23,38 +23,51 @@ public sealed class ContentDialogService
         _editActionViewModelFactory = editActionViewModelFactory;
     }
 
-    public IAsyncOperation<ContentDialogResult> ShowErrorDialog(string title, string message) => new ContentDialog()
+    public async Task ShowErrorDialog(string title, string message)
     {
-        XamlRoot = _windowProperties.XamlRoot,
-        Title = $"❌ {title}",
-        Content = message,
-        CloseButtonText = "Ok",
-    }.ShowAsync();
+        await new ContentDialog()
+        {
+            XamlRoot = _windowProperties.XamlRoot,
+            Title = $"❌ {title}",
+            Content = message,
+            CloseButtonText = "Ok",
+        }.ShowAsync();
+    }
 
-    public IAsyncOperation<ContentDialogResult> ShowMessageDialog(string title, string? message = null) => new ContentDialog()
+    public async Task ShowMessageDialog(string title, string? message = null)
     {
-        XamlRoot = _windowProperties.XamlRoot,
-        Title = title,
-        Content = message,
-        CloseButtonText = "Ok",
-    }.ShowAsync();
+        await new ContentDialog()
+        {
+            XamlRoot = _windowProperties.XamlRoot,
+            Title = title,
+            Content = message,
+            CloseButtonText = "Ok",
+        }.ShowAsync();
+    }
 
-    /// <remarks>
-    /// "Yes" is the primary button.<br/>
-    /// "No" is the secondary button.
-    /// </remarks>
-    public IAsyncOperation<ContentDialogResult> ShowYesNoMessageDialog(string title, string? message = null, Action? onYesClick = null, Action? onNoClick = null) => new ContentDialog()
+    public async Task<YesNoDialogResult> ShowYesNoDialog(string title, string? message = null, Action? onYesClick = null, Action? onNoClick = null)
     {
-        XamlRoot = _windowProperties.XamlRoot,
-        Title = title,
-        Content = message,
-        PrimaryButtonText = "Yes",
-        PrimaryButtonCommand = onYesClick is null ? null : new RelayCommand(onYesClick),
-        SecondaryButtonText = "No",
-        SecondaryButtonCommand = onNoClick is null ? null : new RelayCommand(onNoClick),
-    }.ShowAsync();
+        var result = await new ContentDialog()
+        {
+            XamlRoot = _windowProperties.XamlRoot,
+            Title = title,
+            Content = message,
+            PrimaryButtonText = "Yes",
+            PrimaryButtonCommand = onYesClick is null ? null : new RelayCommand(onYesClick),
+            SecondaryButtonText = "No",
+            SecondaryButtonCommand = onNoClick is null ? null : new RelayCommand(onNoClick),
+        }.ShowAsync();
 
-    public IAsyncOperation<ContentDialogResult> ShowEditActionDialog(ActionType actionType)
+        return result switch
+        {
+            ContentDialogResult.None => YesNoDialogResult.None,
+            ContentDialogResult.Primary => YesNoDialogResult.Yes,
+            ContentDialogResult.Secondary => YesNoDialogResult.No,
+            _ => throw new NotImplementedException()
+        };
+    }
+
+    public async Task<ConfirmCancelDialogResult> ShowEditActionDialog(ActionType actionType)
     {
         ContentDialog dialog = new()
         {
@@ -68,16 +81,26 @@ public sealed class ContentDialogService
         dialog.Content = new Views.EditActionView(isAddView: true) { ViewModel = vm };
         dialog.PrimaryButtonCommand = vm.AddActionCommand;
 
-        return dialog.ShowAsync();
+        var result = await dialog.ShowAsync();
+
+        return result switch
+        {
+            ContentDialogResult.None => ConfirmCancelDialogResult.None,
+            ContentDialogResult.Primary => ConfirmCancelDialogResult.Confirm,
+            ContentDialogResult.Secondary => ConfirmCancelDialogResult.Cancel,
+            _ => throw new NotImplementedException()
+        };
     }
 
-    public IAsyncOperation<ContentDialogResult> ShowEditActionDialog(ObservableObject editActionViewModel, InputAction actionToEdit)
+    public async Task<ConfirmCancelDialogResult> ShowEditActionDialog(ObservableObject editActionViewModel, InputAction actionToEdit)
     {
         if (_actionCollection.IsActionTiedToAggregateAction(actionToEdit))
         {
-            return ShowErrorDialog("This action is not editable.", (actionToEdit is KeyAction { IsAutoRepeat: true })
+            await ShowErrorDialog("This action is not editable.", (actionToEdit is KeyAction { IsAutoRepeat: true })
                 ? "This is an auto repeat action, edit the original key down action if you want to change the key."
                 : ActionCollection.ActionTiedToAggregateActionMsg);
+
+            return ConfirmCancelDialogResult.None;
         }
 
         ContentDialog dialog = new()
@@ -93,6 +116,14 @@ public sealed class ContentDialogService
         dialog.PrimaryButtonCommand = vm.UpdateActionCommand;
         dialog.PrimaryButtonCommandParameter = actionToEdit;
 
-        return dialog.ShowAsync();
+        var result = await dialog.ShowAsync();
+
+        return result switch
+        {
+            ContentDialogResult.None => ConfirmCancelDialogResult.None,
+            ContentDialogResult.Primary => ConfirmCancelDialogResult.Confirm,
+            ContentDialogResult.Secondary => ConfirmCancelDialogResult.Cancel,
+            _ => throw new NotImplementedException()
+        };
     }
 }

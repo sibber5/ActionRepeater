@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using ActionRepeater.UI.Services;
 using ActionRepeater.UI.ViewModels;
 using CommunityToolkit.Mvvm.Input;
@@ -11,9 +10,9 @@ public sealed class AddActionMenuItems
 {
     private readonly AsyncRelayCommand<ActionType> _addActionCommand;
 
-    public AddActionMenuItems(ContentDialogService contentDialogService)
+    public AddActionMenuItems(IDialogService dialogService)
     {
-        _addActionCommand = new(async (actionType) => await contentDialogService.ShowEditActionDialog(actionType));
+        _addActionCommand = new(dialogService.ShowEditActionDialog);
     }
 
     public void AddTo(IList<MenuFlyoutItemBase> items)

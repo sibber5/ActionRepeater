@@ -15,7 +15,6 @@ using ActionRepeater.UI.Services;
 using ActionRepeater.UI.Utilities;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.UI.Xaml.Controls;
 
 namespace ActionRepeater.UI.ViewModels;
 
@@ -53,7 +52,7 @@ public sealed partial class ActionListViewModel : ObservableObject
 
     public bool CanAddAction => !_recorder.IsRecording;
 
-    private readonly ContentDialogService _contentDialogService;
+    private readonly IDialogService _dialogService;
 
     private readonly Action _updateSelectedAction;
 
@@ -68,9 +67,9 @@ public sealed partial class ActionListViewModel : ObservableObject
 
     internal Action _scrollToSelectedItem = null!;
 
-    public ActionListViewModel(ContentDialogService contentDialogService, ActionCollection actionCollection, Recorder recorder, IDispatcher dispatcher)
+    public ActionListViewModel(IDialogService dialogService, ActionCollection actionCollection, Recorder recorder, IDispatcher dispatcher)
     {
-        _contentDialogService = contentDialogService;
+        _dialogService = dialogService;
         _actionCollection = actionCollection;
         _recorder = recorder;
         _dispatcher = dispatcher;
@@ -156,7 +155,7 @@ public sealed partial class ActionListViewModel : ObservableObject
             _ => throw new NotSupportedException($"{SelectedAction.GetType()} not suppored.")
         };
 
-        await _contentDialogService.ShowEditActionDialog(editActionVM, SelectedAction);
+        await _dialogService.ShowEditActionDialog(editActionVM, SelectedAction);
     }
 
     private bool IsSelectedActionNotAutoRepeat() => SelectedAction is not KeyAction ka || !ka.IsAutoRepeat;
@@ -210,7 +209,7 @@ public sealed partial class ActionListViewModel : ObservableObject
         string? errorMsg = _actionCollection.TryReplace(!ShowKeyRepeatActions, SelectedActionIndex, _copiedActions[0].Clone());
         if (errorMsg is not null)
         {
-            await _contentDialogService.ShowErrorDialog("Failed to replace action", errorMsg);
+            await _dialogService.ShowErrorDialog("Failed to replace action", errorMsg);
         }
     }
 
@@ -221,10 +220,10 @@ public sealed partial class ActionListViewModel : ObservableObject
 
         if (_actionCollection.IsAggregateAction(SelectedAction))
         {
-            ContentDialogResult result = await _contentDialogService.ShowYesNoMessageDialog("Are you sure you want to remove this action?",
+            var result = await _dialogService.ShowYesNoDialog("Are you sure you want to remove this action?",
                 $"This action represents multiple hidden actions (because \"{nameof(ShowKeyRepeatActions)}\" is off).{Environment.NewLine}If you remove it the multiple actions it represents will also be removed.");
 
-            if (result == ContentDialogResult.Primary) _actionCollection.TryRemove(SelectedAction!);
+            if (result == YesNoDialogResult.Yes) _actionCollection.TryRemove(SelectedAction!);
 
             return;
         }
@@ -232,7 +231,7 @@ public sealed partial class ActionListViewModel : ObservableObject
         string? errorMsg = _actionCollection.TryRemove(SelectedAction);
         if (errorMsg is not null)
         {
-            await _contentDialogService.ShowErrorDialog("Failed to remove action", errorMsg);
+            await _dialogService.ShowErrorDialog("Failed to remove action", errorMsg);
         }
     }
 
@@ -254,10 +253,10 @@ public sealed partial class ActionListViewModel : ObservableObject
 
         if (selectedActions.Any(_actionCollection.IsAggregateAction))
         {
-            ContentDialogResult result = await _contentDialogService.ShowYesNoMessageDialog("Are you sure you want to remove these actions?",
+            var result = await _dialogService.ShowYesNoDialog("Are you sure you want to remove these actions?",
                 $"One or more of the selected actions represents multiple hidden actions (because \"{nameof(ShowKeyRepeatActions)}\" is off).{Environment.NewLine}If you remove it the multiple actions it represents will also be removed.");
 
-            if (result != ContentDialogResult.Primary) return;
+            if (result != YesNoDialogResult.Yes) return;
         }
 
         string? errorMsg;
@@ -266,7 +265,7 @@ public sealed partial class ActionListViewModel : ObservableObject
             errorMsg = _actionCollection.TryRemove(selectedActions[i], mergeWaitActions: false);
             if (errorMsg is not null)
             {
-                await _contentDialogService.ShowErrorDialog("Failed to remove action", errorMsg);
+                await _dialogService.ShowErrorDialog("Failed to remove action", errorMsg);
             }
         }
 
@@ -274,7 +273,7 @@ public sealed partial class ActionListViewModel : ObservableObject
         errorMsg = _actionCollection.TryRemove(selectedActions[^1], mergeWaitActions: true);
         if (errorMsg is not null)
         {
-            await _contentDialogService.ShowErrorDialog("Failed to remove action", errorMsg);
+            await _dialogService.ShowErrorDialog("Failed to remove action", errorMsg);
         }
     }
 

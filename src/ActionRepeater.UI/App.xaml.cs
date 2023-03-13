@@ -38,7 +38,7 @@ public partial class App : Application
 
     private readonly AppOptions _options;
 
-    private readonly ContentDialogService _contentDialogService;
+    private readonly IDialogService _dialogService;
     private readonly IDispatcher _dispatcher;
 
     private bool _saveOnExit = true;
@@ -65,7 +65,7 @@ public partial class App : Application
 
         Services = ConfigureServices();
 
-        _contentDialogService = Services.GetRequiredService<ContentDialogService>();
+        _dialogService = Services.GetRequiredService<IDialogService>();
         _dispatcher = Services.GetRequiredService<IDispatcher>();
 
         InitializeComponent();
@@ -116,8 +116,7 @@ public partial class App : Application
         services.AddSingleton<Player>();
 
         services.AddSingleton<PathWindowService>();
-        services.AddSingleton<ContentDialogService>();
-
+        services.AddSingleton<IDialogService, ContentDialogService>();
         services.AddSingleton<IFilePicker, FilePicker>();
         services.AddSingleton<IDispatcher, WinUIDispatcher>();
 
@@ -151,7 +150,7 @@ public partial class App : Application
         {
             if (Current._loadingOptionsException is not null)
             {
-                await Current._contentDialogService.ShowErrorDialog("Could not load options", Current._loadingOptionsException.Message);
+                await Current._dialogService.ShowErrorDialog("Could not load options", Current._loadingOptionsException.Message);
             }
         };
 
@@ -215,7 +214,7 @@ public partial class App : Application
                 _themeOptionReverter.PreviousValue = _options.UI.Theme;
             }
 
-            _ = _contentDialogService.ShowYesNoMessageDialog(
+            _ = _dialogService.ShowYesNoDialog(
                 "Restart required to change theme",
                 "Restart?",
                 onYesClick: RestartAndChangeTheme,
@@ -226,7 +225,7 @@ public partial class App : Application
     {
         if (!File.Exists(Path.Combine(AppDataOptionsDir, OptionsFileName))) return;
 
-        _ = _contentDialogService.ShowYesNoMessageDialog(
+        _ = _dialogService.ShowYesNoDialog(
             "Options file in AppData will be deleted",
             "Are you sure you want to change the options file location?",
             onYesClick: static () =>
@@ -251,7 +250,7 @@ public partial class App : Application
     {
         if (!File.Exists(Path.Combine(AppContext.BaseDirectory, OptionsFileName))) return;
 
-        _ = _contentDialogService.ShowYesNoMessageDialog(
+        _ = _dialogService.ShowYesNoDialog(
             "Options file in app folder will be deleted",
             "Are you sure you want to change the options file location?",
             onYesClick: static () =>
@@ -318,7 +317,7 @@ public partial class App : Application
         }
         catch (Exception ex)
         {
-            await _contentDialogService.ShowErrorDialog("Could not save options.", ex.Message);
+            await _dialogService.ShowErrorDialog("Could not save options.", ex.Message);
         }
     }
 
