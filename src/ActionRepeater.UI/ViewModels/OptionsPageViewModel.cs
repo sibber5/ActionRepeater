@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using ActionRepeater.Core;
 using ActionRepeater.Core.Extentions;
+using ActionRepeater.UI.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ActionRepeater.UI.ViewModels;
@@ -12,40 +13,40 @@ public sealed class OptionsPageViewModel : ObservableObject
 {
     public int CursorMovementMode
     {
-        get => (int)CoreOptions.Instance.CursorMovementMode;
-        set => CoreOptions.Instance.CursorMovementMode = (CursorMovementMode)value;
+        get => (int)_options.Core.CursorMovementMode;
+        set => _options.Core.CursorMovementMode = (CursorMovementMode)value;
     }
 
-    public bool DisplayAccelerationWarning => CoreOptions.Instance.CursorMovementMode == Core.CursorMovementMode.Absolute && Win32.SystemInformation.IsMouseAccelerationEnabled;
+    public bool DisplayAccelerationWarning => _options.Core.CursorMovementMode == Core.CursorMovementMode.Absolute && Win32.SystemInformation.IsMouseAccelerationEnabled;
 
     public bool UseCursorPosOnClicks
     {
-        get => CoreOptions.Instance.UseCursorPosOnClicks;
-        set => CoreOptions.Instance.UseCursorPosOnClicks = value;
+        get => _options.Core.UseCursorPosOnClicks;
+        set => _options.Core.UseCursorPosOnClicks = value;
     }
 
     public int MaxClickInterval
     {
-        get => CoreOptions.Instance.MaxClickInterval;
-        set => CoreOptions.Instance.MaxClickInterval = value;
+        get => _options.Core.MaxClickInterval;
+        set => _options.Core.MaxClickInterval = value;
     }
 
     public bool SendKeyAutoRepeat
     {
-        get => CoreOptions.Instance.SendKeyAutoRepeat;
-        set => CoreOptions.Instance.SendKeyAutoRepeat = value;
+        get => _options.Core.SendKeyAutoRepeat;
+        set => _options.Core.SendKeyAutoRepeat = value;
     }
 
     public int Theme
     {
-        get => (int)UIOptions.Instance.Theme;
-        set => UIOptions.Instance.Theme = (Theme)value;
+        get => (int)_options.UI.Theme;
+        set => _options.UI.Theme = (Theme)value;
     }
 
     public int OptionsFileLocation
     {
-        get => (int)UIOptions.Instance.OptionsFileLocation;
-        set => UIOptions.Instance.OptionsFileLocation = (OptionsFileLocation)value;
+        get => (int)_options.UI.OptionsFileLocation;
+        set => _options.UI.OptionsFileLocation = (OptionsFileLocation)value;
     }
 
     public IEnumerable<string> CursorMovementCBItems => Enum.GetNames<CursorMovementMode>().Select(x => x.AddSpacesBetweenWords());
@@ -55,9 +56,13 @@ public sealed class OptionsPageViewModel : ObservableObject
 
     private readonly PropertyChangedEventArgs _isCursorMovementModeChangedArgs = new(nameof(IsCursorMovementMode));
     private readonly PropertyChangedEventArgs _displayAccelerationWarningChangedArgs = new(nameof(DisplayAccelerationWarning));
+    
+    private readonly AppOptions _options;
 
-    public OptionsPageViewModel()
+    public OptionsPageViewModel(AppOptions options)
     {
+        _options = options;
+
         PropertyChangedEventHandler callPropChange = (s, e) =>
         {
             OnPropertyChanged(e);
@@ -67,9 +72,9 @@ public sealed class OptionsPageViewModel : ObservableObject
                 OnPropertyChanged(_displayAccelerationWarningChangedArgs);
             }
         };
-        CoreOptions.Instance.PropertyChanged += callPropChange;
-        UIOptions.Instance.PropertyChanged += callPropChange;
+        _options.Core.PropertyChanged += callPropChange;
+        _options.UI.PropertyChanged += callPropChange;
     }
 
-    public bool IsCursorMovementMode(CursorMovementMode mode) => CoreOptions.Instance.CursorMovementMode == mode;
+    public bool IsCursorMovementMode(CursorMovementMode mode) => _options.Core.CursorMovementMode == mode;
 }

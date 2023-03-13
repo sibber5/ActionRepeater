@@ -31,11 +31,13 @@ public sealed class Recorder
     private readonly StopwatchSlim _actionStopwatch = new();
     private readonly TimeConsistencyChecker _wheelMsgTCC = new();
 
+    private readonly CoreOptions _options;
     private readonly ActionCollection _actionCollection;
     private readonly Func<nint> _getWindowHandle;
 
-    public Recorder(ActionCollection actionCollection, Func<nint> getWindowHandle)
+    public Recorder(CoreOptions options, ActionCollection actionCollection, Func<nint> getWindowHandle)
     {
+        _options = options;
         _actionCollection = actionCollection;
         _getWindowHandle = getWindowHandle;
 
@@ -82,7 +84,7 @@ public sealed class Recorder
 
         Restart();
 
-        _shouldRecordMouseMovement = CoreOptions.Instance.CursorMovementMode != CursorMovementMode.None;
+        _shouldRecordMouseMovement = _options.CursorMovementMode != CursorMovementMode.None;
 
         if (_shouldRecordMouseMovement)
         {
@@ -279,7 +281,7 @@ public sealed class Recorder
 
         if (button == MouseButton.Left && ShouldRecordMouseClick?.Invoke() == true) return;
 
-        AddAction(new MouseButtonAction(type, button, PInvoke.Helpers.GetCursorPos(), CoreOptions.Instance.UseCursorPosOnClicks));
+        AddAction(new MouseButtonAction(type, button, PInvoke.Helpers.GetCursorPos(), _options.UseCursorPosOnClicks));
     }
 
     private void OnKeyboardMessage(VirtualKey key, RawInputKeyFlags keyFlags)
@@ -318,7 +320,7 @@ public sealed class Recorder
 
         int elapsedMS = (int)_actionStopwatch.RestartAndGetElapsedMS();
 
-        if (elapsedMS <= CoreOptions.Instance.MaxClickInterval)
+        if (elapsedMS <= _options.MaxClickInterval)
         {
             if (CheckAndReplaceWithClickAction(action))
             {

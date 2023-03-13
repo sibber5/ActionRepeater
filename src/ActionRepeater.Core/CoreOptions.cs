@@ -1,4 +1,6 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using ActionRepeater.Win32;
 
@@ -6,36 +8,31 @@ namespace ActionRepeater.Core;
 
 public sealed class CoreOptions : INotifyPropertyChanged
 {
-    /// <summary>
-    /// For deserialization only. will be private once https://github.com/dotnet/runtime/issues/31511 is implemented.
-    /// </summary>
-    public CoreOptions() { }
-    private static CoreOptions? _instance;
-    public static CoreOptions Instance => _instance ??= new();
-
     public event PropertyChangedEventHandler? PropertyChanged;
     private void OnPropertyChanged([CallerMemberName] string propertyName = null!) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    private bool SetProperty<T>([NotNullIfNotNull(nameof(newValue))] ref T field, T newValue, [CallerMemberName] string propertyName = null!)
+    {
+        if (EqualityComparer<T>.Default.Equals(field, newValue)) return false;
+
+        field = newValue;
+
+        OnPropertyChanged(propertyName);
+
+        return true;
+    }
 
     private int _maxClickInterval = 120;
     public int MaxClickInterval
     {
         get => _maxClickInterval;
-        set
-        {
-            _maxClickInterval = value;
-            OnPropertyChanged();
-        }
+        set => SetProperty(ref _maxClickInterval, value);
     }
 
     private bool _sendKeyAutoRepeat = true;
     public bool SendKeyAutoRepeat
     {
         get => _sendKeyAutoRepeat;
-        set
-        {
-            _sendKeyAutoRepeat = value;
-            OnPropertyChanged();
-        }
+        set => SetProperty(ref _sendKeyAutoRepeat, value);
     }
 
     private CursorMovementMode _cursorMovementMode = CursorMovementMode.None;
@@ -59,29 +56,14 @@ public sealed class CoreOptions : INotifyPropertyChanged
     public bool UseCursorPosOnClicks
     {
         get => _useCursorPosOnClicks;
-        set
-        {
-            if (_useCursorPosOnClicks == value) return;
-
-            _useCursorPosOnClicks = value;
-            OnPropertyChanged();
-        }
+        set => SetProperty(ref _useCursorPosOnClicks, value);
     }
 
     private int _playRepeatCount = 1;
     public int PlayRepeatCount
     {
         get => _playRepeatCount;
-        set
-        {
-            _playRepeatCount = value;
-            OnPropertyChanged();
-        }
-    }
-
-    public static void Load(CoreOptions options)
-    {
-        _instance = options;
+        set => SetProperty(ref _playRepeatCount, value);
     }
 }
 

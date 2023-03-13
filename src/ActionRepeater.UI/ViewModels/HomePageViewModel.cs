@@ -1,4 +1,5 @@
 ﻿using System;
+using ActionRepeater.Core;
 using ActionRepeater.Core.Input;
 using ActionRepeater.UI.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -10,14 +11,16 @@ public sealed partial class HomePageViewModel : ObservableObject
 {
     public int PlayRepeatCount
     {
-        get => Core.CoreOptions.Instance.PlayRepeatCount;
-        set => Core.CoreOptions.Instance.PlayRepeatCount = value;
+        get => _coreOptions.PlayRepeatCount;
+        set => _coreOptions.PlayRepeatCount = value;
     }
 
     [ObservableProperty]
     private bool _isPlayButtonChecked;
 
     public bool CanAddAction => !_recorder.IsRecording;
+
+    private readonly CoreOptions _coreOptions;
 
     private readonly PathWindowService _pathWindowService;
 
@@ -27,8 +30,10 @@ public sealed partial class HomePageViewModel : ObservableObject
 
     private readonly Action _onIsPlayingChanged;
 
-    public HomePageViewModel(PathWindowService pathWindowService, ActionCollection actionCollection, ActionListViewModel actionListVM, Player player, Recorder recorder, IDispatcher dispatcher)
+    public HomePageViewModel(CoreOptions coreOptions, PathWindowService pathWindowService, ActionCollection actionCollection, ActionListViewModel actionListVM, Player player, Recorder recorder, IDispatcher dispatcher)
     {
+        _coreOptions = coreOptions;
+
         _pathWindowService = pathWindowService;
 
         _actionCollection = actionCollection;
@@ -43,7 +48,7 @@ public sealed partial class HomePageViewModel : ObservableObject
             ToggleRecordingCommand.NotifyCanExecuteChanged();
         };
 
-        Core.CoreOptions.Instance.PropertyChanged += (_, e) =>
+        _coreOptions.PropertyChanged += (_, e) =>
         {
             if (nameof(PlayRepeatCount).Equals(e.PropertyName, StringComparison.Ordinal)) OnPropertyChanged(e);
         };

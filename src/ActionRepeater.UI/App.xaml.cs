@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using ActionRepeater.Core;
 using ActionRepeater.Core.Helpers;
 using ActionRepeater.Core.Input;
 using ActionRepeater.UI.Factories;
@@ -35,6 +36,8 @@ public partial class App : Application
 
     private MainWindow _mainWindow = null!;
 
+    private readonly AppOptions _options;
+
     private readonly ContentDialogService _contentDialogService;
     private readonly IDispatcher _dispatcher;
 
@@ -52,6 +55,14 @@ public partial class App : Application
     /// </summary>
     public App()
     {
+        _options = null!;
+        if (!TryLoadOptions(Path.Combine(AppDataOptionsDir, OptionsFileName), out _options!))
+        {
+            TryLoadOptions(Path.Combine(AppContext.BaseDirectory, OptionsFileName), out _options!);
+        }
+
+        _options ??= new(new CoreOptions(), new UIOptions());
+
         Services = ConfigureServices();
 
         _contentDialogService = Services.GetRequiredService<ContentDialogService>();
@@ -59,17 +70,12 @@ public partial class App : Application
 
         InitializeComponent();
 
-        if (!TryLoadOptions(Path.Combine(AppDataOptionsDir, OptionsFileName)))
-        {
-            TryLoadOptions(Path.Combine(AppContext.BaseDirectory, OptionsFileName));
-        }
-
         string[] args = Environment.GetCommandLineArgs();
         string? themeArg = args.FirstOrDefault(static x => x.StartsWith("--theme="));
         if (themeArg is not null)
         {
-            var theme = themeArg.AsSpan(8);
-            UIOptions.Instance.Theme = theme switch
+            var theme = themeArg.AsSpan("--theme=".Length);
+            _options.UI.Theme = theme switch
             {
                 "light" => Theme.Light,
                 "dark" => Theme.Dark,
@@ -77,7 +83,7 @@ public partial class App : Application
             };
         }
 
-        switch (UIOptions.Instance.Theme)
+        switch (_options.UI.Theme)
         {
             case Theme.Light:
                 App.Current.RequestedTheme = ApplicationTheme.Light;
@@ -88,12 +94,16 @@ public partial class App : Application
                 break;
         }
 
-        UIOptions.Instance.PropertyChanging += UIOptions_PropertyChanging;
+        _options.UI.PropertyChanging += UIOptions_PropertyChanging;
     }
 
-    private static IServiceProvider ConfigureServices()
+    private IServiceProvider ConfigureServices()
     {
         ServiceCollection services = new();
+
+        services.AddSingleton(_options.Core);
+        services.AddSingleton(_options.UI);
+        services.AddSingleton(_options);
 
         services.AddTransient<HighResolutionWaiter>();
 
@@ -101,7 +111,7 @@ public partial class App : Application
         services.AddSingleton<Recorder>((s) =>
         {
             var windowProps = s.GetRequiredService<WindowProperties>();
-            return new(s.GetRequiredService<ActionCollection>(), () => windowProps.Handle);
+            return new(s.GetRequiredService<CoreOptions>(), s.GetRequiredService<ActionCollection>(), () => windowProps.Handle);
         });
         services.AddSingleton<Player>();
 
@@ -164,22 +174,22 @@ public partial class App : Application
 
     private void UIOptions_PropertyChanging(object? sender, System.ComponentModel.PropertyChangingEventArgs e)
     {
-        if (nameof(UIOptions.Instance.OptionsFileLocation).Equals(e.PropertyName, StringComparison.Ordinal))
+        if (nameof(_options.UI.OptionsFileLocation).Equals(e.PropertyName, StringComparison.Ordinal))
         {
             if (_optsFileLocReverter?.IsReverting == true) return;
             if (_optsFileLocReverter is null)
             {
-                _optsFileLocReverter = new(UIOptions.Instance.OptionsFileLocation,
-                                           static () => UIOptions.Instance.OptionsFileLocation,
-                                           static (val) => UIOptions.Instance.OptionsFileLocation = val,
+                _optsFileLocReverter = new(_options.UI.OptionsFileLocation,
+                                           () => _options.UI.OptionsFileLocation,
+                                           (val) => _options.UI.OptionsFileLocation = val,
                                            _dispatcher);
             }
             else
             {
-                _optsFileLocReverter.PreviousValue = UIOptions.Instance.OptionsFileLocation;
+                _optsFileLocReverter.PreviousValue = _options.UI.OptionsFileLocation;
             }
 
-            switch (UIOptions.Instance.OptionsFileLocation)
+            switch (_options.UI.OptionsFileLocation)
             {
                 case OptionsFileLocation.AppData:
                     DeleteAppDataOptionsFile();
@@ -190,19 +200,19 @@ public partial class App : Application
                     break;
             }
         }
-        else if (nameof(UIOptions.Instance.Theme).Equals(e.PropertyName, StringComparison.Ordinal))
+        else if (nameof(_options.UI.Theme).Equals(e.PropertyName, StringComparison.Ordinal))
         {
             if (_themeOptionReverter?.IsReverting == true) return;
             if (_themeOptionReverter is null)
             {
-                _themeOptionReverter = new(UIOptions.Instance.Theme,
-                                           static () => UIOptions.Instance.Theme,
-                                           static (val) => UIOptions.Instance.Theme = val,
+                _themeOptionReverter = new(_options.UI.Theme,
+                                           () => _options.UI.Theme,
+                                           (val) => _options.UI.Theme = val,
                                            _dispatcher);
             }
             else
             {
-                _themeOptionReverter.PreviousValue = UIOptions.Instance.Theme;
+                _themeOptionReverter.PreviousValue = _options.UI.Theme;
             }
 
             _ = _contentDialogService.ShowYesNoMessageDialog(
@@ -259,20 +269,20 @@ public partial class App : Application
     // Intentional async void, because the message dialog requires void return type and app will close anyway, so it doesnt matter.
     private async void RestartAndChangeTheme()
     {
-        while (UIOptions.Instance.Theme == _themeOptionReverter!.PreviousValue) { }
+        while (_options.UI.Theme == _themeOptionReverter!.PreviousValue) { }
 
         string path = Path.ChangeExtension(System.Reflection.Assembly.GetEntryAssembly()!.Location, ".exe");
 
         await SaveOptions();
         _saveOnExit = false;
 
-        if (UIOptions.Instance.Theme == Theme.WindowsSetting || UIOptions.Instance.OptionsFileLocation != OptionsFileLocation.None)
+        if (_options.UI.Theme == Theme.WindowsSetting || _options.UI.OptionsFileLocation != OptionsFileLocation.None)
         {
             Process.Start(path);
         }
         else
         {
-            Process.Start(path, UIOptions.Instance.Theme == Theme.Light ? "--theme=light" : "--theme=dark");
+            Process.Start(path, _options.UI.Theme == Theme.Light ? "--theme=light" : "--theme=dark");
         }
         Application.Current.Exit();
 
@@ -286,7 +296,7 @@ public partial class App : Application
         {
             string path;
 
-            switch (UIOptions.Instance.OptionsFileLocation)
+            switch (_options.UI.OptionsFileLocation)
             {
                 case OptionsFileLocation.AppData:
                     path = Path.Combine(AppDataOptionsDir, OptionsFileName);
@@ -301,11 +311,10 @@ public partial class App : Application
                     return;
 
                 default:
-                    throw new InvalidOperationException($"{nameof(UIOptions.Instance.OptionsFileLocation)} contains an invalid value.");
+                    throw new InvalidOperationException($"{nameof(_options.UI.OptionsFileLocation)} contains an invalid value.");
             }
 
-            AllOptions options = new(Core.CoreOptions.Instance, UIOptions.Instance);
-            await SerializationHelper.SerializeToFileAsync(options, path, AllOptionsJsonContext.Default.AllOptions);
+            await SerializationHelper.SerializeToFileAsync(_options, path, AppOptionsJsonContext.Default.AppOptions);
         }
         catch (Exception ex)
         {
@@ -313,7 +322,7 @@ public partial class App : Application
         }
     }
 
-    private bool TryLoadOptions(string path)
+    private bool TryLoadOptions(string path, [NotNullWhen(true)] out AppOptions? options)
     {
         try
         {
@@ -322,18 +331,25 @@ public partial class App : Application
             {
                 json = File.ReadAllText(path);
             }
-            catch (DirectoryNotFoundException) { return false; }
-            catch (FileNotFoundException) { return false; }
+            catch (DirectoryNotFoundException)
+            {
+                options = null;
+                return false;
+            }
+            catch (FileNotFoundException)
+            {
+                options = null;
+                return false;
+            }
 
-            AllOptions options = JsonSerializer.Deserialize(json, AllOptionsJsonContext.Default.AllOptions);
-            Core.CoreOptions.Load(options.CoreOptions);
-            UIOptions.Load(options.UIOptions);
+            options = JsonSerializer.Deserialize(json, AppOptionsJsonContext.Default.AppOptions) ?? throw new UnreachableException();
 
             return true;
         }
         catch (Exception ex)
         {
             _loadingOptionsException = ex;
+            options = null;
             return false;
         }
     }
@@ -356,9 +372,3 @@ public partial class App : Application
         PInvoke.SetWindowPos(hwnd, SpecialWindowHandles.HWND_TOP, 0, 0, width, height, SetWindowPosFlags.NOMOVE);
     }
 }
-
-public record struct AllOptions(Core.CoreOptions CoreOptions, UIOptions UIOptions);
-
-[JsonSerializable(typeof(AllOptions))]
-[JsonSourceGenerationOptions(GenerationMode = JsonSourceGenerationMode.Default, WriteIndented = true)]
-public partial class AllOptionsJsonContext : JsonSerializerContext { }

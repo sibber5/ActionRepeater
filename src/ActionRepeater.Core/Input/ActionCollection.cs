@@ -60,6 +60,8 @@ public sealed partial class ActionCollection : ICollection<InputAction>
     private readonly ObservableCollectionEx<InputAction> _actions = new();
     private readonly ObservableCollectionEx<InputAction> _filteredActions = new();
 
+    private readonly CoreOptions _options;
+
     private bool _refillActions;
     private bool _refillFilteredActions;
     private bool _isRefillingActions;
@@ -75,8 +77,10 @@ public sealed partial class ActionCollection : ICollection<InputAction>
     private SendOrPostCallback? _refillActionsPostCallback;
     private Action<object?>? _refillActionsTaskCallback;
 
-    public ActionCollection()
+    public ActionCollection(CoreOptions options)
     {
+        _options = options;
+
         _mainSyncContext = SynchronizationContext.Current;
         _aggregateActions = new(_actions, _filteredActions);
 
@@ -95,7 +99,7 @@ public sealed partial class ActionCollection : ICollection<InputAction>
         // this *could* cause a memory leak *if* Options.Instance should live longer than this action collection instance,
         // *but* this will not happen with the current usage of these, as this is registered as a singleton.
         // if for some reason in the future that changed this class would implement IDisposable and unsubscribe from the event in Dispose.
-        CoreOptions.Instance.PropertyChanged += CoreOptions_PropertyChanged;
+        _options.PropertyChanged += CoreOptions_PropertyChanged;
     }
 
     public IEnumerable<MouseMovement> GetAbsoluteCursorPath()
@@ -133,14 +137,16 @@ public sealed partial class ActionCollection : ICollection<InputAction>
 
     private void CoreOptions_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
-        if (nameof(CoreOptions.Instance.UseCursorPosOnClicks).Equals(e.PropertyName, StringComparison.Ordinal))
+        if (nameof(_options.UseCursorPosOnClicks).Equals(e.PropertyName, StringComparison.Ordinal)
+            || nameof(_options.CursorMovementMode).Equals(e.PropertyName, StringComparison.Ordinal))
         {
-            bool newVal = CoreOptions.Instance.UseCursorPosOnClicks;
+            // dont set the position if there is a cursor path, because it messes with that for some reason
+            bool usePosition = _options.UseCursorPosOnClicks && _options.CursorMovementMode == CursorMovementMode.None;
             foreach (InputAction action in _actions.AsSpan())
             {
                 if (action is MouseButtonAction mbAction)
                 {
-                    mbAction.UsePosition = newVal;
+                    mbAction.UsePosition = usePosition;
                 }
             }
         }

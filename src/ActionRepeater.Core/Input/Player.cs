@@ -51,15 +51,18 @@ public sealed class Player
     private readonly Action<Task> _cleanUp;
 
 
+    private readonly CoreOptions _options;
+
     private readonly ActionCollection _actionCollection;
 
     private readonly HighResolutionWaiter _actionsWaiter;
     private readonly HighResolutionWaiter _cursorMovementWaiter;
 
-    public Player(ActionCollection actionCollection, HighResolutionWaiter actionsWaiter, HighResolutionWaiter cursorMovementWaiter)
+    public Player(CoreOptions options, ActionCollection actionCollection, HighResolutionWaiter actionsWaiter, HighResolutionWaiter cursorMovementWaiter)
     {
         if (ReferenceEquals(actionsWaiter, cursorMovementWaiter)) throw new ArgumentException($"{nameof(actionsWaiter)} must be a different instance than {nameof(cursorMovementWaiter)}");
 
+        _options = options;
         _actionCollection = actionCollection;
         _actionsWaiter = actionsWaiter;
         _cursorMovementWaiter = cursorMovementWaiter;
@@ -120,15 +123,15 @@ public sealed class Player
             return false;
         }
 
-        var actions = CoreOptions.Instance.SendKeyAutoRepeat ? _actionCollection.Actions : _actionCollection.FilteredActions;
-        IReadOnlyList<MouseMovement>? cursorPath = CoreOptions.Instance.CursorMovementMode switch
+        var actions = _options.SendKeyAutoRepeat ? _actionCollection.Actions : _actionCollection.FilteredActions;
+        IReadOnlyList<MouseMovement>? cursorPath = _options.CursorMovementMode switch
         {
             CursorMovementMode.Absolute => _actionCollection.GetAbsoluteCursorPath().ToList(),
             CursorMovementMode.Relative => _actionCollection.CursorPath,
             _ => null
         };
 
-        PlayActions(actions, cursorPath, CoreOptions.Instance.CursorMovementMode == CursorMovementMode.Relative, CoreOptions.Instance.PlayRepeatCount);
+        PlayActions(actions, cursorPath, _options.CursorMovementMode == CursorMovementMode.Relative, _options.PlayRepeatCount);
 
         return true;
     }
