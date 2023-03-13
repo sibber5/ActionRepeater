@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ActionRepeater.Win32.WindowsAndMessages;
+﻿namespace ActionRepeater.Win32.WindowsAndMessages;
 
 /// <summary>
 /// Special window handles.

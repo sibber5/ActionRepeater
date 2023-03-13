@@ -162,13 +162,13 @@ public sealed class Player
             Task.Run(async () =>
             {
                 if (repeatCount < 0) while (!_tokenSource.IsCancellationRequested)
-                    {
-                        await _taskToRun();
-                    }
+                {
+                    await _taskToRun();
+                }
                 else for (int i = 0; i < repeatCount && !_tokenSource.IsCancellationRequested; ++i)
-                    {
-                        await _taskToRun();
-                    }
+                {
+                    await _taskToRun();
+                }
             }).ContinueWith(_cleanUp);
         }
     }

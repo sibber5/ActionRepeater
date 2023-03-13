@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ActionRepeater.Win32.Input;
+﻿namespace ActionRepeater.Win32.Input;
 
 /// <summary>Defines information for the raw input devices.</summary>
 /// <remarks>
