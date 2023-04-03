@@ -4,6 +4,7 @@ using ActionRepeater.Core.Action;
 using ActionRepeater.Core.Input;
 using ActionRepeater.UI.Factories;
 using ActionRepeater.UI.ViewModels;
+using ActionRepeater.UI.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Xaml.Controls;
@@ -78,7 +79,7 @@ public sealed class ContentDialogService : IDialogService
 
         EditActionViewModel vm = _editActionViewModelFactory.Create(actionType, dialog);
 
-        dialog.Content = new Views.EditActionView(isAddView: true) { ViewModel = vm };
+        dialog.Content = new EditActionView(isAddView: true) { ViewModel = vm };
         dialog.PrimaryButtonCommand = vm.AddActionCommand;
 
         var result = await dialog.ShowAsync();
@@ -112,7 +113,7 @@ public sealed class ContentDialogService : IDialogService
 
         EditActionViewModel vm = _editActionViewModelFactory.Create(editActionViewModel, dialog);
 
-        dialog.Content = new Views.EditActionView() { ViewModel = vm };
+        dialog.Content = new EditActionView() { ViewModel = vm };
         dialog.PrimaryButtonCommand = vm.UpdateActionCommand;
         dialog.PrimaryButtonCommandParameter = actionToEdit;
 

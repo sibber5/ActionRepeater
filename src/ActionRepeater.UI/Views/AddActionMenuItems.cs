@@ -20,28 +20,28 @@ public sealed class AddActionMenuItems
         items.Add(new MenuFlyoutItem()
         {
             Text = "Key Action",
-            Icon = new FontIcon() { Glyph = "\uE92E" },
+            Icon = new FontIcon() { Glyph = ActionGlyphs.Keyboard },
             Command = _addActionCommand,
             CommandParameter = ActionType.KeyAction,
         });
         items.Add(new MenuFlyoutItem()
         {
             Text = "Mouse Button Action",
-            Icon = new FontIcon() { Glyph = "\uE962" },
+            Icon = new FontIcon() { Glyph = ActionGlyphs.Mouse },
             Command = _addActionCommand,
             CommandParameter = ActionType.MouseButtonAction,
         });
         items.Add(new MenuFlyoutItem()
         {
             Text = "Mouse Wheel Action",
-            Icon = new FontIcon() { Glyph = "\uE962" },
+            Icon = new FontIcon() { Glyph = ActionGlyphs.Mouse },
             Command = _addActionCommand,
             CommandParameter = ActionType.MouseWheelAction,
         });
         items.Add(new MenuFlyoutItem()
         {
             Text = "Wait Action",
-            Icon = new FontIcon() { Glyph = "\uED5A" },
+            Icon = new FontIcon() { Glyph = ActionGlyphs.Clock },
             Command = _addActionCommand,
             CommandParameter = ActionType.WaitAction,
         });

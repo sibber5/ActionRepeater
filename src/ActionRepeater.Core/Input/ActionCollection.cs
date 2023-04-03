@@ -116,7 +116,7 @@ public sealed partial class ActionCollection : ICollection<InputAction>
         {
             MouseMovement lastAbs;
 
-            lastAbs = CursorPathStart;
+            lastAbs = CursorPathStart.Value;
             yield return lastAbs;
 
             foreach (MouseMovement delta in CursorPath)
@@ -125,7 +125,8 @@ public sealed partial class ActionCollection : ICollection<InputAction>
 
                 if (pt == lastAbs.Delta)
                 {
-                    lastAbs.DelayDurationNS += delta.DelayDurationNS;
+                    //lastAbs.DelayDurationNS += delta.DelayDurationNS;
+                    lastAbs = new(lastAbs.Delta, lastAbs.DelayDurationNS + delta.DelayDurationNS);
                     continue;
                 }
 

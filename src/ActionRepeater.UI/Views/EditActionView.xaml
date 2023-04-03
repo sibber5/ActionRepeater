@@ -37,19 +37,19 @@
                 </ComboBox.Resources>
                 
                 <StackPanel Orientation="Horizontal">
-                    <FontIcon Glyph="&#xE92E;" FontSize="20" Margin="0,3,6,0"/>
+                    <FontIcon Glyph="{x:Bind vms:ActionGlyphs.Keyboard}" FontSize="20" Margin="0,3,8,0"/>
                     <TextBlock Text="Key Action"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
-                    <FontIcon Glyph="&#xE962;" FontSize="18" Margin="0,3,8,0"/>
+                    <FontIcon Glyph="{x:Bind vms:ActionGlyphs.Mouse}" FontSize="18" Margin="0,3,10,0"/>
                     <TextBlock Text="Mouse Button Action"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
-                    <FontIcon Glyph="&#xE962;" FontSize="18" Margin="0,3,8,0"/>
+                    <FontIcon Glyph="{x:Bind vms:ActionGlyphs.Mouse}" FontSize="18" Margin="0,3,10,0"/>
                     <TextBlock Text="Mouse Wheel Action"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
-                    <FontIcon Glyph="&#xED5A;" FontSize="17" Margin="0,1,10,0"/>
+                    <FontIcon Glyph="{x:Bind vms:ActionGlyphs.Clock}" FontSize="17" Margin="0,1,12,0"/>
                     <TextBlock Text="Wait Action"/>
                 </StackPanel>
             </ComboBox>

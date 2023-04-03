@@ -85,10 +85,17 @@ public sealed partial class ActionViewModel : ObservableObject
 
     public static (string? glyph, double size) GetIconForAction(InputAction a) => a switch
     {
-        KeyAction => ("\uE92E", 22),
-        MouseButtonAction => ("\uE962", 20),
-        MouseWheelAction => ("\uE962", 20),
-        WaitAction => ("\uED5A", 18),
+        KeyAction => (ActionGlyphs.Keyboard, 22),
+        MouseButtonAction => (ActionGlyphs.Mouse, 20),
+        MouseWheelAction => (ActionGlyphs.Mouse, 20),
+        WaitAction => (ActionGlyphs.Clock, 18),
         _ => (null, 20)
     };
+}
+
+public static class ActionGlyphs
+{
+    public const string Keyboard = "\uE92E";
+    public const string Mouse = "\uE962";
+    public const string Clock = "\uED5A";
 }

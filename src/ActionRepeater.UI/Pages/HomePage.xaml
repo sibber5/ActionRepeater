@@ -6,7 +6,6 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ctrls="using:ActionRepeater.UI.Controls"
     xmlns:views="using:ActionRepeater.UI.Views"
-    xmlns:behavs="using:ActionRepeater.UI.Behaviors"
     mc:Ignorable="d"
     Background="{ThemeResource AppBackgroundThemeBrush}">
 
@@ -34,7 +33,9 @@
 
                 <AppBarSeparator Margin="5,0,5,0" />
 
-                <StackPanel Padding="5,0,5,0" ToolTipService.ToolTip="Number of times to repeat the actions.&#x0d;&#x0a;Negtive number = Repeat infinitely">
+                <StackPanel Padding="5,0,5,0"
+                            ToolTipService.Placement="Bottom"
+                            ToolTipService.ToolTip="Number of times to repeat the actions.&#x0d;&#x0a;Negtive number = Repeat infinitely">
                     <TextBlock Text="Repeat Actions ⓘ"
                                FontSize="15"
                                HorizontalAlignment="Center"

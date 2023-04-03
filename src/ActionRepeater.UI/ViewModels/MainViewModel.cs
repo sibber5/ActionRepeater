@@ -39,7 +39,7 @@ public sealed partial class MainViewModel
             return;
         }
 
-        var file = await _filePicker.PickSaveFileAsync(_saveFileTypes);
+        var file = await _filePicker.PickSaveFile(_saveFileTypes);
         if (file is null) return;
 
         ActionData dat = new(_actionCollection.Actions, _actionCollection.CursorPathStart, _actionCollection.CursorPath);
@@ -51,7 +51,7 @@ public sealed partial class MainViewModel
     [RelayCommand]
     private async Task ImportActions()
     {
-        var file = await _filePicker.PickSingleFileAsync(_loadFileTypes);
+        var file = await _filePicker.PickSingleFile(_loadFileTypes);
         if (file is null) return;
 
         ActionData? data = null;

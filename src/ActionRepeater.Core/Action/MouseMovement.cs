@@ -4,14 +4,14 @@ using ActionRepeater.Win32;
 
 namespace ActionRepeater.Core.Action;
 
-public sealed class MouseMovement
+public readonly record struct MouseMovement
 {
     /// <summary>
     /// The movement delta, in both <i>x</i> and <i>y</i> directions.
     /// </summary>
-    public POINT Delta { get; set; }
+    public POINT Delta { get; }
 
-    public long DelayDurationNS { get; set; }
+    public long DelayDurationNS { get; }
 
     public MouseMovement(POINT delta, long delayNanoseconds)
     {

@@ -93,7 +93,7 @@ public sealed class Recorder
                 Debug.Assert(_actionCollection.CursorPath.Count == 0, $"{nameof(_actionCollection.CursorPath)} is not empty.");
 
                 _actionCollection.CursorPathStart = new(PInvoke.Helpers.GetCursorPos(), 0);
-                Debug.WriteLine($"set cursor start path pos to: {_actionCollection.CursorPathStart.Delta}");
+                Debug.WriteLine($"set cursor start path pos to: {_actionCollection.CursorPathStart.Value.Delta}");
             }
 
             _mouseStopwatch.Restart();

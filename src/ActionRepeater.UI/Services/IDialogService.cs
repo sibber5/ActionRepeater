@@ -8,15 +8,15 @@ namespace ActionRepeater.UI.Services;
 
 public interface IDialogService
 {
-    public Task ShowErrorDialog(string title, string message);
+    Task ShowErrorDialog(string title, string message);
 
-    public Task ShowMessageDialog(string title, string? message = null);
+    Task ShowMessageDialog(string title, string? message = null);
 
-    public Task<YesNoDialogResult> ShowYesNoDialog(string title, string? message = null, Action? onYesClick = null, Action? onNoClick = null);
+    Task<YesNoDialogResult> ShowYesNoDialog(string title, string? message = null, Action? onYesClick = null, Action? onNoClick = null);
 
-    public Task<ConfirmCancelDialogResult> ShowEditActionDialog(ActionType actionType);
+    Task<ConfirmCancelDialogResult> ShowEditActionDialog(ActionType actionType);
 
-    public Task<ConfirmCancelDialogResult> ShowEditActionDialog(ObservableObject editActionViewModel, InputAction actionToEdit);
+    Task<ConfirmCancelDialogResult> ShowEditActionDialog(ObservableObject editActionViewModel, InputAction actionToEdit);
 }
 
 public enum YesNoDialogResult

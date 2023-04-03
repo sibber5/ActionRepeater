@@ -91,7 +91,7 @@ public sealed partial class PathWindowService : IDisposable
 
                 if (_lastAbsPoint is null)
                 {
-                    _lastAbsPoint = _actionCollection.CursorPathStart!.Delta;
+                    _lastAbsPoint = _actionCollection.CursorPathStart!.Value.Delta;
                     _pathWindowWrapper.AddPoint(GetVirtScreenPosFromPosRelToPrimary(_lastAbsPoint.Value), render: true);
                     continue;
                 }
@@ -108,12 +108,7 @@ public sealed partial class PathWindowService : IDisposable
                     _lastAbsPoint = newPoint;
                 }
 
-                //_pathWindowWrapper.AddPoint(GetVirtScreenPosFromPosRelToPrimary(Win32.PInvoke.Helpers.GetCursorPos()), render: false);
-
-                //sw.Restart();
                 _pathWindowWrapper.RenderPath();
-                //sw.Stop();
-                //Debug.WriteLine($"render time: {sw.ElapsedMilliseconds}ms");
 
                 _lastCount = count;
             }
