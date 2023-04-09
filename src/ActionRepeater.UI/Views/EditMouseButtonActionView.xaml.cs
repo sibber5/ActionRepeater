@@ -6,6 +6,7 @@ namespace ActionRepeater.UI.Views;
 
 public sealed partial class EditMouseButtonActionView : UserControl
 {
+    // can't make it a required prop because xaml source gen doesnt support that.
     public EditMouseButtonActionViewModel ViewModel { get; set; } = null!;
 
     public EditMouseButtonActionView()

@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:helpers="using:ActionRepeater.UI.Helpers"
     mc:Ignorable="d">
 
     <!-- this view is used as the content of a ContentDialog when editing/adding an action. -->
@@ -19,7 +20,7 @@
             <ComboBox FontSize="16"
                       Background="Transparent"
                       BorderBrush="Transparent"
-                      SelectedIndex="{x:Bind ViewModel.SelectedActionIndex, Mode=TwoWay}"
+                      SelectedIndex="{x:Bind ViewModel.SelectedIndex, Mode=TwoWay}"
                       IsEnabled="{x:Bind ViewModel.CanChangeAction, Mode=OneTime}">
                 <ComboBox.Resources>
                     <ResourceDictionary>
@@ -37,19 +38,19 @@
                 </ComboBox.Resources>
                 
                 <StackPanel Orientation="Horizontal">
-                    <FontIcon Glyph="{x:Bind vms:ActionGlyphs.Keyboard}" FontSize="20" Margin="0,3,8,0"/>
+                    <FontIcon Glyph="{x:Bind helpers:ActionGlyphs.Keyboard}" FontSize="20" Margin="0,3,8,0"/>
                     <TextBlock Text="Key Action"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
-                    <FontIcon Glyph="{x:Bind vms:ActionGlyphs.Mouse}" FontSize="18" Margin="0,3,10,0"/>
+                    <FontIcon Glyph="{x:Bind helpers:ActionGlyphs.Mouse}" FontSize="18" Margin="0,3,10,0"/>
                     <TextBlock Text="Mouse Button Action"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
-                    <FontIcon Glyph="{x:Bind vms:ActionGlyphs.Mouse}" FontSize="18" Margin="0,3,10,0"/>
+                    <FontIcon Glyph="{x:Bind helpers:ActionGlyphs.Mouse}" FontSize="18" Margin="0,3,10,0"/>
                     <TextBlock Text="Mouse Wheel Action"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
-                    <FontIcon Glyph="{x:Bind vms:ActionGlyphs.Clock}" FontSize="17" Margin="0,1,12,0"/>
+                    <FontIcon Glyph="{x:Bind helpers:ActionGlyphs.Clock}" FontSize="17" Margin="0,1,12,0"/>
                     <TextBlock Text="Wait Action"/>
                 </StackPanel>
             </ComboBox>

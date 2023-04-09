@@ -1,4 +1,6 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
+using ActionRepeater.UI.Helpers;
 using ActionRepeater.UI.ViewModels;
 using Microsoft.UI.Xaml.Controls;
 
@@ -24,14 +26,7 @@ public sealed partial class EditActionView : UserControl, INotifyPropertyChanged
         }
     }
 
-    public UserControl? CurrentEditActionView => ViewModel.CurrentEditActionViewModel switch
-    {
-        EditKeyActionViewModel vm => new EditKeyActionView() { ViewModel = vm },
-        EditMouseButtonActionViewModel vm => new EditMouseButtonActionView() { ViewModel = vm },
-        EditMouseWheelActionViewModel vm => new EditMouseWheelActionView() { ViewModel = vm },
-        EditWaitActionViewModel vm => new EditWaitActionView() { ViewModel = vm },
-        _ => null
-    };
+    public UserControl CurrentEditActionView => ActionMappingHelper.EditViewModelToEditView(ViewModel.CurrentEditActionViewModel);
 
     private readonly string _titleText;
 
@@ -47,7 +42,7 @@ public sealed partial class EditActionView : UserControl, INotifyPropertyChanged
 
     private void ViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(ViewModel.CurrentEditActionViewModel))
+        if (nameof(ViewModel.CurrentEditActionViewModel).Equals(e.PropertyName, StringComparison.Ordinal))
         {
             _currentViewChanged ??= new(nameof(CurrentEditActionView));
             PropertyChanged?.Invoke(this, _currentViewChanged);

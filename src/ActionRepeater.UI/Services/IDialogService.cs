@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using ActionRepeater.Core.Action;
-using ActionRepeater.UI.ViewModels;
+using ActionRepeater.UI.Helpers;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ActionRepeater.UI.Services;

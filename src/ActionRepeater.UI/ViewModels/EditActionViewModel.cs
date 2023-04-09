@@ -1,6 +1,8 @@
-﻿using ActionRepeater.Core.Action;
+﻿using System;
+using ActionRepeater.Core.Action;
 using ActionRepeater.Core.Extentions;
 using ActionRepeater.Core.Input;
+using ActionRepeater.UI.Helpers;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Xaml.Controls;
@@ -12,18 +14,20 @@ public sealed partial class EditActionViewModel : ObservableObject
     public bool CanChangeAction { get; }
 
     [ObservableProperty]
-    private int _selectedActionIndex;
-    partial void OnSelectedActionIndexChanged(int value) => CurrentEditActionViewModel = GetViewModelForAction((ActionType)value);
+    private int _selectedIndex = -1;
+    partial void OnSelectedIndexChanged(int value) => CurrentEditActionViewModel = ActionMappingHelper.ActionTypeToEditViewModel(SelectedActionType);
 
-    public ActionType SelectedAction
+    public ActionType SelectedActionType
     {
-        get => (ActionType)SelectedActionIndex;
-        set => SelectedActionIndex = (int)value;
+        get => (ActionType)_selectedIndex;
+        set => SelectedIndex = (int)value;
     }
 
+    // _currentEditActionViewModel *is* set in both constructors, but static analysis doesnt detect that.
+    // It's set through its property, or in OnSelectedActionTypeChanged, when SelectedActionType is set.
     [ObservableProperty]
-    private ObservableObject? _currentEditActionViewModel;
-    partial void OnCurrentEditActionViewModelChanging(ObservableObject? value)
+    private ObservableObject _currentEditActionViewModel = null!;
+    partial void OnCurrentEditActionViewModelChanging(ObservableObject value)
     {
         if (_currentEditActionViewModel is ObservableValidator oldValidator)
         {
@@ -44,22 +48,21 @@ public sealed partial class EditActionViewModel : ObservableObject
     public EditActionViewModel(ActionType actionType, ContentDialog contentDialog, ActionCollection actionsCollection, bool canChangeAction = true)
     {
         CanChangeAction = canChangeAction;
-        SelectedAction = actionType;
-        CurrentEditActionViewModel = GetViewModelForAction(actionType);
+
+        SelectedActionType = actionType;
 
         _contentDialog = contentDialog;
-
         _actionsCollection = actionsCollection;
     }
 
     public EditActionViewModel(ObservableObject editActionViewModel, ContentDialog contentDialog, ActionCollection actionsCollection, bool canChangeAction = false)
     {
         CanChangeAction = canChangeAction;
-        SelectedAction = GetActionForViewModel(editActionViewModel);
+
         CurrentEditActionViewModel = editActionViewModel;
+        _selectedIndex = (int)ActionMappingHelper.EditViewModelToActionType(editActionViewModel);
 
         _contentDialog = contentDialog;
-
         _actionsCollection = actionsCollection;
     }
 
@@ -72,14 +75,7 @@ public sealed partial class EditActionViewModel : ObservableObject
     [RelayCommand]
     private void AddAction()
     {
-        InputAction action = CurrentEditActionViewModel switch
-        {
-            EditKeyActionViewModel keyVM => new KeyAction(keyVM.Type, keyVM.Key),
-            EditMouseButtonActionViewModel mbVM => new MouseButtonAction(mbVM.Type, mbVM.Button, mbVM.Position),
-            EditMouseWheelActionViewModel mwVM => new MouseWheelAction(mwVM.HorizontalScrolling, mwVM.Steps, (int)(mwVM.DurationSecs * 1000)),
-            EditWaitActionViewModel waitVM => new WaitAction((int)(waitVM.DurationSecs * 1000)),
-            _ => throw new System.NotSupportedException($"{CurrentEditActionViewModel?.GetType()} not supported.")
-        };
+        InputAction action = ActionMappingHelper.EditViewModelToAction(CurrentEditActionViewModel);
 
         _actionsCollection.Add(action, addAutoRepeatIfActIsKeyUp: true);
     }
@@ -128,33 +124,7 @@ public sealed partial class EditActionViewModel : ObservableObject
                 break;
 
             default:
-                throw new System.NotSupportedException($"{CurrentEditActionViewModel?.GetType()} not supported.");
-        }
+                throw new NotImplementedException();
     }
-
-    private static ObservableObject? GetViewModelForAction(ActionType actionType) => actionType switch
-    {
-        ActionType.KeyAction => new EditKeyActionViewModel(),
-        ActionType.MouseButtonAction => new EditMouseButtonActionViewModel(),
-        ActionType.MouseWheelAction => new EditMouseWheelActionViewModel(),
-        ActionType.WaitAction => new EditWaitActionViewModel(),
-        _ => throw new System.ArgumentException($"{actionType} not supported", nameof(actionType))
-    };
-
-    private static ActionType GetActionForViewModel(ObservableObject editActionViewModel) => editActionViewModel switch
-    {
-        EditKeyActionViewModel => ActionType.KeyAction,
-        EditMouseButtonActionViewModel => ActionType.MouseButtonAction,
-        EditMouseWheelActionViewModel => ActionType.MouseWheelAction,
-        EditWaitActionViewModel => ActionType.WaitAction,
-        _ => throw new System.ArgumentException("Action VM Not supported", nameof(editActionViewModel))
-    };
 }
-
-public enum ActionType
-{
-    KeyAction,
-    MouseButtonAction,
-    MouseWheelAction,
-    WaitAction
 }

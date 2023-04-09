@@ -2,6 +2,7 @@
 using ActionRepeater.Core.Action;
 using ActionRepeater.Core.Extentions;
 using ActionRepeater.Core.Input;
+using ActionRepeater.UI.Helpers;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace ActionRepeater.UI.ViewModels;
@@ -27,7 +28,7 @@ public sealed partial class ActionViewModel : ObservableObject
         _actionListViewModel ??= actionListViewModel;
         _actionCollection ??= actionCollection;
 
-        var (glyph, size) = GetIconForAction(inputAction);
+        var (glyph, size) = ActionGlyphs.GetIconForAction(inputAction);
         Glyph = glyph;
         _name = inputAction.Name;
         _description = inputAction.Description;
@@ -82,20 +83,4 @@ public sealed partial class ActionViewModel : ObservableObject
 
         return (actionVM, filteredActionVM);
     }
-
-    public static (string? glyph, double size) GetIconForAction(InputAction a) => a switch
-    {
-        KeyAction => (ActionGlyphs.Keyboard, 22),
-        MouseButtonAction => (ActionGlyphs.Mouse, 20),
-        MouseWheelAction => (ActionGlyphs.Mouse, 20),
-        WaitAction => (ActionGlyphs.Clock, 18),
-        _ => (null, 20)
-    };
-}
-
-public static class ActionGlyphs
-{
-    public const string Keyboard = "\uE92E";
-    public const string Mouse = "\uE962";
-    public const string Clock = "\uED5A";
 }

@@ -11,6 +11,7 @@ using ActionRepeater.Core.Action;
 using ActionRepeater.Core.Extentions;
 using ActionRepeater.Core.Input;
 using ActionRepeater.Core.Utilities;
+using ActionRepeater.UI.Helpers;
 using ActionRepeater.UI.Services;
 using ActionRepeater.UI.Utilities;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -146,15 +147,7 @@ public sealed partial class ActionListViewModel : ObservableObject
     {
         if (SelectedAction is null) throw new InvalidOperationException($"{nameof(SelectedAction)} is null");
 
-        ObservableObject editActionVM = SelectedAction switch
-        {
-            KeyAction ka => new EditKeyActionViewModel(ka),
-            MouseButtonAction mba => new EditMouseButtonActionViewModel(mba),
-            MouseWheelAction mwa => new EditMouseWheelActionViewModel(mwa),
-            WaitAction wa => new EditWaitActionViewModel(wa),
-            _ => throw new NotSupportedException($"{SelectedAction.GetType()} not suppored.")
-        };
-
+        ObservableObject editActionVM = ActionMappingHelper.ActionToEditViewModel(SelectedAction);
         await _dialogService.ShowEditActionDialog(editActionVM, SelectedAction);
     }
 
