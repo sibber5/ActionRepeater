@@ -123,8 +123,14 @@ public sealed partial class EditActionViewModel : ObservableObject
                 wa.DurationMS = (int)(waitVM.DurationSecs * 1000);
                 break;
 
+            case EditTextTypeActionViewModel textVM:
+                var tta = (TextTypeAction)action;
+                tta.Text = textVM.Text;
+                tta.WPM = textVM.Wpm;
+                break;
+
             default:
                 throw new NotImplementedException();
+        }
     }
-}
 }

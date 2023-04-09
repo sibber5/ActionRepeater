@@ -45,5 +45,13 @@ public sealed class AddActionMenuItems
             Command = _addActionCommand,
             CommandParameter = ActionType.WaitAction,
         });
+        items.Add(new MenuFlyoutSeparator());
+        items.Add(new MenuFlyoutItem()
+        {
+            Text = "Text Type Action",
+            Icon = new FontIcon() { Glyph = ActionGlyphs.Keyboard },
+            Command = _addActionCommand,
+            CommandParameter = ActionType.TextTypeAction,
+        });
     }
 }

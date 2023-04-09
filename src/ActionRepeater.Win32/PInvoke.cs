@@ -472,4 +472,9 @@ public static partial class PInvoke
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static partial bool CloseHandle(nint hObject);
+
+    /// <summary>Translates a character to the corresponding virtual-key code and shift state for the current keyboard.</summary>
+    [LibraryImport("USER32.dll", EntryPoint = "VkKeyScanW", StringMarshalling = StringMarshalling.Utf16)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+    public static partial short VkKeyScan(char ch);
 }

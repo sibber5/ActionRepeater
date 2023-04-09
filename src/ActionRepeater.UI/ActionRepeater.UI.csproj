@@ -97,10 +97,16 @@
         <None Remove="Views\EditKeyActionView.xaml" />
         <None Remove="Views\EditMouseButtonActionView.xaml" />
         <None Remove="Views\EditMouseWheelActionView.xaml" />
+        <None Remove="Views\EditTextTypeActionView.xaml" />
         <None Remove="Views\EditWaitActionView.xaml" />
     </ItemGroup>
     <ItemGroup>
         <Resource Remove="Views\ActionListView.xaml" />
+    </ItemGroup>
+    <ItemGroup>
+      <Page Update="Views\EditTextTypeActionView.xaml">
+        <Generator>MSBuild:Compile</Generator>
+      </Page>
     </ItemGroup>
     <ItemGroup>
       <Page Update="Controls\OptionsSeperator.xaml">

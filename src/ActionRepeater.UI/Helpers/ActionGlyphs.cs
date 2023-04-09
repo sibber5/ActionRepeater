@@ -15,6 +15,7 @@ public static class ActionGlyphs
         MouseButtonAction => (Mouse, 20),
         MouseWheelAction => (Mouse, 20),
         WaitAction => (Clock, 18),
+        TextTypeAction => (Keyboard, 22),
         _ => throw new NotImplementedException()
     };
 }

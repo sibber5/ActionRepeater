@@ -53,6 +53,10 @@
                     <FontIcon Glyph="{x:Bind helpers:ActionGlyphs.Clock}" FontSize="17" Margin="0,1,12,0"/>
                     <TextBlock Text="Wait Action"/>
                 </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <FontIcon Glyph="{x:Bind helpers:ActionGlyphs.Keyboard}" FontSize="20" Margin="0,3,8,0"/>
+                    <TextBlock Text="Text Type Action"/>
+                </StackPanel>
             </ComboBox>
         </StackPanel>
 

@@ -15,6 +15,7 @@ public static class ActionMappingHelper
         MouseButtonAction mba => new EditMouseButtonActionViewModel(mba),
         MouseWheelAction mwa => new EditMouseWheelActionViewModel(mwa),
         WaitAction wa => new EditWaitActionViewModel(wa),
+        TextTypeAction tta => new EditTextTypeActionViewModel(tta),
         _ => throw new NotImplementedException()
     };
 
@@ -24,6 +25,7 @@ public static class ActionMappingHelper
         EditMouseButtonActionViewModel mbVM => new MouseButtonAction(mbVM.Type, mbVM.Button, mbVM.Position),
         EditMouseWheelActionViewModel mwVM => new MouseWheelAction(mwVM.HorizontalScrolling, mwVM.Steps, (int)(mwVM.DurationSecs * 1000)),
         EditWaitActionViewModel waitVM => new WaitAction((int)(waitVM.DurationSecs * 1000)),
+        EditTextTypeActionViewModel textVM => new TextTypeAction(textVM.Text, textVM.Wpm),
         _ => throw new NotImplementedException()
     };
 
@@ -33,6 +35,7 @@ public static class ActionMappingHelper
         ActionType.MouseButtonAction => new EditMouseButtonActionViewModel(),
         ActionType.MouseWheelAction => new EditMouseWheelActionViewModel(),
         ActionType.WaitAction => new EditWaitActionViewModel(),
+        ActionType.TextTypeAction => new EditTextTypeActionViewModel(),
         _ => throw new NotImplementedException()
     };
 
@@ -42,6 +45,7 @@ public static class ActionMappingHelper
         EditMouseButtonActionViewModel => ActionType.MouseButtonAction,
         EditMouseWheelActionViewModel => ActionType.MouseWheelAction,
         EditWaitActionViewModel => ActionType.WaitAction,
+        EditTextTypeActionViewModel => ActionType.TextTypeAction,
         _ => throw new NotImplementedException()
     };
 
@@ -51,6 +55,7 @@ public static class ActionMappingHelper
         EditMouseButtonActionViewModel vm => new EditMouseButtonActionView() { ViewModel = vm },
         EditMouseWheelActionViewModel vm => new EditMouseWheelActionView() { ViewModel = vm },
         EditWaitActionViewModel vm => new EditWaitActionView() { ViewModel = vm },
+        EditTextTypeActionViewModel vm => new EditTextTypeActionView() { ViewModel = vm },
         _ => throw new NotImplementedException()
     };
 }
@@ -60,5 +65,6 @@ public enum ActionType
     KeyAction,
     MouseButtonAction,
     MouseWheelAction,
-    WaitAction
+    WaitAction,
+    TextTypeAction
 }
