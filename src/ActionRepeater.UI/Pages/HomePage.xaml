@@ -33,10 +33,11 @@
 
                 <AppBarSeparator Margin="5,0,5,0" />
 
+
                 <StackPanel Padding="5,0,5,0"
                             ToolTipService.Placement="Bottom"
-                            ToolTipService.ToolTip="Number of times to repeat the actions.&#x0d;&#x0a;Negtive number = Repeat infinitely">
-                    <TextBlock Text="Repeat Actions ⓘ"
+                            ToolTipService.ToolTip="Controls how often the input sequence is repeated.&#x0d;&#x0a;A negative number causes the inputs to repeat indefinitely.">
+                    <TextBlock Text="Repetitions"
                                FontSize="15"
                                HorizontalAlignment="Center"
                                Margin="0,0,0,5"/>
@@ -51,7 +52,6 @@
                                ValidationMode="InvalidInputOverwritten"
                                Value="{x:Bind _vm.PlayRepeatCount, Mode=TwoWay}"/>
                 </StackPanel>
-
                 <AppBarSeparator Margin="5,0,5,0" />
 
                 <ctrls:CmdBarToggleButton Glyph="&#xF128;"

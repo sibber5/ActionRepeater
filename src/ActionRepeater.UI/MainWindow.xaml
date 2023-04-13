@@ -26,15 +26,35 @@
                             <SolidColorBrush x:Key="TopNavigationViewItemForegroundPointerOver" Color="White" Opacity="0.8"/>
                         </ResourceDictionary>
                     </ResourceDictionary.ThemeDictionaries>
+                    <Style x:Name="MenuItemDescriptorTextBlock" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
+                        <Setter Property="VerticalAlignment" Value="Center"/>
+                        <Setter Property="Margin" Value="5 0 0 0"/>
+                    </Style>
                 </ResourceDictionary>
+               
             </NavigationView.Resources>
             
             <NavigationView.MenuItems>
                 <!-- space for the file dropdown button -->
                 <NavigationViewItem x:Name="_navViewOffsetItem" Width="35" IsEnabled="False"/>
                 <!-- binding the tag suddenly stopped working for some fucking reason, so now its hardcoded -->
-                <NavigationViewItem Tag="h" Content="Home"/>
-                <NavigationViewItem Tag="o" Content="Options"/>
+                <NavigationViewItem Tag="h">
+                    <NavigationViewItem.Content>
+                        <StackPanel Orientation="Horizontal">
+                       
+                        <SymbolIcon Symbol="Home"/>
+                            <TextBlock Text="Home" Style="{StaticResource MenuItemDescriptorTextBlock}"/>
+                        </StackPanel>
+                    </NavigationViewItem.Content>
+                </NavigationViewItem>
+                <NavigationViewItem Tag="o">
+                    <NavigationViewItem.Content>
+                        <StackPanel Orientation="Horizontal">
+                            <SymbolIcon Symbol="Setting"/>
+                            <TextBlock Text="Settings" Style="{StaticResource MenuItemDescriptorTextBlock}"/>
+                        </StackPanel>
+                    </NavigationViewItem.Content>
+                </NavigationViewItem>
             </NavigationView.MenuItems>
 
             <Grid Padding="0,10,0,0" Background="{ThemeResource AppBackgroundThemeBrush}">
@@ -77,11 +97,11 @@
             </MenuBar.Resources>
 
             <!-- binding the commands doesnt work for some reason, so theyre set in the constructor -->
-            
+
             <MenuBarItem Title="File">
                 <MenuFlyoutItem x:Name="_openMenuItem" Text="Open">
                     <MenuFlyoutItem.Icon>
-                        <FontIcon Glyph="&#xE8E5;"/>
+                        <SymbolIcon Symbol="OpenFile"/>
                     </MenuFlyoutItem.Icon>
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Modifiers="Control" Key="O"/>
@@ -90,7 +110,7 @@
 
                 <MenuFlyoutItem x:Name="_saveMenuItem" Text="Save">
                     <MenuFlyoutItem.Icon>
-                        <FontIcon Glyph="&#xE792;"/>
+                        <SymbolIcon Symbol="Save"/>
                     </MenuFlyoutItem.Icon>
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Modifiers="Control" Key="S"/>
@@ -101,7 +121,6 @@
             </MenuBarItem>
 
         </MenuBar>
-
         <!-- 1p height line to cover some random gray line in the app in light mode. -->
         <!-- i have no clue where it came from ive tried setting the background and border brush on everything in this view -->
         <Rectangle x:Name="_rectangle" Margin="0,30,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="1" Fill="{ThemeResource AppBackgroundThemeBrush}"/>

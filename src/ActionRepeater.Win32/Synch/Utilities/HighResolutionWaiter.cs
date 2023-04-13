@@ -45,6 +45,7 @@ public sealed class HighResolutionWaiter : IDisposable
 
         if (!SetWaitableTimer(_timerHandle, &time, 0, null, null, false))
         {
+            // TODO: call KillTimer when exiting app to avoid exception being thrown when app is closed during playback
             throw new Win32Exception();
         }
 
