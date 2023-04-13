@@ -4,10 +4,10 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vms="using:ActionRepeater.UI.ViewModels" d:DataContext="{d:DesignInstance Type=vms:EditMouseWheelActionViewModel}"
     mc:Ignorable="d">
 
-    <Grid MinWidth="320"
-          RowDefinitions="Auto,Auto,Auto"
+    <Grid RowDefinitions="Auto,Auto,Auto"
           RowSpacing="10">
 
         <TextBlock Text="Horizontal Scrolling:"
@@ -18,7 +18,8 @@
                   Grid.Row="0"
                   HorizontalAlignment="Stretch"/>
 
-        <TextBlock Text="Steps (negative = backward):"
+        <TextBlock Text="Steps: ⓘ"
+                   ToolTipService.ToolTip="Negative = Backward"
                    Grid.Row="1"
                    HorizontalAlignment="Left" VerticalAlignment="Center"/>
         <NumberBox x:Name="_stepsNumerBox"
@@ -30,7 +31,7 @@
                    ValidationMode="InvalidInputOverwritten"
                    Grid.Row="1"
                    HorizontalAlignment="Right"
-                   Margin="185,0,0,0"
+                   Margin="60,0,0,0"
                    Value="{x:Bind ViewModel.Steps, Mode=TwoWay}"/>
 
         <TextBlock Text="Duration (sec):"

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using ActionRepeater.Core.Action;
 using ActionRepeater.Core.Extentions;
 using ActionRepeater.Core.Input;
@@ -19,8 +20,25 @@ public sealed partial class EditActionViewModel : ObservableObject
 
     public ActionType SelectedActionType
     {
-        get => (ActionType)_selectedIndex;
-        set => SelectedIndex = (int)value;
+        get => SelectedIndex switch
+        {
+            0 => ActionType.KeyAction,
+            1 => ActionType.MouseButtonAction,
+            2 => ActionType.MouseWheelAction,
+            3 => ActionType.WaitAction,
+            5 => ActionType.TextTypeAction,
+            _ => throw new UnreachableException()
+        };
+
+        set => SelectedIndex = value switch
+        {
+            ActionType.KeyAction => 0,
+            ActionType.MouseButtonAction => 1,
+            ActionType.MouseWheelAction => 2,
+            ActionType.WaitAction => 3,
+            ActionType.TextTypeAction => 5,
+            _ => throw new UnreachableException()
+        };
     }
 
     // _currentEditActionViewModel *is* set in both constructors, but static analysis doesnt detect that.

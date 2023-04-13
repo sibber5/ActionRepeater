@@ -1228,7 +1228,8 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ContentDialog">
-                    <Border x:Name="Container" Padding="20">
+                    <!-- Added more padding to top to accommodate titlebar (when view is extended to it) -->
+                    <Border x:Name="Container" Padding="20,35,20,20">
                         <VisualStateManager.VisualStateGroups>
                             <VisualStateGroup x:Name="DialogShowingStates">
                                 <VisualStateGroup.Transitions>
@@ -1502,5 +1503,5 @@
             </Setter.Value>
         </Setter>
     </Style>
-    
+
 </ResourceDictionary>
