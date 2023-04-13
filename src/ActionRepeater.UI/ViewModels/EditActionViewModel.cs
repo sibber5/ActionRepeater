@@ -47,7 +47,7 @@ public sealed partial class EditActionViewModel : ObservableObject
     private ObservableObject _currentEditActionViewModel = null!;
     partial void OnCurrentEditActionViewModelChanging(ObservableObject value)
     {
-        if (_currentEditActionViewModel is ObservableValidator oldValidator)
+        if (CurrentEditActionViewModel is ObservableValidator oldValidator)
         {
             oldValidator.ErrorsChanged -= Validator_ErrorsChanged;
         }
