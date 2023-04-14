@@ -7,7 +7,6 @@ using ActionRepeater.UI.Services;
 using ActionRepeater.UI.ViewModels;
 using ActionRepeater.Win32.WindowsAndMessages;
 using ActionRepeater.Win32.WindowsAndMessages.Utilities;
-using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -36,8 +35,6 @@ public sealed partial class MainWindow : Window
 
     private readonly WindowMessageMonitor _msgMonitor;
 
-    private readonly AppWindow _appWindow;
-
     private readonly Thickness _titlebarOffset = new(33, 8, 0, 0);
     private readonly Windows.Graphics.RectInt32[] _dragRects = new Windows.Graphics.RectInt32[2];
 
@@ -51,13 +48,11 @@ public sealed partial class MainWindow : Window
         Title = WindowTitle;
         App.SetWindowSize(Handle, StartupWidth, StartupHeight);
 
-        var windowId = Win32Interop.GetWindowIdFromWindow(Handle);
-        _appWindow = AppWindow.GetFromWindowId(windowId);
-        _appWindow.SetIcon(Path.Combine(AppContext.BaseDirectory, @"Assets\Icon.ico"));
+        AppWindow.SetIcon(Path.Combine(AppContext.BaseDirectory, @"Assets\Icon.ico"));
         if (AppWindowTitleBar.IsCustomizationSupported())
         {
             SetTitleBarColors();
-            _appWindow.TitleBar.ExtendsContentIntoTitleBar = true;
+            AppWindow.TitleBar.ExtendsContentIntoTitleBar = true;
         }
 
         if (App.Current.RequestedTheme == ApplicationTheme.Dark)
@@ -77,12 +72,16 @@ public sealed partial class MainWindow : Window
 
         InitializeComponent();
 
-        if (AppWindowTitleBar.IsCustomizationSupported() && _appWindow.TitleBar.ExtendsContentIntoTitleBar)
+        if (AppWindowTitleBar.IsCustomizationSupported() && AppWindow.TitleBar.ExtendsContentIntoTitleBar)
         {
             _rectangle.Margin = _rectangle.Margin with { Top = _rectangle.Margin.Top + _titlebarOffset.Top };
 
             var fileButtonMargin = _fileButtonMenuBar.Margin;
-            _fileButtonMenuBar.Margin = fileButtonMargin with { Left = fileButtonMargin.Left + _titlebarOffset.Left, Top = fileButtonMargin.Top + _titlebarOffset.Top };
+            _fileButtonMenuBar.Margin = fileButtonMargin with
+            {
+                Left = fileButtonMargin.Left + _titlebarOffset.Left,
+                Top = fileButtonMargin.Top + _titlebarOffset.Top
+            };
 
             _navigationView.Margin = _navigationView.Margin with { Top = _navigationView.Margin.Top + _titlebarOffset.Top };
 
@@ -107,7 +106,7 @@ public sealed partial class MainWindow : Window
     {
         Debug.Assert(AppWindowTitleBar.IsCustomizationSupported());
 
-        var titlebar = _appWindow.TitleBar;
+        var titlebar = AppWindow.TitleBar;
         var bg = App.Current.RequestedTheme == ApplicationTheme.Dark ? Windows.UI.Color.FromArgb(255, 0, 0, 0) : Windows.UI.Color.FromArgb(255, 255, 255, 255);
         var hoverBG = App.Current.RequestedTheme == ApplicationTheme.Dark ? Windows.UI.Color.FromArgb(255, 25, 25, 25) : Windows.UI.Color.FromArgb(255, 230, 230, 230);
         var pressBG = App.Current.RequestedTheme == ApplicationTheme.Dark ? Windows.UI.Color.FromArgb(255, 51, 51, 51) : Windows.UI.Color.FromArgb(255, 204, 204, 204);
@@ -128,7 +127,7 @@ public sealed partial class MainWindow : Window
 
     private void UpdateDragRegion()
     {
-        Debug.Assert(AppWindowTitleBar.IsCustomizationSupported() && _appWindow.TitleBar.ExtendsContentIntoTitleBar);
+        Debug.Assert(AppWindowTitleBar.IsCustomizationSupported() && AppWindow.TitleBar.ExtendsContentIntoTitleBar);
 
         var item = (FrameworkElement)_navigationView.MenuItems[^1];
 
@@ -139,23 +138,25 @@ public sealed partial class MainWindow : Window
 
         var scalingFactor = App.GetWindowScalingFactor(Handle);
 
+        const int resizeAreaOffset = 0;
+
         _dragRects[0] = new()
         {
             X = (int)(dragRegionOffset * scalingFactor),
-            Y = 0,
-            Height = (int)(_titlebarGrid.ActualHeight * scalingFactor),
+            Y = resizeAreaOffset,
+            Height = (int)((_titlebarGrid.ActualHeight - resizeAreaOffset) * scalingFactor),
             Width = (int)((windowWidth - dragRegionOffset) * scalingFactor)
         };
 
         _dragRects[1] = new()
         {
             X = 0,
-            Y = 0,
-            Height = (int)(12 * scalingFactor),
+            Y = resizeAreaOffset,
+            Height = (int)((12 - resizeAreaOffset) * scalingFactor),
             Width = (int)(dragRegionOffset * scalingFactor)
         };
 
-        _appWindow.TitleBar.SetDragRectangles(_dragRects);
+        AppWindow.TitleBar.SetDragRectangles(_dragRects);
     }
 
     private unsafe void OnWindowMessageReceived(object? sender, WindowMessageEventArgs e)
@@ -202,9 +203,6 @@ public sealed partial class MainWindow : Window
 
     private void TitleBarGrid_SizeChanged(object sender, SizeChangedEventArgs e)
     {
-        if (_appWindow.TitleBar.ExtendsContentIntoTitleBar)
-        {
-            UpdateDragRegion();
-        }
+        if (AppWindow.TitleBar.ExtendsContentIntoTitleBar) UpdateDragRegion();
     }
 }

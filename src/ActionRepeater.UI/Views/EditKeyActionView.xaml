@@ -31,7 +31,7 @@
                       VerticalAlignment="Center"
                       Margin="0,0,5,0"
                       ToolTipService.Placement="Top" ToolTipService.ToolTip="{x:Bind ViewModel.KeyNameErrorMessage, Mode=OneWay}"/>
-            <TextBox Text="{x:Bind ViewModel.KeyName, Mode=TwoWay}" MinWidth="35" GotFocus="TextBox_GotFocus"/>
+            <TextBox Text="{x:Bind ViewModel.KeyName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MinWidth="35" GotFocus="TextBox_GotFocus"/>
         </StackPanel>
 
     </Grid>
