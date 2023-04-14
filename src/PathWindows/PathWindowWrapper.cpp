@@ -44,7 +44,6 @@ extern "C" __declspec(dllexport) void __cdecl DisposeDangerous(PathWindowWrapper
 
 extern "C" __declspec(dllexport) HRESULT __cdecl AddPointToPath(PathWindowWrapper* pWrapper, POINT point, bool render)
 {
-    SetLastError(0);
     if (!pWrapper) return E_POINTER;
     if (!pWrapper->m_pPathWindow) return E_UNEXPECTED;
 
@@ -53,7 +52,6 @@ extern "C" __declspec(dllexport) HRESULT __cdecl AddPointToPath(PathWindowWrappe
 
 extern "C" __declspec(dllexport) HRESULT __cdecl AddPointsToPath(PathWindowWrapper* pWrapper, POINT* points, int length)
 {
-    SetLastError(0);
     if (!pWrapper) return E_POINTER;
     if (!pWrapper->m_pPathWindow) return E_UNEXPECTED;
 
@@ -62,7 +60,6 @@ extern "C" __declspec(dllexport) HRESULT __cdecl AddPointsToPath(PathWindowWrapp
 
 extern "C" __declspec(dllexport) HRESULT __cdecl ClearPoints(PathWindowWrapper* pWrapper)
 {
-    SetLastError(0);
     if (!pWrapper) return E_POINTER;
     if (!pWrapper->m_pPathWindow) return E_UNEXPECTED;
 
@@ -71,7 +68,6 @@ extern "C" __declspec(dllexport) HRESULT __cdecl ClearPoints(PathWindowWrapper* 
 
 extern "C" __declspec(dllexport) HRESULT __cdecl Render(PathWindowWrapper* pWrapper)
 {
-    SetLastError(0);
     if (!pWrapper) return E_POINTER;
     if (!pWrapper->m_pPathWindow) return E_UNEXPECTED;
 

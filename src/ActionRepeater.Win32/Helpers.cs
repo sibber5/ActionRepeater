@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Runtime.InteropServices;
 using ActionRepeater.Win32.Input;
 
 namespace ActionRepeater.Win32;
@@ -32,7 +33,7 @@ public static partial class PInvoke
             input[0].union.mi.mouseData = data;
             input[0].union.mi.dwFlags = eventFlags;
 
-            return PInvoke.SendInput(input) == 1;
+            return SendInput(input) == 1;
         }
 
         /// <summary>
@@ -41,7 +42,7 @@ public static partial class PInvoke
         /// <param name="eventFlags">Specifies various aspects of a keystroke. This can be certain combinations of <see cref="KEYEVENTF"/>.</param>
         /// <param name="scanCode">
         /// A hardware scan code for the key. If <paramref name="eventFlags"/> specifies <see cref="KEYEVENTF.UNICODE"/>, <paramref name="scanCode"/> specifies a Unicode character which is to be sent to the foreground application.<br/>
-        /// This can be a <see cref="ScanCode"/> (enum), or the value returned by <see cref="PInvoke.MapVirtualKey"/>.
+        /// This can be a <see cref="ScanCode"/> (enum), or the value returned by <see cref="MapVirtualKey"/>.
         /// </param>
         /// <returns>
         /// <see langword="true"/> if the input was successfully sent, otherwise <see langword="false"/>.
@@ -54,7 +55,7 @@ public static partial class PInvoke
             input[0].union.ki.wScan = scanCode;
             input[0].union.ki.dwFlags = eventFlags;
 
-            return PInvoke.SendInput(input) == 1;
+            return SendInput(input) == 1;
         }
 
         /// <summary>
@@ -75,8 +76,8 @@ public static partial class PInvoke
         {
             const uint DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
             int isEnabled = enabled ? 1 : 0;
-            int result = PInvoke.DwmSetWindowAttribute(hWnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &isEnabled, sizeof(int));
-            if (result != 0) throw new Win32Exception(result);
+            HResult hr = DwmSetWindowAttribute(hWnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &isEnabled, sizeof(int));
+            if (hr != HResult.S_OK) throw new COMException(hr.ToString(), (int)hr);
         }
     }
 }

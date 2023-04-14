@@ -18,101 +18,38 @@ public static partial class PInvoke
     public static unsafe uint SendInput(Span<INPUT> pInputs) => SendInput((uint)pInputs.Length, pInputs, INPUT.SIZE);
 
     /// <summary>Synthesizes keystrokes, mouse motions, and button clicks.</summary>
-    /// <param name="cInputs">
-    /// <para>Type: <b>UINT</b> The number of structures in the <i>pInputs</i> array.</para>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api/winuser/nf-winuser-sendinput#parameters">Read more on docs.microsoft.com</see>.</para>
-    /// </param>
-    /// <param name="pInputs">
-    /// <para>Type: <b>LPINPUT</b> An array of <a href="https://docs.microsoft.com/windows/desktop/api/winuser/ns-winuser-input">INPUT</a> structures. Each structure represents an event to be inserted into the keyboard or mouse input stream.</para>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api/winuser/nf-winuser-sendinput#parameters">Read more on docs.microsoft.com</see>.</para>
-    /// </param>
-    /// <param name="cbSize">
-    /// <para>Type: <b>int</b> The size, in bytes, of an <a href="https://docs.microsoft.com/windows/desktop/api/winuser/ns-winuser-input">INPUT</a> structure. If <i>cbSize</i> is not the size of an <b>INPUT</b> structure, the function fails.</para>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api/winuser/nf-winuser-sendinput#parameters">Read more on docs.microsoft.com</see>.</para>
-    /// </param>
-    /// <returns>
-    /// <para>Type: <b>UINT</b> The function returns the number of events that it successfully inserted into the keyboard or mouse input stream. If the function returns zero, the input was already blocked by another thread. To get extended error information, call <see cref="Marshal.GetLastPInvokeError"/>. This function fails when it is blocked by UIPI. Note that neither <see cref="Marshal.GetLastPInvokeError"/> nor the return value will indicate the failure was caused by UIPI blocking.</para>
-    /// </returns>
-    /// <remarks>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-sendinput">Learn more about this API from docs.microsoft.com</see>.</para>
-    /// </remarks>
+    /// <returns>The number of events that it successfully inserted into the keyboard or mouse input stream. If the function returns zero, the input was already blocked by another thread. To get extended error information, call <see cref="Marshal.GetLastPInvokeError"/>. This function fails when it is blocked by UIPI. Note that neither <see cref="Marshal.GetLastPInvokeError"/> nor the return value will indicate the failure was caused by UIPI blocking.</returns>
+    /// <remarks><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-sendinput">Learn more about this API from docs.microsoft.com</see>.</remarks>
     [LibraryImport("User32", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     public static unsafe partial uint SendInput(uint cInputs, Span<INPUT> pInputs, int cbSize);
 
     /// <summary>Translates (maps) a virtual-key code into a scan code or character value, or translates a scan code into a virtual-key code.</summary>
-    /// <param name="uCode">
-    /// <para>Type: <b>UINT</b> The <see href="https://docs.microsoft.com/windows/desktop/inputdev/virtual-key-codes">virtual key code</see> or scan code for a key. How this value is interpreted depends on the value of the <paramref name="uMapType"/> parameter. <b>Starting with Windows Vista</b>, the high byte of the <paramref name="uCode"/> value can contain either <i>0xE0</i> or <i>0xE1</i> to specify the extended scan code.</para>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api/winuser/nf-winuser-mapvirtualkeyw#parameters">Read more on docs.microsoft.com</see>.</para>
-    /// </param>
-    /// <returns>
-    /// <para>Type: <b>UINT</b> The return value is either a scan code, a virtual-key code, or a character value, depending on the value of <paramref name="uCode"/> and <paramref name="uMapType"/>. If there is no translation, the return value is <i>0</i> (zero).</para>
-    /// </returns>
-    /// <remarks>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api/winuser/nf-winuser-mapvirtualkeyw">Learn more about this API from docs.microsoft.com</see>.</para>
-    /// </remarks>
+    /// <returns>Either a scan code, a virtual-key code, or a character value, depending on the value of <paramref name="uCode"/> and <paramref name="uMapType"/>. If there is no translation, the return value is <i>0</i> (zero).</returns>
+    /// <remarks><see href="https://docs.microsoft.com/windows/win32/api/winuser/nf-winuser-mapvirtualkeyw">Learn more about this API from docs.microsoft.com</see>.</remarks>
     [LibraryImport("User32", EntryPoint = "MapVirtualKeyW")]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     public static partial uint MapVirtualKey(uint uCode, VirtualKeyMapType uMapType);
 
     /// <summary>Retrieves the position of the mouse cursor, in screen coordinates.</summary>
-    /// <param name="lpPoint">
-    /// <para>Type: <b>LPPOINT</b> A pointer to a <see cref="POINT"/> structure that receives the screen coordinates of the cursor.</para>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api/winuser/nf-winuser-getcursorpos#parameters">Read more on docs.microsoft.com</see>.</para>
-    /// </param>
-    /// <returns>
-    /// <para>Type: <b>BOOL</b> Returns nonzero if successful or zero otherwise. To get extended error information, call <see cref="Marshal.GetLastPInvokeError"/>.</para>
-    /// </returns>
-    /// <remarks>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api/winuser/nf-winuser-getcursorpos">Learn more about this API from docs.microsoft.com</see>.</para>
-    /// </remarks>
+    /// <returns>Returns nonzero if successful or zero otherwise. To get extended error information, call <see cref="Marshal.GetLastPInvokeError"/>.</returns>
+    /// <remarks><see href="https://docs.microsoft.com/windows/win32/api/winuser/nf-winuser-getcursorpos">Learn more about this API from docs.microsoft.com</see>.</remarks>
     [LibraryImport("User32", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static unsafe partial bool GetCursorPos(out POINT lpPoint);
 
     /// <summary>Returns the dots per inch (dpi) value for the associated window.</summary>
-    /// <param name="hwnd">The window you want to get information about.</param>
     /// <returns>The DPI for the window which depends on the <a href="https://docs.microsoft.com/windows/desktop/api/windef/ne-windef-dpi_awareness">DPI_AWARENESS</a> of the window. See the Remarks for more information. An invalid <i>hwnd</i> value will result in a return value of 0.</returns>
-    /// <remarks>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api/winuser/nf-winuser-getdpiforwindow">Learn more about this API from docs.microsoft.com</see>.</para>
-    /// </remarks>
+    /// <remarks><see href="https://docs.microsoft.com/windows/win32/api/winuser/nf-winuser-getdpiforwindow">Learn more about this API from docs.microsoft.com</see>.</remarks>
     [LibraryImport("User32")]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     [SupportedOSPlatform("windows10.0.14393")]
     public static partial uint GetDpiForWindow(nint hwnd);
 
     /// <summary>Changes the size, position, and Z order of a child, pop-up, or top-level window. These windows are ordered according to their appearance on the screen. The topmost window receives the highest rank and is the first window in the Z order.</summary>
-    /// <param name="hWnd">
-    /// <para>A handle to the window.</para>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-setwindowpos#parameters">Read more on docs.microsoft.com</see>.</para>
-    /// </param>
-    /// <param name="hWndInsertAfter">
-    /// A handle to the window to precede the positioned window in the Z order. This parameter must be a window handle or one of <see cref="SpecialWindowHandles"/>'s values.
-    /// </param>
-    /// <param name="X">
-    /// <para>Type: <b>int</b> The new position of the left side of the window, in client coordinates.</para>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-setwindowpos#parameters">Read more on docs.microsoft.com</see>.</para>
-    /// </param>
-    /// <param name="Y">
-    /// <para>Type: <b>int</b> The new position of the top of the window, in client coordinates.</para>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-setwindowpos#parameters">Read more on docs.microsoft.com</see>.</para>
-    /// </param>
-    /// <param name="cx">
-    /// <para>Type: <b>int</b> The new width of the window, in pixels.</para>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-setwindowpos#parameters">Read more on docs.microsoft.com</see>.</para>
-    /// </param>
-    /// <param name="cy">
-    /// <para>Type: <b>int</b> The new height of the window, in pixels.</para>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-setwindowpos#parameters">Read more on docs.microsoft.com</see>.</para>
-    /// </param>
-    /// <param name="uFlags">Type: <b>UINT</b> The window sizing and positioning flags.</param>
-    /// <returns>
-    /// <para>Type: <b>BOOL</b> If the function succeeds, the return value is nonzero. If the function fails, the return value is zero. To get extended error information, call <see cref="Marshal.GetLastPInvokeError"/>.</para>
-    /// </returns>
-    /// <remarks>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-setwindowpos">Learn more about this API from docs.microsoft.com</see>.</para>
-    /// </remarks>
+    /// <returns>If the function succeeds, the return value is nonzero. If the function fails, the return value is zero. To get extended error information, call <see cref="Marshal.GetLastPInvokeError"/>.</returns>
+    /// <remarks><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-setwindowpos">Learn more about this API from docs.microsoft.com</see>.</remarks>
     [LibraryImport("User32", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     [return: MarshalAs(UnmanagedType.Bool)]
@@ -122,131 +59,39 @@ public static partial class PInvoke
     public static unsafe bool RegisterRawInputDevices(Span<RAWINPUTDEVICE> pRawInputDevices) => RegisterRawInputDevices(pRawInputDevices, (uint)pRawInputDevices.Length, (uint)RAWINPUTDEVICE.SIZE);
 
     /// <summary>Registers the devices that supply the raw input data.</summary>
-    /// <param name="pRawInputDevices">
-    /// <para>Type: <b>PCRAWINPUTDEVICE</b> An array of <a href="https://docs.microsoft.com/windows/desktop/api/winuser/ns-winuser-rawinputdevice">RAWINPUTDEVICE</a> structures that represent the devices that supply the raw input.</para>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-registerrawinputdevices#parameters">Read more on docs.microsoft.com</see>.</para>
-    /// </param>
-    /// <param name="uiNumDevices">
-    /// <para>Type: <b>UINT</b> The number of <a href="https://docs.microsoft.com/windows/desktop/api/winuser/ns-winuser-rawinputdevice">RAWINPUTDEVICE</a> structures pointed to by <i>pRawInputDevices</i>.</para>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-registerrawinputdevices#parameters">Read more on docs.microsoft.com</see>.</para>
-    /// </param>
-    /// <param name="cbSize">
-    /// <para>Type: <b>UINT</b> The size, in bytes, of a <see cref="RAWINPUTDEVICE"/> structure.</para>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-registerrawinputdevices#parameters">Read more on docs.microsoft.com</see>.</para>
-    /// </param>
-    /// <returns>
-    /// <para>Type: <b>BOOL</b> <b>TRUE</b> if the function succeeds; otherwise, <b>FALSE</b>. If the function fails, call <see cref="Marshal.GetLastPInvokeError"/> for more information.</para>
-    /// </returns>
-    /// <remarks>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-registerrawinputdevices">Learn more about this API from docs.microsoft.com</see>.</para>
-    /// </remarks>
+    /// <returns><b>TRUE</b> if the function succeeds; otherwise, <b>FALSE</b>. If the function fails, call <see cref="Marshal.GetLastPInvokeError"/> for more information.</returns>
+    /// <remarks><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-registerrawinputdevices">Learn more about this API from docs.microsoft.com</see>.</remarks>
     [LibraryImport("User32", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static unsafe partial bool RegisterRawInputDevices(Span<RAWINPUTDEVICE> pRawInputDevices, uint uiNumDevices, uint cbSize);
 
     /// <summary>Calls the next handler in a window's subclass chain. The last handler in the subclass chain calls the original window procedure for the window.</summary>
-    /// <param name="hWnd">
-    /// <para>Type: <b>HWND</b> A handle to the window being subclassed.</para>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//commctrl/nf-commctrl-defsubclassproc#parameters">Read more on docs.microsoft.com</see>.</para>
-    /// </param>
-    /// <param name="uMsg">
-    /// <para>Type: <b>UINT</b> A value of type unsigned <b>int</b> that specifies a window message.</para>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//commctrl/nf-commctrl-defsubclassproc#parameters">Read more on docs.microsoft.com</see>.</para>
-    /// </param>
-    /// <param name="wParam">
-    /// <para>Type: <b>WPARAM</b> Specifies additional message information. The contents of this parameter depend on the value of the window message.</para>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//commctrl/nf-commctrl-defsubclassproc#parameters">Read more on docs.microsoft.com</see>.</para>
-    /// </param>
-    /// <param name="lParam">
-    /// <para>Type: <b>LPARAM</b> Specifies additional message information. The contents of this parameter depend on the value of the window message. Note: On 64-bit versions of Windows LPARAM is a 64-bit value.</para>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//commctrl/nf-commctrl-defsubclassproc#parameters">Read more on docs.microsoft.com</see>.</para>
-    /// </param>
-    /// <returns>
-    /// <para>Type: <b>LRESULT</b> The returned value is specific to the message sent. This value should be ignored.</para>
-    /// </returns>
-    /// <remarks>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//commctrl/nf-commctrl-defsubclassproc">Learn more about this API from docs.microsoft.com</see>.</para>
-    /// </remarks>
+    /// <returns>Type: <b>LRESULT</b>. The returned value is specific to the message sent. This value should be ignored.</returns>
+    /// <remarks><see href="https://docs.microsoft.com/windows/win32/api//commctrl/nf-commctrl-defsubclassproc">Learn more about this API from docs.microsoft.com</see>.</remarks>
     [LibraryImport("ComCtl32")]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     public static partial nint DefSubclassProc(nint hWnd, uint uMsg, nuint wParam, nint lParam);
 
     /// <summary>Installs or updates a window subclass callback.</summary>
-    /// <param name="hWnd">
-    /// <para>Type: <b>HWND</b> The handle of the window being subclassed.</para>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//commctrl/nf-commctrl-setwindowsubclass#parameters">Read more on docs.microsoft.com</see>.</para>
-    /// </param>
-    /// <param name="pfnSubclass">
-    /// <para>Type: <b><a href="https://docs.microsoft.com/windows/desktop/api/commctrl/nc-commctrl-subclassproc">SUBCLASSPROC</a></b> A pointer to a window procedure. This pointer and the subclass ID uniquely identify this subclass callback. For the callback function prototype, see <a href="https://docs.microsoft.com/windows/desktop/api/commctrl/nc-commctrl-subclassproc">SUBCLASSPROC</a>.</para>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//commctrl/nf-commctrl-setwindowsubclass#parameters">Read more on docs.microsoft.com</see>.</para>
-    /// </param>
-    /// <param name="uIdSubclass">
-    /// <para>Type: <b>UINT_PTR</b> The subclass ID. This ID together with the subclass procedure uniquely identify a subclass. To remove a subclass, pass the subclass procedure and this value to the <a href="https://docs.microsoft.com/windows/desktop/api/commctrl/nf-commctrl-removewindowsubclass">RemoveWindowSubclass</a> function. This value is passed to the subclass procedure in the uIdSubclass parameter.</para>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//commctrl/nf-commctrl-setwindowsubclass#parameters">Read more on docs.microsoft.com</see>.</para>
-    /// </param>
-    /// <param name="dwRefData">
-    /// <para>Type: <b>DWORD_PTR</b> <b>DWORD_PTR</b> to reference data. The meaning of this value is determined by the calling application. This value is passed to the subclass procedure in the dwRefData parameter. A different dwRefData is associated with each combination of window handle, subclass procedure and uIdSubclass.</para>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//commctrl/nf-commctrl-setwindowsubclass#parameters">Read more on docs.microsoft.com</see>.</para>
-    /// </param>
-    /// <returns>
-    /// <para>Type: <b>BOOL</b> <b>TRUE</b> if the subclass callback was successfully installed; otherwise, <b>FALSE</b>.</para>
-    /// </returns>
-    /// <remarks>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//commctrl/nf-commctrl-setwindowsubclass">Learn more about this API from docs.microsoft.com</see>.</para>
-    /// </remarks>
+    /// <returns><b>TRUE</b> if the subclass callback was successfully installed; otherwise, <b>FALSE</b>.</returns>
+    /// <remarks><see href="https://docs.microsoft.com/windows/win32/api//commctrl/nf-commctrl-setwindowsubclass">Learn more about this API from docs.microsoft.com</see>.</remarks>
     [LibraryImport("ComCtl32")]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static partial bool SetWindowSubclass(nint hWnd, SUBCLASSPROC pfnSubclass, nuint uIdSubclass, nuint dwRefData);
 
     /// <summary>Removes a subclass callback from a window.</summary>
-    /// <param name="hWnd">
-    /// <para>Type: <b>HWND</b> The handle of the window being subclassed.</para>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//commctrl/nf-commctrl-removewindowsubclass#parameters">Read more on docs.microsoft.com</see>.</para>
-    /// </param>
-    /// <param name="pfnSubclass">
-    /// <para>Type: <b><a href="https://docs.microsoft.com/windows/desktop/api/commctrl/nc-commctrl-subclassproc">SUBCLASSPROC</a></b> A pointer to a window procedure. This pointer and the subclass ID uniquely identify this subclass callback. For the callback function prototype, see <a href="https://docs.microsoft.com/windows/desktop/api/commctrl/nc-commctrl-subclassproc">SUBCLASSPROC</a>.</para>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//commctrl/nf-commctrl-removewindowsubclass#parameters">Read more on docs.microsoft.com</see>.</para>
-    /// </param>
-    /// <param name="uIdSubclass">
-    /// <para>Type: <b>UINT_PTR</b> The <b>UINT_PTR</b> subclass ID. This ID and the callback pointer uniquely identify this subclass callback. Note: On 64-bit versions of Windows this is a 64-bit value.</para>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//commctrl/nf-commctrl-removewindowsubclass#parameters">Read more on docs.microsoft.com</see>.</para>
-    /// </param>
-    /// <returns>
-    /// <para>Type: <b>BOOL</b> <b>TRUE</b> if the subclass callback was successfully removed; otherwise, <b>FALSE</b>.</para>
-    /// </returns>
-    /// <remarks>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//commctrl/nf-commctrl-removewindowsubclass">Learn more about this API from docs.microsoft.com</see>.</para>
-    /// </remarks>
+    /// <returns><b>TRUE</b> if the subclass callback was successfully removed; otherwise, <b>FALSE</b>.</returns>
+    /// <remarks><see href="https://docs.microsoft.com/windows/win32/api//commctrl/nf-commctrl-removewindowsubclass">Learn more about this API from docs.microsoft.com</see>.</remarks>
     [LibraryImport("ComCtl32")]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static partial bool RemoveWindowSubclass(nint hWnd, SUBCLASSPROC pfnSubclass, nuint uIdSubclass);
 
     /// <summary>Calls the default window procedure to provide default processing for any window messages that an application does not process.</summary>
-    /// <param name="hWnd">
-    /// <para>Type: <b>HWND</b> A handle to the window procedure that received the message.</para>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-defwindowprocw#parameters">Read more on docs.microsoft.com</see>.</para>
-    /// </param>
-    /// <param name="Msg">
-    /// <para>Type: <b>UINT</b> The message.</para>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-defwindowprocw#parameters">Read more on docs.microsoft.com</see>.</para>
-    /// </param>
-    /// <param name="wParam">
-    /// <para>Type: <b>WPARAM</b> Additional message information. The content of this parameter depends on the value of the <i>Msg</i> parameter.</para>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-defwindowprocw#parameters">Read more on docs.microsoft.com</see>.</para>
-    /// </param>
-    /// <param name="lParam">
-    /// <para>Type: <b>LPARAM</b> Additional message information. The content of this parameter depends on the value of the <i>Msg</i> parameter.</para>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-defwindowprocw#parameters">Read more on docs.microsoft.com</see>.</para>
-    /// </param>
-    /// <returns>
-    /// <para>Type: <b>LRESULT</b> The return value is the result of the message processing and depends on the message.</para>
-    /// </returns>
-    /// <remarks>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-defwindowprocw">Learn more about this API from docs.microsoft.com</see>.</para>
-    /// </remarks>
+    /// <returns>Type: <b>LRESULT</b> The return value is the result of the message processing and depends on the message.</returns>
+    /// <remarks><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-defwindowprocw">Learn more about this API from docs.microsoft.com</see>.</remarks>
     [LibraryImport("User32", EntryPoint = "DefWindowProcW")]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     public static partial nint DefWindowProc(nint hWnd, uint Msg, nuint wParam, nint lParam);
@@ -302,172 +147,63 @@ public static partial class PInvoke
     public static unsafe partial uint GetRawInputData(nint hRawInput, uint uiCommand, void* pData, uint* pcbSize, uint cbSizeHeader);
 
     /// <summary>The EnumDisplayMonitors function enumerates display monitors (including invisible pseudo-monitors associated with the mirroring drivers) that intersect a region formed by the intersection of a specified clipping rectangle and the visible region of a device context. EnumDisplayMonitors calls an application-defined MonitorEnumProc callback function once for each monitor that is enumerated. Note that GetSystemMetrics (SM_CMONITORS) counts only the display monitors.</summary>
-    /// <param name="hdc">
-    /// <para>A handle to a display device context that defines the visible region of interest. If this parameter is <b>NULL</b>, the <i>hdcMonitor</i> parameter passed to the callback function will be <b>NULL</b>, and the visible region of interest is the virtual screen that encompasses all the displays on the desktop.</para>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-enumdisplaymonitors#parameters">Read more on docs.microsoft.com</see>.</para>
-    /// </param>
-    /// <param name="lprcClip">
-    /// <para>A pointer to a <a href="https://docs.microsoft.com/windows/desktop/api/windef/ns-windef-rect">RECT</a> structure that specifies a clipping rectangle. The region of interest is the intersection of the clipping rectangle with the visible region specified by <i>hdc</i>. If <i>hdc</i> is non-<b>NULL</b>, the coordinates of the clipping rectangle are relative to the origin of the <i>hdc</i>. If <i>hdc</i> is <b>NULL</b>, the coordinates are virtual-screen coordinates. This parameter can be <b>NULL</b> if you don't want to clip the region specified by <i>hdc</i>.</para>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-enumdisplaymonitors#parameters">Read more on docs.microsoft.com</see>.</para>
-    /// </param>
-    /// <param name="lpfnEnum">A pointer to a <a href="https://docs.microsoft.com/windows/desktop/api/winuser/nc-winuser-monitorenumproc">MonitorEnumProc</a> application-defined callback function.</param>
-    /// <param name="dwData">Application-defined data that <b>EnumDisplayMonitors</b> passes directly to the <a href="https://docs.microsoft.com/windows/desktop/api/winuser/nc-winuser-monitorenumproc">MonitorEnumProc</a> function.</param>
-    /// <returns>
-    /// <para>If the function succeeds, the return value is nonzero. If the function fails, the return value is zero.</para>
-    /// </returns>
-    /// <remarks>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-enumdisplaymonitors">Learn more about this API from docs.microsoft.com</see>.</para>
-    /// </remarks>
+    /// <returns>If the function succeeds, the return value is nonzero. If the function fails, the return value is zero.</returns>
+    /// <remarks><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-enumdisplaymonitors">Learn more about this API from docs.microsoft.com</see>.</remarks>
     [LibraryImport("User32")]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static unsafe partial bool EnumDisplayMonitors(nint hdc, nint lprcClip, MONITORENUMPROC lpfnEnum, nint dwData);
 
     /// <summary>Sets the value of Desktop Window Manager (DWM) non-client rendering attributes for a window.</summary>
-    /// <param name="hwnd">The handle to the window for which the attribute value is to be set.</param>
-    /// <param name="dwAttribute">A flag describing which value to set, specified as a value of the [DWMWINDOWATTRIBUTE](/windows/desktop/api/dwmapi/ne-dwmapi-dwmwindowattribute) enumeration. This parameter specifies which attribute to set, and the *pvAttribute* parameter points to an object containing the attribute value.</param>
-    /// <param name="pvAttribute">A pointer to an object containing the attribute value to set. The type of the value set depends on the value of the *dwAttribute* parameter. The [**DWMWINDOWATTRIBUTE**](/windows/desktop/api/Dwmapi/ne-dwmapi-dwmwindowattribute) enumeration topic indicates, in the row for each flag, what type of value you should pass a pointer to in the *pvAttribute* parameter.</param>
-    /// <param name="cbAttribute">The size, in bytes, of the attribute value being set via the *pvAttribute* parameter. The type of the value set, and therefore its size in bytes, depends on the value of the *dwAttribute* parameter.</param>
-    /// <returns>
-    /// <para>Type: **[HRESULT](/windows/desktop/com/structure-of-com-error-codes)** If the function succeeds, it returns **S_OK**. Otherwise, it returns an [**HRESULT**](/windows/desktop/com/structure-of-com-error-codes) [error code](/windows/desktop/com/com-error-codes-10). If Desktop Composition has been disabled (Windows 7 and earlier), then this function returns **DWM_E_COMPOSITIONDISABLED**.</para>
-    /// </returns>
-    /// <remarks>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//dwmapi/nf-dwmapi-dwmsetwindowattribute">Learn more about this API from docs.microsoft.com</see>.</para>
-    /// </remarks>
+    /// <returns>If the function succeeds, it returns **S_OK**. Otherwise, it returns an **HRESULT** <see href="https://docs.microsoft.com/windows/desktop/com/com-error-codes-10">error code</see>. If Desktop Composition has been disabled (Windows 7 and earlier), then this function returns **DWM_E_COMPOSITIONDISABLED**.</returns>
+    /// <remarks><see href="https://docs.microsoft.com/windows/win32/api//dwmapi/nf-dwmapi-dwmsetwindowattribute">Learn more about this API from docs.microsoft.com</see>./remarks>
     [LibraryImport("DwmApi")]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    public static unsafe partial int DwmSetWindowAttribute(nint hwnd, uint dwAttribute, void* pvAttribute, uint cbAttribute);
+    public static unsafe partial HResult DwmSetWindowAttribute(nint hwnd, uint dwAttribute, void* pvAttribute, uint cbAttribute);
 
     /// <summary>Retrieves or sets the value of one of the system-wide parameters.</summary>
-    /// <param name="uiAction">
-    /// <para>Type: <b>UINT</b> The system-wide parameter to be retrieved or set. The possible values are organized in the following tables of related parameters: </para>
-    /// <para>This doc was truncated.</para>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-systemparametersinfow#parameters">Read more on docs.microsoft.com</see>.</para>
-    /// </param>
-    /// <param name="uiParam">
-    /// <para>Type: <b>UINT</b> A parameter whose usage and format depends on the system parameter being queried or set. For more information about system-wide parameters, see the <i>uiAction</i> parameter. If not otherwise indicated, you must specify zero for this parameter.</para>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-systemparametersinfow#parameters">Read more on docs.microsoft.com</see>.</para>
-    /// </param>
-    /// <param name="pvParam">
-    /// <para>Type: <b>PVOID</b> A parameter whose usage and format depends on the system parameter being queried or set. For more information about system-wide parameters, see the <i>uiAction</i> parameter. If not otherwise indicated, you must specify <b>NULL</b> for this parameter. For information on the <b>PVOID</b> datatype, see <a href="https://docs.microsoft.com/windows/desktop/WinProg/windows-data-types">Windows Data Types</a>.</para>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-systemparametersinfow#parameters">Read more on docs.microsoft.com</see>.</para>
-    /// </param>
-    /// <param name="fWinIni">
-    /// <para>Type: <b>UINT</b> If a system parameter is being set, specifies whether the user profile is to be updated, and if so, whether the <a href="https://docs.microsoft.com/windows/desktop/winmsg/wm-settingchange">WM_SETTINGCHANGE</a> message is to be broadcast to all top-level windows to notify them of the change.</para>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-systemparametersinfow#parameters">Read more on docs.microsoft.com</see>.</para>
-    /// </param>
-    /// <returns>
-    /// <para>Type: <b>BOOL</b> If the function succeeds, the return value is a nonzero value. If the function fails, the return value is zero. To get extended error information, call <a href="/windows/desktop/api/errhandlingapi/nf-errhandlingapi-getlasterror">GetLastError</a>.</para>
-    /// </returns>
-    /// <remarks>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-systemparametersinfow">Learn more about this API from docs.microsoft.com</see>.</para>
-    /// </remarks>
+    /// <returns>If the function succeeds, the return value is a nonzero value. If the function fails, the return value is zero. To get extended error information, call <see cref="Marshal.GetLastPInvokeError"/>.</returns>
+    /// <remarks><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-systemparametersinfow">Learn more about this API from docs.microsoft.com</see>.</remarks>
     [LibraryImport("User32", EntryPoint = "SystemParametersInfoW", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static unsafe partial bool SystemParametersInfo(SystemParameter uiAction, uint uiParam, void* pvParam, SystemParameterUpdateAction fWinIni);
 
     /// <summary>Retrieves the specified system metric or system configuration setting.</summary>
-    /// <param name="nIndex">Type: <b>int</b></param>
-    /// <returns>
-    /// <para>Type: <b>int</b> If the function succeeds, the return value is the requested system metric or configuration setting. If the function fails, the return value is 0. <a href="/windows/desktop/api/errhandlingapi/nf-errhandlingapi-getlasterror">GetLastError</a> does not provide extended error information.</para>
-    /// </returns>
-    /// <remarks>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-getsystemmetrics">Learn more about this API from docs.microsoft.com</see>.</para>
-    /// </remarks>
+    /// <returns>If the function succeeds, the return value is the requested system metric or configuration setting. If the function fails, the return value is 0. <see cref="Marshal.GetLastPInvokeError"/> does not provide extended error information.</returns>
+    /// <remarks><see href="https://docs.microsoft.com/windows/win32/api//winuser/nf-winuser-getsystemmetrics">Learn more about this API from docs.microsoft.com</see>.</remarks>
     [LibraryImport("User32", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     public static partial int GetSystemMetrics(SystemMetric nIndex);
 
     /// <summary>Creates or opens a waitable timer object and returns a handle to the object.</summary>
-    /// <param name="lpTimerAttributes">
-    /// <para>A pointer to a <a href="https://docs.microsoft.com/previous-versions/windows/desktop/legacy/aa379560(v=vs.85)">SECURITY_ATTRIBUTES</a> structure. If this parameter is <b>NULL</b>, the timer handle cannot be inherited by child processes. If <i>lpTimerAttributes</i> is <b>NULL</b>, the timer object gets a default security descriptor and the handle cannot be inherited. The ACLs in the default security descriptor for a timer come from the primary or impersonation token of the creator.</para>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//synchapi/nf-synchapi-createwaitabletimerexw#parameters">Read more on docs.microsoft.com</see>.</para>
-    /// </param>
-    /// <param name="lpTimerName">
-    /// <para>The name of the timer object. The name is limited to <b>MAX_PATH</b> characters. Name comparison is case sensitive.</para>
-    /// <para>If <i>lpTimerName</i> is <b>NULL</b>, the timer object is created without a name. If <i>lpTimerName</i> matches the name of an existing event, semaphore, mutex, job, or file-mapping object, the function fails and <a href="https://docs.microsoft.com/windows/desktop/api/errhandlingapi/nf-errhandlingapi-getlasterror">GetLastError</a> returns <b>ERROR_INVALID_HANDLE</b>. This occurs because these objects share the same namespace. The name can have a "Global\" or "Local\" prefix to explicitly create the object in the global or session namespace. The remainder of the name can contain any character except the backslash character (\\). For more information, see <a href="https://docs.microsoft.com/windows/desktop/TermServ/kernel-object-namespaces">Kernel Object Namespaces</a>. Fast user switching is implemented using Terminal Services sessions. Kernel object names must follow the guidelines outlined for Terminal Services so that applications can support multiple users. The object can be created in a private namespace. For more information, see <a href="https://docs.microsoft.com/windows/desktop/Sync/object-namespaces">Object Namespaces</a>.</para>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//synchapi/nf-synchapi-createwaitabletimerexw#parameters">Read more on docs.microsoft.com</see>.</para>
-    /// </param>
-    /// <param name="dwFlags">
-    /// <para>This parameter can be 0 or the following value. </para>
-    /// <para>This doc was truncated.</para>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//synchapi/nf-synchapi-createwaitabletimerexw#parameters">Read more on docs.microsoft.com</see>.</para>
-    /// </param>
-    /// <param name="dwDesiredAccess">
-    /// <para>The access mask for the timer object. For a list of access rights, see <a href="https://docs.microsoft.com/windows/desktop/Sync/synchronization-object-security-and-access-rights">Synchronization Object Security and Access Rights</a>.</para>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//synchapi/nf-synchapi-createwaitabletimerexw#parameters">Read more on docs.microsoft.com</see>.</para>
-    /// </param>
-    /// <returns>
-    /// <para>If the function succeeds, the return value is a handle to the timer object. If the named timer object exists before the function call, the function returns a handle to the existing object and <a href="/windows/desktop/api/errhandlingapi/nf-errhandlingapi-getlasterror">GetLastError</a> returns <b>ERROR_ALREADY_EXISTS</b>. If the function fails, the return value is <b>NULL</b>. To get extended error information, call <a href="/windows/desktop/api/errhandlingapi/nf-errhandlingapi-getlasterror">GetLastError</a>.</para>
-    /// </returns>
-    /// <remarks>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//synchapi/nf-synchapi-createwaitabletimerexw">Learn more about this API from docs.microsoft.com</see>.</para>
-    /// </remarks>
+    /// <returns>If the function succeeds, the return value is a handle to the timer object. If the named timer object exists before the function call, the function returns a handle to the existing object and <see cref="Marshal.GetLastPInvokeError"/> returns <b>ERROR_ALREADY_EXISTS</b>. If the function fails, the return value is <b>NULL</b>. To get extended error information, call <see cref="Marshal.GetLastPInvokeError"/>.</returns>
+    /// <remarks><see href="https://docs.microsoft.com/windows/win32/api//synchapi/nf-synchapi-createwaitabletimerexw">Learn more about this API from docs.microsoft.com</see>.</remarks>
     [LibraryImport("Kernel32", EntryPoint = "CreateWaitableTimerExW", StringMarshalling = StringMarshalling.Utf16, SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     public static unsafe partial nint CreateWaitableTimerEx(nint lpTimerAttributes, string? lpTimerName, WaitableTimerFlags dwFlags, AccessRights dwDesiredAccess);
 
     /// <summary>Activates the specified waitable timer. When the due time arrives, the timer is signaled and the thread that set the timer calls the optional completion routine.</summary>
-    /// <param name="hTimer">
-    /// <para>A handle to the timer object. The <a href="https://docs.microsoft.com/windows/desktop/api/synchapi/nf-synchapi-createwaitabletimerw">CreateWaitableTimer</a> or <a href="https://docs.microsoft.com/windows/desktop/api/synchapi/nf-synchapi-openwaitabletimerw">OpenWaitableTimer</a> function returns this handle.</para>
-    /// <para>The handle must have the <b>TIMER_MODIFY_STATE</b> access right. For more information, see <a href="https://docs.microsoft.com/windows/desktop/Sync/synchronization-object-security-and-access-rights">Synchronization Object Security and Access Rights</a>.</para>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//synchapi/nf-synchapi-setwaitabletimer#parameters">Read more on docs.microsoft.com</see>.</para>
-    /// </param>
-    /// <param name="lpDueTime">
-    /// <para>The time after which the state of the timer is to be set to signaled, in 100 nanosecond intervals. Use the format described by the <a href="https://docs.microsoft.com/windows/desktop/api/minwinbase/ns-minwinbase-filetime">FILETIME</a> structure. Positive values indicate absolute time. Be sure to use a UTC-based absolute time, as the system uses UTC-based time internally. Negative values indicate relative time. The actual timer accuracy depends on the capability of your hardware. For more information about UTC-based time, see <a href="https://docs.microsoft.com/windows/desktop/SysInfo/system-time">System Time</a>.</para>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//synchapi/nf-synchapi-setwaitabletimer#parameters">Read more on docs.microsoft.com</see>.</para>
-    /// </param>
-    /// <param name="lPeriod">
-    /// <para>The period of the timer, in milliseconds. If <i>lPeriod</i> is zero, the timer is signaled once. If <i>lPeriod</i> is greater than zero, the timer is periodic. A periodic timer automatically reactivates each time the period elapses, until the timer is canceled using the <a href="https://docs.microsoft.com/windows/desktop/api/synchapi/nf-synchapi-cancelwaitabletimer">CancelWaitableTimer</a> function or reset using <b>SetWaitableTimer</b>. If <i>lPeriod</i> is less than zero, the function fails.</para>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//synchapi/nf-synchapi-setwaitabletimer#parameters">Read more on docs.microsoft.com</see>.</para>
-    /// </param>
-    /// <param name="pfnCompletionRoutine">
-    /// <para>A pointer to an optional completion routine. The completion routine is application-defined function of type <b>PTIMERAPCROUTINE</b> to be executed when the timer is signaled. For more information on the timer callback function, see <a href="https://docs.microsoft.com/windows/desktop/api/synchapi/nc-synchapi-ptimerapcroutine">TimerAPCProc</a>. For more information about APCs and thread pool threads, see Remarks.</para>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//synchapi/nf-synchapi-setwaitabletimer#parameters">Read more on docs.microsoft.com</see>.</para>
-    /// </param>
-    /// <param name="lpArgToCompletionRoutine">A pointer to a structure that is passed to the completion routine.</param>
-    /// <param name="fResume">If this parameter is <b>TRUE</b>, restores a system in suspended power conservation mode when the timer state is set to signaled. Otherwise, the system is not restored. If the system does not support a restore, the call succeeds, but <a href="https://docs.microsoft.com/windows/desktop/api/errhandlingapi/nf-errhandlingapi-getlasterror">GetLastError</a> returns <b>ERROR_NOT_SUPPORTED</b>.</param>
-    /// <returns>
-    /// <para>If the function succeeds, the return value is nonzero. If the function fails, the return value is zero. To get extended error information, call <a href="/windows/desktop/api/errhandlingapi/nf-errhandlingapi-getlasterror">GetLastError</a>.</para>
-    /// </returns>
-    /// <remarks>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//synchapi/nf-synchapi-setwaitabletimer">Learn more about this API from docs.microsoft.com</see>.</para>
-    /// </remarks>
+    /// <returns>If the function succeeds, the return value is nonzero. If the function fails, the return value is zero. To get extended error information, call <see cref="Marshal.GetLastPInvokeError"/>.</returns>
+    /// <remarks><see href="https://docs.microsoft.com/windows/win32/api//synchapi/nf-synchapi-setwaitabletimer">Learn more about this API from docs.microsoft.com</see>.</remarks>
     [LibraryImport("Kernel32", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static unsafe partial bool SetWaitableTimer(nint hTimer, long* lpDueTime, int lPeriod, PTIMERAPCROUTINE? pfnCompletionRoutine, void* lpArgToCompletionRoutine, [MarshalAs(UnmanagedType.Bool)] bool fResume);
 
     /// <summary>Waits until the specified object is in the signaled state or the time-out interval elapses.</summary>
-    /// <param name="hHandle">
-    /// <para>A handle to the object. For a list of the object types whose handles can be specified, see the following Remarks section.</para>
-    /// <para>If this handle is closed while the wait is still pending, the function's behavior is undefined. The handle must have the <b>SYNCHRONIZE</b> access right. For more information, see <a href="https://docs.microsoft.com/windows/desktop/SecAuthZ/standard-access-rights">Standard Access Rights</a>.</para>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//synchapi/nf-synchapi-waitforsingleobject#parameters">Read more on docs.microsoft.com</see>.</para>
-    /// </param>
-    /// <param name="dwMilliseconds">
-    /// <para>The time-out interval, in milliseconds. If a nonzero value is specified, the function waits until the object is signaled or the interval elapses. If <i>dwMilliseconds</i> is zero, the function does not enter a wait state if the object is not signaled; it always returns immediately. If <i>dwMilliseconds</i> is <b>INFINITE</b>, the function will return only when the object is signaled. <b>Windows XP, Windows Server 2003, Windows Vista, Windows 7, Windows Server 2008 and Windows Server 2008 R2:  </b>The <i>dwMilliseconds</i> value does include time spent in low-power states. For example, the timeout does keep counting down while the computer is asleep. <b>Windows 8, Windows Server 2012, Windows 8.1, Windows Server 2012 R2, Windows 10 and Windows Server 2016:  </b>The <i>dwMilliseconds</i> value does not include time spent in low-power states. For example, the timeout does not keep counting down while the computer is asleep.</para>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//synchapi/nf-synchapi-waitforsingleobject#parameters">Read more on docs.microsoft.com</see>.</para>
-    /// </param>
     /// <returns>
     /// <para>If the function succeeds, the return value indicates the event that caused the function to return. It can be one of the following values. </para>
     /// <para>This doc was truncated.</para>
     /// </returns>
-    /// <remarks>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//synchapi/nf-synchapi-waitforsingleobject">Learn more about this API from docs.microsoft.com</see>.</para>
-    /// </remarks>
+    /// <remarks><see href="https://docs.microsoft.com/windows/win32/api//synchapi/nf-synchapi-waitforsingleobject">Learn more about this API from docs.microsoft.com</see>.</remarks>
     [LibraryImport("Kernel32", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     public static partial WaitResult WaitForSingleObject(nint hHandle, uint dwMilliseconds);
 
     /// <summary>Closes an open object handle.</summary>
-    /// <param name="hObject">A valid handle to an open object.</param>
-    /// <returns>
-    /// <para>If the function succeeds, the return value is nonzero. If the function fails, the return value is zero. To get extended error information, call <a href="/windows/desktop/api/errhandlingapi/nf-errhandlingapi-getlasterror">GetLastError</a>. If the application is running under a debugger,  the function will throw an exception if it receives either a  handle value that is not valid  or a pseudo-handle value. This can happen if you close a handle twice, or if you  call <b>CloseHandle</b> on a handle returned by the <a href="/windows/desktop/api/fileapi/nf-fileapi-findfirstfilea">FindFirstFile</a> function instead of calling the <a href="/windows/desktop/api/fileapi/nf-fileapi-findclose">FindClose</a> function.</para>
-    /// </returns>
-    /// <remarks>
-    /// <para><see href="https://docs.microsoft.com/windows/win32/api//handleapi/nf-handleapi-closehandle">Learn more about this API from docs.microsoft.com</see>.</para>
-    /// </remarks>
+    /// <returns>If the function succeeds, the return value is nonzero. If the function fails, the return value is zero. To get extended error information, call <see cref="Marshal.GetLastPInvokeError"/>. If the application is running under a debugger,  the function will throw an exception if it receives either a  handle value that is not valid  or a pseudo-handle value. This can happen if you close a handle twice, or if you  call <b>CloseHandle</b> on a handle returned by the <a href="https://docs.microsoft.com/windows/desktop/api/fileapi/nf-fileapi-findfirstfilea">FindFirstFile</a> function instead of calling the <a href="https://docs.microsoft.com/windows/desktop/api/fileapi/nf-fileapi-findclose">FindClose</a> function.</returns>
+    /// <remarks><see href="https://docs.microsoft.com/windows/win32/api//handleapi/nf-handleapi-closehandle">Learn more about this API from docs.microsoft.com</see>.</remarks>
     [LibraryImport("Kernel32", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     [return: MarshalAs(UnmanagedType.Bool)]
