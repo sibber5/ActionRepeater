@@ -79,22 +79,21 @@ public sealed class Player
 
                 OnActionPlayed?.Invoke(action, i);
 
-                if (action is WaitableInputAction w)
+                if (action is WaitableInputAction waitableAction)
                 {
-                    w.PlayWait(_actionsWaiter);
+                    waitableAction.PlayWait(_actionsWaiter, _tokenSource.Token);
                     continue;
                 }
 
                 action.Play();
             }
-
-            OnActionPlayed?.Invoke(null, default);
         };
 
         _cleanUp = task =>
         {
             Debug.WriteLine($"[{nameof(Player)}] Finished play task.");
 
+            OnActionPlayed?.Invoke(null, default);
             IsPlaying = false;
 
             _tokenSource!.Dispose();
@@ -169,7 +168,7 @@ public sealed class Player
                 {
                     await _taskToRun();
                 }
-            }).ContinueWith(_cleanUp);
+            }, _tokenSource.Token).ContinueWith(_cleanUp);
         }
     }
 

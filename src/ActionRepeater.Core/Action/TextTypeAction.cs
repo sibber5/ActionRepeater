@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Text.Json.Serialization;
+using System.Threading;
 using ActionRepeater.Core.Input;
 using ActionRepeater.Win32;
 using ActionRepeater.Win32.Input;
@@ -57,13 +58,17 @@ public sealed class TextTypeAction : WaitableInputAction
         _wpm = wpm;
     }
 
-    public override void PlayWait(HighResolutionWaiter waiter)
+    public override void PlayWait(HighResolutionWaiter waiter, CancellationToken cancellationToken)
     {
         int charsPerSecond = WPM * 5 / 60;
         int delayMS = charsPerSecond == 0 ? 0 : 1000 / charsPerSecond;
 
+        using var registration = cancellationToken.Register(static (waiter) => ((HighResolutionWaiter)waiter!).Cancel(), waiter);
+
         foreach (char c in Text.AsSpan())
         {
+            if (cancellationToken.IsCancellationRequested) return;
+
             var (shift, ctrl, alt, key) = GetVirtualKeys(c);
 
             if (shift) InputSimulator.SendKeyDown(VirtualKey.SHIFT);

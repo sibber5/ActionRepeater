@@ -13,6 +13,8 @@ public sealed class HighResolutionWaiter : IDisposable
 
     private bool _disposed;
 
+    private readonly object _cancelLock = new();
+
     public HighResolutionWaiter()
     {
         _timerHandle = CreateWaitableTimerEx(nint.Zero, null, WaitableTimerFlags.HIGH_RESOLUTION, AccessRights.DELETE | AccessRights.SYNCHRONIZE | AccessRights.TIMER_MODIFY_STATE);
@@ -56,18 +58,24 @@ public sealed class HighResolutionWaiter : IDisposable
         _isWaiting = false;
     }
 
-    /// <remarks>Calling <see cref="Cancel"/> when not waiting is a no-op.</remarks>
+    /// <remarks>
+    /// <para>Calling <see cref="Cancel"/> when not waiting is a no-op.</para>
+    /// <para>This method is thread safe.</para>
+    /// </remarks>
     public unsafe void Cancel()
     {
-        if (!_isWaiting) return;
-
-        long time = -1;
-        if (!SetWaitableTimer(_timerHandle, &time, 0, null, null, false))
+        lock (_cancelLock)
         {
-            throw new Win32Exception();
-        }
+            if (!_isWaiting) return;
 
-        _isWaiting = false;
+            long time = -1;
+            if (!SetWaitableTimer(_timerHandle, &time, 0, null, null, false))
+            {
+                throw new Win32Exception();
+            }
+
+            _isWaiting = false;
+        }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

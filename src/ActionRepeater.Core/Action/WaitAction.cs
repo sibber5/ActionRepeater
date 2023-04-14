@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using System.Threading;
 using ActionRepeater.Win32.Synch.Utilities;
 
 namespace ActionRepeater.Core.Action;
@@ -31,8 +32,9 @@ public sealed class WaitAction : WaitableInputAction
     /// <summary>Used only for deserialization.</summary>
     internal WaitAction() { }
 
-    public override void PlayWait(HighResolutionWaiter waiter)
+    public override void PlayWait(HighResolutionWaiter waiter, CancellationToken cancellationToken)
     {
+        using var registration = cancellationToken.Register(static (waiter) => ((HighResolutionWaiter)waiter!).Cancel(), waiter);
         waiter.Wait((uint)DurationMS);
     }
 }

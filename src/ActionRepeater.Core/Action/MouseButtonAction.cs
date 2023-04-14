@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Diagnostics;
 using System.Text.Json.Serialization;
 using ActionRepeater.Core.Extentions;
 using ActionRepeater.Core.Input;
@@ -85,8 +86,8 @@ public sealed class MouseButtonAction : InputAction
 
         if (!success)
         {
-            System.Diagnostics.Debug.WriteLine($"Failed to send mouse event ({ActionType}).");
-            throw new Win32Exception(System.Runtime.InteropServices.Marshal.GetLastPInvokeError());
+            Debug.WriteLine($"Failed to send mouse event ({ActionType}).");
+            throw new Win32Exception();
         }
     }
 }

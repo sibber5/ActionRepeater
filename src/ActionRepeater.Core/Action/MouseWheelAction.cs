@@ -1,6 +1,8 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Text.Json.Serialization;
+using System.Threading;
 using ActionRepeater.Core.Input;
 using ActionRepeater.Win32.Synch.Utilities;
 
@@ -62,9 +64,11 @@ public sealed class MouseWheelAction : WaitableInputAction
         _durationMS = durationMS;
     }
 
-    public override void PlayWait(HighResolutionWaiter waiter)
+    public override void PlayWait(HighResolutionWaiter waiter, CancellationToken cancellationToken)
     {
         int absStepCount = Math.Abs(_stepCount);
+
+        if (cancellationToken.IsCancellationRequested) return;
 
         if (_durationMS == 0 || absStepCount == 1)
         {
@@ -75,10 +79,17 @@ public sealed class MouseWheelAction : WaitableInputAction
         uint waitInterval = (uint)(_durationMS / (absStepCount - 1));
         int step = Math.Sign(_stepCount);
 
+        if (cancellationToken.IsCancellationRequested) return;
+
+        using var registration = cancellationToken.Register(static (waiter) => ((HighResolutionWaiter)waiter!).Cancel(), waiter);
+
         SendWheelEvent(step);
         for (int i = 1; i < absStepCount; ++i)
         {
             waiter.Wait(waitInterval);
+
+            if (cancellationToken.IsCancellationRequested) return;
+
             SendWheelEvent(step);
         }
 
@@ -86,8 +97,8 @@ public sealed class MouseWheelAction : WaitableInputAction
         {
             if (!InputSimulator.MoveMouseWheel(clicks, IsHorizontal))
             {
-                System.Diagnostics.Debug.WriteLine("Failed to send mouse wheel event.");
-                throw new Win32Exception(System.Runtime.InteropServices.Marshal.GetLastPInvokeError());
+                Debug.WriteLine("Failed to send mouse wheel event.");
+                throw new Win32Exception();
             }
         }
     }

@@ -138,7 +138,7 @@ public sealed class Recorder
 
         if (!PInvoke.RegisterRawInputDevices(rid))
         {
-            throw new Win32Exception(System.Runtime.InteropServices.Marshal.GetLastPInvokeError());
+            throw new Win32Exception();
         }
 
         IsSubscribed = true;
@@ -166,7 +166,7 @@ public sealed class Recorder
 
         if (!PInvoke.RegisterRawInputDevices(inputDevices))
         {
-            throw new Win32Exception(System.Runtime.InteropServices.Marshal.GetLastPInvokeError());
+            throw new Win32Exception();
         }
 
         IsSubscribed = false;
