@@ -38,9 +38,10 @@ Download the zip from [the latest release page](https://github.com/cyberrex5/Act
 
 ### Development Requirements
 
- - [.NET 7.0.X SDK](https://dotnet.microsoft.com/en-us/download/dotnet/7.0) (should come with the visual studio .NET workload)
- - [Windows SDK 10.0.19041.0](https://developer.microsoft.com/en-us/windows/downloads/sdk-archive/) (should come with the visual studio .NET workload)
+ - [.NET 7.0.X SDK](https://dotnet.microsoft.com/en-us/download/dotnet/7.0)
+ - [Windows SDK 10.0.19041.0](https://developer.microsoft.com/en-us/windows/downloads/sdk-archive/)
  - [Windows App SDK 1.3](https://docs.microsoft.com/en-us/windows/apps/windows-app-sdk/downloads)
+ - [Build Tools for Visual Studio 2022](https://visualstudio.microsoft.com/downloads#build-tools-for-visual-studio-2022) (required to build PathWindows)
 
 ### Building/Compiling
 
