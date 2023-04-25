@@ -40,7 +40,7 @@ public sealed partial class HomePageViewModel : ObservableObject
         _player = player;
         _recorder = recorder;
 
-        _player.OnActionPlayed = actionListVM.UpdateSelectedAction;
+        _player.ActionPlayed += actionListVM.UpdateSelectedAction;
 
         _onIsPlayingChanged = () =>
         {
@@ -83,7 +83,7 @@ public sealed partial class HomePageViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanPlayActions))]
     private void PlayActions()
     {
-        if (!_player.TryPlayActions())
+        if (!_player.PlayActions())
         {
             _player.RefreshIsPlaying();
         }

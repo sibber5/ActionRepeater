@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using ActionRepeater.Core.Action;
+using ActionRepeater.Core.Helpers;
 using ActionRepeater.Core.Utilities;
 using ActionRepeater.Win32.Synch.Utilities;
 
@@ -13,6 +14,13 @@ namespace ActionRepeater.Core.Input;
 
 public sealed class Player
 {
+    /// <summary>
+    /// <code>
+    /// OnActionPlayed(InputAction? currentAction, int index)
+    /// </code>
+    /// </summary>
+    public event Action<InputAction?, int>? ActionPlayed;
+
     /// <summary>
     /// Note: This is usually invoked from a different thread than the main thread.
     /// </summary>
@@ -29,27 +37,18 @@ public sealed class Player
         }
     }
 
-    public Action<InputAction?, int>? OnActionPlayed;
-
     private CancellationTokenSource? _tokenSource;
 
 
     private IReadOnlyList<InputAction>? _actionsToPlay;
-
     private IReadOnlyList<MouseMovement>? _cursorPath;
 
-    private readonly Func<Task> _runAllActions;
-    private readonly Func<Task> _runInputActions;
-    private Func<Task>? _taskToRun;
+    private Func<Player, Task>? _runPlayActions;
 
-    private System.Action? _playCursorMovementRelative;
-    private System.Action? _playCursorMovementAbsolute;
-    private System.Action? _playCursorMovement;
-
-    private readonly System.Action _playInputActions;
+    private readonly Action<object?> _playInputActions;
+    private Action<object?>? _playCursorMovement;
 
     private readonly Action<Task> _cleanUp;
-
 
     private readonly CoreOptions _options;
 
@@ -67,21 +66,23 @@ public sealed class Player
         _actionsWaiter = actionsWaiter;
         _cursorMovementWaiter = cursorMovementWaiter;
 
-        _playInputActions = () =>
+        _playInputActions = static (state) =>
         {
-            ReadOnlySpan<InputAction> actionsSpan = ((ObservableCollectionEx<InputAction>)_actionsToPlay!).AsSpan();
+            var p = (Player)state!;
+
+            ReadOnlySpan<InputAction> actionsSpan = ((ObservableCollectionEx<InputAction>)p._actionsToPlay!).AsSpan();
 
             for (int i = 0; i < actionsSpan.Length; ++i)
             {
-                if (_tokenSource!.IsCancellationRequested) return;
+                if (p._tokenSource!.IsCancellationRequested) return;
 
                 InputAction action = actionsSpan[i];
 
-                OnActionPlayed?.Invoke(action, i);
+                p.ActionPlayed?.Invoke(action, i);
 
                 if (action is WaitableInputAction waitableAction)
                 {
-                    waitableAction.PlayWait(_actionsWaiter, _tokenSource.Token);
+                    waitableAction.PlayWait(p._actionsWaiter, p._tokenSource.Token);
                     continue;
                 }
 
@@ -93,22 +94,19 @@ public sealed class Player
         {
             Debug.WriteLine($"[{nameof(Player)}] Finished play task.");
 
-            OnActionPlayed?.Invoke(null, default);
+            ActionPlayed?.Invoke(null, default);
             IsPlaying = false;
 
             _tokenSource!.Dispose();
             _tokenSource = null;
             Debug.WriteLine($"[{nameof(Player)}] Disposed token source.");
         };
-
-        _runAllActions = () => Task.WhenAll(Task.Run(_playInputActions, _tokenSource!.Token), Task.Run(_playCursorMovement!, _tokenSource!.Token));
-        _runInputActions = () => Task.Run(_playInputActions, _tokenSource!.Token);
     }
 
     /// <returns>
     /// false if there are no actions to play or its already playing, otherwise true.
     /// </returns>
-    public bool TryPlayActions()
+    public bool PlayActions()
     {
         if (_actionCollection.Actions.Count == 0 && _actionCollection.CursorPathStart is null)
         {
@@ -130,12 +128,12 @@ public sealed class Player
             _ => null
         };
 
-        PlayActions(actions, cursorPath, _options.CursorMovementMode == CursorMovementMode.Relative, _options.PlayRepeatCount);
+        PlayActionsCore(actions, cursorPath, _options.CursorMovementMode == CursorMovementMode.Relative, _options.PlayRepeatCount);
 
         return true;
     }
 
-    private void PlayActions(IReadOnlyList<InputAction> actions, IReadOnlyList<MouseMovement>? cursorPath, bool isPathRelative, int repeatCount = 1)
+    private void PlayActionsCore(IReadOnlyList<InputAction> actions, IReadOnlyList<MouseMovement>? cursorPath, bool isPathRelative, int repeatCount = 1)
     {
         _tokenSource?.Dispose();
         _tokenSource = new CancellationTokenSource();
@@ -143,18 +141,24 @@ public sealed class Player
         _actionsToPlay = actions;
         _cursorPath = cursorPath;
 
-        SetCursorMovementFunction(isPathRelative);
+        _playCursorMovement = GetCursorMovementFunction(isPathRelative);
 
-        _taskToRun = _actionCollection.CursorPathStart is not null && cursorPath?.Count > 0
-            ? _runAllActions
-            : _runInputActions;
+        Func<Player, Task> runInputActions = static (p) => TaskHelper.Run(p._playInputActions, p, p._tokenSource!.Token);
+        Func<Player, Task> runAllActions = static (p) => Task.WhenAll(
+            TaskHelper.Run(p._playInputActions, p, p._tokenSource!.Token),
+            TaskHelper.Run(p._playCursorMovement!, p, p._tokenSource!.Token)
+        );
+
+        _runPlayActions = _actionCollection.CursorPathStart is not null && _cursorPath?.Count > 0
+            ? runAllActions
+            : runInputActions;
 
         IsPlaying = true;
         Debug.WriteLine($"[{nameof(Player)}] Started play task.");
 
         if (repeatCount == 1)
         {
-            _taskToRun().ContinueWith(_cleanUp);
+            _runPlayActions(this).ContinueWith(_cleanUp);
         }
         else
         {
@@ -162,47 +166,14 @@ public sealed class Player
             {
                 if (repeatCount < 0) while (!_tokenSource.IsCancellationRequested)
                 {
-                    await _taskToRun();
+                    await _runPlayActions(this);
                 }
                 else for (int i = 0; i < repeatCount && !_tokenSource.IsCancellationRequested; ++i)
                 {
-                    await _taskToRun();
+                    await _runPlayActions(this);
                 }
             }, _tokenSource.Token).ContinueWith(_cleanUp);
         }
-    }
-
-    private void SetCursorMovementFunction(bool isPathRelative)
-    {
-        _playCursorMovement = isPathRelative
-            ? _playCursorMovementRelative ??= () =>
-            {
-                if (_tokenSource!.IsCancellationRequested) return;
-
-                ReadOnlySpan<MouseMovement> cursorPathSpan = CollectionsMarshal.AsSpan((List<MouseMovement>)_cursorPath!);
-
-                InputSimulator.MoveMouse(_actionCollection.CursorPathStart!.Value.Delta, relativePos: false);
-
-                foreach (MouseMovement mouseMovement in cursorPathSpan)
-                {
-                    if (_tokenSource!.IsCancellationRequested) return;
-
-                    _cursorMovementWaiter.WaitNS(mouseMovement.DelayDurationNS);
-                    InputSimulator.MoveMouse(mouseMovement.Delta, relativePos: true);
-                }
-            }
-            : _playCursorMovementAbsolute ??= () =>
-            {
-                ReadOnlySpan<MouseMovement> cursorPathSpan = CollectionsMarshal.AsSpan((List<MouseMovement>)_cursorPath!);
-
-                foreach (MouseMovement mouseMovement in cursorPathSpan)
-                {
-                    if (_tokenSource!.IsCancellationRequested) return;
-
-                    _cursorMovementWaiter.WaitNS(mouseMovement.DelayDurationNS);
-                    InputSimulator.MoveMouse(mouseMovement.Delta, relativePos: false);
-                }
-            };
     }
 
     public void Cancel()
@@ -216,4 +187,39 @@ public sealed class Player
     }
 
     public void RefreshIsPlaying() => IsPlayingChanged?.Invoke(this, _isPlaying);
+
+    private static Action<object?> GetCursorMovementFunction(bool isPathRelative) => isPathRelative
+    ? static (state) =>
+    {
+        var p = (Player)state!;
+
+        if (p._tokenSource!.IsCancellationRequested) return;
+
+        ReadOnlySpan<MouseMovement> cursorPathSpan = CollectionsMarshal.AsSpan((List<MouseMovement>)p._cursorPath!);
+
+        InputSimulator.MoveMouse(p._actionCollection.CursorPathStart!.Value.Delta, relativePos: false);
+
+        foreach (MouseMovement mouseMovement in cursorPathSpan)
+        {
+            if (p._tokenSource!.IsCancellationRequested) return;
+
+            p._cursorMovementWaiter.WaitNS(mouseMovement.DelayDurationNS);
+            InputSimulator.MoveMouse(mouseMovement.Delta, relativePos: true);
+        }
+    }
+    : static (state) =>
+    {
+        var p = (Player)state!;
+
+        ReadOnlySpan<MouseMovement> cursorPathSpan = CollectionsMarshal.AsSpan((List<MouseMovement>)p._cursorPath!);
+
+        foreach (MouseMovement mouseMovement in cursorPathSpan)
+        {
+            if (p._tokenSource!.IsCancellationRequested) return;
+
+            p._cursorMovementWaiter.WaitNS(mouseMovement.DelayDurationNS);
+            InputSimulator.MoveMouse(mouseMovement.Delta, relativePos: false);
+        }
+    };
+
 }
