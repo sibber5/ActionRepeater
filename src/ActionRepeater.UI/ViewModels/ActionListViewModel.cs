@@ -231,7 +231,7 @@ public sealed partial class ActionListViewModel : ObservableObject
     [RelayCommand]
     private async Task RemoveMultipleActions()
     {
-        Debug.Assert(SelectedRanges is not null);
+        if (SelectedRanges is null || SelectedRanges.Count < 1) return;
 
         // in case this is called when there is only one action selected, e.g. when pressing the keyboard shortcut
         if (SelectedRanges.Count == 1 && (SelectedRanges[0].FirstIndex == SelectedRanges[0].LastIndex))
