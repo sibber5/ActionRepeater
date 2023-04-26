@@ -117,6 +117,7 @@
             </MenuBarItem>
 
         </MenuBar>
+
         <!-- 1p height line to cover some random gray line in the app in light mode. -->
         <!-- i have no clue where it came from ive tried setting the background and border brush on everything in this view -->
         <Rectangle x:Name="_rectangle" Margin="0,30,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="1" Fill="{ThemeResource AppBackgroundThemeBrush}"/>
