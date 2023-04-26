@@ -39,21 +39,17 @@
                 <NavigationViewItem x:Name="_navViewOffsetItem" Width="35" IsEnabled="False"/>
                 <!-- binding the tag suddenly stopped working for some fucking reason, so now its hardcoded -->
                 <NavigationViewItem Tag="h">
-                    <NavigationViewItem.Content>
-                        <StackPanel Orientation="Horizontal">
-                       
-                        <SymbolIcon Symbol="Home"/>
-                            <TextBlock Text="Home" Style="{StaticResource MenuItemDescriptorTextBlock}"/>
-                        </StackPanel>
-                    </NavigationViewItem.Content>
+                    <StackPanel Orientation="Horizontal" Spacing="5">
+                        <FontIcon Glyph="&#xE80F;" FontSize="16"/>
+                        <TextBlock Text="Home"/>
+                    </StackPanel>
                 </NavigationViewItem>
+
                 <NavigationViewItem Tag="o">
-                    <NavigationViewItem.Content>
-                        <StackPanel Orientation="Horizontal">
-                            <SymbolIcon Symbol="Setting"/>
-                            <TextBlock Text="Settings" Style="{StaticResource MenuItemDescriptorTextBlock}"/>
-                        </StackPanel>
-                    </NavigationViewItem.Content>
+                    <StackPanel Orientation="Horizontal" Spacing="5">
+                        <FontIcon Glyph="&#xE713;" FontSize="16"/>
+                        <TextBlock Text="Settings"/>
+                    </StackPanel>
                 </NavigationViewItem>
             </NavigationView.MenuItems>
 
