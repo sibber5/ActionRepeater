@@ -26,12 +26,7 @@
                             <SolidColorBrush x:Key="TopNavigationViewItemForegroundPointerOver" Color="White" Opacity="0.8"/>
                         </ResourceDictionary>
                     </ResourceDictionary.ThemeDictionaries>
-                    <Style x:Name="MenuItemDescriptorTextBlock" TargetType="TextBlock" BasedOn="{StaticResource BaseTextBlockStyle}">
-                        <Setter Property="VerticalAlignment" Value="Center"/>
-                        <Setter Property="Margin" Value="5 0 0 0"/>
-                    </Style>
                 </ResourceDictionary>
-               
             </NavigationView.Resources>
             
             <NavigationView.MenuItems>
