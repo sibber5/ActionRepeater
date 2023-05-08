@@ -36,7 +36,7 @@
 
                 <StackPanel Padding="5,0,5,0"
                             ToolTipService.Placement="Bottom"
-                            ToolTipService.ToolTip="Controls how often the input sequence is repeated.&#x0d;&#x0a;A negative number causes the inputs to repeat indefinitely.">
+                            ToolTipService.ToolTip="Specifies the number of repetitions of the action sequence.&#x0d;&#x0a;A negative number causes the inputs to repeat indefinitely.">
                     <TextBlock Text="Repetitions"
                                FontSize="15"
                                HorizontalAlignment="Center"
