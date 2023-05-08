@@ -33,8 +33,19 @@
                 <!-- space for the file dropdown button -->
                 <NavigationViewItem x:Name="_navViewOffsetItem" Width="35" IsEnabled="False"/>
                 <!-- binding the tag suddenly stopped working for some fucking reason, so now its hardcoded -->
-                <NavigationViewItem Tag="h" Content="Home"/>
-                <NavigationViewItem Tag="o" Content="Options"/>
+                <NavigationViewItem Tag="h">
+                    <StackPanel Orientation="Horizontal" Spacing="5">
+                        <FontIcon Glyph="&#xE80F;" FontSize="16"/>
+                        <TextBlock Text="Home"/>
+                    </StackPanel>
+                </NavigationViewItem>
+
+                <NavigationViewItem Tag="o">
+                    <StackPanel Orientation="Horizontal" Spacing="5">
+                        <FontIcon Glyph="&#xE713;" FontSize="16"/>
+                        <TextBlock Text="Settings"/>
+                    </StackPanel>
+                </NavigationViewItem>
             </NavigationView.MenuItems>
 
             <Grid Padding="0,10,0,0" Background="{ThemeResource AppBackgroundThemeBrush}">
@@ -77,11 +88,11 @@
             </MenuBar.Resources>
 
             <!-- binding the commands doesnt work for some reason, so theyre set in the constructor -->
-            
+
             <MenuBarItem Title="File">
                 <MenuFlyoutItem x:Name="_openMenuItem" Text="Open">
                     <MenuFlyoutItem.Icon>
-                        <FontIcon Glyph="&#xE8E5;"/>
+                        <SymbolIcon Symbol="OpenFile"/>
                     </MenuFlyoutItem.Icon>
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Modifiers="Control" Key="O"/>
@@ -90,7 +101,7 @@
 
                 <MenuFlyoutItem x:Name="_saveMenuItem" Text="Save">
                     <MenuFlyoutItem.Icon>
-                        <FontIcon Glyph="&#xE792;"/>
+                        <SymbolIcon Symbol="Save"/>
                     </MenuFlyoutItem.Icon>
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Modifiers="Control" Key="S"/>
