@@ -11,6 +11,18 @@ namespace ActionRepeater.UI.ViewModels;
 
 public sealed class OptionsPageViewModel : ObservableObject
 {
+    public int MaxClickInterval
+    {
+        get => _options.Core.MaxClickInterval;
+        set => _options.Core.MaxClickInterval = value;
+    }
+
+    public bool SendKeyAutoRepeat
+    {
+        get => _options.Core.SendKeyAutoRepeat;
+        set => _options.Core.SendKeyAutoRepeat = value;
+    }
+
     public int CursorMovementMode
     {
         get => (int)_options.Core.CursorMovementMode;
@@ -25,16 +37,10 @@ public sealed class OptionsPageViewModel : ObservableObject
         set => _options.Core.UseCursorPosOnClicks = value;
     }
 
-    public int MaxClickInterval
+    public bool SendAbsoluteCursorCoords
     {
-        get => _options.Core.MaxClickInterval;
-        set => _options.Core.MaxClickInterval = value;
-    }
-
-    public bool SendKeyAutoRepeat
-    {
-        get => _options.Core.SendKeyAutoRepeat;
-        set => _options.Core.SendKeyAutoRepeat = value;
+        get => _options.Core.SendAbsoluteCursorCoords;
+        set => _options.Core.SendAbsoluteCursorCoords = value;
     }
 
     public int Theme

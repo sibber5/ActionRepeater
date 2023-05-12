@@ -90,6 +90,13 @@
                 </ctrls:OptionItem.OptionContent>
             </ctrls:OptionItem>
 
+            <ctrls:OptionItem Text="Send absolute cursor coordinates ⓘ" IsEnabled="{x:Bind _vm.IsCursorMovementMode(core:CursorMovementMode.Absolute), Mode=OneWay}"
+                              ToolTipService.ToolTip="It is recommended to enable this option enabled.&#x0d;&#x0a;&#x0d;&#x0a;Relative mouse motion is subject to the effects of the mouse speed and the two-mouse threshold values.&#x0d;&#x0a;It is possible for windows to multiply relative mouse movement along the x or y axis by up to four times.&#x0d;&#x0a;&#x0d;&#x0a;If this option is enabled, absolute mouse movement will be sent instead of relative, to avoid this issue.&#x0d;&#x0a;&#x0d;&#x0a;This option only applies to absolute cursor movement mode.">
+                <ctrls:OptionItem.OptionContent>
+                    <ToggleSwitch IsOn="{x:Bind _vm.SendAbsoluteCursorCoords, Mode=TwoWay}" Style="{StaticResource LeftSideTextToggleSwitch}"/>
+                </ctrls:OptionItem.OptionContent>
+            </ctrls:OptionItem>
+
             <ctrls:OptionsSeperator/>
 
             <ctrls:OptionItem Text="Theme">

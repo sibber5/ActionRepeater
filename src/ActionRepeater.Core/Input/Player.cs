@@ -213,12 +213,14 @@ public sealed class Player
 
         ReadOnlySpan<MouseMovement> cursorPathSpan = CollectionsMarshal.AsSpan((List<MouseMovement>)p._cursorPath!);
 
+        bool convertToAbsolute = p._options.SendAbsoluteCursorCoords;
+
         foreach (MouseMovement mouseMovement in cursorPathSpan)
         {
             if (p._tokenSource!.IsCancellationRequested) return;
 
             p._cursorMovementWaiter.WaitNS(mouseMovement.DelayDurationNS);
-            InputSimulator.MoveMouse(mouseMovement.Delta, relativePos: false);
+            InputSimulator.MoveMouse(mouseMovement.Delta, relativePos: false, convertToAbsolute: convertToAbsolute);
         }
     };
 

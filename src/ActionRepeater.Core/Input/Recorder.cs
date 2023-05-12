@@ -93,7 +93,7 @@ public sealed class Recorder
                 Debug.Assert(_actionCollection.CursorPath.Count == 0, $"{nameof(_actionCollection.CursorPath)} is not empty.");
 
                 _actionCollection.CursorPathStart = new(PInvoke.Helpers.GetCursorPos(), 0);
-                Debug.WriteLine($"set cursor start path pos to: {_actionCollection.CursorPathStart.Value.Delta}");
+                Debug.WriteLine($"[{nameof(Recorder)}] set cursor start path pos to: {_actionCollection.CursorPathStart.Value.Delta}");
             }
 
             _mouseStopwatch.Restart();
@@ -109,7 +109,11 @@ public sealed class Recorder
 
         UnregisterRawInput();
 
-        if (_actionCollection.CursorPath.Count == 0) _actionCollection.CursorPathStart = null;
+        if (_actionCollection.CursorPath.Count == 0)
+        {
+            _actionCollection.CursorPathStart = null;
+            Debug.WriteLine($"[{nameof(Recorder)}] set cursor start path pos to: null");
+        }
 
         IsRecording = false;
         IsRecordingChanged?.Invoke(this, false);
@@ -177,7 +181,7 @@ public sealed class Recorder
         var inputCode = unchecked(e.Message.wParam & 0xff);
         if (!PInvoke.GetRawInputData(e.Message.lParam, out RAWINPUT inputData))
         {
-            Debug.WriteLine("ERROR RETRIEVING RAW INPUT");
+            Debug.WriteLine($"[{nameof(Recorder)}] ERROR RETRIEVING RAW INPUT");
         }
 
         switch (inputData.header.dwType)

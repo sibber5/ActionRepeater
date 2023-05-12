@@ -59,6 +59,13 @@ public sealed class CoreOptions : INotifyPropertyChanged
         set => SetProperty(ref _useCursorPosOnClicks, value);
     }
 
+    private bool _sendAbsoluteCursorCoords = true;
+    public bool SendAbsoluteCursorCoords
+    {
+        get => _sendAbsoluteCursorCoords;
+        set => SetProperty(ref _sendAbsoluteCursorCoords, value);
+    }
+
     private int _playRepeatCount = 1;
     public int PlayRepeatCount
     {

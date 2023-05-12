@@ -83,30 +83,47 @@ public static class InputSimulator
     /// <para><b>(Will be ignored if <paramref name="relativePos"/> is <see langword="true"/>)</b> Use normalized absolute coordinates between <c>0</c> (<see cref="ushort.MinValue"/>) and <c>65,535</c> (<see cref="ushort.MaxValue"/>).</para>
     /// <para><see href="https://docs.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-mouseinput#remarks">Read more on docs.microsoft.com</see>.</para>
     /// </param>
+    /// <param name="convertToAbsolute">
+    /// <para>
+    /// Convert <paramref name="newPos"/> to absolute coordinates if <paramref name="relativePos"/> is <see langword="false"/>,
+    /// in order to avoid windows messing with the movement (<see href="https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-mouseinput#remarks">click for more info - last 2 paragraphs</see>).
+    /// </para>
+    /// <para>
+    /// Will be ignored if <paramref name="convertToAbsolute"/> is <see langword="true"/>.
+    /// </para>
+    /// </param>
     /// <returns>
     /// <see langword="true"/> if the input was successfully sent, otherwise <see langword="false"/>.
     /// </returns>
-    public static bool MoveMouse(POINT newPos, bool relativePos = false, bool absoluteCoords = false)
+    public static bool MoveMouse(POINT newPos, bool relativePos = false, bool absoluteCoords = false, bool convertToAbsolute = true)
     {
         MOUSEEVENTF flags = MOUSEEVENTF.MOVE;
 
-        if (!relativePos)
+        if (relativePos) return SendMouseEvent(flags, 0, newPos.x, newPos.y);
+        
+        if (absoluteCoords)
         {
-            flags |= MOUSEEVENTF.ABSOLUTE | MOUSEEVENTF.VIRTUALDESK;
-
-            if (!absoluteCoords)
-            {
-                POINT absolutePos = ScreenCoordsConverter.GetAbsoluteCoordinateFromPosRelToPrimary(newPos);
-                newPos = absolutePos;
-            }
+            flags = MOUSEEVENTF.MOVE | MOUSEEVENTF.ABSOLUTE | MOUSEEVENTF.VIRTUALDESK;
+            return SendMouseEvent(flags, 0, newPos.x, newPos.y);
         }
 
-        return SendMouseEvent(
-            eventFlags: flags,
-            data: 0,
-            dx: newPos.x,
-            dy: newPos.y
-        );
+        if (convertToAbsolute)
+        {
+            flags = MOUSEEVENTF.MOVE | MOUSEEVENTF.ABSOLUTE | MOUSEEVENTF.VIRTUALDESK;
+
+            // Convert to absolute coordinates because because "Relative mouse motion is subject to the effects of the mouse speed and the two-mouse threshold values."
+            // see last 2 paragraphs: https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-mouseinput#remarks
+            POINT absolutePos = ScreenCoordsConverter.GetAbsoluteCoordinateFromPosRelToPrimary(newPos);
+            newPos = absolutePos;
+        }
+        else
+        {
+            POINT curPos = GetCursorPos();
+            newPos.x -= curPos.x;
+            newPos.y -= curPos.y;
+        }
+
+        return SendMouseEvent(flags, 0, newPos.x, newPos.y);
     }
 
     /// <summary>
