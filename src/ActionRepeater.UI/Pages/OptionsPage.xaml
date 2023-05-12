@@ -19,8 +19,6 @@
 
             <StackPanel.Resources>
                 <x:Double x:Key="OptionControlWidth">160</x:Double>
-                <!-- for some reason toggle switches have a margin on the left?? so this is to remove that. -->
-                <Thickness x:Key="ToggleSwitchNegativeMargin">0,0,-82,0</Thickness>
             </StackPanel.Resources>
 
             <ctrls:OptionItem Text="Max click interval (ms)"
@@ -40,7 +38,7 @@
 
             <ctrls:OptionItem Text="Simulate keystroke auto-repeat">
                 <ctrls:OptionItem.OptionContent>
-                    <ToggleSwitch IsOn="{x:Bind _vm.SendKeyAutoRepeat, Mode=TwoWay}" Margin="{StaticResource ToggleSwitchNegativeMargin}" Style="{StaticResource LeftSideTextToggleSwitch}"/>
+                    <ToggleSwitch IsOn="{x:Bind _vm.SendKeyAutoRepeat, Mode=TwoWay}" Style="{StaticResource LeftSideTextToggleSwitch}"/>
                 </ctrls:OptionItem.OptionContent>
             </ctrls:OptionItem>
 
@@ -88,7 +86,7 @@
 
             <ctrls:OptionItem Text="Set cursor position on clicks" IsEnabled="{x:Bind _vm.IsCursorMovementMode(core:CursorMovementMode.None), Mode=OneWay}">
                 <ctrls:OptionItem.OptionContent>
-                    <ToggleSwitch IsOn="{x:Bind _vm.UseCursorPosOnClicks, Mode=TwoWay}" Margin="{StaticResource ToggleSwitchNegativeMargin}" Style="{StaticResource LeftSideTextToggleSwitch}"/>
+                    <ToggleSwitch IsOn="{x:Bind _vm.UseCursorPosOnClicks, Mode=TwoWay}" Style="{StaticResource LeftSideTextToggleSwitch}"/>
                 </ctrls:OptionItem.OptionContent>
             </ctrls:OptionItem>
 
