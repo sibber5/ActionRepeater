@@ -1,7 +1,9 @@
 ﻿using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Markup;
 
 namespace ActionRepeater.UI.Controls;
 
+[ContentProperty(Name = nameof(Content))]
 public sealed partial class OptionItem : UserControl
 {
     public string Text
@@ -10,7 +12,7 @@ public sealed partial class OptionItem : UserControl
         set => _textBlock.Text = value;
     }
 
-    public object OptionContent
+    public new object Content
     {
         get => _content.Content;
         set => _content.Content = value;

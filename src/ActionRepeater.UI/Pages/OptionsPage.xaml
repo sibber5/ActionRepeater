@@ -6,6 +6,8 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ctrls="using:ActionRepeater.UI.Controls"
     xmlns:core="using:ActionRepeater.Core"
+    xmlns:vms="using:ActionRepeater.UI.ViewModels"
+    d:DataContext="{d:DesignInstance Type=vms:OptionsPageViewModel}"
     mc:Ignorable="d"
     Background="{ThemeResource AppBackgroundThemeBrush}">
 
@@ -23,8 +25,7 @@
 
             <ctrls:OptionItem Text="Max click interval (ms)"
                               ToolTipService.ToolTip="The maximum time, in milliseconds, between pressing down a key/mouse button and releasing it for the action to be counted as a press/click (instead of button down and up actinos)">
-                <ctrls:OptionItem.OptionContent>
-                    <NumberBox x:Name="_clickIntervalNumbox"
+                <NumberBox x:Name="_clickIntervalNumbox"
                                MinWidth="{StaticResource OptionControlWidth}"
                                SmallChange="10"
                                LargeChange="100"
@@ -33,93 +34,80 @@
                                SpinButtonPlacementMode="Inline"
                                ValidationMode="InvalidInputOverwritten"
                                Value="{x:Bind _vm.MaxClickInterval, Mode=TwoWay}"/>
-                </ctrls:OptionItem.OptionContent>
             </ctrls:OptionItem>
 
             <ctrls:OptionItem Text="Simulate keystroke auto-repeat">
-                <ctrls:OptionItem.OptionContent>
-                    <ToggleSwitch IsOn="{x:Bind _vm.SendKeyAutoRepeat, Mode=TwoWay}" Style="{StaticResource LeftSideTextToggleSwitch}"/>
-                </ctrls:OptionItem.OptionContent>
+                <ToggleSwitch IsOn="{x:Bind _vm.SendKeyAutoRepeat, Mode=TwoWay}" Style="{StaticResource LeftSideTextToggleSwitch}"/>
             </ctrls:OptionItem>
 
             <ctrls:OptionsSeperator/>
 
             <ctrls:OptionItem Text="Cursor movement">
-                <ctrls:OptionItem.OptionContent>
-                    <StackPanel Orientation="Horizontal">
+                <StackPanel Orientation="Horizontal">
 
-                        <TeachingTip x:Name="_mouseAccelerationWarningPopup"
+                    <TeachingTip x:Name="_mouseAccelerationWarningPopup"
                                      Target="{x:Bind _mouseAccelerationWarningButton}"
                                      Title="Mouse acceleration (enhance pointer precision) is enabled"
                                      Subtitle="Using absolute movement will not apply acceleration, cursor movement may be different than what was actually recorded."/>
 
-                        <Button x:Name="_mouseAccelerationWarningButton"
+                    <Button x:Name="_mouseAccelerationWarningButton"
                                 Visibility="{x:Bind _vm.DisplayAccelerationWarning, Mode=OneWay}"
                                 Click="MouseAccelerationWarning_Click"
                                 Margin="0,0,5,0"
                                 Background="Transparent"
                                 BorderBrush="Transparent"
                                 Style="{StaticResource DisabledButtonSettableBg}">
-                            <Button.Resources>
-                                <ResourceDictionary>
-                                    <ResourceDictionary.ThemeDictionaries>
-                                        <!-- setting a global theme resource doesnt work for some reason. nor does a static resource for this color.  -->
-                                        <ResourceDictionary x:Key="Light">
-                                            <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#fafafa"/>
-                                        </ResourceDictionary>
-                                    </ResourceDictionary.ThemeDictionaries>
-                                </ResourceDictionary>
-                            </Button.Resources>
-                            
-                            <FontIcon Glyph="&#xE7BA;"
+                        <Button.Resources>
+                            <ResourceDictionary>
+                                <ResourceDictionary.ThemeDictionaries>
+                                    <!-- setting a global theme resource doesnt work for some reason. nor does a static resource for this color.  -->
+                                    <ResourceDictionary x:Key="Light">
+                                        <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#fafafa"/>
+                                    </ResourceDictionary>
+                                </ResourceDictionary.ThemeDictionaries>
+                            </ResourceDictionary>
+                        </Button.Resources>
+
+                        <FontIcon Glyph="&#xE7BA;"
                                       FontFamily="{StaticResource SymbolThemeFontFamily}"
                                       Foreground="Orange"/>
-                        </Button>
-                        
-                        <ComboBox HorizontalAlignment="Right"
+                    </Button>
+
+                    <ComboBox HorizontalAlignment="Right"
                               Width="{StaticResource OptionControlWidth}"
                               ItemsSource="{x:Bind _vm.CursorMovementCBItems}"
                               SelectedIndex="{x:Bind _vm.CursorMovementMode, Mode=TwoWay}"/>
-                    </StackPanel>
-                </ctrls:OptionItem.OptionContent>
+                </StackPanel>
             </ctrls:OptionItem>
 
             <ctrls:OptionItem Text="Set cursor position on clicks" IsEnabled="{x:Bind _vm.IsCursorMovementMode(core:CursorMovementMode.None), Mode=OneWay}">
-                <ctrls:OptionItem.OptionContent>
-                    <ToggleSwitch IsOn="{x:Bind _vm.UseCursorPosOnClicks, Mode=TwoWay}" Style="{StaticResource LeftSideTextToggleSwitch}"/>
-                </ctrls:OptionItem.OptionContent>
+                <ToggleSwitch IsOn="{x:Bind _vm.UseCursorPosOnClicks, Mode=TwoWay}" Style="{StaticResource LeftSideTextToggleSwitch}"/>
             </ctrls:OptionItem>
 
             <ctrls:OptionItem Text="Send absolute cursor coordinates ⓘ" IsEnabled="{x:Bind _vm.IsCursorMovementMode(core:CursorMovementMode.Absolute), Mode=OneWay}"
                               ToolTipService.ToolTip="It is recommended to enable this option enabled.&#x0d;&#x0a;&#x0d;&#x0a;Relative mouse motion is subject to the effects of the mouse speed and the two-mouse threshold values.&#x0d;&#x0a;It is possible for windows to multiply relative mouse movement along the x or y axis by up to four times.&#x0d;&#x0a;&#x0d;&#x0a;If this option is enabled, absolute mouse movement will be sent instead of relative, to avoid this issue.&#x0d;&#x0a;&#x0d;&#x0a;This option only applies to absolute cursor movement mode.">
-                <ctrls:OptionItem.OptionContent>
-                    <ToggleSwitch IsOn="{x:Bind _vm.SendAbsoluteCursorCoords, Mode=TwoWay}" Style="{StaticResource LeftSideTextToggleSwitch}"/>
-                </ctrls:OptionItem.OptionContent>
+                <ToggleSwitch IsOn="{x:Bind _vm.SendAbsoluteCursorCoords, Mode=TwoWay}" Style="{StaticResource LeftSideTextToggleSwitch}"/>
             </ctrls:OptionItem>
 
             <ctrls:OptionsSeperator/>
 
             <ctrls:OptionItem Text="Theme">
-                <ctrls:OptionItem.OptionContent>
-                    <ComboBox HorizontalAlignment="Right"
+                <ComboBox HorizontalAlignment="Right"
                               Width="{StaticResource OptionControlWidth}"
                               ItemsSource="{x:Bind _vm.ThemeCBItems}"
                               SelectedIndex="{x:Bind _vm.Theme, Mode=TwoWay}"/>
-                </ctrls:OptionItem.OptionContent>
             </ctrls:OptionItem>
 
             <ctrls:OptionsSeperator/>
 
             <ctrls:OptionItem Text="Options file location">
-                <ctrls:OptionItem.OptionContent>
-                    <ComboBox HorizontalAlignment="Right"
+                <ComboBox HorizontalAlignment="Right"
                               Width="{StaticResource OptionControlWidth}"
                               SelectedIndex="{x:Bind _vm.OptionsFileLocation, Mode=TwoWay}">
-                        <x:String>Don't Save</x:String>
-                        <x:String>AppData</x:String>
-                        <x:String>App Folder</x:String>
-                    </ComboBox>
-                </ctrls:OptionItem.OptionContent>
+                    <x:String>Don't Save</x:String>
+                    <x:String>AppData</x:String>
+                    <x:String>App Folder</x:String>
+                </ComboBox>
             </ctrls:OptionItem>
 
         </StackPanel>

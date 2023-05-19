@@ -18,6 +18,13 @@
                     <ResourceDictionary x:Key="Light">
                         <SolidColorBrush x:Key="ToggleButtonBackgroundPointerOver" Color="#fafafa"/>
                     </ResourceDictionary>
+                    <ResourceDictionary x:Key="Dark">
+                        <!-- White foreground looks clearer on red background (which is the accent color) -->
+                        <SolidColorBrush x:Key="ToggleButtonForegroundChecked" Color="White"/>
+                        <SolidColorBrush x:Key="ToggleButtonForegroundCheckedPointerOver" Color="White"/>
+                        <SolidColorBrush x:Key="ToggleButtonForegroundCheckedPressed" Color="White"/>
+                        <SolidColorBrush x:Key="ToggleButtonForegroundCheckedDisabled" Color="White"/>
+                    </ResourceDictionary>
                 </ResourceDictionary.ThemeDictionaries>
             </ResourceDictionary>
         </ToggleButton.Resources>
