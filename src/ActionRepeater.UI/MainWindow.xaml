@@ -28,10 +28,10 @@
                     </ResourceDictionary.ThemeDictionaries>
                 </ResourceDictionary>
             </NavigationView.Resources>
-            
+
             <NavigationView.MenuItems>
                 <!-- space for the file dropdown button -->
-                <NavigationViewItem x:Name="_navViewOffsetItem" Width="35" IsEnabled="False"/>
+                <NavigationViewItem x:Name="_navViewOffsetItem" Width="43" IsEnabled="False"/>
                 <!-- binding the tag suddenly stopped working for some fucking reason, so now its hardcoded -->
                 <NavigationViewItem Tag="h">
                     <StackPanel Orientation="Horizontal" Spacing="5">

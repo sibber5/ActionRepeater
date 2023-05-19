@@ -1504,4 +1504,9 @@
         </Setter>
     </Style>
 
+    <!-- Fixes gap in transition between nav view items -->
+    <Style TargetType="NavigationViewItem">
+        <Setter Property="Margin" Value="-4"/>
+    </Style>
+
 </ResourceDictionary>
