@@ -69,7 +69,7 @@ public sealed class TextTypeAction : WaitableInputAction
         {
             if (cancellationToken.IsCancellationRequested) return;
 
-            var (shift, ctrl, alt, key) = GetVirtualKeys(c);
+            var (shift, ctrl, alt, key) = GetKeysForChar(c);
 
             if (shift) InputSimulator.SendKeyDown(VirtualKey.SHIFT);
             if (ctrl) InputSimulator.SendKeyDown(VirtualKey.CONTROL);
@@ -85,12 +85,13 @@ public sealed class TextTypeAction : WaitableInputAction
         }
     }
 
-    private static (bool shift, bool ctrl, bool alt, VirtualKey key) GetVirtualKeys(char c)
+    private static (bool shift, bool ctrl, bool alt, VirtualKey key) GetKeysForChar(char c)
     {
-        short vk = PInvoke.VkKeyScan(c);
+        // TODO: handle chars from a layout that is not installed. also show an error message for unhandled exceptions in general.
+        short result = PInvoke.Helpers.VkKeyScanAllSystemLayouts(c);
 
-        sbyte low = (sbyte)(vk & 0xFF);
-        sbyte high = (sbyte)((vk >> 8) & 0xFF);
+        sbyte low = (sbyte)(result & 0xFF);
+        sbyte high = (sbyte)((result >> 8) & 0xFF);
 
         if (low == -1 && high == -1) throw new InvalidOperationException("Character could not be translated.");
 

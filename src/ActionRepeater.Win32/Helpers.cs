@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Runtime;
 using System.Runtime.InteropServices;
 using ActionRepeater.Win32.Input;
 
@@ -78,6 +79,58 @@ public static partial class PInvoke
             int isEnabled = enabled ? 1 : 0;
             HResult hr = DwmSetWindowAttribute(hWnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &isEnabled, sizeof(int));
             if (hr != HResult.S_OK) throw new COMException(hr.ToString(), (int)hr);
+        }
+
+        public static unsafe int GetKeyboardLayoutListLength()
+        {
+            int length = PInvoke.GetKeyboardLayoutList(0, null);
+            if (length == 0) throw new Win32Exception();
+            return length;
+        }
+
+        public static unsafe void GetKeyboardLayoutList(Span<nint> buffer)
+        {
+            int retLength = -1;
+            fixed (nint* pBuffer = buffer)
+            {
+                retLength = PInvoke.GetKeyboardLayoutList(buffer.Length, pBuffer);
+            }
+
+            if (retLength == 0 || retLength != buffer.Length) throw new Win32Exception();
+        }
+
+        /// <summary>
+        /// Translates a character to the corresponding virtual-key code and shift state. The function translates the character by trying all installed input locale identifiers, starting with the current one.
+        /// </summary>
+        /// <returns>Same as <see cref="PInvoke.VkKeyScanEx(char, nint)"/>.</returns>
+        public static short VkKeyScanAllSystemLayouts(char ch)
+        {
+            Span<nint> layouts = stackalloc nint[GetKeyboardLayoutListLength()];
+            GetKeyboardLayoutList(layouts);
+
+            nint currentLayout = PInvoke.GetKeyboardLayout(0);
+            short result;
+
+            result = PInvoke.VkKeyScanEx(ch, currentLayout);
+            if (DidTranslationSucceed(result)) return result;
+
+            foreach (var layout in layouts)
+            {
+                if (layout == currentLayout) continue;
+
+                result = PInvoke.VkKeyScanEx(ch, layout);
+                if (DidTranslationSucceed(result)) return result;
+            }
+
+            return -1;
+
+            static bool DidTranslationSucceed(short translationResult)
+            {
+                sbyte low = (sbyte)(translationResult & 0xFF);
+                sbyte high = (sbyte)((translationResult >> 8) & 0xFF);
+
+                return low != -1 || high != -1;
+            }
         }
     }
 }

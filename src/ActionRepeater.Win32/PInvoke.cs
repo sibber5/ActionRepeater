@@ -209,8 +209,22 @@ public static partial class PInvoke
     [return: MarshalAs(UnmanagedType.Bool)]
     public static partial bool CloseHandle(nint hObject);
 
-    /// <summary>Translates a character to the corresponding virtual-key code and shift state for the current keyboard.</summary>
-    [LibraryImport("USER32.dll", EntryPoint = "VkKeyScanW", StringMarshalling = StringMarshalling.Utf16)]
+    /// <summary>Translates a character to the corresponding virtual-key code and shift state. The function translates the character using the input language and physical keyboard layout identified by the input locale identifier.</summary>
+    [LibraryImport("USER32.dll", EntryPoint = "VkKeyScanExW", StringMarshalling = StringMarshalling.Utf16)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-    public static partial short VkKeyScan(char ch);
+    public static partial short VkKeyScanEx(char ch, nint dwhkl);
+
+    /// <summary>Retrieves the active input locale identifier (formerly called the keyboard layout).</summary>
+    /// <param name="idThread">The identifier of the thread to query, or 0 for the current thread.</param>
+    [LibraryImport("USER32.dll")]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+    public static partial nint GetKeyboardLayout(uint idThread);
+
+    /// <summary>Retrieves the input locale identifiers (formerly called keyboard layout handles) corresponding to the current set of input locales in the system. The function copies the identifiers to the specified buffer.</summary>
+    /// <returns>
+    /// <para>Type: <b>int</b> If the function succeeds, the return value is the number of input locale identifiers copied to the buffer or, if <i>nBuff</i> is zero, the return value is the size, in array elements, of the buffer needed to receive all current input locale identifiers. If the function fails, the return value is zero. To get extended error information, call <a href="https://docs.microsoft.com/windows/desktop/api/errhandlingapi/nf-errhandlingapi-getlasterror">GetLastError</a>.</para>
+    /// </returns>
+    [LibraryImport("USER32.dll", SetLastError = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+    public static unsafe partial int GetKeyboardLayoutList(int nBuff, nint* lpList);
 }
