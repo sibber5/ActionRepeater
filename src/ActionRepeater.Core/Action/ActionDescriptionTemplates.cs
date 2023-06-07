@@ -214,11 +214,9 @@ public static class ActionDescriptionTemplates
 
     public static string HorizontalWheelSteps(int count) => count < 0 ? $"{-count} steps to the left" : $"{count} steps to the right";
 
-    public static string HorizontalWheelSteps(int count, int ms)
-    {
-        if (ms == 0) return HorizontalWheelSteps(count);
-        return count < 0 ? $"{-count} steps to the left, in {DurationMS(ms)}" : $"{count} steps to the right, in {DurationMS(ms)}";
-    }
+    public static string HorizontalWheelSteps(int count, int ms) => ms == 0
+            ? HorizontalWheelSteps(count)
+            : count < 0 ? $"{-count} steps to the left, in {DurationMS(ms)}" : $"{count} steps to the right, in {DurationMS(ms)}";
 
     public static string KeyFriendlyName(VirtualKey key) => VirtualKeyFriendlyNames.TryGetValue(key, out string? name) ? name : key.ToString();
 

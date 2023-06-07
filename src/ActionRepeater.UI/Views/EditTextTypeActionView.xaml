@@ -1,46 +1,54 @@
-﻿<UserControl
-    x:Class="ActionRepeater.UI.Views.EditTextTypeActionView"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:vms="using:ActionRepeater.UI.ViewModels" d:DataContext="{d:DesignInstance Type=vms:EditTextTypeActionViewModel}"
-    mc:Ignorable="d">
+﻿<UserControl x:Class="ActionRepeater.UI.Views.EditTextTypeActionView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vms="using:ActionRepeater.UI.ViewModels"
+             d:DataContext="{d:DesignInstance Type=vms:EditTextTypeActionViewModel}"
+             mc:Ignorable="d">
 
-    <ScrollViewer ZoomMode="Disabled"
-                  HorizontalScrollMode="Disabled" HorizontalScrollBarVisibility="Disabled"
-                  VerticalScrollMode="Enabled" VerticalScrollBarVisibility="Auto"
-                  Margin="0,-10,-15,-10">
-    
-    <Grid RowDefinitions="Auto,Auto"
-          RowSpacing="10"
-          Margin="0,10,15,10">
+    <ScrollViewer Margin="0,-10,-15,-10"
+                  HorizontalScrollBarVisibility="Disabled"
+                  HorizontalScrollMode="Disabled"
+                  VerticalScrollBarVisibility="Auto"
+                  VerticalScrollMode="Enabled"
+                  ZoomMode="Disabled">
 
-        <TextBlock Text="Text:"
-                   Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-        <TextBox Grid.Row="0" HorizontalAlignment="Right"
-                 Margin="35,0,0,0"
-                 MinWidth="150"
-                 TextWrapping="Wrap"
-                 AcceptsReturn="True"
-                 Text="{x:Bind ViewModel.Text, Mode=TwoWay}"/>
+        <Grid Margin="0,10,15,10"
+              RowDefinitions="Auto,Auto"
+              RowSpacing="10">
 
-        <TextBlock Text="Words per Minute: ⓘ"
-                   ToolTipService.ToolTip="0 = Type instantly"
-                   Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Center"/>
-        <NumberBox Grid.Row="1"
-                   SmallChange="10"
-                   LargeChange="100"
-                   Minimum="0"
-                   Maximum="9999"
-                   SpinButtonPlacementMode="Inline"
-                   ValidationMode="InvalidInputOverwritten"
-                   HorizontalAlignment="Right" VerticalAlignment="Center"
-                   Margin="135,0,0,0"
-                   Value="{x:Bind ViewModel.Wpm, Mode=TwoWay}"/>
+            <TextBlock Grid.Row="0"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Center"
+                       Text="Text:" />
+            <TextBox Grid.Row="0"
+                     MinWidth="150"
+                     Margin="35,0,0,0"
+                     HorizontalAlignment="Right"
+                     AcceptsReturn="True"
+                     Text="{x:Bind ViewModel.Text, Mode=TwoWay}"
+                     TextWrapping="Wrap" />
 
-    </Grid>
+            <TextBlock Grid.Row="1"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Center"
+                       Text="Words per Minute: ⓘ"
+                       ToolTipService.ToolTip="0 = Type instantly" />
+            <NumberBox Grid.Row="1"
+                       Margin="135,0,0,0"
+                       HorizontalAlignment="Right"
+                       VerticalAlignment="Center"
+                       LargeChange="100"
+                       Maximum="9999"
+                       Minimum="0"
+                       SmallChange="10"
+                       SpinButtonPlacementMode="Inline"
+                       ValidationMode="InvalidInputOverwritten"
+                       Value="{x:Bind ViewModel.Wpm, Mode=TwoWay}" />
+
+        </Grid>
 
     </ScrollViewer>
-    
+
 </UserControl>

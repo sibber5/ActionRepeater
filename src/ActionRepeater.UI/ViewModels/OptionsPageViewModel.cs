@@ -62,7 +62,7 @@ public sealed class OptionsPageViewModel : ObservableObject
 
     private readonly PropertyChangedEventArgs _isCursorMovementModeChangedArgs = new(nameof(IsCursorMovementMode));
     private readonly PropertyChangedEventArgs _displayAccelerationWarningChangedArgs = new(nameof(DisplayAccelerationWarning));
-    
+
     private readonly AppOptions _options;
 
     public OptionsPageViewModel(AppOptions options)

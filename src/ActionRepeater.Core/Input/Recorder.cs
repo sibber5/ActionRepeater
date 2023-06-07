@@ -53,11 +53,7 @@ public sealed class Recorder
         };
     }
 
-    private InputAction? GetLastAction()
-    {
-        if (_actionCollection.Actions.Count > 0) return _actionCollection.Actions[^1];
-        return null;
-    }
+    private InputAction? GetLastAction() => _actionCollection.Actions.Count > 0 ? _actionCollection.Actions[^1] : null;
 
     private void ReplaceLastAction(InputAction action)
     {

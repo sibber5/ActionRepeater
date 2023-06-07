@@ -1,52 +1,54 @@
-﻿<UserControl
-    x:Class="ActionRepeater.UI.Views.EditMouseWheelActionView"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:vms="using:ActionRepeater.UI.ViewModels" d:DataContext="{d:DesignInstance Type=vms:EditMouseWheelActionViewModel}"
-    mc:Ignorable="d">
+﻿<UserControl x:Class="ActionRepeater.UI.Views.EditMouseWheelActionView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vms="using:ActionRepeater.UI.ViewModels"
+             d:DataContext="{d:DesignInstance Type=vms:EditMouseWheelActionViewModel}"
+             mc:Ignorable="d">
 
-    <Grid RowDefinitions="Auto,Auto,Auto"
-          RowSpacing="10">
+    <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="10">
 
-        <TextBlock Text="Horizontal Scrolling:"
-                   Grid.Row="0"
-                   HorizontalAlignment="Left" VerticalAlignment="Center"/>
-        <CheckBox IsChecked="{x:Bind ViewModel.HorizontalScrolling, Mode=TwoWay}"
+        <TextBlock Grid.Row="0"
+                   HorizontalAlignment="Left"
+                   VerticalAlignment="Center"
+                   Text="Horizontal Scrolling:" />
+        <CheckBox Grid.Row="0"
+                  HorizontalAlignment="Stretch"
                   FlowDirection="RightToLeft"
-                  Grid.Row="0"
-                  HorizontalAlignment="Stretch"/>
+                  IsChecked="{x:Bind ViewModel.HorizontalScrolling, Mode=TwoWay}" />
 
-        <TextBlock Text="Steps: ⓘ"
-                   ToolTipService.ToolTip="Negative = Backward"
-                   Grid.Row="1"
-                   HorizontalAlignment="Left" VerticalAlignment="Center"/>
+        <TextBlock Grid.Row="1"
+                   HorizontalAlignment="Left"
+                   VerticalAlignment="Center"
+                   Text="Steps: ⓘ"
+                   ToolTipService.ToolTip="Negative = Backward" />
         <NumberBox x:Name="_stepsNumerBox"
-                   SmallChange="1"
-                   LargeChange="10"
-                   Minimum="-999999"
-                   Maximum="999999"
-                   SpinButtonPlacementMode="Inline"
-                   ValidationMode="InvalidInputOverwritten"
                    Grid.Row="1"
-                   HorizontalAlignment="Right"
                    Margin="60,0,0,0"
-                   Value="{x:Bind ViewModel.Steps, Mode=TwoWay}"/>
-
-        <TextBlock Text="Duration (sec):"
-                   Grid.Row="2"
-                   HorizontalAlignment="Left" VerticalAlignment="Center"/>
-        <NumberBox SmallChange="1"
+                   HorizontalAlignment="Right"
                    LargeChange="10"
-                   Minimum="0"
                    Maximum="999999"
+                   Minimum="-999999"
+                   SmallChange="1"
                    SpinButtonPlacementMode="Inline"
                    ValidationMode="InvalidInputOverwritten"
-                   Grid.Row="2"
-                   HorizontalAlignment="Right"
+                   Value="{x:Bind ViewModel.Steps, Mode=TwoWay}" />
+
+        <TextBlock Grid.Row="2"
+                   HorizontalAlignment="Left"
+                   VerticalAlignment="Center"
+                   Text="Duration (sec):" />
+        <NumberBox Grid.Row="2"
                    Margin="95,0,0,0"
-                   Value="{x:Bind ViewModel.DurationSecs, Mode=TwoWay}"/>
+                   HorizontalAlignment="Right"
+                   LargeChange="10"
+                   Maximum="999999"
+                   Minimum="0"
+                   SmallChange="1"
+                   SpinButtonPlacementMode="Inline"
+                   ValidationMode="InvalidInputOverwritten"
+                   Value="{x:Bind ViewModel.DurationSecs, Mode=TwoWay}" />
     </Grid>
-    
+
 </UserControl>

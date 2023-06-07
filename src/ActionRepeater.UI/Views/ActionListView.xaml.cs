@@ -13,7 +13,7 @@ namespace ActionRepeater.UI.Views;
 public sealed partial class ActionListView : UserControl
 {
     private ActionListViewModel? _vm;
-    
+
     public ActionListView() { }
 
     public void Initialize(ActionListViewModel vm, Recorder recorder, AddActionMenuItems addActionMenuItems)

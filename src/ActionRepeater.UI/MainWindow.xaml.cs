@@ -105,15 +105,18 @@ public sealed partial class MainWindow : Window
         _windowProperties.XamlRoot = _grid.XamlRoot;
     }
 
+    /// <summary>
+    /// Set titlebar colors according to theme. WinUi doesnt do this automatically for some reason.
+    /// </summary>
     private void SetTitleBarColors()
     {
         Debug.Assert(AppWindowTitleBar.IsCustomizationSupported());
 
         var titlebar = AppWindow.TitleBar;
-        var bg = App.Current.RequestedTheme == ApplicationTheme.Dark ? Windows.UI.Color.FromArgb(255, 0, 0, 0) : Windows.UI.Color.FromArgb(255, 255, 255, 255);
-        var hoverBG = App.Current.RequestedTheme == ApplicationTheme.Dark ? Windows.UI.Color.FromArgb(255, 25, 25, 25) : Windows.UI.Color.FromArgb(255, 230, 230, 230);
-        var pressBG = App.Current.RequestedTheme == ApplicationTheme.Dark ? Windows.UI.Color.FromArgb(255, 51, 51, 51) : Windows.UI.Color.FromArgb(255, 204, 204, 204);
-        var fg = App.Current.RequestedTheme == ApplicationTheme.Dark ? Windows.UI.Color.FromArgb(255, 255, 255, 255) : Windows.UI.Color.FromArgb(255, 0, 0, 0);
+        var bg         = App.Current.RequestedTheme == ApplicationTheme.Dark ? Windows.UI.Color.FromArgb(255, 0, 0, 0)       : Windows.UI.Color.FromArgb(255, 255, 255, 255);
+        var hoverBG    = App.Current.RequestedTheme == ApplicationTheme.Dark ? Windows.UI.Color.FromArgb(255, 25, 25, 25)    : Windows.UI.Color.FromArgb(255, 230, 230, 230);
+        var pressBG    = App.Current.RequestedTheme == ApplicationTheme.Dark ? Windows.UI.Color.FromArgb(255, 51, 51, 51)    : Windows.UI.Color.FromArgb(255, 204, 204, 204);
+        var fg         = App.Current.RequestedTheme == ApplicationTheme.Dark ? Windows.UI.Color.FromArgb(255, 255, 255, 255) : Windows.UI.Color.FromArgb(255, 0, 0, 0);
         var inavtiveFG = App.Current.RequestedTheme == ApplicationTheme.Dark ? Windows.UI.Color.FromArgb(255, 102, 102, 102) : Windows.UI.Color.FromArgb(255, 153, 153, 153);
 
         titlebar.BackgroundColor = bg;

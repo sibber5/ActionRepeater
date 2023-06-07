@@ -1,29 +1,30 @@
-﻿<UserControl
-    x:Class="ActionRepeater.UI.Views.EditMouseButtonActionView"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:vms="using:ActionRepeater.UI.ViewModels" d:DataContext="{d:DesignInstance Type=vms:EditMouseButtonActionViewModel}"
-    mc:Ignorable="d">
+﻿<UserControl x:Class="ActionRepeater.UI.Views.EditMouseButtonActionView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vms="using:ActionRepeater.UI.ViewModels"
+             d:DataContext="{d:DesignInstance Type=vms:EditMouseButtonActionViewModel}"
+             mc:Ignorable="d">
 
-    <Grid RowDefinitions="Auto,Auto,Auto"
-          RowSpacing="10">
+    <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="10">
 
-        <TextBlock Text="Type:"
-                   Grid.Row="0"
-                   HorizontalAlignment="Left" VerticalAlignment="Center"/>
-        <ComboBox ItemsSource="{x:Bind ViewModel.MBActionTypesFriendlyNames}"
-                  SelectedIndex="{x:Bind ViewModel.SelectedTypeIndex, Mode=TwoWay}"
-                  Grid.Row="0"
-                  HorizontalAlignment="Right"/>
+        <TextBlock Grid.Row="0"
+                   HorizontalAlignment="Left"
+                   VerticalAlignment="Center"
+                   Text="Type:" />
+        <ComboBox Grid.Row="0"
+                  HorizontalAlignment="Right"
+                  ItemsSource="{x:Bind ViewModel.MBActionTypesFriendlyNames}"
+                  SelectedIndex="{x:Bind ViewModel.SelectedTypeIndex, Mode=TwoWay}" />
 
-        <TextBlock Text="Button:"
-                   Grid.Row="1"
-                   HorizontalAlignment="Left" VerticalAlignment="Center"/>
-        <ComboBox SelectedIndex="{x:Bind ViewModel.SelectedButtonIndex, Mode=TwoWay}"
-                  Grid.Row="1"
-                  HorizontalAlignment="Right">
+        <TextBlock Grid.Row="1"
+                   HorizontalAlignment="Left"
+                   VerticalAlignment="Center"
+                   Text="Button:" />
+        <ComboBox Grid.Row="1"
+                  HorizontalAlignment="Right"
+                  SelectedIndex="{x:Bind ViewModel.SelectedButtonIndex, Mode=TwoWay}">
             <TextBlock ToolTipService.ToolTip="The left button.">Left</TextBlock>
             <TextBlock ToolTipService.ToolTip="The middle button (wheel button).">Middle</TextBlock>
             <TextBlock ToolTipService.ToolTip="The right button.">Right</TextBlock>
@@ -31,31 +32,32 @@
             <TextBlock ToolTipService.ToolTip="The second X button (extra mouse [usually] side button).">X2</TextBlock>
         </ComboBox>
 
-        <TextBlock Text="Position:"
-                   Grid.Row="2"
-                   HorizontalAlignment="Left" VerticalAlignment="Center"/>
-        <StackPanel Orientation="Horizontal"
-                    Spacing="5"
-                    Grid.Row="2"
+        <TextBlock Grid.Row="2"
+                   HorizontalAlignment="Left"
+                   VerticalAlignment="Center"
+                   Text="Position:" />
+        <StackPanel Grid.Row="2"
+                    Margin="60,0,0,0"
                     HorizontalAlignment="Right"
-                    Margin="60,0,0,0">
-            <TextBlock Text="X:" VerticalAlignment="Center"/>
+                    Orientation="Horizontal"
+                    Spacing="5">
+            <TextBlock VerticalAlignment="Center" Text="X:" />
             <NumberBox x:Name="_posXNumBox"
-                       Value="{x:Bind ViewModel.PositionX, Mode=TwoWay}"
-                       Minimum="-999999"
                        Maximum="999999"
+                       Minimum="-999999"
                        SpinButtonPlacementMode="Hidden"
-                       ValidationMode="InvalidInputOverwritten"/>
+                       ValidationMode="InvalidInputOverwritten"
+                       Value="{x:Bind ViewModel.PositionX, Mode=TwoWay}" />
 
-            <TextBlock Text="Y:" VerticalAlignment="Center"/>
+            <TextBlock VerticalAlignment="Center" Text="Y:" />
             <NumberBox x:Name="_posYNumBox"
-                       Value="{x:Bind ViewModel.PositionY, Mode=TwoWay}"
-                       Minimum="-999999"
                        Maximum="999999"
+                       Minimum="-999999"
                        SpinButtonPlacementMode="Hidden"
-                       ValidationMode="InvalidInputOverwritten"/>
+                       ValidationMode="InvalidInputOverwritten"
+                       Value="{x:Bind ViewModel.PositionY, Mode=TwoWay}" />
         </StackPanel>
 
     </Grid>
-    
+
 </UserControl>

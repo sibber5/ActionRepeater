@@ -37,7 +37,7 @@ public partial struct PathWindowWrapper : IDisposable
 
     public unsafe void AddPoints(Span<POINT> points)
     {
-        fixed (POINT* pPoints = &System.Runtime.InteropServices.Marshalling.SpanMarshaller<POINT, POINT>.ManagedToUnmanagedIn.GetPinnableReference(points))
+        fixed (POINT* pPoints = points)
         {
             VerifyHR(AddPointsToPath(_pPathWindowWrapper, pPoints, points.Length));
         }
@@ -66,7 +66,7 @@ public partial struct PathWindowWrapper : IDisposable
         nint ret = 0;
         HResult hr;
 
-        fixed (POINT* pPoints = &System.Runtime.InteropServices.Marshalling.SpanMarshaller<POINT, POINT>.ManagedToUnmanagedIn.GetPinnableReference(points))
+        fixed (POINT* pPoints = points)
         {
             hr = CreatePathWindow(pPoints, points.Length, &ret);
         }

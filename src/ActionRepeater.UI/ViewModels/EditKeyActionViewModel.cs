@@ -51,14 +51,9 @@ public sealed partial class EditKeyActionViewModel : ObservableValidator
     public EditKeyActionViewModel(KeyAction keyAction)
     {
         Type = keyAction.ActionType;
-        if (ActionDescriptionTemplates.VirtualKeyFriendlyNames.TryGetValue(keyAction.Key, out string? name))
-        {
-            _keyName = ExcludeDescriptionFromKeyFriendlyName(name).ToString();
-        }
-        else
-        {
-            _keyName = ActionDescriptionTemplates.VirtualKeyFriendlyNames[VirtualKey.NO_KEY];
-        }
+        _keyName = ActionDescriptionTemplates.VirtualKeyFriendlyNames.TryGetValue(keyAction.Key, out string? name)
+            ? ExcludeDescriptionFromKeyFriendlyName(name).ToString()
+            : ActionDescriptionTemplates.VirtualKeyFriendlyNames[VirtualKey.NO_KEY];
         Key = keyAction.Key;
     }
 

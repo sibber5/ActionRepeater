@@ -165,13 +165,13 @@ public sealed class Player
             Task.Run(async () =>
             {
                 if (repeatCount < 0) while (!_tokenSource.IsCancellationRequested)
-                {
-                    await _runPlayActions(this);
-                }
+                    {
+                        await _runPlayActions(this);
+                    }
                 else for (int i = 0; i < repeatCount && !_tokenSource.IsCancellationRequested; ++i)
-                {
-                    await _runPlayActions(this);
-                }
+                    {
+                        await _runPlayActions(this);
+                    }
             }, _tokenSource.Token).ContinueWith(_cleanUp);
         }
     }

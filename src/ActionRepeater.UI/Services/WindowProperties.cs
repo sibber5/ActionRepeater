@@ -9,7 +9,7 @@ namespace ActionRepeater.UI.Services;
 public sealed class WindowProperties
 {
     public nint Handle { get; set; }
-    
+
     public DispatcherQueue? DispatcherQueue { get; set; }
 
     public XamlRoot? XamlRoot { get; set; }
