@@ -31,7 +31,7 @@
         
         <StackPanel x:Name="_stackpanel" Width="{StaticResource CommandBarButtonSize}" Height="{StaticResource CommandBarButtonSize}">
             <FontIcon x:Name="_fontIcon" FontFamily="{StaticResource SymbolThemeFontFamily}" FontSize="{StaticResource CommandBarButtonIconSize}" />
-            <TextBlock x:Name="_textBlcok" FontSize="{StaticResource CommandBarFontSize}" Margin="0,2,0,0" HorizontalAlignment="Center" />
+            <TextBlock x:Name="_textBlcok" FontSize="{StaticResource CommandBarFontSize}" TextWrapping="WrapWholeWords" TextAlignment="Center" Margin="0,2,0,0" HorizontalAlignment="Center" />
         </StackPanel>
         
     </ToggleButton>

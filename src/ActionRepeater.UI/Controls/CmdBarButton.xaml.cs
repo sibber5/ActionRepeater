@@ -1,4 +1,5 @@
 ﻿using System.Windows.Input;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 
@@ -6,6 +7,12 @@ namespace ActionRepeater.UI.Controls;
 
 public sealed partial class CmdBarButton : UserControl
 {
+    public new Thickness Padding
+    {
+        get => _button.Padding;
+        set => _button.Padding = value;
+    }
+
     public string Glyph
     {
         get => _fontIcon.Glyph;
@@ -18,6 +25,12 @@ public sealed partial class CmdBarButton : UserControl
         set => _fontIcon.FontSize = value;
     }
 
+    public new double FontSize
+    {
+        get => _textBlcok.FontSize;
+        set => _textBlcok.FontSize = value;
+    }
+
     public string Text
     {
         get => _textBlcok.Text;
@@ -26,9 +39,22 @@ public sealed partial class CmdBarButton : UserControl
 
     public double ButtonWidth
     {
-        get => _stackpanel.Width;
-        set => _stackpanel.Width = value;
+        get
+        {
+            var val = (double)GetValue(ButtonWidthProperty);
+            if (val != _stackpanel.Width) _stackpanel.Width = val;
+            return val;
+        }
+        set
+        {
+            SetValue(ButtonWidthProperty, value);
+            _stackpanel.Width = value;
+        }
     }
+
+    // Using a DependencyProperty as the backing store for ButtonWidth.  This enables animation, styling, binding, etc...
+    public static readonly DependencyProperty ButtonWidthProperty =
+        DependencyProperty.Register("ButtonWidth", typeof(double), typeof(CmdBarButton), new PropertyMetadata(0));
 
     public double ButtonHeight
     {

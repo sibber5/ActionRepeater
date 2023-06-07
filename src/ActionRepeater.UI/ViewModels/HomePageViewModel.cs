@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Threading.Tasks;
 using ActionRepeater.Core;
 using ActionRepeater.Core.Input;
+using ActionRepeater.UI.Helpers;
 using ActionRepeater.UI.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -20,27 +22,39 @@ public sealed partial class HomePageViewModel : ObservableObject
 
     public bool CanAddAction => !_recorder.IsRecording;
 
+    public IAsyncRelayCommand EditSelectedActionCommand => _actionListViewModel.EditSelectedActionCommand;
+    public IAsyncRelayCommand RemoveOneOrMoreActionsCommand => _actionListViewModel.RemoveOneOrMoreActionsCommand;
+
+    public IRelayCommand ClearActionsCommand => _actionListViewModel.ClearActionsCommand;
+    public IRelayCommand ClearCursorPathCommand => _actionListViewModel.ClearCursorPathCommand;
+
     private readonly CoreOptions _coreOptions;
 
     private readonly PathWindowService _pathWindowService;
+    private readonly IDialogService _dialogService;
 
     private readonly ActionCollection _actionCollection;
     private readonly Recorder _recorder;
     private readonly Player _player;
 
+    private readonly ActionListViewModel _actionListViewModel;
+
     private readonly Action _onIsPlayingChanged;
 
-    public HomePageViewModel(CoreOptions coreOptions, PathWindowService pathWindowService, ActionCollection actionCollection, ActionListViewModel actionListVM, Player player, Recorder recorder, IDispatcher dispatcher)
+    public HomePageViewModel(CoreOptions coreOptions, PathWindowService pathWindowService, ActionCollection actionCollection, ActionListViewModel actionListVM, Player player, Recorder recorder, IDispatcher dispatcher, IDialogService dialogService)
     {
         _coreOptions = coreOptions;
 
         _pathWindowService = pathWindowService;
+        _dialogService = dialogService;
 
         _actionCollection = actionCollection;
         _player = player;
         _recorder = recorder;
 
-        _player.ActionPlayed += actionListVM.UpdateSelectedAction;
+        _actionListViewModel = actionListVM;
+
+        _player.ActionPlayed += _actionListViewModel.UpdateSelectedAction;
 
         _onIsPlayingChanged = () =>
         {
@@ -101,4 +115,7 @@ public sealed partial class HomePageViewModel : ObservableObject
 
         _pathWindowService.OpenPathWindow();
     }
+
+    [RelayCommand(CanExecute = nameof(CanAddAction))]
+    private Task AddAction(ActionType actionType) => _dialogService.ShowEditActionDialog(actionType);
 }

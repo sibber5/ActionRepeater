@@ -18,6 +18,12 @@ public sealed partial class CmdBarToggleButton : UserControl
         set => _fontIcon.FontSize = value;
     }
 
+    public new double FontSize
+    {
+        get => _textBlcok.FontSize;
+        set => _textBlcok.FontSize = value;
+    }
+
     public string Text
     {
         get => _textBlcok.Text;

@@ -82,7 +82,9 @@
                         </MenuFlyoutItem.KeyboardAccelerators>
                     </MenuFlyoutItem>
 
-                    <MenuFlyoutItem Text="Remove" Icon="Delete" Command="{x:Bind _vm.RemoveMultipleActionsCommand}">
+                    <MenuFlyoutItem Command="{x:Bind _vm.RemoveOneOrMoreActionsCommand}"
+                                    Icon="Delete"
+                                    Text="Remove">
                         <MenuFlyoutItem.KeyboardAccelerators>
                             <KeyboardAccelerator Key="Delete"/>
                         </MenuFlyoutItem.KeyboardAccelerators>
@@ -139,9 +141,9 @@
                             <FontIcon Glyph="&#xE894;"/>
                         </MenuFlyoutSubItem.Icon>
 
-                        <MenuFlyoutItem Text="Clear actions" Command="{x:Bind _vm.ClearActionsCommand}"/>
-                        <MenuFlyoutItem Text="Clear cursor path" Command="{x:Bind _vm.ClearCursorPathCommand}"/>
-                        <MenuFlyoutItem Text="Clear all" Command="{x:Bind _vm.ClearAllCommand}"/>
+                        <MenuFlyoutItem Command="{x:Bind _vm.ClearActionsCommand}" Text="Clear actions" />
+                        <MenuFlyoutItem Command="{x:Bind _vm.ClearCursorPathCommand}" Text="Clear cursor path" />
+                        <MenuFlyoutItem Command="{x:Bind _vm.ClearAllCommand}" Text="Clear all" />
                     </MenuFlyoutSubItem>
                 </MenuFlyout>
                 

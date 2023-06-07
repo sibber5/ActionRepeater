@@ -10,18 +10,20 @@ using ActionRepeater.Win32.WindowsAndMessages.Utilities;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media.Animation;
 
 namespace ActionRepeater.UI;
 
 public sealed partial class MainWindow : Window
 {
     private const string WindowTitle = "ActionRepeater";
-    private const int StartupWidth = 507;
+    private const int StartupWidth = 520;
     private const int StartupHeight = 700;
-    private const int MinWidth = 356;
+    private const int MinWidth = 394;
     private const int MinHeight = 206;
 
-    public const string HomeTag = "h";
+    public const string HomeRibbonTag = "h_homeRibbon";
+    public const string AddRibbonTag = "h_addRibbon";
     public const string OptionsTag = "o";
 
     public nint Handle { get; }
@@ -37,6 +39,7 @@ public sealed partial class MainWindow : Window
 
     private readonly Thickness _titlebarOffset = new(33, 8, 0, 0);
     private readonly Windows.Graphics.RectInt32[] _dragRects = new Windows.Graphics.RectInt32[2];
+    private const int DragRegionMinHeight = 18;
 
     public MainWindow(MainViewModel vm, Recorder recorder, HomePageParameter homePageParameter, OptionsPageParameter optionsPageParameter, WindowProperties windowProperties)
     {
@@ -152,7 +155,7 @@ public sealed partial class MainWindow : Window
         {
             X = 0,
             Y = resizeAreaOffset,
-            Height = (int)((12 - resizeAreaOffset) * scalingFactor),
+            Height = (int)((DragRegionMinHeight - resizeAreaOffset) * scalingFactor),
             Width = (int)(dragRegionOffset * scalingFactor)
         };
 
@@ -176,33 +179,43 @@ public sealed partial class MainWindow : Window
         }
     }
 
+    private void TitleBarGrid_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        if (AppWindow.TitleBar.ExtendsContentIntoTitleBar) UpdateDragRegion();
+    }
+
     private void NavigationView_Loaded(object sender, RoutedEventArgs e)
     {
         _navigationView.SelectedItem = _navigationView.MenuItems[1];
-        Navigate(HomeTag, new Microsoft.UI.Xaml.Media.Animation.SuppressNavigationTransitionInfo());
+        Navigate(HomeRibbonTag, new SuppressNavigationTransitionInfo());
     }
 
     private void NavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
-        Navigate((string?)args.SelectedItemContainer.Tag, args.RecommendedNavigationTransitionInfo);
+        Navigate((string)args.SelectedItemContainer.Tag, args.RecommendedNavigationTransitionInfo);
     }
 
-    private void Navigate(string? tag, Microsoft.UI.Xaml.Media.Animation.NavigationTransitionInfo navInfo)
+    private void Navigate(string tag, NavigationTransitionInfo navInfo)
     {
         switch (tag)
         {
-            case HomeTag:
-                _contentFrame.Navigate(typeof(HomePage), _homePageParameter, navInfo);
-                break;
-
             case OptionsTag:
                 _contentFrame.Navigate(typeof(OptionsPage), _optionsPageParameter, navInfo);
                 break;
-        }
-    }
 
-    private void TitleBarGrid_SizeChanged(object sender, SizeChangedEventArgs e)
-    {
-        if (AppWindow.TitleBar.ExtendsContentIntoTitleBar) UpdateDragRegion();
+            case var t when t.StartsWith("h_"):
+                if (_contentFrame.Content is not HomePage)
+                {
+                    _contentFrame.Navigate(typeof(HomePage), _homePageParameter, navInfo);
+                    ((HomePage)_contentFrame.Content).NavigateRibbon(tag, new SuppressNavigationTransitionInfo());
+                    break;
+                }
+
+                ((HomePage)_contentFrame.Content).NavigateRibbon(tag, navInfo);
+                break;
+
+            default:
+                throw new NotImplementedException();
+        }
     }
 }

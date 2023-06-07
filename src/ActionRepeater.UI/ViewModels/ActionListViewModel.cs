@@ -40,6 +40,9 @@ public sealed partial class ActionListViewModel : ObservableObject
                 : (ShowKeyRepeatActions ? _actionCollection.Actions[SelectedActionIndex] : _actionCollection.FilteredActions[SelectedActionIndex]);
 
     [NotifyCanExecuteChangedFor(nameof(StoreActionCommand))]
+    [NotifyCanExecuteChangedFor(nameof(EditSelectedActionCommand))]
+    [NotifyCanExecuteChangedFor(nameof(RemoveActionCommand))]
+    [NotifyCanExecuteChangedFor(nameof(RemoveOneOrMoreActionsCommand))]
     [ObservableProperty]
     private int _selectedActionIndex = -1;
 
@@ -104,6 +107,16 @@ public sealed partial class ActionListViewModel : ObservableObject
                 ReplaceActionCommand.NotifyCanExecuteChanged();
             }
         };
+
+        _actionCollection.ActionsCountChanged += (_, _) =>
+        {
+            ClearActionsCommand.NotifyCanExecuteChanged();
+        };
+
+        _actionCollection.CursorPathStartChanged += (_, _) =>
+        {
+            ClearCursorPathCommand.NotifyCanExecuteChanged();
+        };
     }
 
     public void UpdateSelectedAction(InputAction? currentAction, int index)
@@ -141,14 +154,14 @@ public sealed partial class ActionListViewModel : ObservableObject
         }
     }
 
+    private bool IsAnyActionSelected() => SelectedActionIndex != -1;
+
     // internal because its called from code behind (on item double tap). (there is not command for double tap, only an event)
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(IsAnyActionSelected))]
     internal async Task EditSelectedAction()
     {
-        if (SelectedAction is null) throw new InvalidOperationException($"{nameof(SelectedAction)} is null");
-
-        ObservableObject editActionVM = ActionMappingHelper.ActionToEditViewModel(SelectedAction);
-        await _dialogService.ShowEditActionDialog(editActionVM, SelectedAction);
+        ObservableObject editActionVM = ActionMappingHelper.ActionToEditViewModel(SelectedAction!);
+        await _dialogService.ShowEditActionDialog(editActionVM, SelectedAction!);
     }
 
     private bool IsSelectedActionNotAutoRepeat() => SelectedAction is not KeyAction ka || !ka.IsAutoRepeat;
@@ -206,12 +219,10 @@ public sealed partial class ActionListViewModel : ObservableObject
         }
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(IsAnyActionSelected))]
     private async Task RemoveAction()
     {
-        if (SelectedAction is null) return;
-
-        if (_actionCollection.IsAggregateAction(SelectedAction))
+        if (_actionCollection.IsAggregateAction(SelectedAction!))
         {
             var result = await _dialogService.ShowYesNoDialog("Are you sure you want to remove this action?",
                 $"This action represents multiple hidden actions (because \"{nameof(ShowKeyRepeatActions)}\" is off).{Environment.NewLine}If you remove it the multiple actions it represents will also be removed.");
@@ -221,15 +232,15 @@ public sealed partial class ActionListViewModel : ObservableObject
             return;
         }
 
-        string? errorMsg = _actionCollection.TryRemove(SelectedAction);
+        string? errorMsg = _actionCollection.TryRemove(SelectedAction!);
         if (errorMsg is not null)
         {
             await _dialogService.ShowErrorDialog("Failed to remove action", errorMsg);
         }
     }
 
-    [RelayCommand]
-    private async Task RemoveMultipleActions()
+    [RelayCommand(CanExecute = nameof(IsAnyActionSelected))]
+    private async Task RemoveOneOrMoreActions()
     {
         if (SelectedRanges is null || SelectedRanges.Count < 1) return;
 
@@ -283,15 +294,15 @@ public sealed partial class ActionListViewModel : ObservableObject
         }
     }
 
+    private bool CanClearActions() => _actionCollection.Actions.Count > 0;
     [RelayCommand(CanExecute = nameof(CanClearActions))]
     private void ClearActions() => _actionCollection.ClearActions();
-    private bool CanClearActions() => _actionCollection.Actions.Count > 0;
 
+    private bool CanClearCursorPath() => _actionCollection.CursorPathStart is not null;
     [RelayCommand(CanExecute = nameof(CanClearCursorPath))]
     private void ClearCursorPath() => _actionCollection.ClearCursorPath();
-    private bool CanClearCursorPath() => _actionCollection.CursorPathStart is not null;
 
+    private bool CanClearAll() => CanClearActions() || CanClearCursorPath();
     [RelayCommand(CanExecute = nameof(CanClearAll))]
     private void ClearAll() => _actionCollection.Clear();
-    private bool CanClearAll() => CanClearActions() || CanClearCursorPath();
 }

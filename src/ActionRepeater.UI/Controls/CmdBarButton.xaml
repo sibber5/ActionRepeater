@@ -1,32 +1,34 @@
-﻿<UserControl
-    x:Class="ActionRepeater.UI.Controls.CmdBarButton"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d">
+﻿<UserControl x:Class="ActionRepeater.UI.Controls.CmdBarButton" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d">
 
-    <Button x:Name="_button"
-            Background="Transparent"
+    <Button x:Name="_button" Background="Transparent"
             BorderBrush="Transparent"
             Style="{StaticResource DisabledButtonSettableBg}">
 
         <Button.Resources>
             <ResourceDictionary>
                 <ResourceDictionary.ThemeDictionaries>
-                    <!-- setting a global theme resource doesnt work for some reason. nor does a static resource for this color.  -->
+                    <!--  setting a global theme resource doesnt work for some reason. nor does a static resource for this color.  -->
                     <ResourceDictionary x:Key="Light">
-                        <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#fafafa"/>
+                        <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#fafafa" />
                     </ResourceDictionary>
                 </ResourceDictionary.ThemeDictionaries>
             </ResourceDictionary>
         </Button.Resources>
-        
-        <StackPanel x:Name="_stackpanel" Width="{StaticResource CommandBarButtonSize}" Height="{StaticResource CommandBarButtonSize}">
-            <FontIcon x:Name="_fontIcon" FontFamily="{StaticResource SymbolThemeFontFamily}" FontSize="{StaticResource CommandBarButtonIconSize}" />
-            <TextBlock x:Name="_textBlcok" FontSize="{StaticResource CommandBarFontSize}" Margin="0,2,0,0" HorizontalAlignment="Center" />
+
+        <StackPanel x:Name="_stackpanel"
+                    Width="{StaticResource CommandBarButtonSize}"
+                    Height="{StaticResource CommandBarButtonSize}">
+            <FontIcon x:Name="_fontIcon"
+                      FontFamily="{StaticResource SymbolThemeFontFamily}"
+                      FontSize="{StaticResource CommandBarButtonIconSize}" />
+            <TextBlock x:Name="_textBlcok" Margin="0,2,0,0"
+                       HorizontalAlignment="Center"
+                       FontSize="{StaticResource CommandBarFontSize}"
+                       TextAlignment="Center" TextWrapping="WrapWholeWords" />
         </StackPanel>
-        
+
     </Button>
-    
+
 </UserControl>

@@ -90,6 +90,8 @@
         <None Remove="Controls\OptionItem.xaml" />
         <None Remove="GlobalResources.xaml" />
         <None Remove="Pages\HomePage.xaml" />
+        <None Remove="Pages\HomePageRibbons\AddRibbon.xaml" />
+        <None Remove="Pages\HomePageRibbons\HomeRibbon.xaml" />
         <None Remove="Pages\OptionsPage.xaml" />
         <None Remove="Styles.xaml" />
         <None Remove="Views\ActionListView.xaml" />
@@ -102,6 +104,11 @@
     </ItemGroup>
     <ItemGroup>
         <Resource Remove="Views\ActionListView.xaml" />
+    </ItemGroup>
+    <ItemGroup>
+      <Page Update="Pages\HomePageRibbons\AddRibbon.xaml">
+        <Generator>MSBuild:Compile</Generator>
+      </Page>
     </ItemGroup>
     <ItemGroup>
       <Page Update="Controls\ComboBoxIconnedItem.xaml">
@@ -172,6 +179,11 @@
         <Page Update="Pages\HomePage.xaml">
             <Generator>MSBuild:Compile</Generator>
         </Page>
+    </ItemGroup>
+    <ItemGroup>
+      <Page Update="Pages\HomePageRibbons\HomeRibbon.xaml">
+        <Generator>MSBuild:Compile</Generator>
+      </Page>
     </ItemGroup>
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">
       <Exec Command="xcopy &quot;$(ProjectDir)..\PathWindows\bin\$(Platform)\$(Configuration)\PathWindows.dll&quot; &quot;$(OutDir)&quot; /v /k /r /y /f&#xD;&#xA;xcopy &quot;$(ProjectDir)..\PathWindows\bin\$(Platform)\$(Configuration)\PathWindows.pdb&quot; &quot;$(OutDir)&quot; /v /k /r /y /f" />

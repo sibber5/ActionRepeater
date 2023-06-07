@@ -1,102 +1,35 @@
-﻿<Page
-    x:Class="ActionRepeater.UI.Pages.HomePage"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:ctrls="using:ActionRepeater.UI.Controls"
-    xmlns:views="using:ActionRepeater.UI.Views"
-    mc:Ignorable="d"
-    Background="{ThemeResource AppBackgroundThemeBrush}">
+﻿<Page x:Class="ActionRepeater.UI.Pages.HomePage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:views="using:ActionRepeater.UI.Views"
+      Background="{ThemeResource AppBackgroundThemeBrush}"
+      mc:Ignorable="d">
 
-    <Grid RowDefinitions="Auto,*">
+    <Grid>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
 
         <ScrollViewer Grid.Row="0"
-                      Margin="0,0,0,-2"
-                      ZoomMode="Disabled"
-                      HorizontalScrollMode="Enabled"
+                      Margin="0,0,0,-6"
+                      CanContentRenderOutsideBounds="True"
                       HorizontalScrollBarVisibility="Auto"
+                      HorizontalScrollMode="Enabled"
+                      IsVerticalRailEnabled="False"
+                      VerticalScrollBarVisibility="Disabled"
                       VerticalScrollMode="Disabled"
-                      VerticalScrollBarVisibility="Disabled">
-            
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
+                      ZoomMode="Disabled">
 
-                <ctrls:CmdBarToggleButton x:Name="_recordButton"
-                                          Glyph="&#xEA3A;"
-                                          Text="Record"
-                                          Command="{x:Bind _vm.ToggleRecordingCommand}"/>
+            <Frame x:Name="_ribbonFrame"
+                   MinHeight="58"
+                   Margin="0,0,0,12" />
 
-                <ctrls:CmdBarToggleButton Glyph="&#xE768;"
-                                          Text="Play"
-                                          IsChecked="{x:Bind _vm.IsPlayButtonChecked, Mode=OneWay}"
-                                          Command="{x:Bind _vm.PlayActionsCommand}"/>
-
-                <AppBarSeparator Margin="5,0,5,0" />
-
-
-                <StackPanel Padding="5,0,5,0"
-                            ToolTipService.Placement="Bottom"
-                            ToolTipService.ToolTip="Specifies the number of repetitions of the action sequence.&#x0d;&#x0a;A negative number causes the inputs to repeat indefinitely.">
-                    <TextBlock Text="Repetitions"
-                               FontSize="15"
-                               HorizontalAlignment="Center"
-                               Margin="0,0,0,5"/>
-
-                    <NumberBox x:Name="_repeatActionsNumBox"
-                               SmallChange="1"
-                               LargeChange="10"
-                               Minimum="-1"
-                               Maximum="9999"
-                               SpinButtonPlacementMode="Inline"
-                               MinWidth="90"
-                               ValidationMode="InvalidInputOverwritten"
-                               Value="{x:Bind _vm.PlayRepeatCount, Mode=TwoWay}"/>
-                </StackPanel>
-                <AppBarSeparator Margin="5,0,5,0" />
-
-                <ctrls:CmdBarToggleButton Glyph="&#xF128;"
-                                          Text="Cursor Path"
-                                          ButtonWidth="70"
-                                          Command="{x:Bind _vm.ToggleCursorPathWindowCommand}"/>
-
-                <AppBarSeparator Margin="5,0,5,0" />
-
-                <DropDownButton Height="55"
-                                Background="Transparent"
-                                BorderBrush="Transparent"
-                                IsEnabled="{x:Bind _vm.CanAddAction, Mode=OneWay}">
-                    <DropDownButton.Resources>
-                        <ResourceDictionary>
-                            <ResourceDictionary.ThemeDictionaries>
-                                <!-- setting a global theme resource doesnt work for some reason. nor does a static resource for this color.  -->
-                                <ResourceDictionary x:Key="Light">
-                                    <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#fafafa"/>
-                                    <SolidColorBrush x:Key="ButtonBackgroundDisabled" Color="Transparent"/>
-                                    <SolidColorBrush x:Key="ButtonBorderBrushDisabled" Color="Transparent"/>
-                                </ResourceDictionary>
-                                <ResourceDictionary x:Key="Dark">
-                                    <SolidColorBrush x:Key="ButtonBackgroundDisabled" Color="Transparent"/>
-                                    <SolidColorBrush x:Key="ButtonBorderBrushDisabled" Color="Transparent"/>
-                                </ResourceDictionary>
-                            </ResourceDictionary.ThemeDictionaries>
-                        </ResourceDictionary>
-                    </DropDownButton.Resources>
-
-                    <DropDownButton.Content>
-                        <StackPanel>
-                            <FontIcon Glyph="&#xE710;" FontSize="20"/>
-                            <TextBlock Text="Add" Margin="0,4,0,0"/>
-                        </StackPanel>
-                    </DropDownButton.Content>
-                    <DropDownButton.Flyout>
-                        <MenuFlyout x:Name="_actionsMenuFlyout" Placement="Bottom"/>
-                    </DropDownButton.Flyout>
-                </DropDownButton>
-
-            </StackPanel>
-        
         </ScrollViewer>
-        
+
         <views:ActionListView x:Name="_actionList" Grid.Row="1" />
 
     </Grid>

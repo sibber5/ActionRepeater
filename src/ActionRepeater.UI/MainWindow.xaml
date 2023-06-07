@@ -18,6 +18,7 @@
 
             <NavigationView.Resources>
                 <ResourceDictionary>
+                    <Thickness x:Key="TopNavigationViewTopNavGridMargin">4,0,70,0</Thickness>
                     <ResourceDictionary.ThemeDictionaries>
                         <ResourceDictionary x:Key="Light">
                             <SolidColorBrush x:Key="TopNavigationViewItemForegroundPointerOver" Color="Black" Opacity="0.6"/>
@@ -30,25 +31,34 @@
             </NavigationView.Resources>
 
             <NavigationView.MenuItems>
-                <!-- space for the file dropdown button -->
-                <NavigationViewItem x:Name="_navViewOffsetItem" Width="43" IsEnabled="False"/>
-                <!-- binding the tag suddenly stopped working for some fucking reason, so now its hardcoded -->
-                <NavigationViewItem Tag="h">
+                <!--  space for the file dropdown button  -->
+                <NavigationViewItem x:Name="_navViewOffsetItem"
+                                    Width="43"
+                                    IsEnabled="False" />
+                <!--  binding the tag suddenly stopped working for some fucking reason, so now its hardcoded  -->
+                <NavigationViewItem Tag="h_homeRibbon">
                     <StackPanel Orientation="Horizontal" Spacing="5">
-                        <FontIcon Glyph="&#xE80F;" FontSize="16"/>
-                        <TextBlock Text="Home"/>
+                        <FontIcon FontSize="16" Glyph="&#xE80F;" />
+                        <TextBlock Text="Home" />
+                    </StackPanel>
+                </NavigationViewItem>
+
+                <NavigationViewItem Tag="h_addRibbon">
+                    <StackPanel Orientation="Horizontal" Spacing="5">
+                        <FontIcon FontSize="16" Glyph="&#xE710;" />
+                        <TextBlock Text="Add" />
                     </StackPanel>
                 </NavigationViewItem>
 
                 <NavigationViewItem Tag="o">
                     <StackPanel Orientation="Horizontal" Spacing="5">
-                        <FontIcon Glyph="&#xE713;" FontSize="16"/>
-                        <TextBlock Text="Settings"/>
+                        <FontIcon FontSize="16" Glyph="&#xE713;" />
+                        <TextBlock Text="Settings" />
                     </StackPanel>
                 </NavigationViewItem>
             </NavigationView.MenuItems>
 
-            <Grid Padding="0,10,0,0" Background="{ThemeResource AppBackgroundThemeBrush}">
+            <Grid Padding="0,5,0,0" Background="{ThemeResource AppBackgroundThemeBrush}">
                 <Frame x:Name="_contentFrame" Background="{ThemeResource AppBackgroundThemeBrush}" />
             </Grid>
             
