@@ -35,7 +35,7 @@ public sealed partial class MainViewModel
     {
         if (_actionCollection.Actions.Count == 0)
         {
-            await _dialogService.ShowMessageDialog("Actions list is empty.");
+            await _dialogService.ShowOkDialog("Actions list is empty.");
             return;
         }
 

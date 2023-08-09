@@ -1,7 +1,9 @@
 #pragma once
 #include "pch.h"
+#include "IWindow.h"
 #include "LayeredWindowInfo.h"
 #include <vector>
+#include <functional>
 
 template<class T>
 inline void SafeRelease(T** ppT)
@@ -20,10 +22,10 @@ EXTERN_C IMAGE_DOS_HEADER __ImageBase;
 
 namespace PathWindows
 {
-    class PathWindow
+    class PathWindow : public IWindow
     {
     public:
-        PathWindow();
+        PathWindow(const std::function<void(HWND, UINT, WPARAM, LPARAM)>& = nullptr, bool clickable = false);
         ~PathWindow();
 
         HWND GetHandle();
@@ -32,7 +34,7 @@ namespace PathWindows
 
         HRESULT RunMessageLoop();
 
-        HRESULT AddPoint(POINT point, bool render);
+        HRESULT AddPoint(POINT point, bool render, bool newPath = false);
         HRESULT AddPoints(POINT* points, int length);
 
         HRESULT ClearPoints();
@@ -42,6 +44,8 @@ namespace PathWindows
     private:
         const int WND_WIDTH;
         const int WND_HEIGHT;
+
+        const bool CLICKABLE;
 
         LayeredWindowInfo m_info;
 
@@ -55,7 +59,11 @@ namespace PathWindows
         ID2D1GdiInteropRenderTarget* m_pInteropTarget;
         ID2D1SolidColorBrush* m_pPathBrush;
 
-        std::vector<D2D1_POINT_2F> m_points;
+        std::vector<std::vector<D2D1_POINT_2F>> m_paths;
+
+        std::function<void(HWND, UINT, WPARAM, LPARAM)> m_onUnhandledMsg;
+
+        std::vector<D2D1_POINT_2F>& GetLastPath();
 
         HRESULT CreateDeviceIndependentResources();
 

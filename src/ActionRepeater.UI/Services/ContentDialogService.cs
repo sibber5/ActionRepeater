@@ -25,23 +25,23 @@ public sealed class ContentDialogService : IDialogService
         _editActionViewModelFactory = editActionViewModelFactory;
     }
 
+    public async Task ShowOkDialog(string title, object? content = null)
+    {
+        await new ContentDialog()
+        {
+            XamlRoot = _windowProperties.XamlRoot,
+            Title = title,
+            Content = content,
+            CloseButtonText = "Ok",
+        }.ShowAsync();
+    }
+
     public async Task ShowErrorDialog(string title, string message)
     {
         await new ContentDialog()
         {
             XamlRoot = _windowProperties.XamlRoot,
             Title = $"❌ {title}",
-            Content = message,
-            CloseButtonText = "Ok",
-        }.ShowAsync();
-    }
-
-    public async Task ShowMessageDialog(string title, string? message = null)
-    {
-        await new ContentDialog()
-        {
-            XamlRoot = _windowProperties.XamlRoot,
-            Title = title,
             Content = message,
             CloseButtonText = "Ok",
         }.ShowAsync();

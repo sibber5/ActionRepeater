@@ -27,7 +27,13 @@
     <ClInclude Include="PathWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PathWindowWrapper.h">
+    <ClInclude Include="WindowHost.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DrawablePathWindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -41,7 +47,16 @@
     <ClCompile Include="PathWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PathWindowWrapper.cpp">
+    <ClCompile Include="WindowHost.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DrawablePathWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PathWindowExports.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WindowHostExports.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

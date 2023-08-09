@@ -1,23 +1,21 @@
 #pragma once
 #include "pch.h"
-#include "PathWindow.h"
+#include "IWindow.h"
 #include <thread>
 #include <condition_variable>
 
 namespace PathWindows
 {
-	class PathWindowWrapper
+	class WindowHost
 	{
 	public:
-		PathWindowWrapper();
-		~PathWindowWrapper();
+		WindowHost(IWindow* pPathWindow);
+		~WindowHost();
 
-		void OpenPathWindow();
-		HRESULT ClosePathWindow();
+		IWindow* GetPWindow();
+		HRESULT GetThreadHR();
 
-		PathWindow* m_pPathWindow;
-
-		HRESULT m_threadHR;
+		HRESULT CloseWindow();
 
 	private:
 		std::thread m_thread;
@@ -25,5 +23,11 @@ namespace PathWindows
 
 		std::condition_variable m_wndInitCondVar;
 		std::mutex m_wndInitMutex;
+
+		IWindow* m_pWindow;
+
+		HRESULT m_threadHR;
+
+		void CreateAndShowWindow();
 	};
 }

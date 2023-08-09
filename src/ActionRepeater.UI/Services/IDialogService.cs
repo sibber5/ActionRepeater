@@ -8,9 +8,9 @@ namespace ActionRepeater.UI.Services;
 
 public interface IDialogService
 {
-    Task ShowErrorDialog(string title, string message);
+    Task ShowOkDialog(string title, object? content = null);
 
-    Task ShowMessageDialog(string title, string? message = null);
+    Task ShowErrorDialog(string title, string message);
 
     Task<YesNoDialogResult> ShowYesNoDialog(string title, string? message = null, Action? onYesClick = null, Action? onNoClick = null);
 

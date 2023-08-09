@@ -6,12 +6,13 @@ using System.Threading.Tasks;
 using ActionRepeater.Core.Action;
 using ActionRepeater.Core.Input;
 using ActionRepeater.Core.Utilities;
+using ActionRepeater.UI.Services.Interop;
 using ActionRepeater.Win32;
 using static ActionRepeater.Win32.Utilities.ScreenCoordsConverter;
 
 namespace ActionRepeater.UI.Services;
 
-public sealed partial class PathWindowService : IDisposable
+public sealed class PathWindowService : IDisposable
 {
     public bool IsPathWindowOpen => _pathWindowWrapper.IsWindowOpen;
 
@@ -30,7 +31,7 @@ public sealed partial class PathWindowService : IDisposable
         _actionCollection = actionCollection;
     }
 
-    public void OpenPathWindow()
+    public void OpenWindow()
     {
         Debug.Assert(!_pathWindowWrapper.IsWindowOpen);
 
@@ -55,7 +56,7 @@ public sealed partial class PathWindowService : IDisposable
         RunUpdatePathWindowTask();
     }
 
-    public void ClosePathWindow()
+    public void CloseWindow()
     {
         Debug.Assert(_pathWindowWrapper.IsWindowOpen);
 

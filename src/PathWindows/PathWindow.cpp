@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "PathWindow.h"
+#include <string>
 
 //#define MEASURE_RENDER
 #ifdef MEASURE_RENDER
@@ -15,9 +16,11 @@
 using namespace PathWindows;
 using Microsoft::WRL::ComPtr;
 
-PathWindow::PathWindow() :
+PathWindow::PathWindow(const std::function<void(HWND, UINT, WPARAM, LPARAM)>& onUnhandledMsg, bool clickable) :
     WND_WIDTH(GetSystemMetrics(SM_CXVIRTUALSCREEN)),
     WND_HEIGHT(GetSystemMetrics(SM_CYVIRTUALSCREEN)),
+
+    CLICKABLE(clickable),
 
     m_info(WND_WIDTH, WND_HEIGHT),
 
@@ -29,7 +32,9 @@ PathWindow::PathWindow() :
 
     m_pRenderTarget(nullptr),
     m_pInteropTarget(nullptr),
-    m_pPathBrush(nullptr)
+    m_pPathBrush(nullptr),
+
+    m_onUnhandledMsg(onUnhandledMsg)
 {}
 
 PathWindow::~PathWindow()
@@ -68,7 +73,7 @@ HRESULT PathWindow::Initialize()
     // correct DPI-scaled size, then we use ShowWindow to show it.
 
     m_hWnd = CreateWindowEx(
-        WS_EX_LAYERED | WS_EX_TRANSPARENT | WS_EX_TOPMOST | WS_EX_NOACTIVATE,
+        (CLICKABLE ? WS_EX_TOOLWINDOW : WS_EX_TRANSPARENT | WS_EX_NOACTIVATE) | WS_EX_NOREDIRECTIONBITMAP | WS_EX_LAYERED | WS_EX_TOPMOST,
         wcex.lpszClassName,
         L"ActionRepeater Path Window",
         WS_POPUP,
@@ -90,7 +95,7 @@ HRESULT PathWindow::Initialize()
 
     SetWindowPos(m_hWnd, HWND_TOPMOST, primaryMonitorX - WND_WIDTH, primaryMonitorY - WND_HEIGHT, static_cast<int>(WND_WIDTH * dpi / 96.0f), static_cast<int>(WND_HEIGHT * dpi / 96.0f), 0);
     ShowWindow(m_hWnd, SW_SHOWNORMAL);
-    //hr = Render();
+    hr = Render();
 
     return hr;
 }
@@ -113,9 +118,29 @@ HRESULT PathWindow::RunMessageLoop()
     return S_OK;
 }
 
-HRESULT PathWindow::AddPoint(POINT point, bool render)
+inline std::vector<D2D1_POINT_2F>& PathWindow::GetLastPath()
 {
-    m_points.push_back(D2D1::Point2F(static_cast<float>(point.x), static_cast<float>(point.y)));
+    if (m_paths.size() == 0)
+    {
+        m_paths.push_back(std::vector<D2D1_POINT_2F> {});
+        return m_paths[0];
+    }
+
+    return m_paths[m_paths.size() - 1];
+}
+
+HRESULT PathWindow::AddPoint(POINT point, bool render, bool newPath)
+{
+    D2D1_POINT_2F d2Point = D2D1::Point2F(static_cast<float>(point.x), static_cast<float>(point.y));
+
+    if (newPath)
+    {
+        m_paths.push_back(std::vector<D2D1_POINT_2F> { d2Point });
+    }
+    else
+    {
+        GetLastPath().push_back(d2Point);
+    }
 
     if (render) return Render();
     return S_OK;
@@ -129,7 +154,7 @@ HRESULT PathWindow::AddPoints(POINT* points, int length)
     for (int i = 0; i < length; ++i)
     {
         POINT point = points[i];
-        m_points.push_back(D2D1::Point2F(static_cast<float>(point.x), static_cast<float>(point.y)));
+        GetLastPath().push_back(D2D1::Point2F(static_cast<float>(point.x), static_cast<float>(point.y)));
     }
 
     return Render();
@@ -137,7 +162,7 @@ HRESULT PathWindow::AddPoints(POINT* points, int length)
 
 HRESULT PathWindow::ClearPoints()
 {
-    m_points.clear();
+    m_paths.clear();
 
     return Render();
 }
@@ -205,11 +230,11 @@ HRESULT PathWindow::Render()
 
     m_pRenderTarget->BeginDraw();
     m_pRenderTarget->SetTransform(D2D1::Matrix3x2F::Identity());
-    m_pRenderTarget->Clear(D2D1::ColorF(0.0f, 0.0f, 0.0f, 0.0f));
+    m_pRenderTarget->Clear(CLICKABLE ? D2D1::ColorF(0.0f, 0.0f, 0.0f, 0.1f) : D2D1::ColorF(0.0f, 0.0f, 0.0f, 0.0f));
 
     //D2D1_SIZE_F rtSize = m_pRenderTarget->GetSize();
 
-    if (m_points.size() > 1)
+    if (m_paths.size() > 0)
     {
 #ifdef MEASURE_RENDER
         std::chrono::steady_clock::time_point beginRender = std::chrono::steady_clock::now();
@@ -221,11 +246,14 @@ HRESULT PathWindow::Render()
         ComPtr<ID2D1GeometrySink> pSink;
         HR(pGeometry->Open(pSink.GetAddressOf()));
 
-        pSink->BeginFigure(D2D1::Point2F(static_cast<float>(m_points[0].x), static_cast<float>(m_points[0].y)), D2D1_FIGURE_BEGIN_HOLLOW);
+        for (auto&& path : m_paths)
+        {
+            if (path.size() <= 1) continue;
 
-        pSink->AddLines(&m_points[1], static_cast<UINT32>(m_points.size() - 1));
-
-        pSink->EndFigure(D2D1_FIGURE_END_OPEN);
+            pSink->BeginFigure(D2D1::Point2F(static_cast<float>(path[0].x), static_cast<float>(path[0].y)), D2D1_FIGURE_BEGIN_HOLLOW);
+            pSink->AddLines(&path[1], static_cast<UINT32>(path.size() - 1));
+            pSink->EndFigure(D2D1_FIGURE_END_OPEN);
+        }
 
         HR(pSink->Close());
 
@@ -319,6 +347,9 @@ LRESULT CALLBACK PathWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPA
         case WM_DESTROY:
             PostQuitMessage(0);
             return 0;
+
+        default:
+            if (pPathWindow->m_onUnhandledMsg) pPathWindow->m_onUnhandledMsg(hWnd, message, wParam, lParam);
         }
     }
 

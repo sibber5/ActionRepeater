@@ -113,7 +113,7 @@ public static class InputSimulator
 
             // Convert to absolute coordinates because because "Relative mouse motion is subject to the effects of the mouse speed and the two-mouse threshold values."
             // see last 2 paragraphs: https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-mouseinput#remarks
-            POINT absolutePos = ScreenCoordsConverter.GetAbsoluteCoordinateFromPosRelToPrimary(newPos);
+            POINT absolutePos = ScreenCoordsConverter.GetAbsCoordFromPosRelToPrimary(newPos);
             newPos = absolutePos;
         }
         else
@@ -197,7 +197,7 @@ public static class InputSimulator
         {
             flags |= MOUSEEVENTF.ABSOLUTE | MOUSEEVENTF.VIRTUALDESK;
 
-            POINT absolutePos = ScreenCoordsConverter.GetAbsoluteCoordinateFromPosRelToPrimary(pos);
+            POINT absolutePos = ScreenCoordsConverter.GetAbsCoordFromPosRelToPrimary(pos);
             pos = absolutePos;
         }
 
@@ -260,7 +260,7 @@ public static class InputSimulator
         {
             flags |= MOUSEEVENTF.ABSOLUTE | MOUSEEVENTF.VIRTUALDESK;
 
-            POINT absolutePos = ScreenCoordsConverter.GetAbsoluteCoordinateFromPosRelToPrimary(pos);
+            POINT absolutePos = ScreenCoordsConverter.GetAbsCoordFromPosRelToPrimary(pos);
             pos = absolutePos;
         }
 
@@ -330,7 +330,7 @@ public static class InputSimulator
         {
             flags0 |= MOUSEEVENTF.ABSOLUTE | MOUSEEVENTF.VIRTUALDESK;
             
-            POINT absolutePos = ScreenCoordsConverter.GetAbsoluteCoordinateFromPosRelToPrimary(pos);
+            POINT absolutePos = ScreenCoordsConverter.GetAbsCoordFromPosRelToPrimary(pos);
             pos = absolutePos;
         }
 

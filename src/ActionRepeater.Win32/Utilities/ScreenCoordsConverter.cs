@@ -12,16 +12,23 @@ public static class ScreenCoordsConverter
         return new(x, y);
     }
 
-    public static POINT GetAbsoluteCoordinateFromVirtScreenPoint(POINT virtScreenPoint)
+    public static POINT GetAbsCoordFromVirtScreenPoint(POINT virtScreenPoint)
     {
-        int x = (int)MathF.Round(((float)virtScreenPoint.x / VirtualScreen.Width) * 65535);
-        int y = (int)MathF.Round(((float)virtScreenPoint.y / VirtualScreen.Height) * 65535);
+        int x = (int)MathF.Round(((float)virtScreenPoint.x / VirtualScreen.Width) * ushort.MaxValue);
+        int y = (int)MathF.Round(((float)virtScreenPoint.y / VirtualScreen.Height) * ushort.MaxValue);
         return new(x, y);
     }
 
-    public static POINT GetAbsoluteCoordinateFromPosRelToPrimary(POINT posRelToPrimaryOrigin)
+    public static POINT GetAbsCoordFromPosRelToPrimary(POINT posRelToPrimaryOrigin)
     {
         POINT virtScreenPoint = GetVirtScreenPosFromPosRelToPrimary(posRelToPrimaryOrigin);
-        return GetAbsoluteCoordinateFromVirtScreenPoint(virtScreenPoint);
+        return GetAbsCoordFromVirtScreenPoint(virtScreenPoint);
+    }
+
+    public static POINT GetPosRelToPrimaryFromVirtScreenPoint(POINT virtScreenPoint)
+    {
+        int x = virtScreenPoint.x + PrimaryMonitorRect.Width - VirtualScreen.Width;
+        int y = virtScreenPoint.y + PrimaryMonitorRect.Height - VirtualScreen.Height;
+        return new(x, y);
     }
 }

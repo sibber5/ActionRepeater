@@ -116,6 +116,7 @@ public partial class App : Application
         services.AddSingleton<Player>();
 
         services.AddSingleton<PathWindowService>();
+        services.AddSingleton<DrawablePathWindowService>();
         services.AddSingleton<IDialogService, ContentDialogService>();
         services.AddSingleton<IFilePicker, FilePicker>();
         services.AddSingleton<IDispatcher, WinUIDispatcher>();
@@ -161,7 +162,7 @@ public partial class App : Application
 
     private async void MainWindow_Closed(object sender, WindowEventArgs args)
     {
-        if (Services.GetService<PathWindowService>() is { IsPathWindowOpen: true } pathWindowService) pathWindowService.ClosePathWindow();
+        if (Services.GetService<PathWindowService>() is { IsPathWindowOpen: true } pathWindowService) pathWindowService.CloseWindow();
 
         if (!_saveOnExit) return;
 

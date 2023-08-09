@@ -20,6 +20,9 @@ public sealed partial class HomePageViewModel : ObservableObject
     [ObservableProperty]
     private bool _isPlayButtonChecked;
 
+    [ObservableProperty]
+    private bool _isDrawablePathWindowOpen;
+
     public bool CanAddAction => !_recorder.IsRecording;
 
     public IAsyncRelayCommand EditSelectedActionCommand => _actionListViewModel.EditSelectedActionCommand;
@@ -31,6 +34,7 @@ public sealed partial class HomePageViewModel : ObservableObject
     private readonly CoreOptions _coreOptions;
 
     private readonly PathWindowService _pathWindowService;
+    private readonly DrawablePathWindowService _drawablePathWindowService;
     private readonly IDialogService _dialogService;
 
     private readonly ActionCollection _actionCollection;
@@ -41,11 +45,12 @@ public sealed partial class HomePageViewModel : ObservableObject
 
     private readonly Action _onIsPlayingChanged;
 
-    public HomePageViewModel(CoreOptions coreOptions, PathWindowService pathWindowService, ActionCollection actionCollection, ActionListViewModel actionListVM, Player player, Recorder recorder, IDispatcher dispatcher, IDialogService dialogService)
+    public HomePageViewModel(CoreOptions coreOptions, PathWindowService pathWindowService, DrawablePathWindowService drawablePathWindowService, ActionCollection actionCollection, ActionListViewModel actionListVM, Player player, Recorder recorder, IDispatcher dispatcher, IDialogService dialogService)
     {
         _coreOptions = coreOptions;
 
         _pathWindowService = pathWindowService;
+        _drawablePathWindowService = drawablePathWindowService;
         _dialogService = dialogService;
 
         _actionCollection = actionCollection;
@@ -77,6 +82,11 @@ public sealed partial class HomePageViewModel : ObservableObject
             OnPropertyChanged(nameof(CanAddAction));
         };
         _actionCollection.ActionsCountChanged += (_, _) => PlayActionsCommand.NotifyCanExecuteChanged();
+
+        _drawablePathWindowService.WindowClosed += () =>
+        {
+            dispatcher.Enqueue(() => IsDrawablePathWindowOpen = false);
+        };
     }
 
     [RelayCommand(CanExecute = nameof(CanToggleRecording))]
@@ -109,13 +119,20 @@ public sealed partial class HomePageViewModel : ObservableObject
     {
         if (_pathWindowService.IsPathWindowOpen)
         {
-            _pathWindowService.ClosePathWindow();
+            _pathWindowService.CloseWindow();
             return;
         }
 
-        _pathWindowService.OpenPathWindow();
+        _pathWindowService.OpenWindow();
     }
 
     [RelayCommand(CanExecute = nameof(CanAddAction))]
     private Task AddAction(ActionType actionType) => _dialogService.ShowEditActionDialog(actionType);
+
+    [RelayCommand]
+    private void OpenCursorPathDrawingWindow()
+    {
+        _drawablePathWindowService.OpenWindow(5_000_000);
+        IsDrawablePathWindowOpen = true;
+    }
 }

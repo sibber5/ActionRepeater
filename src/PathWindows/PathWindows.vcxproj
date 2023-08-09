@@ -151,22 +151,27 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="DrawablePathWindow.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="IWindow.h" />
     <ClInclude Include="LayeredWindowInfo.h" />
     <ClInclude Include="PathWindow.h" />
-    <ClInclude Include="PathWindowWrapper.h" />
+    <ClInclude Include="WindowHost.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="DrawablePathWindow.cpp" />
+    <ClCompile Include="PathWindowExports.cpp" />
     <ClCompile Include="LayeredWindowInfo.cpp" />
     <ClCompile Include="PathWindow.cpp" />
-    <ClCompile Include="PathWindowWrapper.cpp" />
+    <ClCompile Include="WindowHost.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="WindowHostExports.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

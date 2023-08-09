@@ -22,6 +22,18 @@
 
     <StackPanel Margin="0,-4,0,-10" Orientation="Horizontal">
 
+        <ctrls:CmdBarToggleButton Padding="{StaticResource ButtonPadding}"
+                                  ButtonHeight="{StaticResource ButtonHeight}"
+                                  ButtonWidth="{StaticResource ButtonWidth}"
+                                  Command="{x:Bind _vm.OpenCursorPathDrawingWindowCommand}"
+                                  FontIconSize="{StaticResource IconSize}"
+                                  FontSize="{StaticResource FontSize}"
+                                  Glyph="&#xF128;"
+                                  IsChecked="{x:Bind _vm.IsDrawablePathWindowOpen, Mode=OneWay}"
+                                  Text="Draw Cursor Path" />
+
+        <AppBarSeparator Margin="5,0" />
+
         <ctrls:CmdBarButton Padding="{StaticResource ButtonPadding}"
                             ButtonHeight="{StaticResource ButtonHeight}"
                             ButtonWidth="{StaticResource ButtonWidth}"
