@@ -61,12 +61,7 @@
             </ComboBox>
         </StackPanel>
 
-        <ContentControl Grid.Row="1"
-                        HorizontalAlignment="Stretch"
-                        VerticalAlignment="Stretch"
-                        HorizontalContentAlignment="Stretch"
-                        VerticalContentAlignment="Stretch"
-                        Content="{x:Bind CurrentEditActionView, Mode=OneWay}" />
+        <ContentPresenter Grid.Row="1" Content="{x:Bind CurrentEditActionView, Mode=OneWay}" />
 
     </Grid>
 

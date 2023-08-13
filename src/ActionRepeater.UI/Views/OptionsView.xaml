@@ -1,14 +1,14 @@
-﻿<Page x:Class="ActionRepeater.UI.Pages.OptionsPage"
-      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      xmlns:core="using:ActionRepeater.Core"
-      xmlns:ctrls="using:ActionRepeater.UI.Controls"
-      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-      xmlns:vms="using:ActionRepeater.UI.ViewModels"
-      d:DataContext="{d:DesignInstance Type=vms:OptionsPageViewModel}"
-      Background="{ThemeResource AppBackgroundThemeBrush}"
-      mc:Ignorable="d">
+<UserControl x:Class="ActionRepeater.UI.Views.OptionsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:core="using:ActionRepeater.Core"
+             xmlns:ctrls="using:ActionRepeater.UI.Controls"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="using:ActionRepeater.UI.Views"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vms="using:ActionRepeater.UI.ViewModels"
+             d:DataContext="{d:DesignInstance Type=vms:OptionsViewModel}"
+             mc:Ignorable="d">
 
     <ScrollViewer HorizontalScrollBarVisibility="Disabled"
                   HorizontalScrollMode="Disabled"
@@ -115,4 +115,4 @@
 
     </ScrollViewer>
 
-</Page>
+</UserControl>

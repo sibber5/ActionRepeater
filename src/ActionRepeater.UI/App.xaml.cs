@@ -9,11 +9,11 @@ using ActionRepeater.Core;
 using ActionRepeater.Core.Helpers;
 using ActionRepeater.Core.Input;
 using ActionRepeater.UI.Factories;
-using ActionRepeater.UI.Pages;
 using ActionRepeater.UI.Services;
 using ActionRepeater.UI.Utilities;
 using ActionRepeater.UI.ViewModels;
 using ActionRepeater.UI.Views;
+using ActionRepeater.UI.Views.HomeViewRibbons;
 using ActionRepeater.Win32;
 using ActionRepeater.Win32.Synch.Utilities;
 using ActionRepeater.Win32.WindowsAndMessages;
@@ -122,16 +122,20 @@ public partial class App : Application
         services.AddSingleton<IDispatcher, WinUIDispatcher>();
 
         services.AddSingleton<MainViewModel>();
+        services.AddSingleton<HomeViewModel>();
+        services.AddSingleton<OptionsViewModel>();
         services.AddSingleton<ActionListViewModel>();
-        services.AddSingleton<HomePageViewModel>();
-        services.AddSingleton<OptionsPageViewModel>();
 
         services.AddSingleton<EditActionViewModelFactory>();
 
         services.AddSingleton<AddActionMenuItems>();
-        services.AddSingleton<HomePageParameter>();
-        services.AddSingleton<OptionsPageParameter>();
+
         services.AddSingleton<MainWindow>();
+        services.AddSingleton<HomeView>();
+        services.AddSingleton<OptionsView>();
+        services.AddSingleton<HomeRibbon>();
+        services.AddSingleton<AddRibbon>();
+        services.AddSingleton<ActionListView>();
 
         services.AddSingleton<WindowProperties>();
 

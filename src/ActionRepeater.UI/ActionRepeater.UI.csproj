@@ -87,12 +87,11 @@
         <None Remove="Controls\CmdBarButton.xaml" />
         <None Remove="Controls\CmdBarToggleButton.xaml" />
         <None Remove="Controls\ComboBoxIconnedItem.xaml" />
+        <None Remove="Controls\ComboboxSeperator.xaml" />
+        <None Remove="Controls\NavigationViewPresenter.xaml" />
         <None Remove="Controls\OptionItem.xaml" />
+        <None Remove="Controls\OptionsSeperator.xaml" />
         <None Remove="GlobalResources.xaml" />
-        <None Remove="Pages\HomePage.xaml" />
-        <None Remove="Pages\HomePageRibbons\AddRibbon.xaml" />
-        <None Remove="Pages\HomePageRibbons\HomeRibbon.xaml" />
-        <None Remove="Pages\OptionsPage.xaml" />
         <None Remove="Styles.xaml" />
         <None Remove="Views\ActionListView.xaml" />
         <None Remove="Views\EditActionView.xaml" />
@@ -101,12 +100,41 @@
         <None Remove="Views\EditMouseWheelActionView.xaml" />
         <None Remove="Views\EditTextTypeActionView.xaml" />
         <None Remove="Views\EditWaitActionView.xaml" />
+        <None Remove="Views\HomeView.xaml" />
+        <None Remove="Views\HomeViewRibbons\AddRibbon.xaml" />
+        <None Remove="Views\HomeViewRibbons\HomeRibbon.xaml" />
+        <None Remove="Views\OptionsView.xaml" />
     </ItemGroup>
     <ItemGroup>
         <Resource Remove="Views\ActionListView.xaml" />
     </ItemGroup>
     <ItemGroup>
-      <Page Update="Pages\HomePageRibbons\AddRibbon.xaml">
+      <Page Update="Controls\ComboboxSeperator.xaml">
+        <Generator>MSBuild:Compile</Generator>
+      </Page>
+    </ItemGroup>
+    <ItemGroup>
+      <Page Update="Controls\OptionsSeperator.xaml">
+        <Generator>MSBuild:Compile</Generator>
+      </Page>
+    </ItemGroup>
+    <ItemGroup>
+      <Page Update="Views\HomeViewRibbons\HomeRibbon.xaml">
+        <Generator>MSBuild:Compile</Generator>
+      </Page>
+    </ItemGroup>
+    <ItemGroup>
+      <Page Update="Views\OptionsView.xaml">
+        <Generator>MSBuild:Compile</Generator>
+      </Page>
+    </ItemGroup>
+    <ItemGroup>
+      <Page Update="Controls\NavigationViewPresenter.xaml">
+        <Generator>MSBuild:Compile</Generator>
+      </Page>
+    </ItemGroup>
+    <ItemGroup>
+      <Page Update="Views\HomeView.xaml">
         <Generator>MSBuild:Compile</Generator>
       </Page>
     </ItemGroup>
@@ -156,11 +184,6 @@
         </Page>
     </ItemGroup>
     <ItemGroup>
-        <Page Update="Pages\OptionsPage.xaml">
-            <Generator>MSBuild:Compile</Generator>
-        </Page>
-    </ItemGroup>
-    <ItemGroup>
         <Page Update="Controls\CmdBarButton.xaml">
             <Generator>MSBuild:Compile</Generator>
         </Page>
@@ -176,12 +199,7 @@
         </Page>
     </ItemGroup>
     <ItemGroup>
-        <Page Update="Pages\HomePage.xaml">
-            <Generator>MSBuild:Compile</Generator>
-        </Page>
-    </ItemGroup>
-    <ItemGroup>
-      <Page Update="Pages\HomePageRibbons\HomeRibbon.xaml">
+      <Page Update="Views\HomeViewRibbons\AddRibbon.xaml">
         <Generator>MSBuild:Compile</Generator>
       </Page>
     </ItemGroup>

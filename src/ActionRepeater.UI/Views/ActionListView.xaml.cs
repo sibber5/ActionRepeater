@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Linq;
 using ActionRepeater.Core.Extentions;
 using ActionRepeater.Core.Input;
@@ -12,18 +11,15 @@ namespace ActionRepeater.UI.Views;
 
 public sealed partial class ActionListView : UserControl
 {
-    private ActionListViewModel? _vm;
+    private readonly ActionListViewModel _vm;
 
-    public ActionListView() { }
-
-    public void Initialize(ActionListViewModel vm, Recorder recorder, AddActionMenuItems addActionMenuItems)
+    public ActionListView(ActionListViewModel vm, Recorder recorder, AddActionMenuItems addActionMenuItems)
     {
-        if (_vm is not null) throw new UnreachableException($"{nameof(ActionListView)} has already been initialized.");
-
         _vm = vm;
-        _vm._scrollToSelectedItem = ScrollToSelectedItem;
 
-        recorder.ActionAdded += (_, _) => ActionList.ScrollIntoView(_vm.ViewedActions[^1]);
+        _vm._scrollToSelectedItem = () => _actionList.ScrollIntoView(_actionList.SelectedItem);
+
+        recorder.ActionAdded += (_, _) => _actionList.ScrollIntoView(_vm.ViewedActions[^1]);
 
         InitializeComponent();
 
@@ -41,43 +37,41 @@ public sealed partial class ActionListView : UserControl
             _replaceMenuItem.KeyboardAccelerators[0].IsEnabled = isAnyItemSelected;
             _pasteMenuItem.KeyboardAccelerators[0].IsEnabled = !isAnyItemSelected;
 
-            _vm.SelectedRanges = ActionList.SelectedRanges;
+            _vm.SelectedRanges = _actionList.SelectedRanges;
         }
     }
-
-    public void ScrollToSelectedItem() => ActionList.ScrollIntoView(ActionList.SelectedItem);
 
     private void ActionList_RightTapped(object sender, RightTappedRoutedEventArgs e)
     {
         if (((FrameworkElement)e.OriginalSource).DataContext is ActionViewModel actionItem)
         {
             int rightClickedItemIdx = _vm!.ViewedActions.RefIndexOfReverse(actionItem);
-            if (!ActionList.SelectedRanges.Any(x => rightClickedItemIdx >= x.FirstIndex && rightClickedItemIdx <= x.LastIndex))
+            if (!_actionList.SelectedRanges.Any(x => rightClickedItemIdx >= x.FirstIndex && rightClickedItemIdx <= x.LastIndex))
             {
-                ActionList.SelectedIndex = rightClickedItemIdx;
-                SingleItemMenuFlyout.ShowAt(ActionList, e.GetPosition(ActionList));
+                _actionList.SelectedIndex = rightClickedItemIdx;
+                _singleItemMenuFlyout.ShowAt(_actionList, e.GetPosition(_actionList));
                 return;
             }
 
             if (AreMultipleItemsSelected())
             {
-                MultiItemMenuFlyout.ShowAt(ActionList, e.GetPosition(ActionList));
+                _multiItemMenuFlyout.ShowAt(_actionList, e.GetPosition(_actionList));
                 return;
             }
 
-            SingleItemMenuFlyout.ShowAt(ActionList, e.GetPosition(ActionList));
+            _singleItemMenuFlyout.ShowAt(_actionList, e.GetPosition(_actionList));
             return;
         }
 
-        ActionList.SelectedIndex = -1;
-        NoItemMenuFlyout.ShowAt(ActionList, e.GetPosition(ActionList));
+        _actionList.SelectedIndex = -1;
+        _noItemMenuFlyout.ShowAt(_actionList, e.GetPosition(_actionList));
     }
 
     private async void ActionList_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
     {
         if (((FrameworkElement)e.OriginalSource).DataContext is not ActionViewModel actionVM) return;
 
-        if (!ReferenceEquals(ActionList.SelectedItem, actionVM)) ActionList.SelectedItem = actionVM;
+        if (!ReferenceEquals(_actionList.SelectedItem, actionVM)) _actionList.SelectedItem = actionVM;
 
         await _vm!.EditSelectedAction();
     }
@@ -86,12 +80,12 @@ public sealed partial class ActionListView : UserControl
     {
         if (((FrameworkElement)e.OriginalSource).DataContext is ActionViewModel)
         {
-            _vm!.SelectedRanges = ActionList.SelectedRanges;
+            _vm!.SelectedRanges = _actionList.SelectedRanges;
             return;
         }
 
-        ActionList.SelectedIndex = -1;
+        _actionList.SelectedIndex = -1;
     }
 
-    private bool AreMultipleItemsSelected() => ActionList.SelectedRanges.Count > 1 || (ActionList.SelectedRanges.Count == 1 && ActionList.SelectedRanges[0].FirstIndex != ActionList.SelectedRanges[0].LastIndex);
+    private bool AreMultipleItemsSelected() => _actionList.SelectedRanges.Count > 1 || (_actionList.SelectedRanges.Count == 1 && _actionList.SelectedRanges[0].FirstIndex != _actionList.SelectedRanges[0].LastIndex);
 }

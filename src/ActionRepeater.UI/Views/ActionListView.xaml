@@ -4,6 +4,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:vms="using:ActionRepeater.UI.ViewModels"
+             d:DataContext="{d:DesignInstance Type=vms:ActionListViewModel}"
              mc:Ignorable="d">
 
     <Grid RowDefinitions="Auto,*">
@@ -11,24 +12,21 @@
             <ResourceDictionary Source="ms-appx:///Microsoft.UI.Xaml/DensityStyles/Compact.xaml" />
         </Grid.Resources>
 
-        <TextBlock x:Name="ActionListHeader"
-                   Grid.Row="0"
+        <TextBlock Grid.Row="0"
                    Margin="3,0,0,1"
                    HorizontalAlignment="Left"
                    VerticalAlignment="Bottom"
                    FontSize="17"
                    Text="{x:Bind _vm.ActionListHeaderWithCount, Mode=OneWay}" />
 
-        <TextBlock x:Name="ShowAutoRepeatLabel"
-                   Grid.Row="0"
+        <TextBlock Grid.Row="0"
                    Margin="67,0,45,1"
                    HorizontalAlignment="Right"
                    VerticalAlignment="Bottom"
                    FontSize="14"
                    Text="Show key auto-repeat actions" />
 
-        <ToggleSwitch x:Name="ShowAutoRepeatToggle"
-                      Grid.Row="0"
+        <ToggleSwitch Grid.Row="0"
                       Margin="67,0,-115,-9"
                       HorizontalAlignment="Right"
                       VerticalAlignment="Bottom"
@@ -37,7 +35,7 @@
                       OnContent=""
                       Style="{StaticResource SmallToggleSwitch}" />
 
-        <ListView x:Name="ActionList"
+        <ListView x:Name="_actionList"
                   Grid.Row="2"
                   Margin="0,5,0,0"
                   HorizontalAlignment="Stretch"
@@ -74,7 +72,7 @@
 
             <ListView.Resources>
 
-                <MenuFlyout x:Name="MultiItemMenuFlyout">
+                <MenuFlyout x:Name="_multiItemMenuFlyout">
                     <MenuFlyoutItem Command="{x:Bind _vm.StoreMultipleActionsCommand}"
                                     Icon="Copy"
                                     Text="Copy">
@@ -92,7 +90,7 @@
                     </MenuFlyoutItem>
                 </MenuFlyout>
 
-                <MenuFlyout x:Name="SingleItemMenuFlyout">
+                <MenuFlyout x:Name="_singleItemMenuFlyout">
                     <MenuFlyoutItem Command="{x:Bind _vm.EditSelectedActionCommand}"
                                     Icon="Edit"
                                     Text="Edit" />
@@ -135,7 +133,7 @@
                     </MenuFlyoutSubItem>
                 </MenuFlyout>
 
-                <MenuFlyout x:Name="NoItemMenuFlyout">
+                <MenuFlyout x:Name="_noItemMenuFlyout">
                     <MenuFlyoutSubItem x:Name="_listFlyoutAdd"
                                        Icon="Add"
                                        IsEnabled="{x:Bind _vm.CanAddAction, Mode=OneWay}"

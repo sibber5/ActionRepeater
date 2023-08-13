@@ -2,15 +2,14 @@
 using System.Diagnostics;
 using System.IO;
 using ActionRepeater.Core.Input;
-using ActionRepeater.UI.Pages;
 using ActionRepeater.UI.Services;
 using ActionRepeater.UI.ViewModels;
+using ActionRepeater.UI.Views;
 using ActionRepeater.Win32.WindowsAndMessages;
 using ActionRepeater.Win32.WindowsAndMessages.Utilities;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media.Animation;
 
 namespace ActionRepeater.UI;
 
@@ -30,9 +29,10 @@ public sealed partial class MainWindow : Window
 
     private readonly MainViewModel _vm;
 
+    private readonly HomeView _homeView;
+    private readonly OptionsView _optionsView;
+
     private readonly Recorder _recorder;
-    private readonly HomePageParameter _homePageParameter;
-    private readonly OptionsPageParameter _optionsPageParameter;
     private readonly WindowProperties _windowProperties;
 
     private readonly WindowMessageMonitor _msgMonitor;
@@ -41,12 +41,22 @@ public sealed partial class MainWindow : Window
     private readonly Windows.Graphics.RectInt32[] _dragRects = new Windows.Graphics.RectInt32[2];
     private const int DragRegionMinHeight = 18;
 
-    public MainWindow(MainViewModel vm, Recorder recorder, HomePageParameter homePageParameter, OptionsPageParameter optionsPageParameter, WindowProperties windowProperties)
+    private object? _prevSelectedMenuItem;
+
+    public MainWindow(MainViewModel vm, HomeView homeView, OptionsView optionsView, Recorder recorder, WindowProperties windowProperties)
     {
         Handle = WinRT.Interop.WindowNative.GetWindowHandle(this);
 
-        windowProperties.Handle = Handle;
-        windowProperties.DispatcherQueue = DispatcherQueue;
+        _vm = vm;
+
+        _homeView = homeView;
+        _optionsView = optionsView;
+
+        _recorder = recorder;
+        _windowProperties = windowProperties;
+
+        _windowProperties.Handle = Handle;
+        _windowProperties.DispatcherQueue = DispatcherQueue;
 
         Title = WindowTitle;
         App.SetWindowSize(Handle, StartupWidth, StartupHeight);
@@ -65,13 +75,6 @@ public sealed partial class MainWindow : Window
 
         _msgMonitor = new(Handle);
         _msgMonitor.WindowMessageReceived += OnWindowMessageReceived;
-
-        _vm = vm;
-
-        _recorder = recorder;
-        _homePageParameter = homePageParameter;
-        _optionsPageParameter = optionsPageParameter;
-        _windowProperties = windowProperties;
 
         InitializeComponent();
 
@@ -190,35 +193,58 @@ public sealed partial class MainWindow : Window
     private void NavigationView_Loaded(object sender, RoutedEventArgs e)
     {
         _navigationView.SelectedItem = _navigationView.MenuItems[1];
-        Navigate(HomeRibbonTag, new SuppressNavigationTransitionInfo());
+        _prevSelectedMenuItem = _navigationView.SelectedItem;
     }
 
     private void NavigationView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
-        Navigate((string)args.SelectedItemContainer.Tag, args.RecommendedNavigationTransitionInfo);
+        bool isInitialNavigation = _prevSelectedMenuItem == null;
+        Navigate((string)args.SelectedItemContainer.Tag, isInitialNavigation);
+        _prevSelectedMenuItem = _navigationView.SelectedItem;
     }
 
-    private void Navigate(string tag, NavigationTransitionInfo navInfo)
+    private void Navigate(string tag, bool suppressTransition = false)
     {
+        bool isNavigatingRight = IsNavigatingRight(tag);
+
         switch (tag)
         {
             case OptionsTag:
-                _contentFrame.Navigate(typeof(OptionsPage), _optionsPageParameter, navInfo);
+                _navViewPresenter.Navigate(_optionsView, isNavigatingRight, suppressTransition);
                 break;
 
-            case var t when t.StartsWith("h_"):
-                if (_contentFrame.Content is not HomePage)
+            case var t when t.StartsWith("h_", StringComparison.Ordinal):
+                if (_navViewPresenter.Content is not HomeView)
                 {
-                    _contentFrame.Navigate(typeof(HomePage), _homePageParameter, navInfo);
-                    ((HomePage)_contentFrame.Content).NavigateRibbon(tag, new SuppressNavigationTransitionInfo());
+                    _navViewPresenter.Navigate(_homeView, isNavigatingRight, suppressTransition);
+
+                    _homeView.NavigateRibbon(tag, isNavigatingRight, true);
                     break;
                 }
 
-                ((HomePage)_contentFrame.Content).NavigateRibbon(tag, navInfo);
+                _homeView.NavigateRibbon(tag, isNavigatingRight, suppressTransition);
                 break;
 
             default:
                 throw new NotImplementedException();
         }
+    }
+
+    private bool IsNavigatingRight(string tag)
+    {
+        var items = _navigationView.MenuItems;
+        int selectedItemIdx = items.IndexOf(_prevSelectedMenuItem);
+
+        int nextItemIdx = -1;
+        for (int i = 0; i < items.Count; i++)
+        {
+            if ((string)((NavigationViewItem)items[i]).Tag == tag)
+            {
+                nextItemIdx = i;
+                break;
+            }
+        }
+
+        return nextItemIdx > selectedItemIdx;
     }
 }
