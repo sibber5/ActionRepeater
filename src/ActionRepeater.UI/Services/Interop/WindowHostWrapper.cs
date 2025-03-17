@@ -15,6 +15,12 @@ public partial struct WindowHostWrapper : IDisposable
 
     private nint _pWindowHost;
 
+    // Force load the dll at app startup to avoid overhead when opening path window for the first time
+    //static WindowHostWrapper()
+    //{
+    //    DisposeDangerous(0);
+    //}
+
     public void OpenPathWindow() => _pWindowHost = CreatePathWindow();
 
     public void OpenPathWindow(Span<POINT> points) => _pWindowHost = CreatePathWindow(points);

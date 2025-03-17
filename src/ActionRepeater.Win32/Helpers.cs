@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 using ActionRepeater.Win32.Input;
+using ActionRepeater.Win32.WindowsAndMessages;
 
 namespace ActionRepeater.Win32;
 
@@ -130,6 +131,20 @@ public static partial class PInvoke
 
                 return low != -1 || high != -1;
             }
+        }
+    
+        public static void SetWindowLongPtr(nint hWnd, WindowLongIndex nIndex, nint dwNewLong)
+        {
+            var res = PInvoke.SetWindowLongPtr(hWnd, nIndex, dwNewLong);
+            if (res == 0) throw new Win32Exception();
+        }
+
+        public static nint GetWindowLongPtr(nint hWnd, WindowLongIndex nIndex)
+        {
+            var res = PInvoke.GetWindowLongPtr(hWnd, nIndex);
+            if (res == 0) throw new Win32Exception();
+            
+            return res;
         }
     }
 }

@@ -41,7 +41,7 @@
                   HorizontalAlignment="Stretch"
                   VerticalAlignment="Stretch"
                   AllowDrop="True"
-                  Background="{ThemeResource ListViewBackgroundThemeBrush}"
+                  Background="{ThemeResource ControlBackgroundThemeBrush}"
                   BorderBrush="{ThemeResource ListViewBorderThemeBrush}"
                   BorderThickness="1"
                   CanReorderItems="{x:Bind _vm.CanReorderActions, Mode=OneWay}"

@@ -38,9 +38,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Content Include="Assets\Icon.ico">
-            <CopyToPublishDirectory>Always</CopyToPublishDirectory>
-        </Content>
         <Content Include="Assets\SplashScreen.scale-200.png" />
         <Content Include="Assets\LockScreenLogo.scale-200.png" />
         <Content Include="Assets\Square150x150Logo.scale-200.png" />
@@ -104,9 +101,15 @@
         <None Remove="Views\HomeViewRibbons\AddRibbon.xaml" />
         <None Remove="Views\HomeViewRibbons\HomeRibbon.xaml" />
         <None Remove="Views\OptionsView.xaml" />
+        <None Remove="AppWindows\PathDrawingControls.xaml" />
     </ItemGroup>
     <ItemGroup>
         <Resource Remove="Views\ActionListView.xaml" />
+    </ItemGroup>
+    <ItemGroup>
+      <Page Update="Windows\PathDrawingControls.xaml">
+        <Generator>MSBuild:Compile</Generator>
+      </Page>
     </ItemGroup>
     <ItemGroup>
       <Page Update="Controls\ComboboxSeperator.xaml">

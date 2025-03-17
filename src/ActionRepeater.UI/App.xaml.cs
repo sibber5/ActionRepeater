@@ -8,15 +8,14 @@ using System.Threading.Tasks;
 using ActionRepeater.Core;
 using ActionRepeater.Core.Helpers;
 using ActionRepeater.Core.Input;
+using ActionRepeater.UI.AppWindows;
 using ActionRepeater.UI.Factories;
 using ActionRepeater.UI.Services;
 using ActionRepeater.UI.Utilities;
 using ActionRepeater.UI.ViewModels;
 using ActionRepeater.UI.Views;
 using ActionRepeater.UI.Views.HomeViewRibbons;
-using ActionRepeater.Win32;
 using ActionRepeater.Win32.Synch.Utilities;
-using ActionRepeater.Win32.WindowsAndMessages;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 
@@ -27,7 +26,8 @@ namespace ActionRepeater.UI;
 /// </summary>
 public partial class App : Application
 {
-    public static string AppDataOptionsDir => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), nameof(ActionRepeater));
+    public static readonly string AssemblyName = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name!;
+    public static string AppDataOptionsDir => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), AssemblyName);
     public static string OptionsFileName => "Options.json";
 
     public IServiceProvider Services { get; }
@@ -125,12 +125,15 @@ public partial class App : Application
         services.AddSingleton<HomeViewModel>();
         services.AddSingleton<OptionsViewModel>();
         services.AddSingleton<ActionListViewModel>();
+        services.AddTransient<PathDrawingControlsViewModel>();
 
         services.AddSingleton<EditActionViewModelFactory>();
 
         services.AddSingleton<AddActionMenuItems>();
 
         services.AddSingleton<MainWindow>();
+        services.AddTransient<PathDrawingControls>();
+
         services.AddSingleton<HomeView>();
         services.AddSingleton<OptionsView>();
         services.AddSingleton<HomeRibbon>();
@@ -162,10 +165,13 @@ public partial class App : Application
         _mainWindow.Closed += MainWindow_Closed;
 
         _mainWindow.Activate();
+        Services.GetRequiredService<PathDrawingControls>().Activate();
     }
 
     private async void MainWindow_Closed(object sender, WindowEventArgs args)
     {
+        _mainWindow.Dispose();
+
         if (Services.GetService<PathWindowService>() is { IsPathWindowOpen: true } pathWindowService) pathWindowService.CloseWindow();
 
         if (!_saveOnExit) return;
@@ -356,23 +362,5 @@ public partial class App : Application
             options = null;
             return false;
         }
-    }
-
-    /// <summary>
-    /// Win32 uses pixels and WinUI 3 uses effective pixels, so this method returns the dpi scale factor.
-    /// </summary>
-    public static float GetWindowScalingFactor(nint hwnd)
-    {
-        uint dpi = PInvoke.GetDpiForWindow(hwnd);
-        return dpi / 96f;
-    }
-
-    public static void SetWindowSize(nint hwnd, int width, int height)
-    {
-        float scalingFactor = GetWindowScalingFactor(hwnd);
-        width = (int)(width * scalingFactor);
-        height = (int)(height * scalingFactor);
-
-        PInvoke.SetWindowPos(hwnd, SpecialWindowHandles.HWND_TOP, 0, 0, width, height, SetWindowPosFlags.NOMOVE);
     }
 }

@@ -31,4 +31,6 @@ public static class MACROS
 
     public static byte HIBYTE(nuint l) => unchecked((byte)((((nint)l) >> 8) & 0xff));
     public static byte HIBYTE(nint l) => unchecked((byte)((l >> 8) & 0xff));
+
+    public static uint RGB(byte r, byte g, byte b) => unchecked(r | ((uint)g << 8) | (((uint)b) << 16));
 }

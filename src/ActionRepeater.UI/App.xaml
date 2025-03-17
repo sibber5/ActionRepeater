@@ -13,13 +13,15 @@
             <ResourceDictionary.ThemeDictionaries>
                 <ResourceDictionary x:Key="Light">
                     <SolidColorBrush x:Key="AppBackgroundThemeBrush" Color="White" />
-                    <SolidColorBrush x:Key="ListViewBackgroundThemeBrush" Color="#f5f5f5" />
-                    <SolidColorBrush x:Key="ListViewBorderThemeBrush" Color="#f0f0f0" />
+                    <SolidColorBrush x:Key="ControlBackgroundThemeBrush" Color="#F5F5F5" />
+                    <SolidColorBrush x:Key="ListViewBorderThemeBrush" Color="#F0F0F0" />
+                    <SolidColorBrush x:Key="WindowBorderBrush" Color="#22000000" />
                 </ResourceDictionary>
                 <ResourceDictionary x:Key="Dark">
                     <SolidColorBrush x:Key="AppBackgroundThemeBrush" Color="Black" />
-                    <SolidColorBrush x:Key="ListViewBackgroundThemeBrush" Color="#0f0f0f" />
+                    <SolidColorBrush x:Key="ControlBackgroundThemeBrush" Color="#0F0F0F" />
                     <SolidColorBrush x:Key="ListViewBorderThemeBrush" Color="#121212" />
+                    <SolidColorBrush x:Key="WindowBorderBrush" Color="#22FFFFFF" />
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
         </ResourceDictionary>

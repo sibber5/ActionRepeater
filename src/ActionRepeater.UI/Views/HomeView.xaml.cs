@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using ActionRepeater.UI.Views.HomeViewRibbons;
+using ActionRepeater.UI.AppWindows;
 using Microsoft.UI.Xaml.Controls;
 
 namespace ActionRepeater.UI.Views;

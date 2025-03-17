@@ -227,4 +227,66 @@ public static partial class PInvoke
     [LibraryImport("USER32.dll", SetLastError = true)]
     [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
     public static unsafe partial int GetKeyboardLayoutList(int nBuff, nint* lpList);
+
+    public static nint ExtractIcon(string pszExeFileName, uint nIconIndex) => ExtractIcon(default, pszExeFileName, nIconIndex);
+
+    [LibraryImport("SHELL32.dll", EntryPoint = "ExtractIconW", StringMarshalling = StringMarshalling.Utf16)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+    public static partial nint ExtractIcon(nint hInst, string pszExeFileName, uint nIconIndex);
+
+    [LibraryImport("USER32.dll", SetLastError = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial bool DestroyIcon(nint hIcon);
+
+    [LibraryImport("USER32.dll", EntryPoint = "SetWindowLongPtrW", SetLastError = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+    public static partial nint SetWindowLongPtr(nint hWnd, WindowLongIndex nIndex, nint dwNewLong);
+
+    [LibraryImport("USER32.dll", EntryPoint = "GetWindowLongPtrW", SetLastError = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+    public static partial nint GetWindowLongPtr(nint hWnd, WindowLongIndex nIndex);
+
+    [LibraryImport("dwmapi.dll")]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+    public static unsafe partial HResult DwmExtendFrameIntoClientArea(nint hWnd, in MARGINS pMarInset);
+
+    [LibraryImport("dwmapi.dll")]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+    public static unsafe partial HResult DwmEnableBlurBehindWindow(nint hWnd, in DWM_BLURBEHIND pBlurBehind);
+
+    [LibraryImport("USER32.dll", SetLastError = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static unsafe partial bool GetClientRect(nint hWnd, out RECT lpRect);
+
+    [LibraryImport("USER32.dll")]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+    public static unsafe partial int FillRect(nint hDC, in RECT lprc, nint hbr);
+
+    [LibraryImport("GDI32.dll")]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial bool DeleteObject(nint ho);
+
+    public static unsafe DeleteObjectSafeHandle CreateSolidBrush_SafeHandle(uint color)
+    {
+        nint __result = CreateSolidBrush(color);
+        return new DeleteObjectSafeHandle(__result, ownsHandle: true);
+    }
+
+    [DllImport("GDI32.dll", ExactSpelling = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+    public static extern nint CreateSolidBrush(uint color);
+
+    [SupportedOSPlatform("windows5.0")]
+    public static unsafe DeleteObjectSafeHandle CreateRectRgn_SafeHandle(int x1, int y1, int x2, int y2)
+    {
+        nint __result = PInvoke.CreateRectRgn(x1, y1, x2, y2);
+        return new DeleteObjectSafeHandle(__result, ownsHandle: true);
+    }
+
+    [DllImport("GDI32.dll", ExactSpelling = true)]
+    [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+    public static extern nint CreateRectRgn(int x1, int y1, int x2, int y2);
 }
